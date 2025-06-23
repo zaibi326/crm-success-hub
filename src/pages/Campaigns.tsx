@@ -6,7 +6,7 @@ import { CampaignsContent } from '@/components/campaigns/CampaignsContent';
 
 const Campaigns = () => {
   return (
-    <div className="min-h-screen bg-crm-bg">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-purple-50/20">
       <SidebarProvider>
         <div className="min-h-screen flex w-full">
           <AppSidebar />
