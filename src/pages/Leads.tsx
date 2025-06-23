@@ -6,7 +6,7 @@ import { LeadsContent } from '@/components/leads/LeadsContent';
 
 const Leads = () => {
   return (
-    <div className="min-h-screen bg-crm-bg">
+    <div className="min-h-screen bg-gray-50">
       <SidebarProvider>
         <div className="min-h-screen flex w-full">
           <AppSidebar />
