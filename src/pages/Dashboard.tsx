@@ -6,7 +6,7 @@ import { DashboardContent } from '@/components/dashboard/DashboardContent';
 
 const Dashboard = () => {
   return (
-    <div className="min-h-screen bg-crm-bg">
+    <div className="min-h-screen bg-gradient-to-br from-crm-gradient-start via-white to-crm-gradient-end">
       <SidebarProvider>
         <div className="min-h-screen flex w-full">
           <AppSidebar />

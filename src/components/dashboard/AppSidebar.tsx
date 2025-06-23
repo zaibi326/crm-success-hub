@@ -49,32 +49,35 @@ const navigationItems = [
 
 export function AppSidebar() {
   return (
-    <Sidebar className="bg-[#111827] border-r-0">
-      <SidebarHeader className="p-6">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-crm-primary rounded-lg flex items-center justify-center">
-            <Activity className="w-5 h-5 text-white" />
+    <Sidebar className="bg-gradient-to-b from-[#111827] to-[#1f2937] border-r-0 shadow-2xl">
+      <SidebarHeader className="p-6 border-b border-gray-700/50">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-crm-primary to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+            <Activity className="w-6 h-6 text-white drop-shadow-sm" />
           </div>
-          <span className="text-white font-bold text-lg">CRM Pro</span>
+          <div>
+            <span className="text-white font-bold text-xl tracking-tight">CRM Pro</span>
+            <div className="text-xs text-gray-400 mt-0.5">Professional Edition</div>
+          </div>
         </div>
       </SidebarHeader>
       
-      <SidebarContent>
+      <SidebarContent className="py-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-gray-400 text-xs uppercase tracking-wider px-3 py-2">
+          <SidebarGroupLabel className="text-gray-400 text-xs uppercase tracking-wider px-4 py-3 font-semibold">
             Navigation
           </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
+          <SidebarGroupContent className="px-2">
+            <SidebarMenu className="space-y-1">
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild 
-                    className="text-white hover:bg-gray-700 hover:text-white group transition-all duration-200"
+                    className="text-gray-300 hover:bg-gradient-to-r hover:from-gray-700/50 hover:to-gray-600/50 hover:text-white group transition-all duration-300 rounded-lg mx-2 px-4 py-3"
                   >
-                    <a href={item.url} className="flex items-center gap-3 px-3 py-2">
-                      <item.icon className="w-5 h-5 text-white group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-all duration-200" />
-                      <span className="group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">{item.title}</span>
+                    <a href={item.url} className="flex items-center gap-4">
+                      <item.icon className="w-5 h-5 text-gray-400 group-hover:text-white group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.5)] transition-all duration-300" />
+                      <span className="font-medium group-hover:translate-x-1 transition-transform duration-300">{item.title}</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -84,14 +87,14 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="p-4 border-t border-gray-700">
+      <SidebarFooter className="p-4 border-t border-gray-700/50 bg-gradient-to-r from-gray-800/50 to-gray-700/50">
         <div className="flex items-center gap-3 text-white">
-          <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
-            <Users className="w-4 h-4" />
+          <div className="w-10 h-10 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full flex items-center justify-center shadow-lg">
+            <Users className="w-5 h-5 text-gray-300" />
           </div>
           <div className="text-sm">
-            <div className="font-medium">John Doe</div>
-            <div className="text-gray-400">Admin</div>
+            <div className="font-semibold text-gray-100">John Doe</div>
+            <div className="text-gray-400 text-xs">Administrator</div>
           </div>
         </div>
       </SidebarFooter>
