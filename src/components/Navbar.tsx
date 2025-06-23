@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,21 +13,21 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="flex items-center space-x-2">
+              <Link to="/" className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-crm-primary rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">C</span>
                 </div>
                 <span className="font-bold text-xl text-gray-900">SmartCRM</span>
-              </div>
+              </Link>
             </div>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
-              <a href="#" className="text-gray-900 hover:text-crm-primary px-3 py-2 text-sm font-medium transition-colors">
+              <Link to="/" className="text-gray-900 hover:text-crm-primary px-3 py-2 text-sm font-medium transition-colors">
                 Home
-              </a>
+              </Link>
               <a href="#" className="text-gray-600 hover:text-crm-primary px-3 py-2 text-sm font-medium transition-colors">
                 CRM
               </a>
@@ -44,9 +45,11 @@ const Navbar = () => {
 
           {/* CTA Button */}
           <div className="hidden md:block">
-            <Button className="bg-crm-primary hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105">
-              Start Free Trial
-            </Button>
+            <Link to="/login">
+              <Button className="bg-crm-primary hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105">
+                Start Free Trial
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile menu button */}
@@ -66,14 +69,16 @@ const Navbar = () => {
         {isMenuOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
-              <a href="#" className="text-gray-900 block px-3 py-2 text-base font-medium">Home</a>
+              <Link to="/" className="text-gray-900 block px-3 py-2 text-base font-medium">Home</Link>
               <a href="#" className="text-gray-600 block px-3 py-2 text-base font-medium">CRM</a>
               <a href="#" className="text-gray-600 block px-3 py-2 text-base font-medium">Features</a>
               <a href="#" className="text-gray-600 block px-3 py-2 text-base font-medium">Pricing</a>
               <a href="#" className="text-gray-600 block px-3 py-2 text-base font-medium">Contact</a>
-              <Button className="bg-crm-primary hover:bg-blue-700 text-white w-full mt-4">
-                Start Free Trial
-              </Button>
+              <Link to="/login">
+                <Button className="bg-crm-primary hover:bg-blue-700 text-white w-full mt-4">
+                  Start Free Trial
+                </Button>
+              </Link>
             </div>
           </div>
         )}
