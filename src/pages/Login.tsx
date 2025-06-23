@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import BackgroundDecoration from '@/components/auth/BackgroundDecoration';
 import LoginHeader from '@/components/auth/LoginHeader';
@@ -16,6 +16,7 @@ const Login = () => {
     role: 'Employee'
   });
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -42,25 +43,15 @@ const Login = () => {
       return;
     }
 
-    // Simulate authentication
+    // Simulate authentication success
     toast({
       title: isSignUp ? "Account Created" : "Welcome Back",
-      description: `Successfully ${isSignUp ? 'created account' : 'logged in'} as ${formData.role}`,
+      description: `Successfully ${isSignUp ? 'created account and signed in' : 'logged in'} as ${formData.role}`,
     });
 
-    // Role-based redirect simulation
+    // For both sign up and sign in, redirect to dashboard
     setTimeout(() => {
-      switch (formData.role) {
-        case 'Admin':
-          console.log('Redirecting to Admin Dashboard');
-          break;
-        case 'Manager':
-          console.log('Redirecting to Manager Dashboard');
-          break;
-        case 'Employee':
-          console.log('Redirecting to Employee Dashboard');
-          break;
-      }
+      navigate('/dashboard');
     }, 1000);
   };
 
