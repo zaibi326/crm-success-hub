@@ -1,5 +1,6 @@
 
 import React, { useMemo } from 'react';
+import { Search } from 'lucide-react';
 import { CampaignCard } from './CampaignCard';
 
 const campaigns = [
