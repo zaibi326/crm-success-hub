@@ -1,13 +1,15 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { CsvUploader } from './CsvUploader';
+import { EnhancedCsvUploader } from './EnhancedCsvUploader';
 import { LeadDetailsForm } from './LeadDetailsForm';
 import { OwnershipBreakdown } from './OwnershipBreakdown';
-import { Upload, Users, FileText, Search, Filter, Plus, BarChart3 } from 'lucide-react';
+import { LeadReviewSystem } from './LeadReviewSystem';
+import { Upload, Users, FileText, Search, Filter, Plus, BarChart3, Eye } from 'lucide-react';
 
 interface Lead {
   id: number;
@@ -25,6 +27,12 @@ interface Lead {
   notes: string;
   avatar?: string;
   tags: string[];
+  // Enhanced fields for tax lien leads
+  taxId?: string;
+  ownerName?: string;
+  propertyAddress?: string;
+  taxLawsuitNumber?: string;
+  currentArrears?: number;
 }
 
 const mockLeads: Lead[] = [
@@ -42,7 +50,12 @@ const mockLeads: Lead[] = [
     status: 'HOT',
     score: 95,
     notes: 'High-value prospect with immediate estate planning needs.',
-    tags: ['High Priority', 'Estate Planning', 'Business Owner']
+    tags: ['High Priority', 'Estate Planning', 'Business Owner'],
+    taxId: 'TX123456789',
+    ownerName: 'John Smith',
+    propertyAddress: '123 Main St, New York, NY 10001',
+    taxLawsuitNumber: 'TL-2024-001',
+    currentArrears: 15000
   },
   {
     id: 2,
@@ -58,7 +71,12 @@ const mockLeads: Lead[] = [
     status: 'WARM',
     score: 78,
     notes: 'Interested in trust services, follow up in 2 weeks.',
-    tags: ['Trust Services', 'CEO', 'Follow-up']
+    tags: ['Trust Services', 'CEO', 'Follow-up'],
+    taxId: 'TX987654321',
+    ownerName: 'Sarah Johnson',
+    propertyAddress: '456 Oak Ave, Los Angeles, CA 90210',
+    taxLawsuitNumber: 'TL-2024-002',
+    currentArrears: 8500
   }
 ];
 
@@ -76,14 +94,16 @@ export function LeadsContent() {
   };
 
   const handleUploadComplete = () => {
-    // Switch to overview tab after successful upload
-    setActiveTab('overview');
+    // Switch to review tab after successful upload
+    setActiveTab('review');
   };
 
   const filteredLeads = leads.filter(lead =>
     lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     lead.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead.company.toLowerCase().includes(searchTerm.toLowerCase())
+    lead.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (lead.taxId && lead.taxId.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (lead.propertyAddress && lead.propertyAddress.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const getStatusColor = (status: string) => {
@@ -99,19 +119,23 @@ export function LeadsContent() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Lead Management</h1>
-        <p className="text-gray-600">Manage and track your prospects through the conversion funnel</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Lead Management System</h1>
+        <p className="text-gray-600">Manage tax lien leads through CSV import, review, and detailed processing</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:grid-cols-5">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
             Overview
           </TabsTrigger>
           <TabsTrigger value="upload" className="flex items-center gap-2">
             <Upload className="w-4 h-4" />
-            Upload
+            CSV Import
+          </TabsTrigger>
+          <TabsTrigger value="review" className="flex items-center gap-2">
+            <Eye className="w-4 h-4" />
+            Lead Review
           </TabsTrigger>
           <TabsTrigger value="details" className="flex items-center gap-2">
             <FileText className="w-4 h-4" />
@@ -119,7 +143,7 @@ export function LeadsContent() {
           </TabsTrigger>
           <TabsTrigger value="ownership" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
-            Ownership
+            Analytics
           </TabsTrigger>
         </TabsList>
 
@@ -157,6 +181,9 @@ export function LeadsContent() {
                       <CardTitle className="text-lg">{lead.name}</CardTitle>
                       <p className="text-sm text-gray-600 mt-1">{lead.position}</p>
                       <p className="text-sm text-gray-500">{lead.company}</p>
+                      {lead.taxId && (
+                        <p className="text-xs text-blue-600 mt-1 font-mono">Tax ID: {lead.taxId}</p>
+                      )}
                     </div>
                     <Badge className={getStatusColor(lead.status)}>
                       {lead.status}
@@ -167,6 +194,16 @@ export function LeadsContent() {
                   <div className="space-y-2">
                     <p className="text-sm text-gray-600">{lead.email}</p>
                     <p className="text-sm text-gray-600">{lead.phone}</p>
+                    {lead.propertyAddress && (
+                      <p className="text-sm text-gray-500 truncate" title={lead.propertyAddress}>
+                        📍 {lead.propertyAddress}
+                      </p>
+                    )}
+                    {lead.currentArrears && (
+                      <p className="text-sm font-semibold text-red-600">
+                        Arrears: ${lead.currentArrears.toLocaleString()}
+                      </p>
+                    )}
                     <div className="flex items-center justify-between mt-3">
                       <div className="flex items-center gap-1">
                         <span className="text-sm font-medium">Score:</span>
@@ -193,7 +230,11 @@ export function LeadsContent() {
         </TabsContent>
 
         <TabsContent value="upload">
-          <CsvUploader onUploadComplete={handleUploadComplete} />
+          <EnhancedCsvUploader onUploadComplete={handleUploadComplete} />
+        </TabsContent>
+
+        <TabsContent value="review">
+          <LeadReviewSystem />
         </TabsContent>
 
         <TabsContent value="details">
