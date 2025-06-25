@@ -52,6 +52,10 @@ const Login = () => {
       return;
     }
 
+    // Store user role and create session
+    localStorage.setItem('userRole', formData.role);
+    localStorage.setItem('userSession', 'active');
+    
     // Simulate authentication success with role-based redirect
     const redirectPath = getRoleBasedRedirect(formData.role);
     
