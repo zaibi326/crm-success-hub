@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -74,6 +73,11 @@ export function LeadsContent() {
       lead.id === updatedLead.id ? updatedLead : lead
     ));
     setSelectedLead(updatedLead);
+  };
+
+  const handleUploadComplete = () => {
+    // Switch to overview tab after successful upload
+    setActiveTab('overview');
   };
 
   const filteredLeads = leads.filter(lead =>
@@ -189,7 +193,7 @@ export function LeadsContent() {
         </TabsContent>
 
         <TabsContent value="upload">
-          <CsvUploader />
+          <CsvUploader onUploadComplete={handleUploadComplete} />
         </TabsContent>
 
         <TabsContent value="details">
