@@ -134,7 +134,7 @@ export function LeadDetailsForm({ lead, onSave }: LeadDetailsFormProps) {
                 </div>
                 <ChevronDown className={`w-5 h-5 transition-transform ${isContactOpen ? 'rotate-180' : ''}`} />
               </CardTitle>
-            </CollapsibleTrigger>
+            </CardHeader>
           </CollapsibleTrigger>
           <CollapsibleContent>
             <CardContent className="space-y-4">
