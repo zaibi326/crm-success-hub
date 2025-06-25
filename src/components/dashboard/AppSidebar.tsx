@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Home, Users, Activity, Settings, Bell, Calendar } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import {
@@ -14,6 +14,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from '@/components/ui/sidebar';
+import { Badge } from '@/components/ui/badge';
 
 const navigationItems = [
   {
@@ -50,6 +51,25 @@ const navigationItems = [
 
 export function AppSidebar() {
   const location = useLocation();
+  const [userRole, setUserRole] = useState('Employee');
+
+  useEffect(() => {
+    const role = localStorage.getItem('userRole') || 'Employee';
+    setUserRole(role);
+  }, []);
+
+  const getRoleBadgeColor = (role: string) => {
+    switch (role.toLowerCase()) {
+      case 'admin':
+        return 'bg-red-500/20 text-red-300 border-red-400/30';
+      case 'manager':
+        return 'bg-blue-500/20 text-blue-300 border-blue-400/30';
+      case 'employee':
+        return 'bg-green-500/20 text-green-300 border-green-400/30';
+      default:
+        return 'bg-gray-500/20 text-gray-300 border-gray-400/30';
+    }
+  };
 
   return (
     <Sidebar className="bg-gradient-to-b from-[#111827] to-[#1f2937] border-r-0 shadow-2xl">
@@ -104,9 +124,13 @@ export function AppSidebar() {
           <div className="w-10 h-10 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full flex items-center justify-center shadow-lg">
             <Users className="w-5 h-5 text-gray-300" />
           </div>
-          <div className="text-sm">
+          <div className="text-sm flex-1">
             <div className="font-semibold text-gray-100">John Doe</div>
-            <div className="text-gray-400 text-xs">Administrator</div>
+            <div className="flex items-center gap-2 mt-1">
+              <Badge className={`text-xs ${getRoleBadgeColor(userRole)}`}>
+                {userRole}
+              </Badge>
+            </div>
           </div>
         </div>
       </SidebarFooter>

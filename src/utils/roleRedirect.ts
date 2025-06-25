@@ -2,12 +2,25 @@
 export const getRoleBasedRedirect = (role: string): string => {
   switch (role.toLowerCase()) {
     case 'admin':
-      return '/dashboard'; // Admin Dashboard - using existing dashboard for now
+      return '/dashboard'; // Admin Dashboard
     case 'manager':
-      return '/campaigns'; // Campaign Dashboard
+      return '/campaigns'; // Manager Dashboard (Campaign focused)
     case 'employee':
-      return '/leads'; // Assigned Leads
+      return '/leads'; // Employee Dashboard (Leads focused)
     default:
       return '/dashboard';
+  }
+};
+
+export const getRoleDashboardTitle = (role: string): string => {
+  switch (role.toLowerCase()) {
+    case 'admin':
+      return 'Admin Dashboard';
+    case 'manager':
+      return 'Manager Dashboard';
+    case 'employee':
+      return 'Employee Dashboard';
+    default:
+      return 'Dashboard';
   }
 };

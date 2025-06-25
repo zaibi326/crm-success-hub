@@ -1,108 +1,172 @@
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Users, Activity, Calendar, Bell } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
-const activities = [
-  {
-    id: 1,
-    type: 'contact',
-    message: 'New contact Sarah Johnson added to CRM',
-    time: '2 minutes ago',
-    icon: Users,
-    avatar: '/placeholder.svg',
-    initials: 'SJ',
-    color: 'bg-green-500'
-  },
-  {
-    id: 2,
-    type: 'campaign',
-    message: 'Email campaign "Summer Sale" sent to 500 contacts',
-    time: '15 minutes ago',
-    icon: Activity,
-    avatar: '/placeholder.svg',
-    initials: 'ES',
-    color: 'bg-blue-500'
-  },
-  {
-    id: 3,
-    type: 'meeting',
-    message: 'Meeting scheduled with Michael Brown for tomorrow',
-    time: '1 hour ago',
-    icon: Calendar,
-    avatar: '/placeholder.svg',
-    initials: 'MB',
-    color: 'bg-purple-500'
-  },
-  {
-    id: 4,
-    type: 'notification',
-    message: 'Follow-up reminder for 3 hot leads',
-    time: '2 hours ago',
-    icon: Bell,
-    avatar: '/placeholder.svg',
-    initials: 'FR',
-    color: 'bg-orange-500'
-  },
-  {
-    id: 5,
-    type: 'contact',
-    message: 'Contact Emily Davis updated her preferences',
-    time: '4 hours ago',
-    icon: Users,
-    avatar: '/placeholder.svg',
-    initials: 'ED',
-    color: 'bg-pink-500'
-  }
-];
+interface ActivityFeedProps {
+  userRole: string;
+}
 
-export function ActivityFeed() {
+export function ActivityFeed({ userRole }: ActivityFeedProps) {
+  const getActivitiesForRole = (role: string) => {
+    switch (role.toLowerCase()) {
+      case 'admin':
+        return [
+          {
+            user: "System",
+            action: "New user registration",
+            time: "2 minutes ago",
+            type: "user",
+            details: "Sarah Johnson joined as Manager"
+          },
+          {
+            user: "Backup Service",
+            action: "Daily backup completed",
+            time: "1 hour ago",
+            type: "system",
+            details: "All data successfully backed up"
+          },
+          {
+            user: "Security Monitor",
+            action: "Security scan completed",
+            time: "3 hours ago",
+            type: "security",
+            details: "No threats detected"
+          },
+          {
+            user: "Performance Monitor",
+            action: "System performance optimal",
+            time: "6 hours ago",
+            type: "performance",
+            details: "All services running smoothly"
+          }
+        ];
+      case 'manager':
+        return [
+          {
+            user: "John Smith",
+            action: "Completed lead conversion",
+            time: "30 minutes ago",
+            type: "conversion",
+            details: "TechCorp deal closed - $15K"
+          },
+          {
+            user: "Emily Davis",
+            action: "Updated campaign status",
+            time: "1 hour ago",
+            type: "campaign",
+            details: "Q4 Campaign moved to active"
+          },
+          {
+            user: "Mike Johnson",
+            action: "Added new lead",
+            time: "2 hours ago",
+            type: "lead",
+            details: "StartupX - Software Development"
+          },
+          {
+            user: "Team Performance",
+            action: "Weekly target achieved",
+            time: "1 day ago",
+            type: "achievement",
+            details: "105% of weekly goal completed"
+          }
+        ];
+      case 'employee':
+      default:
+        return [
+          {
+            user: "You",
+            action: "Updated lead status",
+            time: "15 minutes ago",
+            type: "lead",
+            details: "Acme Corp moved to negotiation"
+          },
+          {
+            user: "You",
+            action: "Completed task",
+            time: "1 hour ago",
+            type: "task",
+            details: "Follow-up call with client"
+          },
+          {
+            user: "Manager",
+            action: "Assigned new lead",
+            time: "2 hours ago",
+            type: "assignment",
+            details: "Tech Solutions Inc."
+          },
+          {
+            user: "You",
+            action: "Added contact note",
+            time: "3 hours ago",
+            type: "note",
+            details: "Discussed pricing options"
+          }
+        ];
+    }
+  };
+
+  const activities = getActivitiesForRole(userRole);
+
+  const getActivityBadge = (type: string) => {
+    switch (type) {
+      case 'conversion':
+        return <Badge className="bg-green-100 text-green-800">Conversion</Badge>;
+      case 'campaign':
+        return <Badge className="bg-blue-100 text-blue-800">Campaign</Badge>;
+      case 'lead':
+        return <Badge className="bg-purple-100 text-purple-800">Lead</Badge>;
+      case 'task':
+        return <Badge className="bg-orange-100 text-orange-800">Task</Badge>;
+      case 'user':
+        return <Badge className="bg-indigo-100 text-indigo-800">User</Badge>;
+      case 'system':
+        return <Badge className="bg-gray-100 text-gray-800">System</Badge>;
+      case 'security':
+        return <Badge className="bg-red-100 text-red-800">Security</Badge>;
+      case 'performance':
+        return <Badge className="bg-yellow-100 text-yellow-800">Performance</Badge>;
+      case 'achievement':
+        return <Badge className="bg-emerald-100 text-emerald-800">Achievement</Badge>;
+      default:
+        return <Badge className="bg-gray-100 text-gray-800">Activity</Badge>;
+    }
+  };
+
   return (
-    <Card className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm hover:bg-white/90">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          Recent Activity
-        </CardTitle>
+    <Card className="bg-white/70 backdrop-blur-sm border-white/50 shadow-lg">
+      <CardHeader>
+        <CardTitle className="text-gray-800">Recent Activity</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {activities.map((activity, index) => (
-            <div 
-              key={activity.id} 
-              className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50/80 transition-all duration-200 group/item"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <div className="flex-shrink-0 relative">
-                <Avatar className="w-10 h-10 ring-2 ring-white shadow-lg group-hover/item:scale-105 transition-transform duration-200">
-                  <AvatarImage src={activity.avatar} />
-                  <AvatarFallback className={`${activity.color} text-white text-sm font-semibold`}>
-                    {activity.initials}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-white rounded-full flex items-center justify-center shadow-md">
-                  <activity.icon className="w-2.5 h-2.5 text-gray-500" />
-                </div>
-              </div>
+            <div key={index} className="flex items-start space-x-3 p-3 rounded-lg bg-white/50 hover:bg-white/70 transition-colors">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="text-xs">
+                  {activity.user.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                </AvatarFallback>
+              </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-900 mb-1 group-hover/item:text-gray-700 transition-colors">
-                  {activity.message}
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-gray-900">
+                    {activity.user}
+                  </p>
+                  {getActivityBadge(activity.type)}
+                </div>
+                <p className="text-sm text-gray-600 mt-1">
+                  {activity.action}
                 </p>
-                <p className="text-xs text-gray-500 group-hover/item:text-gray-600 transition-colors">
+                <p className="text-xs text-gray-500 mt-1">
+                  {activity.details}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
                   {activity.time}
                 </p>
               </div>
             </div>
           ))}
-        </div>
-        
-        <div className="mt-6 pt-4 border-t border-gray-200">
-          <button className="w-full text-sm text-crm-primary hover:text-crm-primary/80 font-semibold py-2 px-4 rounded-lg hover:bg-crm-primary/5 transition-all duration-200 group/button">
-            <span className="group-hover/button:translate-x-1 transition-transform duration-200 inline-block">
-              View all activities →
-            </span>
-          </button>
         </div>
       </CardContent>
     </Card>
