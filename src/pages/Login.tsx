@@ -1,8 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { getRoleBasedRedirect } from '@/utils/roleRedirect';
+import { useAuth } from '@/contexts/AuthContext';
 import BackgroundDecoration from '@/components/auth/BackgroundDecoration';
 import LoginHeader from '@/components/auth/LoginHeader';
 import LoginForm from '@/components/auth/LoginForm';
@@ -18,8 +19,18 @@ const Login = () => {
     confirmPassword: '',
     role: 'Employee'
   });
+  
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user, login, signup } = useAuth();
+
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      const redirectPath = getRoleBasedRedirect(user.role);
+      navigate(redirectPath);
+    }
+  }, [user, navigate]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -28,48 +39,61 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate loading delay for better UX
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    if (isSignUp && formData.password !== formData.confirmPassword) {
+
+    try {
+      // Validation for sign up
+      if (isSignUp && formData.password !== formData.confirmPassword) {
+        toast({
+          title: "Password Mismatch",
+          description: "Passwords do not match. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (formData.password.length < 6) {
+        toast({
+          title: "Invalid Password",
+          description: "Password must be at least 6 characters long.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Call appropriate auth function
+      const result = isSignUp 
+        ? await signup(formData.email, formData.password, formData.role)
+        : await login(formData.email, formData.password, formData.role);
+
+      if (result.success) {
+        const redirectPath = getRoleBasedRedirect(formData.role);
+        
+        toast({
+          title: isSignUp ? "Account Created Successfully! 🎉" : "Welcome Back! 👋",
+          description: `Successfully ${isSignUp ? 'created account and signed in' : 'logged in'} as ${formData.role}. Redirecting to your ${formData.role.toLowerCase()} dashboard...`,
+          className: "animate-fade-in"
+        });
+
+        // Redirect based on role after a short delay
+        setTimeout(() => {
+          navigate(redirectPath);
+        }, 1500);
+      } else {
+        toast({
+          title: "Authentication Failed",
+          description: result.error || "Please check your credentials and try again.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
       toast({
-        title: "Password Mismatch",
-        description: "Passwords do not match. Please try again.",
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive"
       });
+    } finally {
       setIsLoading(false);
-      return;
     }
-
-    if (formData.password.length < 6) {
-      toast({
-        title: "Invalid Password",
-        description: "Password must be at least 6 characters long.",
-        variant: "destructive"
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    // Store user role and create session
-    localStorage.setItem('userRole', formData.role);
-    localStorage.setItem('userSession', 'active');
-    
-    // Simulate authentication success with role-based redirect
-    const redirectPath = getRoleBasedRedirect(formData.role);
-    
-    toast({
-      title: isSignUp ? "Account Created Successfully! 🎉" : "Welcome Back! 👋",
-      description: `Successfully ${isSignUp ? 'created account and signed in' : 'logged in'} as ${formData.role}. Redirecting to your ${formData.role.toLowerCase()} dashboard...`,
-      className: "animate-fade-in"
-    });
-
-    // Redirect based on role after a short delay
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate(redirectPath);
-    }, 1500);
   };
 
   return (
@@ -90,6 +114,7 @@ const Login = () => {
             onToggleConfirmPassword={() => setShowConfirmPassword(!showConfirmPassword)}
             onInputChange={handleInputChange}
             onSubmit={handleSubmit}
+            isLoading={isLoading}
           />
 
           {/* Toggle between sign in and sign up */}

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/dashboard/AppSidebar';
@@ -8,27 +8,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import ProfileSection from '@/components/settings/ProfileSection';
 import SecuritySection from '@/components/settings/SecuritySection';
 import RoleBasedSettings from '@/components/settings/RoleBasedSettings';
 import { LogOut, User, Shield, Settings as SettingsIcon } from 'lucide-react';
 
 const Settings = () => {
-  const [userRole, setUserRole] = useState('Employee');
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  useEffect(() => {
-    // Get user role from localStorage (set from login)
-    const role = localStorage.getItem('userRole') || 'Employee';
-    setUserRole(role);
-  }, []);
+  const { user, logout } = useAuth();
 
   const handleLogout = () => {
-    // Clear all user data
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('userProfile');
-    localStorage.removeItem('userSession');
+    logout();
     
     toast({
       title: "Logged Out Successfully",
@@ -54,7 +46,7 @@ const Settings = () => {
                   <div>
                     <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
                     <p className="text-sm text-gray-600 mt-0.5">
-                      Manage your account and preferences - {userRole} Dashboard
+                      Manage your account and preferences - {user?.role || 'User'} Dashboard
                     </p>
                   </div>
                 </div>
@@ -96,7 +88,7 @@ const Settings = () => {
                   </TabsContent>
 
                   <TabsContent value="role-settings" className="space-y-6">
-                    <RoleBasedSettings userRole={userRole} />
+                    <RoleBasedSettings userRole={user?.role || 'Employee'} />
                   </TabsContent>
                 </Tabs>
 
@@ -116,7 +108,7 @@ const Settings = () => {
                       <Button variant="outline" onClick={() => navigate('/campaigns')}>
                         View Campaigns
                       </Button>
-                      {(userRole === 'Admin' || userRole === 'Manager') && (
+                      {(user?.role === 'Admin' || user?.role === 'Manager') && (
                         <Button variant="outline" onClick={() => navigate('/notifications')}>
                           Team Notifications
                         </Button>

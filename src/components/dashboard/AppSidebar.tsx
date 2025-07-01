@@ -1,7 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Home, Users, Activity, Settings, Bell, Calendar } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Sidebar,
   SidebarContent,
@@ -51,12 +52,7 @@ const navigationItems = [
 
 export function AppSidebar() {
   const location = useLocation();
-  const [userRole, setUserRole] = useState('Employee');
-
-  useEffect(() => {
-    const role = localStorage.getItem('userRole') || 'Employee';
-    setUserRole(role);
-  }, []);
+  const { user } = useAuth();
 
   const getRoleBadgeColor = (role: string) => {
     switch (role.toLowerCase()) {
@@ -125,10 +121,12 @@ export function AppSidebar() {
             <Users className="w-5 h-5 text-gray-300" />
           </div>
           <div className="text-sm flex-1">
-            <div className="font-semibold text-gray-100">John Doe</div>
+            <div className="font-semibold text-gray-100">
+              {user?.name || user?.email?.split('@')[0] || 'User'}
+            </div>
             <div className="flex items-center gap-2 mt-1">
-              <Badge className={`text-xs ${getRoleBadgeColor(userRole)}`}>
-                {userRole}
+              <Badge className={`text-xs ${getRoleBadgeColor(user?.role || 'Employee')}`}>
+                {user?.role || 'Employee'}
               </Badge>
             </div>
           </div>

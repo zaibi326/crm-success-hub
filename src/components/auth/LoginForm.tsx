@@ -22,6 +22,7 @@ interface LoginFormProps {
   onToggleConfirmPassword: () => void;
   onInputChange: (field: string, value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
+  isLoading: boolean;
 }
 
 const LoginForm = ({
@@ -32,7 +33,8 @@ const LoginForm = ({
   onTogglePassword,
   onToggleConfirmPassword,
   onInputChange,
-  onSubmit
+  onSubmit,
+  isLoading
 }: LoginFormProps) => {
   return (
     <form onSubmit={onSubmit} className="space-y-5">
@@ -49,6 +51,7 @@ const LoginForm = ({
             onChange={(e) => onInputChange('email', e.target.value)}
             className="pl-10 bg-white/50 border-white/30 backdrop-blur-sm focus:bg-white/70 transition-all shadow-lg hover:shadow-xl focus:shadow-xl rounded-xl h-12"
             required
+            disabled={isLoading}
           />
         </div>
       </div>
@@ -66,11 +69,13 @@ const LoginForm = ({
             onChange={(e) => onInputChange('password', e.target.value)}
             className="pl-10 pr-10 bg-white/50 border-white/30 backdrop-blur-sm focus:bg-white/70 transition-all shadow-lg hover:shadow-xl focus:shadow-xl rounded-xl h-12"
             required
+            disabled={isLoading}
           />
           <button
             type="button"
             onClick={onTogglePassword}
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            disabled={isLoading}
           >
             {showPassword ? <EyeClosed className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
@@ -91,11 +96,13 @@ const LoginForm = ({
               onChange={(e) => onInputChange('confirmPassword', e.target.value)}
               className="pl-10 pr-10 bg-white/50 border-white/30 backdrop-blur-sm focus:bg-white/70 transition-all shadow-lg hover:shadow-xl focus:shadow-xl rounded-xl h-12"
               required
+              disabled={isLoading}
             />
             <button
               type="button"
               onClick={onToggleConfirmPassword}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              disabled={isLoading}
             >
               {showConfirmPassword ? <EyeClosed className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -111,6 +118,7 @@ const LoginForm = ({
           value={formData.role}
           onChange={(e) => onInputChange('role', e.target.value)}
           className="w-full px-4 py-3 bg-white/50 border border-white/30 rounded-xl backdrop-blur-sm focus:bg-white/70 focus:outline-none focus:ring-2 focus:ring-crm-primary transition-all shadow-lg hover:shadow-xl focus:shadow-xl h-12"
+          disabled={isLoading}
         >
           <option value="Employee">Employee</option>
           <option value="Manager">Manager</option>
@@ -121,13 +129,21 @@ const LoginForm = ({
       {/* Submit button */}
       <Button
         type="submit"
-        className="w-full bg-gradient-to-r from-crm-primary to-blue-700 hover:from-blue-700 hover:to-crm-primary text-white font-semibold py-3 rounded-xl transition-all hover:scale-105 shadow-lg hover:shadow-xl duration-300 transform h-12"
+        disabled={isLoading}
+        className="w-full bg-gradient-to-r from-crm-primary to-blue-700 hover:from-blue-700 hover:to-crm-primary text-white font-semibold py-3 rounded-xl transition-all hover:scale-105 shadow-lg hover:shadow-xl duration-300 transform h-12 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
       >
-        {isSignUp ? 'Create Account' : 'Sign In'}
+        {isLoading ? (
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+            {isSignUp ? 'Creating Account...' : 'Signing In...'}
+          </div>
+        ) : (
+          isSignUp ? 'Create Account' : 'Sign In'
+        )}
       </Button>
 
       {/* Social Login */}
-      <SocialLogin />
+      <SocialLogin isLoading={isLoading} />
     </form>
   );
 };
