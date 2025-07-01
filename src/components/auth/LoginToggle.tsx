@@ -14,6 +14,12 @@ const LoginToggle = ({ isSignUp, isLoading, onToggleMode }: LoginToggleProps) =>
     e.preventDefault();
     e.stopPropagation();
     console.log('LoginToggle button clicked, current mode:', isSignUp ? 'signup' : 'signin');
+    
+    if (isLoading) {
+      console.log('Click ignored - currently loading');
+      return;
+    }
+    
     onToggleMode();
   };
 

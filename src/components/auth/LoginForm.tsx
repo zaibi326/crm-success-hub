@@ -37,8 +37,16 @@ const LoginForm = ({
   onSubmit,
   isLoading
 }: LoginFormProps) => {
+  console.log('LoginForm render - isSignUp:', isSignUp);
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('LoginForm handleFormSubmit called - isSignUp:', isSignUp);
+    onSubmit(e);
+  };
+
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
+    <form onSubmit={handleFormSubmit} className="space-y-5">
       {/* Email field */}
       <div className="space-y-2">
         <Label htmlFor="email" className="text-gray-700 font-medium">Email</Label>

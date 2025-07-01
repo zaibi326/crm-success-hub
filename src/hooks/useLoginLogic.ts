@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { getRoleBasedRedirect } from '@/utils/roleRedirect';
@@ -20,11 +21,11 @@ export const useLoginLogic = () => {
   const navigate = useNavigate();
   const { login, signup } = useAuth();
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = useCallback((field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
-  const handleToggleMode = () => {
+  const handleToggleMode = useCallback(() => {
     console.log('Toggle mode called, current isSignUp:', isSignUp);
     
     if (isLoading) {
@@ -50,7 +51,7 @@ export const useLoginLogic = () => {
     // Reset password visibility
     setShowPassword(false);
     setShowConfirmPassword(false);
-  };
+  }, [isSignUp, isLoading]);
 
   const validateForm = () => {
     if (!formData.email || !formData.password) {
@@ -105,6 +106,9 @@ export const useLoginLogic = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('Form submitted - isSignUp:', isSignUp);
     setIsLoading(true);
 
     try {
