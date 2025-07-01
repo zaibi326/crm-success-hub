@@ -36,7 +36,12 @@ const Login = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleToggleMode = () => {
+  const handleToggleMode = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isLoading) return; // Prevent toggle during loading
+    
     setIsSignUp(!isSignUp);
     // Reset form when switching modes
     setFormData({
@@ -176,8 +181,8 @@ const Login = () => {
               <button
                 type="button"
                 onClick={handleToggleMode}
-                className="ml-2 text-crm-primary hover:text-blue-700 font-semibold transition-colors duration-200 hover:underline"
-                disabled={isLoading}
+                className="ml-2 text-crm-primary hover:text-blue-700 font-semibold transition-colors duration-200 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={false} // Never disable this button
               >
                 {isSignUp ? 'Sign In' : 'Sign Up'}
               </button>
