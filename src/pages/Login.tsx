@@ -10,13 +10,13 @@ import { Toaster } from '@/components/ui/toaster';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
+  const { user, profile, isLoading } = useAuth();
   
   const {
     isSignUp,
     showPassword,
     showConfirmPassword,
-    isLoading,
+    isLoading: formLoading,
     formData,
     handleInputChange,
     handleToggleMode,
@@ -25,13 +25,29 @@ const Login = () => {
     setShowConfirmPassword
   } = useLoginLogic();
 
-  // Redirect if user is already logged in
+  // Redirect if user is already logged in and profile is loaded
   useEffect(() => {
-    if (user && profile) {
+    if (user && profile && !isLoading) {
+      console.log('User authenticated with profile:', profile.role);
       const redirectPath = getRoleBasedRedirect(profile.role);
-      navigate(redirectPath);
+      console.log('Redirecting to:', redirectPath);
+      navigate(redirectPath, { replace: true });
     }
-  }, [user, profile, navigate]);
+  }, [user, profile, isLoading, navigate]);
+
+  // Show loading while auth state is being determined
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#EFF6FF] via-[#DBEAFE] to-[#BFDBFE] flex items-center justify-center">
+        <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
+          <div className="flex items-center space-x-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            <span className="text-gray-700 font-medium">Loading...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#EFF6FF] via-[#DBEAFE] to-[#BFDBFE] flex items-center justify-center p-4 relative overflow-hidden">
@@ -74,11 +90,11 @@ const Login = () => {
             onToggleConfirmPassword={() => setShowConfirmPassword(!showConfirmPassword)}
             onInputChange={handleInputChange}
             onSubmit={handleSubmit}
-            isLoading={isLoading}
+            isLoading={formLoading}
           />
 
           {/* Social Login */}
-          <SocialLoginButtons isLoading={isLoading} />
+          <SocialLoginButtons isLoading={formLoading} />
 
           {/* Toggle between login/signup */}
           <div className="text-center pt-6 border-t border-white/20">
@@ -89,7 +105,7 @@ const Login = () => {
               type="button"
               onClick={handleToggleMode}
               className="text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-200 hover:underline disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 rounded-lg hover:bg-white/10"
-              disabled={isLoading}
+              disabled={formLoading}
             >
               {isSignUp ? 'Sign In Instead' : 'Create New Account'}
             </button>

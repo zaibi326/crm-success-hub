@@ -116,19 +116,25 @@ export const useLoginLogic = () => {
             className: "animate-fade-in backdrop-blur-xl bg-white/90 border-white/30"
           });
         } else {
-          // Successful login - redirect based on role
-          const redirectPath = getRoleBasedRedirect(formData.role);
-          
+          // Successful login - show success message first
           toast({
             title: isSignUp ? "Account Created Successfully! 🎉" : "Welcome Back! 👋",
             description: `Successfully ${isSignUp ? 'created account' : 'logged in'}. Redirecting to your dashboard...`,
             className: "animate-fade-in backdrop-blur-xl bg-white/90 border-white/30"
           });
 
-          // Redirect immediately after successful login
-          setTimeout(() => {
-            navigate(redirectPath);
-          }, 1000);
+          // For login, we need to wait for the profile to be fetched before redirecting
+          // The AuthContext will handle the redirect automatically after profile is loaded
+          if (!isSignUp) {
+            // Just show success message, let the Login component handle redirect based on user/profile
+            console.log('Login successful, waiting for profile to load...');
+          } else {
+            // For signup, redirect based on the role from form
+            const redirectPath = getRoleBasedRedirect(formData.role);
+            setTimeout(() => {
+              navigate(redirectPath);
+            }, 1000);
+          }
         }
       } else {
         toast({
