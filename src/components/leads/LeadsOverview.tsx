@@ -35,9 +35,10 @@ interface LeadsOverviewProps {
   onSearchChange: (term: string) => void;
   onLeadSelect: (lead: Lead) => void;
   onTabChange: (tab: string) => void;
+  canViewAll: boolean;
 }
 
-export function LeadsOverview({ leads, searchTerm, onSearchChange, onLeadSelect, onTabChange }: LeadsOverviewProps) {
+export function LeadsOverview({ leads, searchTerm, onSearchChange, onLeadSelect, onTabChange, canViewAll }: LeadsOverviewProps) {
   const filteredLeads = leads.filter(lead =>
     lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     lead.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -74,10 +75,12 @@ export function LeadsOverview({ leads, searchTerm, onSearchChange, onLeadSelect,
             <Filter className="w-4 h-4 mr-2" />
             Filter
           </Button>
-          <Button size="sm" className="bg-crm-primary hover:bg-crm-primary/90">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Lead
-          </Button>
+          {canViewAll && (
+            <Button size="sm" className="bg-crm-primary hover:bg-crm-primary/90">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Lead
+            </Button>
+          )}
         </div>
       </div>
 

@@ -28,6 +28,7 @@ interface Lead {
 interface LeadDetailsFormProps {
   lead: Lead;
   onSave: (updatedLead: Lead) => void;
+  canEdit: boolean;
 }
 
 interface UploadedFile {
@@ -38,7 +39,7 @@ interface UploadedFile {
   preview?: string;
 }
 
-export function LeadDetailsForm({ lead, onSave }: LeadDetailsFormProps) {
+export function LeadDetailsForm({ lead, onSave, canEdit }: LeadDetailsFormProps) {
   const [formData, setFormData] = useState(lead);
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isContactOpen, setIsContactOpen] = useState(true);
@@ -48,10 +49,13 @@ export function LeadDetailsForm({ lead, onSave }: LeadDetailsFormProps) {
   const { toast } = useToast();
 
   const handleInputChange = (field: keyof Lead, value: any) => {
+    if (!canEdit) return;
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!canEdit) return;
+    
     const uploadedFiles = Array.from(event.target.files || []);
     
     uploadedFiles.forEach(file => {
@@ -74,6 +78,8 @@ export function LeadDetailsForm({ lead, onSave }: LeadDetailsFormProps) {
   };
 
   const removeFile = (fileId: string) => {
+    if (!canEdit) return;
+    
     setFiles(prev => prev.filter(f => f.id !== fileId));
     toast({
       title: "File removed",
@@ -82,6 +88,8 @@ export function LeadDetailsForm({ lead, onSave }: LeadDetailsFormProps) {
   };
 
   const handleSave = async () => {
+    if (!canEdit) return;
+    
     setIsSaving(true);
     
     // Simulate API call
@@ -99,6 +107,14 @@ export function LeadDetailsForm({ lead, onSave }: LeadDetailsFormProps) {
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
+      {!canEdit && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+          <p className="text-yellow-800 text-sm">
+            You have view-only access to this lead. Contact your manager to request edit permissions.
+          </p>
+        </div>
+      )}
+
       <ContactInfoSection
         formData={formData}
         isOpen={isContactOpen}
@@ -121,26 +137,28 @@ export function LeadDetailsForm({ lead, onSave }: LeadDetailsFormProps) {
         onInputChange={handleInputChange}
       />
 
-      {/* Sticky Save Button */}
-      <div className="sticky bottom-6 z-10 flex justify-center">
-        <Button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="bg-gradient-to-r from-crm-primary to-crm-accent hover:from-crm-primary/90 hover:to-crm-accent/90 text-white px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transform transition-all duration-200 hover:scale-105"
-        >
-          {isSaving ? (
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Saving...
-            </div>
-          ) : (
-            <>
-              <Save className="w-5 h-5 mr-2" />
-              Save Changes
-            </>
-          )}
-        </Button>
-      </div>
+      {/* Sticky Save Button - Only show if user can edit */}
+      {canEdit && (
+        <div className="sticky bottom-6 z-10 flex justify-center">
+          <Button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="bg-gradient-to-r from-crm-primary to-crm-accent hover:from-crm-primary/90 hover:to-crm-accent/90 text-white px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transform transition-all duration-200 hover:scale-105"
+          >
+            {isSaving ? (
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Saving...
+              </div>
+            ) : (
+              <>
+                <Save className="w-5 h-5 mr-2" />
+                Save Changes
+              </>
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

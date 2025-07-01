@@ -76,9 +76,10 @@ interface CampaignGridProps {
   searchTerm: string;
   sortBy: string;
   filterStatus: string;
+  canEdit: boolean;
 }
 
-export function CampaignGrid({ searchTerm, sortBy, filterStatus }: CampaignGridProps) {
+export function CampaignGrid({ searchTerm, sortBy, filterStatus, canEdit }: CampaignGridProps) {
   const filteredAndSortedCampaigns = useMemo(() => {
     let filtered = campaigns;
 
