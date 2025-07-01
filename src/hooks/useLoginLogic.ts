@@ -116,6 +116,7 @@ export const useLoginLogic = () => {
             className: "animate-fade-in backdrop-blur-xl bg-white/90 border-white/30"
           });
         } else {
+          // Successful login - redirect based on role
           const redirectPath = getRoleBasedRedirect(formData.role);
           
           toast({
@@ -124,9 +125,10 @@ export const useLoginLogic = () => {
             className: "animate-fade-in backdrop-blur-xl bg-white/90 border-white/30"
           });
 
+          // Redirect immediately after successful login
           setTimeout(() => {
             navigate(redirectPath);
-          }, 1500);
+          }, 1000);
         }
       } else {
         toast({

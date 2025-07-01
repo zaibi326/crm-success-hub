@@ -70,12 +70,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch user profile data
+          // Use setTimeout to prevent infinite recursion issues
           setTimeout(async () => {
-            const profileData = await fetchUserProfile(session.user.id);
-            setProfile(profileData);
-            setIsLoading(false);
-          }, 0);
+            try {
+              const profileData = await fetchUserProfile(session.user.id);
+              setProfile(profileData);
+            } catch (error) {
+              console.error('Profile fetch error:', error);
+            } finally {
+              setIsLoading(false);
+            }
+          }, 100);
         } else {
           setProfile(null);
           setIsLoading(false);
