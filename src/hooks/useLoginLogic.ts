@@ -10,7 +10,6 @@ export const useLoginLogic = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isResetMode, setIsResetMode] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -22,7 +21,7 @@ export const useLoginLogic = () => {
   
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { login, signup, resetPassword } = useAuth();
+  const { login, signup } = useAuth();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -32,24 +31,6 @@ export const useLoginLogic = () => {
     if (isLoading) return;
     
     setIsSignUp(!isSignUp);
-    setIsResetMode(false);
-    setFormData({
-      email: '',
-      password: '',
-      confirmPassword: '',
-      firstName: '',
-      lastName: '',
-      role: 'Employee'
-    });
-    setShowPassword(false);
-    setShowConfirmPassword(false);
-  };
-
-  const handleResetMode = () => {
-    if (isLoading) return;
-    
-    setIsResetMode(!isResetMode);
-    setIsSignUp(false);
     setFormData({
       email: '',
       password: '',
@@ -63,18 +44,6 @@ export const useLoginLogic = () => {
   };
 
   const validateForm = () => {
-    if (isResetMode) {
-      if (!formData.email) {
-        toast({
-          title: "Missing Email",
-          description: "Please enter your email address.",
-          variant: "destructive"
-        });
-        return false;
-      }
-      return true;
-    }
-
     if (!formData.email || !formData.password) {
       toast({
         title: "Missing Information",
@@ -134,26 +103,6 @@ export const useLoginLogic = () => {
         return;
       }
 
-      if (isResetMode) {
-        const result = await resetPassword(formData.email);
-        
-        if (result.success) {
-          toast({
-            title: "Reset Email Sent! 📧",
-            description: "Please check your email for password reset instructions.",
-          });
-          setIsResetMode(false);
-          setFormData(prev => ({ ...prev, email: '' }));
-        } else {
-          toast({
-            title: "Reset Failed",
-            description: result.error || "Please try again.",
-            variant: "destructive"
-          });
-        }
-        return;
-      }
-
       const result = isSignUp 
         ? await signup(formData.email, formData.password, formData.role, formData.firstName, formData.lastName)
         : await login(formData.email, formData.password);
@@ -164,7 +113,7 @@ export const useLoginLogic = () => {
           toast({
             title: "Account Created! 🎉",
             description: result.error,
-            className: "animate-fade-in"
+            className: "animate-fade-in backdrop-blur-xl bg-white/90 border-white/30"
           });
         } else {
           const redirectPath = getRoleBasedRedirect(formData.role);
@@ -172,7 +121,7 @@ export const useLoginLogic = () => {
           toast({
             title: isSignUp ? "Account Created Successfully! 🎉" : "Welcome Back! 👋",
             description: `Successfully ${isSignUp ? 'created account' : 'logged in'}. Redirecting to your dashboard...`,
-            className: "animate-fade-in"
+            className: "animate-fade-in backdrop-blur-xl bg-white/90 border-white/30"
           });
 
           setTimeout(() => {
@@ -183,7 +132,8 @@ export const useLoginLogic = () => {
         toast({
           title: "Authentication Failed",
           description: result.error || "Please check your credentials and try again.",
-          variant: "destructive"
+          variant: "destructive",
+          className: "backdrop-blur-xl bg-white/90 border-white/30"
         });
       }
     } catch (error) {
@@ -191,7 +141,8 @@ export const useLoginLogic = () => {
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
+        className: "backdrop-blur-xl bg-white/90 border-white/30"
       });
     } finally {
       setIsLoading(false);
@@ -200,14 +151,12 @@ export const useLoginLogic = () => {
 
   return {
     isSignUp,
-    isResetMode,
     showPassword,
     showConfirmPassword,
     isLoading,
     formData,
     handleInputChange,
     handleToggleMode,
-    handleResetMode,
     handleSubmit,
     setShowPassword,
     setShowConfirmPassword
