@@ -36,13 +36,17 @@ const Login = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleToggleMode = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleToggleMode = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     
     if (isLoading) return; // Prevent toggle during loading
     
-    setIsSignUp(!isSignUp);
+    console.log('Toggling mode from', isSignUp ? 'signup' : 'signin', 'to', !isSignUp ? 'signup' : 'signin');
+    
+    setIsSignUp(prev => !prev);
     // Reset form when switching modes
     setFormData({
       email: '',
@@ -174,19 +178,19 @@ const Login = () => {
             isLoading={isLoading}
           />
 
-          {/* Toggle between sign in and sign up */}
-          <div className="text-center">
+          {/* Toggle between sign in and sign up - moved outside of form */}
+          <div className="text-center pt-4 border-t border-white/20">
             <p className="text-gray-600">
               {isSignUp ? 'Already have an account?' : "Don't have an account?"}
-              <button
-                type="button"
-                onClick={handleToggleMode}
-                className="ml-2 text-crm-primary hover:text-blue-700 font-semibold transition-colors duration-200 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={false} // Never disable this button
-              >
-                {isSignUp ? 'Sign In' : 'Sign Up'}
-              </button>
             </p>
+            <button
+              type="button"
+              onClick={handleToggleMode}
+              className="mt-2 text-crm-primary hover:text-blue-700 font-semibold transition-colors duration-200 hover:underline disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 rounded-md hover:bg-white/10"
+              disabled={isLoading}
+            >
+              {isSignUp ? 'Sign In Instead' : 'Create New Account'}
+            </button>
           </div>
         </div>
 
