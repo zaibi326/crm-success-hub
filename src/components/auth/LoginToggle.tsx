@@ -12,8 +12,11 @@ const LoginToggle = ({ isSignUp, isLoading, onToggleMode }: LoginToggleProps) =>
     e.preventDefault();
     e.stopPropagation();
     console.log('Toggle button clicked, current mode:', isSignUp ? 'signup' : 'signin');
+    console.log('About to call onToggleMode');
     onToggleMode(e);
   };
+
+  console.log('LoginToggle rendering, isSignUp:', isSignUp);
 
   return (
     <div className="text-center pt-4 border-t border-white/20">
