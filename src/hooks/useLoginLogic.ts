@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -24,13 +25,25 @@ export const useLoginLogic = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   }, []);
 
-  const handleToggleMode = useCallback(() => {
-    // Use functional state update to avoid stale closure and dependency issues
-    setIsSignUp(prev => {
-      const newMode = !prev;
-      console.log('Toggling from', prev ? 'signup' : 'signin', 'to', newMode ? 'signup' : 'signin');
-      return newMode;
-    });
+  const handleToggleMode = () => {
+    console.log('handleToggleMode called - current isSignUp:', isSignUp);
+    
+    // Don't allow toggle if loading
+    if (isLoading) {
+      console.log('Toggle blocked - currently loading');
+      return;
+    }
+    
+    // Simple direct state update
+    const newMode = !isSignUp;
+    console.log('Setting isSignUp to:', newMode);
+    
+    setIsSignUp(newMode);
+    
+    // Verify state change immediately
+    setTimeout(() => {
+      console.log('State after toggle should be:', newMode);
+    }, 0);
     
     // Clear form data when switching modes
     setFormData({
@@ -43,7 +56,7 @@ export const useLoginLogic = () => {
     // Reset password visibility
     setShowPassword(false);
     setShowConfirmPassword(false);
-  }, []); // Remove problematic dependencies
+  };
 
   const validateForm = () => {
     if (!formData.email || !formData.password) {

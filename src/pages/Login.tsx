@@ -45,7 +45,7 @@ const Login = () => {
       
       <div className="w-full max-w-md">
         <div 
-          key={`login-form-${isSignUp ? 'signup' : 'signin'}`}
+          key={`login-form-${isSignUp ? 'signup' : 'signin'}-${Date.now()}`}
           className="bg-white/25 backdrop-blur-xl border border-white/40 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 p-8 space-y-6 animate-fade-in"
         >
           <LoginHeader isSignUp={isSignUp} />

@@ -20,8 +20,13 @@ const LoginToggle = ({ isSignUp, isLoading, onToggleMode }: LoginToggleProps) =>
       return;
     }
     
-    console.log('Calling onToggleMode...');
+    console.log('About to call onToggleMode...');
     onToggleMode();
+    
+    // Verify the call completed
+    setTimeout(() => {
+      console.log('onToggleMode call completed');
+    }, 0);
   };
 
   return (
