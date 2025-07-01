@@ -24,25 +24,16 @@ export const useLoginLogic = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleToggleMode = (e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+  const handleToggleMode = () => {
+    console.log('Toggle clicked, current mode:', isSignUp ? 'signup' : 'signin');
     
     if (isLoading) {
       console.log('Toggle blocked - currently loading');
       return;
     }
     
-    console.log('Current mode before toggle:', isSignUp ? 'signup' : 'signin');
-    
-    // Toggle the mode first
-    setIsSignUp(prev => {
-      const newMode = !prev;
-      console.log('Setting new mode to:', newMode ? 'signup' : 'signin');
-      return newMode;
-    });
+    // Simply toggle the mode
+    setIsSignUp(!isSignUp);
     
     // Clear form data when switching modes
     setFormData({
@@ -55,6 +46,8 @@ export const useLoginLogic = () => {
     // Reset password visibility
     setShowPassword(false);
     setShowConfirmPassword(false);
+    
+    console.log('Mode toggled to:', !isSignUp ? 'signup' : 'signin');
   };
 
   const validateForm = () => {
