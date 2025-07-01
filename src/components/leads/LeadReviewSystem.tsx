@@ -1,10 +1,11 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { LeadSearchFilters } from './LeadSearchFilters';
 import { LeadReviewCard } from './LeadReviewCard';
 import { ReviewActions } from './ReviewActions';
+import { TaxLeadDetailsForm } from './TaxLeadDetailsForm';
 
 interface Lead {
   id: number;
@@ -62,6 +63,7 @@ export function LeadReviewSystem() {
   const [currentLeadIndex, setCurrentLeadIndex] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [showDetailForm, setShowDetailForm] = useState(false);
   const { toast } = useToast();
 
   const currentLead = leads[currentLeadIndex];
@@ -88,10 +90,9 @@ export function LeadReviewSystem() {
         description: `${currentLead.ownerName} has been marked as passed.`,
       });
     } else {
-      toast({
-        title: "Lead Kept! 🎉",
-        description: `${currentLead.ownerName} has been added to your pipeline.`,
-      });
+      // Show detailed form for "Keep" action
+      setShowDetailForm(true);
+      return; // Don't move to next lead yet
     }
 
     // Move to next lead
@@ -110,6 +111,26 @@ export function LeadReviewSystem() {
       lead.id === updatedLead.id ? updatedLead : lead
     );
     setLeads(updatedLeads);
+  };
+
+  const handleDetailFormSave = (updatedLead: Lead) => {
+    handleLeadUpdate(updatedLead);
+    setShowDetailForm(false);
+    
+    toast({
+      title: "Lead Kept! 🎉",
+      description: `${updatedLead.ownerName} has been added to your pipeline with detailed information.`,
+    });
+
+    // Move to next lead after saving details
+    if (currentLeadIndex < filteredLeads.length - 1) {
+      setCurrentLeadIndex(currentLeadIndex + 1);
+    } else {
+      toast({
+        title: "Review Complete! ✅",
+        description: "You've reviewed all available leads!",
+      });
+    }
   };
 
   if (!currentLead) {
@@ -138,6 +159,7 @@ export function LeadReviewSystem() {
           <LeadReviewCard
             lead={currentLead}
             onLeadUpdate={handleLeadUpdate}
+            onOpenDetailedForm={() => setShowDetailForm(true)}
           />
         </div>
 
@@ -164,6 +186,20 @@ export function LeadReviewSystem() {
           </Card>
         </div>
       </div>
+
+      {/* Detailed Lead Form Dialog */}
+      <Dialog open={showDetailForm} onOpenChange={setShowDetailForm}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Detailed Lead Information - {currentLead.ownerName}</DialogTitle>
+          </DialogHeader>
+          <TaxLeadDetailsForm
+            lead={currentLead as any}
+            onSave={handleDetailFormSave}
+            userRole="editor"
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
