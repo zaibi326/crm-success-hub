@@ -32,6 +32,10 @@ const Login = () => {
       const redirectPath = getRoleBasedRedirect(profile.role);
       console.log('Redirecting to:', redirectPath);
       navigate(redirectPath, { replace: true });
+    } else if (user && !profile && !isLoading) {
+      // If user exists but profile failed to load, try redirecting to dashboard anyway
+      console.log('User authenticated but no profile loaded, redirecting to dashboard');
+      navigate('/dashboard', { replace: true });
     }
   }, [user, profile, isLoading, navigate]);
 

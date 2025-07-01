@@ -40,8 +40,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchUserProfile = async (userId: string) => {
+  const fetchUserProfile = async (userId: string, retryCount = 0) => {
     try {
+      console.log('Fetching profile for user:', userId);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -50,9 +51,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Error fetching profile:', error);
+        
+        // If it's a profile not found error and we haven't retried too many times, retry
+        if (error.code === 'PGRST116' && retryCount < 3) {
+          console.log('Profile not found, retrying in 1 second...');
+          setTimeout(() => fetchUserProfile(userId, retryCount + 1), 1000);
+          return null;
+        }
+        
         return null;
       }
 
+      console.log('Profile fetched successfully:', data);
       return data as UserProfile;
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -70,7 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Use setTimeout to prevent infinite recursion issues
+          // Fetch profile with a small delay to avoid recursion issues
           setTimeout(async () => {
             try {
               const profileData = await fetchUserProfile(session.user.id);
