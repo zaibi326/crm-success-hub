@@ -52,7 +52,7 @@ const navigationItems = [
 
 export function AppSidebar() {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   const getRoleBadgeColor = (role: string) => {
     switch (role.toLowerCase()) {
@@ -65,6 +65,16 @@ export function AppSidebar() {
       default:
         return 'bg-gray-500/20 text-gray-300 border-gray-400/30';
     }
+  };
+
+  const getUserDisplayName = () => {
+    if (profile?.first_name && profile?.last_name) {
+      return `${profile.first_name} ${profile.last_name}`;
+    }
+    if (profile?.first_name) {
+      return profile.first_name;
+    }
+    return user?.email?.split('@')[0] || 'User';
   };
 
   return (
@@ -122,11 +132,11 @@ export function AppSidebar() {
           </div>
           <div className="text-sm flex-1">
             <div className="font-semibold text-gray-100">
-              {user?.name || user?.email?.split('@')[0] || 'User'}
+              {getUserDisplayName()}
             </div>
             <div className="flex items-center gap-2 mt-1">
-              <Badge className={`text-xs ${getRoleBadgeColor(user?.role || 'Employee')}`}>
-                {user?.role || 'Employee'}
+              <Badge className={`text-xs ${getRoleBadgeColor(profile?.role || 'Employee')}`}>
+                {profile?.role || 'Employee'}
               </Badge>
             </div>
           </div>

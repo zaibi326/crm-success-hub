@@ -17,7 +17,7 @@ import { LogOut, User, Shield, Settings as SettingsIcon } from 'lucide-react';
 const Settings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, logout } = useAuth();
+  const { user, profile, logout } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -33,6 +33,14 @@ const Settings = () => {
     }, 1000);
   };
 
+  const getUserRole = (): 'Admin' | 'Manager' | 'Employee' => {
+    const role = profile?.role || 'Employee';
+    if (role === 'Admin' || role === 'Manager' || role === 'Employee') {
+      return role;
+    }
+    return 'Employee';
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-crm-gradient-start via-white to-crm-gradient-end">
       <SidebarProvider>
@@ -46,7 +54,7 @@ const Settings = () => {
                   <div>
                     <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
                     <p className="text-sm text-gray-600 mt-0.5">
-                      Manage your account and preferences - {user?.role || 'User'} Dashboard
+                      Manage your account and preferences - {getUserRole()} Dashboard
                     </p>
                   </div>
                 </div>
@@ -88,7 +96,7 @@ const Settings = () => {
                   </TabsContent>
 
                   <TabsContent value="role-settings" className="space-y-6">
-                    <RoleBasedSettings userRole={user?.role || 'Employee'} />
+                    <RoleBasedSettings userRole={getUserRole()} />
                   </TabsContent>
                 </Tabs>
 
@@ -108,7 +116,7 @@ const Settings = () => {
                       <Button variant="outline" onClick={() => navigate('/campaigns')}>
                         View Campaigns
                       </Button>
-                      {(user?.role === 'Admin' || user?.role === 'Manager') && (
+                      {(getUserRole() === 'Admin' || getUserRole() === 'Manager') && (
                         <Button variant="outline" onClick={() => navigate('/notifications')}>
                           Team Notifications
                         </Button>
