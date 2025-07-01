@@ -35,8 +35,14 @@ export const useLoginLogic = () => {
       return;
     }
     
-    const newMode = !isSignUp;
-    console.log('Toggling mode from', isSignUp ? 'signup' : 'signin', 'to', newMode ? 'signup' : 'signin');
+    console.log('Current mode before toggle:', isSignUp ? 'signup' : 'signin');
+    
+    // Toggle the mode first
+    setIsSignUp(prev => {
+      const newMode = !prev;
+      console.log('Setting new mode to:', newMode ? 'signup' : 'signin');
+      return newMode;
+    });
     
     // Clear form data when switching modes
     setFormData({
@@ -49,14 +55,6 @@ export const useLoginLogic = () => {
     // Reset password visibility
     setShowPassword(false);
     setShowConfirmPassword(false);
-    
-    // Update the mode
-    setIsSignUp(newMode);
-    
-    // Add a small delay to ensure state updates properly
-    setTimeout(() => {
-      console.log('Toggle completed, new mode:', newMode ? 'signup' : 'signin');
-    }, 50);
   };
 
   const validateForm = () => {
