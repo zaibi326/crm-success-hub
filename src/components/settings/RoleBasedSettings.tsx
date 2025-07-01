@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Crown, Users, Settings, BarChart3, Shield, UserCheck } from 'lucide-react';
 
 interface RoleBasedSettingsProps {
-  userRole: string;
+  userRole: 'Admin' | 'Manager' | 'Employee';
 }
 
 const RoleBasedSettings: React.FC<RoleBasedSettingsProps> = ({ userRole }) => {
@@ -137,12 +137,12 @@ const RoleBasedSettings: React.FC<RoleBasedSettingsProps> = ({ userRole }) => {
     </>
   );
 
-  switch (userRole.toLowerCase()) {
-    case 'admin':
+  switch (userRole) {
+    case 'Admin':
       return <div className="space-y-6">{renderAdminSettings()}</div>;
-    case 'manager':
+    case 'Manager':
       return <div className="space-y-6">{renderManagerSettings()}</div>;
-    case 'employee':
+    case 'Employee':
     default:
       return <div className="space-y-6">{renderEmployeeSettings()}</div>;
   }

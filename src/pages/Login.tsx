@@ -13,45 +13,55 @@ import LoginFooter from '@/components/auth/LoginFooter';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   
   const {
     isSignUp,
+    isResetMode,
     showPassword,
     showConfirmPassword,
     isLoading,
     formData,
     handleInputChange,
     handleToggleMode,
+    handleResetMode,
     handleSubmit,
     setShowPassword,
     setShowConfirmPassword
   } = useLoginLogic();
 
-  // Debug logging
-  console.log('Login component render - isSignUp:', isSignUp);
-
   // Redirect if user is already logged in
   useEffect(() => {
-    if (user) {
-      const redirectPath = getRoleBasedRedirect(user.role);
+    if (user && profile) {
+      const redirectPath = getRoleBasedRedirect(profile.role);
       navigate(redirectPath);
     }
-  }, [user, navigate]);
+  }, [user, profile, navigate]);
+
+  const getHeaderTitle = () => {
+    if (isResetMode) return 'Reset Password';
+    return isSignUp ? 'Create Account' : 'Welcome Back';
+  };
+
+  const getHeaderSubtitle = () => {
+    if (isResetMode) return 'Enter your email to receive reset instructions';
+    return isSignUp ? 'Join our CRM platform today' : 'Sign in to your account';
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-crm-gradient-start via-blue-50 to-crm-gradient-end flex items-center justify-center p-4 relative overflow-hidden">
       <BackgroundDecoration />
       
       <div className="w-full max-w-md">
-        <div 
-          key={`login-form-${isSignUp ? 'signup' : 'signin'}-${Date.now()}`}
-          className="bg-white/25 backdrop-blur-xl border border-white/40 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 p-8 space-y-6 animate-fade-in"
-        >
-          <LoginHeader isSignUp={isSignUp} />
+        <div className="bg-white/25 backdrop-blur-xl border border-white/40 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 p-8 space-y-6 animate-fade-in">
+          <LoginHeader 
+            title={getHeaderTitle()}
+            subtitle={getHeaderSubtitle()}
+          />
 
           <LoginForm
             isSignUp={isSignUp}
+            isResetMode={isResetMode}
             showPassword={showPassword}
             showConfirmPassword={showConfirmPassword}
             formData={formData}
@@ -59,11 +69,13 @@ const Login = () => {
             onToggleConfirmPassword={() => setShowConfirmPassword(!showConfirmPassword)}
             onInputChange={handleInputChange}
             onSubmit={handleSubmit}
+            onResetMode={handleResetMode}
             isLoading={isLoading}
           />
 
           <LoginToggle
             isSignUp={isSignUp}
+            isResetMode={isResetMode}
             isLoading={isLoading}
             onToggleMode={handleToggleMode}
           />

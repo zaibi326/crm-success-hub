@@ -5,11 +5,16 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: string;
+  requiredRole?: 'Admin' | 'Manager' | 'Employee';
+  allowedRoles?: ('Admin' | 'Manager' | 'Employee')[];
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole }) => {
-  const { user, isLoading } = useAuth();
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
+  children, 
+  requiredRole, 
+  allowedRoles 
+}) => {
+  const { user, profile, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -24,18 +29,28 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
     );
   }
 
-  if (!user) {
+  if (!user || !profile) {
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && user.role !== requiredRole) {
+  // Check role-based access
+  if (requiredRole && profile.role !== requiredRole) {
     // Redirect to appropriate dashboard based on user role
     const roleRoutes = {
       'Admin': '/dashboard',
       'Manager': '/campaigns',
       'Employee': '/leads'
     };
-    return <Navigate to={roleRoutes[user.role as keyof typeof roleRoutes] || '/dashboard'} replace />;
+    return <Navigate to={roleRoutes[profile.role] || '/dashboard'} replace />;
+  }
+
+  if (allowedRoles && !allowedRoles.includes(profile.role)) {
+    const roleRoutes = {
+      'Admin': '/dashboard',
+      'Manager': '/campaigns',
+      'Employee': '/leads'
+    };
+    return <Navigate to={roleRoutes[profile.role] || '/dashboard'} replace />;
   }
 
   return <>{children}</>;

@@ -3,31 +3,13 @@ import React from 'react';
 
 interface LoginToggleProps {
   isSignUp: boolean;
+  isResetMode: boolean;
   isLoading: boolean;
   onToggleMode: () => void;
 }
 
-const LoginToggle = ({ isSignUp, isLoading, onToggleMode }: LoginToggleProps) => {
-  console.log('LoginToggle render - isSignUp:', isSignUp);
-
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('LoginToggle button clicked, current mode:', isSignUp ? 'signup' : 'signin');
-    
-    if (isLoading) {
-      console.log('Click ignored - currently loading');
-      return;
-    }
-    
-    console.log('About to call onToggleMode...');
-    onToggleMode();
-    
-    // Verify the call completed
-    setTimeout(() => {
-      console.log('onToggleMode call completed');
-    }, 0);
-  };
+const LoginToggle = ({ isSignUp, isResetMode, isLoading, onToggleMode }: LoginToggleProps) => {
+  if (isResetMode) return null;
 
   return (
     <div className="text-center pt-4 border-t border-white/20">
@@ -36,7 +18,7 @@ const LoginToggle = ({ isSignUp, isLoading, onToggleMode }: LoginToggleProps) =>
       </p>
       <button
         type="button"
-        onClick={handleClick}
+        onClick={onToggleMode}
         className="mt-2 text-crm-primary hover:text-blue-700 font-semibold transition-colors duration-200 hover:underline disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 rounded-md hover:bg-white/10"
         disabled={isLoading}
       >

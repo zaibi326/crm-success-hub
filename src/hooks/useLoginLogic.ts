@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { getRoleBasedRedirect } from '@/utils/roleRedirect';
@@ -10,55 +10,71 @@ export const useLoginLogic = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isResetMode, setIsResetMode] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
+    firstName: '',
+    lastName: '',
     role: 'Employee'
   });
   
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { login, signup } = useAuth();
+  const { login, signup, resetPassword } = useAuth();
 
-  const handleInputChange = useCallback((field: string, value: string) => {
+  const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-  }, []);
+  };
 
   const handleToggleMode = () => {
-    console.log('handleToggleMode called - current isSignUp:', isSignUp);
+    if (isLoading) return;
     
-    // Don't allow toggle if loading
-    if (isLoading) {
-      console.log('Toggle blocked - currently loading');
-      return;
-    }
-    
-    // Simple direct state update
-    const newMode = !isSignUp;
-    console.log('Setting isSignUp to:', newMode);
-    
-    setIsSignUp(newMode);
-    
-    // Verify state change immediately
-    setTimeout(() => {
-      console.log('State after toggle should be:', newMode);
-    }, 0);
-    
-    // Clear form data when switching modes
+    setIsSignUp(!isSignUp);
+    setIsResetMode(false);
     setFormData({
       email: '',
       password: '',
       confirmPassword: '',
+      firstName: '',
+      lastName: '',
       role: 'Employee'
     });
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+  };
+
+  const handleResetMode = () => {
+    if (isLoading) return;
     
-    // Reset password visibility
+    setIsResetMode(!isResetMode);
+    setIsSignUp(false);
+    setFormData({
+      email: '',
+      password: '',
+      confirmPassword: '',
+      firstName: '',
+      lastName: '',
+      role: 'Employee'
+    });
     setShowPassword(false);
     setShowConfirmPassword(false);
   };
 
   const validateForm = () => {
+    if (isResetMode) {
+      if (!formData.email) {
+        toast({
+          title: "Missing Email",
+          description: "Please enter your email address.",
+          variant: "destructive"
+        });
+        return false;
+      }
+      return true;
+    }
+
     if (!formData.email || !formData.password) {
       toast({
         title: "Missing Information",
@@ -111,9 +127,6 @@ export const useLoginLogic = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-    
-    console.log('Form submitted - isSignUp:', isSignUp);
     setIsLoading(true);
 
     try {
@@ -121,30 +134,51 @@ export const useLoginLogic = () => {
         return;
       }
 
-      console.log('Attempting authentication with:', { 
-        email: formData.email, 
-        role: formData.role, 
-        isSignUp 
-      });
+      if (isResetMode) {
+        const result = await resetPassword(formData.email);
+        
+        if (result.success) {
+          toast({
+            title: "Reset Email Sent! 📧",
+            description: "Please check your email for password reset instructions.",
+          });
+          setIsResetMode(false);
+          setFormData(prev => ({ ...prev, email: '' }));
+        } else {
+          toast({
+            title: "Reset Failed",
+            description: result.error || "Please try again.",
+            variant: "destructive"
+          });
+        }
+        return;
+      }
 
       const result = isSignUp 
-        ? await signup(formData.email, formData.password, formData.role)
-        : await login(formData.email, formData.password, formData.role);
-
-      console.log('Authentication result:', result);
+        ? await signup(formData.email, formData.password, formData.role, formData.firstName, formData.lastName)
+        : await login(formData.email, formData.password);
 
       if (result.success) {
-        const redirectPath = getRoleBasedRedirect(formData.role);
-        
-        toast({
-          title: isSignUp ? "Account Created Successfully! 🎉" : "Welcome Back! 👋",
-          description: `Successfully ${isSignUp ? 'created account and signed in' : 'logged in'} as ${formData.role}. Redirecting to your ${formData.role.toLowerCase()} dashboard...`,
-          className: "animate-fade-in"
-        });
+        if (isSignUp && result.error) {
+          // Email confirmation required
+          toast({
+            title: "Account Created! 🎉",
+            description: result.error,
+            className: "animate-fade-in"
+          });
+        } else {
+          const redirectPath = getRoleBasedRedirect(formData.role);
+          
+          toast({
+            title: isSignUp ? "Account Created Successfully! 🎉" : "Welcome Back! 👋",
+            description: `Successfully ${isSignUp ? 'created account' : 'logged in'}. Redirecting to your dashboard...`,
+            className: "animate-fade-in"
+          });
 
-        setTimeout(() => {
-          navigate(redirectPath);
-        }, 1500);
+          setTimeout(() => {
+            navigate(redirectPath);
+          }, 1500);
+        }
       } else {
         toast({
           title: "Authentication Failed",
@@ -166,12 +200,14 @@ export const useLoginLogic = () => {
 
   return {
     isSignUp,
+    isResetMode,
     showPassword,
     showConfirmPassword,
     isLoading,
     formData,
     handleInputChange,
     handleToggleMode,
+    handleResetMode,
     handleSubmit,
     setShowPassword,
     setShowConfirmPassword
