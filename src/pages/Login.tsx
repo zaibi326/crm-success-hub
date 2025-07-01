@@ -28,6 +28,9 @@ const Login = () => {
     setShowConfirmPassword
   } = useLoginLogic();
 
+  // Debug logging
+  console.log('Login component render - isSignUp:', isSignUp);
+
   // Redirect if user is already logged in
   useEffect(() => {
     if (user) {
@@ -41,7 +44,10 @@ const Login = () => {
       <BackgroundDecoration />
       
       <div className="w-full max-w-md">
-        <div className="bg-white/25 backdrop-blur-xl border border-white/40 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 p-8 space-y-6 animate-fade-in">
+        <div 
+          key={`login-form-${isSignUp ? 'signup' : 'signin'}`}
+          className="bg-white/25 backdrop-blur-xl border border-white/40 rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 p-8 space-y-6 animate-fade-in"
+        >
           <LoginHeader isSignUp={isSignUp} />
 
           <LoginForm

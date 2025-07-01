@@ -8,8 +8,12 @@ interface LoginToggleProps {
 }
 
 const LoginToggle = ({ isSignUp, isLoading, onToggleMode }: LoginToggleProps) => {
-  const handleClick = () => {
-    console.log('LoginToggle clicked, current mode:', isSignUp ? 'signup' : 'signin');
+  console.log('LoginToggle render - isSignUp:', isSignUp);
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('LoginToggle button clicked, current mode:', isSignUp ? 'signup' : 'signin');
     onToggleMode();
   };
 

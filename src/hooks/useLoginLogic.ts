@@ -25,15 +25,19 @@ export const useLoginLogic = () => {
   };
 
   const handleToggleMode = () => {
-    console.log('Toggle clicked, current mode:', isSignUp ? 'signup' : 'signin');
+    console.log('Toggle mode called, current isSignUp:', isSignUp);
     
     if (isLoading) {
       console.log('Toggle blocked - currently loading');
       return;
     }
     
-    // Simply toggle the mode
-    setIsSignUp(!isSignUp);
+    // Use functional state update to avoid stale closure issues
+    setIsSignUp(prevIsSignUp => {
+      const newMode = !prevIsSignUp;
+      console.log('Toggling from', prevIsSignUp ? 'signup' : 'signin', 'to', newMode ? 'signup' : 'signin');
+      return newMode;
+    });
     
     // Clear form data when switching modes
     setFormData({
@@ -46,8 +50,6 @@ export const useLoginLogic = () => {
     // Reset password visibility
     setShowPassword(false);
     setShowConfirmPassword(false);
-    
-    console.log('Mode toggled to:', !isSignUp ? 'signup' : 'signin');
   };
 
   const validateForm = () => {
