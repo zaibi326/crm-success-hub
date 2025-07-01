@@ -4,13 +4,16 @@ import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Filter, ChevronDown } from 'lucide-react';
+import { Plus, Search, Filter, ChevronDown, Lock } from 'lucide-react';
 import { CampaignGrid } from './CampaignGrid';
+import { useRoleAccess } from '@/hooks/useRoleAccess';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function CampaignsContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [filterStatus, setFilterStatus] = useState('all');
+  const { canCreateCampaigns, userRole } = useRoleAccess();
 
   return (
     <SidebarInset className="flex-1 overflow-auto">
@@ -20,15 +23,44 @@ export function CampaignsContent() {
             <SidebarTrigger className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-all duration-200" />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Campaigns</h1>
-              <p className="text-sm text-gray-600 mt-0.5">Manage and track your marketing campaigns</p>
+              <p className="text-sm text-gray-600 mt-0.5">
+                {canCreateCampaigns 
+                  ? 'Manage and track your marketing campaigns' 
+                  : 'View assigned campaigns - Contact your manager to create new campaigns'
+                }
+              </p>
             </div>
           </div>
-          <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
-            <Plus className="w-4 h-4 mr-2" />
-            Create Campaign
-          </Button>
+          {canCreateCampaigns ? (
+            <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+              <Plus className="w-4 h-4 mr-2" />
+              Create Campaign
+            </Button>
+          ) : (
+            <div className="flex items-center gap-2 text-gray-500 bg-gray-100 px-4 py-2 rounded-lg">
+              <Lock className="w-4 h-4" />
+              <span className="text-sm">View Only Access</span>
+            </div>
+          )}
         </div>
       </header>
+
+      {/* Role-based access notice for Employees */}
+      {userRole === 'Employee' && (
+        <div className="p-6 bg-yellow-50/50 border-b border-yellow-200/60">
+          <Card className="border-yellow-200 bg-yellow-50">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-yellow-800 text-lg">Limited Access</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-yellow-700 text-sm">
+                As an Employee, you have view-only access to campaigns. You can see campaign details but cannot create, edit, or delete campaigns. 
+                Contact your Manager or Admin for campaign modifications.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
       
       {/* Filters and Search Bar */}
       <div className="p-6 bg-gray-50/50 border-b border-gray-200/60">
@@ -77,7 +109,12 @@ export function CampaignsContent() {
       </div>
       
       <main className="p-6 bg-gradient-to-br from-gray-50/30 to-white">
-        <CampaignGrid searchTerm={searchTerm} sortBy={sortBy} filterStatus={filterStatus} />
+        <CampaignGrid 
+          searchTerm={searchTerm} 
+          sortBy={sortBy} 
+          filterStatus={filterStatus}
+          canEdit={canCreateCampaigns}
+        />
       </main>
     </SidebarInset>
   );

@@ -2,6 +2,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { canAccessRoute, getRoleBasedRedirect } from '@/utils/roleRedirect';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -33,24 +34,24 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/login" replace />;
   }
 
-  // Check role-based access
-  if (requiredRole && profile.role !== requiredRole) {
-    // Redirect to appropriate dashboard based on user role
-    const roleRoutes = {
-      'Admin': '/dashboard',
-      'Manager': '/campaigns',
-      'Employee': '/leads'
-    };
-    return <Navigate to={roleRoutes[profile.role] || '/dashboard'} replace />;
+  const userRole = profile.role;
+  const currentPath = window.location.pathname;
+
+  // Check if user can access current route
+  if (!canAccessRoute(userRole, currentPath)) {
+    const redirectPath = getRoleBasedRedirect(userRole);
+    return <Navigate to={redirectPath} replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(profile.role)) {
-    const roleRoutes = {
-      'Admin': '/dashboard',
-      'Manager': '/campaigns',
-      'Employee': '/leads'
-    };
-    return <Navigate to={roleRoutes[profile.role] || '/dashboard'} replace />;
+  // Check specific role requirements
+  if (requiredRole && userRole !== requiredRole) {
+    const redirectPath = getRoleBasedRedirect(userRole);
+    return <Navigate to={redirectPath} replace />;
+  }
+
+  if (allowedRoles && !allowedRoles.includes(userRole)) {
+    const redirectPath = getRoleBasedRedirect(userRole);
+    return <Navigate to={redirectPath} replace />;
   }
 
   return <>{children}</>;

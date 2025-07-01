@@ -9,6 +9,10 @@ import { LeadsHeader } from './LeadsHeader';
 import { LeadsTabNavigation } from './LeadsTabNavigation';
 import { LeadsOverview } from './LeadsOverview';
 import { LeadsEmptyState } from './LeadsEmptyState';
+import { useRoleAccess } from '@/hooks/useRoleAccess';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Users, Eye, Edit } from 'lucide-react';
 
 interface Lead {
   id: number;
@@ -31,6 +35,7 @@ interface Lead {
   propertyAddress?: string;
   taxLawsuitNumber?: string;
   currentArrears?: number;
+  assignedTo?: string; // For role-based filtering
 }
 
 const mockLeads: Lead[] = [
@@ -53,7 +58,8 @@ const mockLeads: Lead[] = [
     ownerName: 'John Smith',
     propertyAddress: '123 Main St, New York, NY 10001',
     taxLawsuitNumber: 'TL-2024-001',
-    currentArrears: 15000
+    currentArrears: 15000,
+    assignedTo: 'current-user' // Simulating assigned to current user
   },
   {
     id: 2,
@@ -74,33 +80,95 @@ const mockLeads: Lead[] = [
     ownerName: 'Sarah Johnson',
     propertyAddress: '456 Oak Ave, Los Angeles, CA 90210',
     taxLawsuitNumber: 'TL-2024-002',
-    currentArrears: 8500
+    currentArrears: 8500,
+    assignedTo: 'other-user' // Simulating assigned to different user
   }
 ];
 
 export function LeadsContent() {
-  const [leads, setLeads] = useState(mockLeads);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
+  const { canViewAllLeads, userRole, canManageTeam } = useRoleAccess();
+  
+  // Filter leads based on role
+  const getFilteredLeads = () => {
+    if (canViewAllLeads) {
+      return mockLeads; // Admin and Manager see all leads
+    }
+    // Employee only sees assigned leads
+    return mockLeads.filter(lead => lead.assignedTo === 'current-user');
+  };
+
+  const [leads] = useState(getFilteredLeads());
 
   const handleLeadUpdate = (updatedLead: Lead) => {
-    setLeads(leads.map(lead => 
-      lead.id === updatedLead.id ? updatedLead : lead
-    ));
-    setSelectedLead(updatedLead);
+    // Only allow updates if user can view all leads or if lead is assigned to them
+    if (canViewAllLeads || updatedLead.assignedTo === 'current-user') {
+      setSelectedLead(updatedLead);
+    }
   };
 
   const handleUploadComplete = () => {
     setActiveTab('review');
   };
 
+  const getAccessLevel = () => {
+    if (userRole === 'Admin') return 'Full Access';
+    if (userRole === 'Manager') return 'Team Access';
+    return 'Assigned Leads Only';
+  };
+
+  const getAccessBadgeColor = () => {
+    if (userRole === 'Admin') return 'bg-red-100 text-red-800 border-red-200';
+    if (userRole === 'Manager') return 'bg-blue-100 text-blue-800 border-blue-200';
+    return 'bg-green-100 text-green-800 border-green-200';
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
+      {/* Role-based access indicator */}
+      <div className="mb-6">
+        <Card className="border-gray-200">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                Lead Access Level
+              </CardTitle>
+              <Badge className={getAccessBadgeColor()}>
+                {getAccessLevel()}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-4 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <Eye className="w-4 h-4" />
+                <span>Can view: {canViewAllLeads ? 'All leads' : 'Assigned leads only'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Edit className="w-4 h-4" />
+                <span>Can edit: {canViewAllLeads ? 'All leads' : 'Assigned leads only'}</span>
+              </div>
+            </div>
+            {userRole === 'Employee' && (
+              <p className="text-yellow-700 text-sm mt-2 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                You can only view and edit leads assigned to you. Contact your manager to access other leads or request new assignments.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       <LeadsHeader />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <LeadsTabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <LeadsTabNavigation 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab}
+          canUpload={canManageTeam}
+        />
 
         <TabsContent value="overview" className="space-y-6">
           <LeadsOverview
@@ -109,31 +177,39 @@ export function LeadsContent() {
             onSearchChange={setSearchTerm}
             onLeadSelect={setSelectedLead}
             onTabChange={setActiveTab}
+            canViewAll={canViewAllLeads}
           />
         </TabsContent>
 
-        <TabsContent value="upload">
-          <EnhancedCsvUploader onUploadComplete={handleUploadComplete} />
-        </TabsContent>
+        {canManageTeam && (
+          <TabsContent value="upload">
+            <EnhancedCsvUploader onUploadComplete={handleUploadComplete} />
+          </TabsContent>
+        )}
 
-        <TabsContent value="review">
-          <LeadReviewSystem />
-        </TabsContent>
+        {canManageTeam && (
+          <TabsContent value="review">
+            <LeadReviewSystem />
+          </TabsContent>
+        )}
 
         <TabsContent value="details">
           {selectedLead ? (
             <LeadDetailsForm
               lead={selectedLead}
               onSave={handleLeadUpdate}
+              canEdit={canViewAllLeads || selectedLead.assignedTo === 'current-user'}
             />
           ) : (
             <LeadsEmptyState onNavigateToOverview={() => setActiveTab('overview')} />
           )}
         </TabsContent>
 
-        <TabsContent value="ownership">
-          <OwnershipBreakdown />
-        </TabsContent>
+        {canViewAllLeads && (
+          <TabsContent value="ownership">
+            <OwnershipBreakdown />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

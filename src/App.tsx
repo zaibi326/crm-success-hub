@@ -31,7 +31,7 @@ const App = () => (
             <Route 
               path="/dashboard" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['Admin']}>
                   <Dashboard />
                 </ProtectedRoute>
               } 
@@ -39,7 +39,7 @@ const App = () => (
             <Route 
               path="/campaigns" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['Admin', 'Manager']}>
                   <Campaigns />
                 </ProtectedRoute>
               } 
@@ -47,7 +47,7 @@ const App = () => (
             <Route 
               path="/leads" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['Admin', 'Manager', 'Employee']}>
                   <Leads />
                 </ProtectedRoute>
               } 
@@ -55,7 +55,7 @@ const App = () => (
             <Route 
               path="/settings" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['Admin', 'Manager', 'Employee']}>
                   <Settings />
                 </ProtectedRoute>
               } 
@@ -63,7 +63,7 @@ const App = () => (
             <Route 
               path="/calendar" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['Admin', 'Manager', 'Employee']}>
                   <Calendar />
                 </ProtectedRoute>
               } 
@@ -71,7 +71,7 @@ const App = () => (
             <Route 
               path="/notifications" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['Admin', 'Manager', 'Employee']}>
                   <Notifications />
                 </ProtectedRoute>
               } 

@@ -3,6 +3,7 @@ import React from 'react';
 import { Home, Users, Activity, Settings, Bell, Calendar } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { getVisibleNavigationItems } from '@/utils/roleRedirect';
 import {
   Sidebar,
   SidebarContent,
@@ -17,38 +18,14 @@ import {
 } from '@/components/ui/sidebar';
 import { Badge } from '@/components/ui/badge';
 
-const navigationItems = [
-  {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: Home,
-  },
-  {
-    title: "Campaigns",
-    url: "/campaigns",
-    icon: Activity,
-  },
-  {
-    title: "Leads",
-    url: "/leads",
-    icon: Users,
-  },
-  {
-    title: "Calendar",
-    url: "/calendar",
-    icon: Calendar,
-  },
-  {
-    title: "Notifications",
-    url: "/notifications",
-    icon: Bell,
-  },
-  {
-    title: "Settings",
-    url: "/settings",
-    icon: Settings,
-  },
-];
+const iconMap: Record<string, React.ComponentType<any>> = {
+  '/dashboard': Home,
+  '/campaigns': Activity,
+  '/leads': Users,
+  '/calendar': Calendar,
+  '/notifications': Bell,
+  '/settings': Settings,
+};
 
 export function AppSidebar() {
   const location = useLocation();
@@ -77,6 +54,8 @@ export function AppSidebar() {
     return user?.email?.split('@')[0] || 'User';
   };
 
+  const visibleNavigationItems = getVisibleNavigationItems(profile?.role || 'Employee');
+
   return (
     <Sidebar className="bg-gradient-to-b from-[#111827] to-[#1f2937] border-r-0 shadow-2xl">
       <SidebarHeader className="p-6 border-b border-gray-700/50">
@@ -98,8 +77,10 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent className="px-2">
             <SidebarMenu className="space-y-1">
-              {navigationItems.map((item) => {
+              {visibleNavigationItems.map((item) => {
                 const isActive = location.pathname === item.url;
+                const IconComponent = iconMap[item.url] || Home;
+                
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
@@ -109,7 +90,7 @@ export function AppSidebar() {
                       }`}
                     >
                       <Link to={item.url} className="flex items-center gap-4">
-                        <item.icon className={`w-5 h-5 text-gray-400 group-hover:text-white group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.5)] transition-all duration-300 ${
+                        <IconComponent className={`w-5 h-5 text-gray-400 group-hover:text-white group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.5)] transition-all duration-300 ${
                           isActive ? 'text-blue-400' : ''
                         }`} />
                         <span className={`font-medium group-hover:translate-x-1 transition-transform duration-300 ${

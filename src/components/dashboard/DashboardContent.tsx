@@ -5,7 +5,11 @@ import { DashboardStats } from './DashboardStats';
 import { LeadsPieChart } from './LeadsPieChart';
 import { ActivityFeed } from './ActivityFeed';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Users, Settings, BarChart3, Shield } from 'lucide-react';
 import { getRoleDashboardTitle } from '@/utils/roleRedirect';
+import { useRoleAccess } from '@/hooks/useRoleAccess';
 
 interface DashboardContentProps {
   userRole: string;
@@ -13,6 +17,7 @@ interface DashboardContentProps {
 
 export function DashboardContent({ userRole }: DashboardContentProps) {
   const dashboardTitle = getRoleDashboardTitle(userRole);
+  const { canManageUsers, canManageTeam, canViewAnalytics } = useRoleAccess();
   
   const getRoleBadgeColor = (role: string) => {
     switch (role.toLowerCase()) {
@@ -47,13 +52,69 @@ export function DashboardContent({ userRole }: DashboardContentProps) {
       </header>
       
       <main className="p-6 space-y-8">
+        {/* Admin-only Management Section */}
+        {canManageUsers && (
+          <div className="animate-fade-in-up">
+            <Card className="border-red-200 bg-red-50/50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-red-800">
+                  <Shield className="w-5 h-5" />
+                  Admin Management
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Button variant="outline" className="flex items-center gap-2 border-red-200 text-red-700 hover:bg-red-100">
+                    <Users className="w-4 h-4" />
+                    Manage Users
+                  </Button>
+                  <Button variant="outline" className="flex items-center gap-2 border-red-200 text-red-700 hover:bg-red-100">
+                    <Settings className="w-4 h-4" />
+                    System Settings
+                  </Button>
+                  <Button variant="outline" className="flex items-center gap-2 border-red-200 text-red-700 hover:bg-red-100">
+                    <BarChart3 className="w-4 h-4" />
+                    Full Analytics
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Manager-only Team Management */}
+        {canManageTeam && !canManageUsers && (
+          <div className="animate-fade-in-up">
+            <Card className="border-blue-200 bg-blue-50/50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-blue-800">
+                  <Users className="w-5 h-5" />
+                  Team Management
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Button variant="outline" className="flex items-center gap-2 border-blue-200 text-blue-700 hover:bg-blue-100">
+                    <Users className="w-4 h-4" />
+                    Team Overview
+                  </Button>
+                  <Button variant="outline" className="flex items-center gap-2 border-blue-200 text-blue-700 hover:bg-blue-100">
+                    <BarChart3 className="w-4 h-4" />
+                    Team Analytics
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         <div className="animate-fade-in-up">
           <DashboardStats userRole={userRole} />
         </div>
         
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 animate-slide-in-right">
           <div className="space-y-8">
-            <LeadsPieChart />
+            {canViewAnalytics && <LeadsPieChart />}
           </div>
           <div className="space-y-8">
             <ActivityFeed userRole={userRole} />
