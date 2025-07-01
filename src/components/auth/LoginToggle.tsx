@@ -20,6 +20,7 @@ const LoginToggle = ({ isSignUp, isLoading, onToggleMode }: LoginToggleProps) =>
       return;
     }
     
+    console.log('Calling onToggleMode...');
     onToggleMode();
   };
 
