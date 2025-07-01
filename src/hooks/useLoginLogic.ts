@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -31,11 +30,15 @@ export const useLoginLogic = () => {
       e.stopPropagation();
     }
     
-    if (isLoading) return;
+    if (isLoading) {
+      console.log('Toggle blocked - currently loading');
+      return;
+    }
     
-    console.log('Toggling mode from', isSignUp ? 'signup' : 'signin', 'to', !isSignUp ? 'signup' : 'signin');
+    const newMode = !isSignUp;
+    console.log('Toggling mode from', isSignUp ? 'signup' : 'signin', 'to', newMode ? 'signup' : 'signin');
     
-    setIsSignUp(prev => !prev);
+    setIsSignUp(newMode);
     setFormData({
       email: '',
       password: '',
@@ -44,6 +47,11 @@ export const useLoginLogic = () => {
     });
     setShowPassword(false);
     setShowConfirmPassword(false);
+    
+    // Add a small delay to ensure state updates properly
+    setTimeout(() => {
+      console.log('Toggle completed, new mode:', newMode ? 'signup' : 'signin');
+    }, 100);
   };
 
   const validateForm = () => {
