@@ -36,16 +36,29 @@ const Login = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleToggleMode = () => {
+    setIsSignUp(!isSignUp);
+    // Reset form when switching modes
+    setFormData({
+      email: '',
+      password: '',
+      confirmPassword: '',
+      role: 'Employee'
+    });
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // Validation for sign up
-      if (isSignUp && formData.password !== formData.confirmPassword) {
+      // Basic validation
+      if (!formData.email || !formData.password) {
         toast({
-          title: "Password Mismatch",
-          description: "Passwords do not match. Please try again.",
+          title: "Missing Information",
+          description: "Please fill in all required fields.",
           variant: "destructive"
         });
         return;
@@ -60,10 +73,48 @@ const Login = () => {
         return;
       }
 
+      // Validation for sign up
+      if (isSignUp) {
+        if (!formData.confirmPassword) {
+          toast({
+            title: "Missing Confirmation",
+            description: "Please confirm your password.",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+          toast({
+            title: "Password Mismatch",
+            description: "Passwords do not match. Please try again.",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        if (!formData.role) {
+          toast({
+            title: "Missing Role",
+            description: "Please select your role.",
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+
+      console.log('Attempting authentication with:', { 
+        email: formData.email, 
+        role: formData.role, 
+        isSignUp 
+      });
+
       // Call appropriate auth function
       const result = isSignUp 
         ? await signup(formData.email, formData.password, formData.role)
         : await login(formData.email, formData.password, formData.role);
+
+      console.log('Authentication result:', result);
 
       if (result.success) {
         const redirectPath = getRoleBasedRedirect(formData.role);
@@ -86,6 +137,7 @@ const Login = () => {
         });
       }
     } catch (error) {
+      console.error('Authentication error:', error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
@@ -123,7 +175,7 @@ const Login = () => {
               {isSignUp ? 'Already have an account?' : "Don't have an account?"}
               <button
                 type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
+                onClick={handleToggleMode}
                 className="ml-2 text-crm-primary hover:text-blue-700 font-semibold transition-colors duration-200 hover:underline"
                 disabled={isLoading}
               >

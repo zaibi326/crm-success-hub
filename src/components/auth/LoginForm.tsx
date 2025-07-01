@@ -3,7 +3,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Eye, EyeClosed, Lock, Mail } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Eye, EyeClosed, Lock, Mail, User } from 'lucide-react';
 import SocialLogin from './SocialLogin';
 
 interface FormData {
@@ -113,17 +114,23 @@ const LoginForm = ({
       {/* Role selection */}
       <div className="space-y-2">
         <Label htmlFor="role" className="text-gray-700 font-medium">Role</Label>
-        <select
-          id="role"
-          value={formData.role}
-          onChange={(e) => onInputChange('role', e.target.value)}
-          className="w-full px-4 py-3 bg-white/50 border border-white/30 rounded-xl backdrop-blur-sm focus:bg-white/70 focus:outline-none focus:ring-2 focus:ring-crm-primary transition-all shadow-lg hover:shadow-xl focus:shadow-xl h-12"
-          disabled={isLoading}
-        >
-          <option value="Employee">Employee</option>
-          <option value="Manager">Manager</option>
-          <option value="Admin">Admin</option>
-        </select>
+        <div className="relative">
+          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 z-10" />
+          <Select
+            value={formData.role}
+            onValueChange={(value) => onInputChange('role', value)}
+            disabled={isLoading}
+          >
+            <SelectTrigger className="pl-10 bg-white/50 border-white/30 backdrop-blur-sm focus:bg-white/70 transition-all shadow-lg hover:shadow-xl focus:shadow-xl rounded-xl h-12">
+              <SelectValue placeholder="Select your role" />
+            </SelectTrigger>
+            <SelectContent className="bg-white/95 backdrop-blur-xl border-white/40 shadow-2xl">
+              <SelectItem value="Employee">Employee</SelectItem>
+              <SelectItem value="Manager">Manager</SelectItem>
+              <SelectItem value="Admin">Admin</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Submit button */}
