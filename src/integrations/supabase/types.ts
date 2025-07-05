@@ -9,6 +9,130 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      custom_app_fields: {
+        Row: {
+          app_id: string
+          created_at: string
+          field_type: string
+          id: string
+          is_required: boolean | null
+          label: string
+          name: string
+          options: Json | null
+          position: number
+          validation_rules: Json | null
+        }
+        Insert: {
+          app_id: string
+          created_at?: string
+          field_type: string
+          id?: string
+          is_required?: boolean | null
+          label: string
+          name: string
+          options?: Json | null
+          position?: number
+          validation_rules?: Json | null
+        }
+        Update: {
+          app_id?: string
+          created_at?: string
+          field_type?: string
+          id?: string
+          is_required?: boolean | null
+          label?: string
+          name?: string
+          options?: Json | null
+          position?: number
+          validation_rules?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_app_fields_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "custom_apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_app_records: {
+        Row: {
+          app_id: string
+          created_at: string
+          created_by: string
+          data: Json
+          id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          app_id: string
+          created_at?: string
+          created_by: string
+          data?: Json
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          app_id?: string
+          created_at?: string
+          created_by?: string
+          data?: Json
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_app_records_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "custom_apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_apps: {
+        Row: {
+          color: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       password_reset_tokens: {
         Row: {
           created_at: string | null
@@ -65,6 +189,104 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      workflow_executions: {
+        Row: {
+          completed_at: string | null
+          error_message: string | null
+          execution_data: Json | null
+          id: string
+          record_id: string | null
+          started_at: string
+          status: string
+          workflow_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          error_message?: string | null
+          execution_data?: Json | null
+          id?: string
+          record_id?: string | null
+          started_at?: string
+          status: string
+          workflow_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          error_message?: string | null
+          execution_data?: Json | null
+          id?: string
+          record_id?: string | null
+          started_at?: string
+          status?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_executions_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "custom_app_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_executions_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflows: {
+        Row: {
+          actions: Json
+          app_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          trigger_conditions: Json | null
+          trigger_type: string
+          updated_at: string
+        }
+        Insert: {
+          actions?: Json
+          app_id: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          trigger_conditions?: Json | null
+          trigger_type: string
+          updated_at?: string
+        }
+        Update: {
+          actions?: Json
+          app_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          trigger_conditions?: Json | null
+          trigger_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflows_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "custom_apps"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

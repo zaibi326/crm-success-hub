@@ -20,6 +20,7 @@ import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 import OrganizationManagement from "./pages/OrganizationManagement";
 import CommunicationCenter from "./pages/CommunicationCenter";
+import AppBuilder from "./pages/AppBuilder";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,15 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={['Admin', 'Manager', 'Employee']}>
                   <Leads />
+                </ProtectedRoute>
+              } 
+            />
+            {/* App Builder - Admin and Manager only */}
+            <Route 
+              path="/app-builder" 
+              element={
+                <ProtectedRoute allowedRoles={['Admin', 'Manager']}>
+                  <AppBuilder />
                 </ProtectedRoute>
               } 
             />
