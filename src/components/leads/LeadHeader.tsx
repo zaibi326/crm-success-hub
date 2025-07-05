@@ -3,7 +3,8 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Building } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Building, ArrowLeft } from 'lucide-react';
 
 interface Lead {
   id: number;
@@ -25,9 +26,10 @@ interface Lead {
 
 interface LeadHeaderProps {
   lead: Lead;
+  onBack: () => void;
 }
 
-export function LeadHeader({ lead }: LeadHeaderProps) {
+export function LeadHeader({ lead, onBack }: LeadHeaderProps) {
   const getStatusColor = (status: Lead['status']) => {
     switch (status) {
       case 'HOT':
@@ -57,6 +59,17 @@ export function LeadHeader({ lead }: LeadHeaderProps) {
   return (
     <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-r from-white to-gray-50">
       <CardHeader className="pb-4">
+        <div className="flex items-start gap-4">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onBack}
+            className="flex items-center gap-2 hover:bg-gray-100"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Leads
+          </Button>
+        </div>
         <div className="flex items-start gap-4">
           <Avatar className="w-16 h-16 border-4 border-white shadow-lg">
             <AvatarImage src={lead.avatar} alt={lead.name} />

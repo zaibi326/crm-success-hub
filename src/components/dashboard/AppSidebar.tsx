@@ -1,7 +1,18 @@
+
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Home, Users, Calendar, Bell, Settings, Activity, Target, Phone, Building2 } from 'lucide-react';
-import { Sidebar, SidebarTrigger, SidebarContent, SidebarItem, SidebarGroup, SidebarFooter, SidebarBadge } from "@/components/ui/sidebar"
+import { 
+  Sidebar, 
+  SidebarTrigger, 
+  SidebarContent, 
+  SidebarGroup, 
+  SidebarFooter,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarMenuBadge
+} from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { useAuth } from '@/contexts/AuthContext';
@@ -80,19 +91,23 @@ export function AppSidebar() {
     <Sidebar className="bg-white/95 backdrop-blur-sm border-r border-gray-200/50 shadow-xl">
       <SidebarContent>
         <SidebarGroup>
-          {navigationItems.map((item) => (
-            <SidebarItem
-              key={item.title}
-              title={item.title}
-              href={item.url}
-              icon={item.icon}
-              active={location.pathname === item.url}
-            >
-              {item.badge && (
-                <SidebarBadge className={item.badgeColor}>{item.badge}</SidebarBadge>
-              )}
-            </SidebarItem>
-          ))}
+          <SidebarMenu>
+            {navigationItems.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton asChild isActive={location.pathname === item.url}>
+                  <a href={item.url} className="flex items-center gap-2">
+                    <item.icon className="w-4 h-4" />
+                    <span>{item.title}</span>
+                    {item.badge && (
+                      <SidebarMenuBadge className={item.badgeColor}>
+                        {item.badge}
+                      </SidebarMenuBadge>
+                    )}
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>

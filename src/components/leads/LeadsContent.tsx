@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -39,7 +40,7 @@ interface Lead {
   tags: string[];
 }
 
-const mockLeads: Lead[] = [
+const initialMockLeads: Lead[] = [
   {
     id: 1,
     name: "John Smith",
@@ -145,7 +146,7 @@ export function LeadsContent() {
   const [sortBy, setSortBy] = useState('name');
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [mockLeads, setMockLeads] = useState<Lead[]>(mockLeads);
+  const [mockLeads, setMockLeads] = useState<Lead[]>(initialMockLeads);
   const { canViewAllLeads } = useRoleAccess();
 
   const filteredLeads = mockLeads.filter(lead => {
