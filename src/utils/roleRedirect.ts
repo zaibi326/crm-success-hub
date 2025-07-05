@@ -34,6 +34,8 @@ export const canAccessRoute = (userRole: string, route: string): boolean => {
     '/dashboard': ['Admin'],
     '/campaigns': ['Admin', 'Manager'],
     '/leads': ['Admin', 'Manager', 'Employee'],
+    '/communication': ['Admin', 'Manager', 'Employee'],
+    '/organizations': ['Admin'],
     '/settings': ['Admin', 'Manager', 'Employee'],
     '/notifications': ['Admin', 'Manager', 'Employee'],
     '/calendar': ['Admin', 'Manager', 'Employee']
@@ -48,6 +50,8 @@ export const getVisibleNavigationItems = (userRole: string) => {
     { title: "Dashboard", url: "/dashboard", requiredRoles: ['Admin'] },
     { title: "Campaigns", url: "/campaigns", requiredRoles: ['Admin', 'Manager'] },
     { title: "Leads", url: "/leads", requiredRoles: ['Admin', 'Manager', 'Employee'] },
+    { title: "Communication", url: "/communication", requiredRoles: ['Admin', 'Manager', 'Employee'] },
+    { title: "Organizations", url: "/organizations", requiredRoles: ['Admin'] },
     { title: "Calendar", url: "/calendar", requiredRoles: ['Admin', 'Manager', 'Employee'] },
     { title: "Notifications", url: "/notifications", requiredRoles: ['Admin', 'Manager', 'Employee'] },
     { title: "Settings", url: "/settings", requiredRoles: ['Admin', 'Manager', 'Employee'] }

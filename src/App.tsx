@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,6 +18,8 @@ import SystemSettings from "./pages/SystemSettings";
 import FullAnalytics from "./pages/FullAnalytics";
 import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
+import OrganizationManagement from "./pages/OrganizationManagement";
+import CommunicationCenter from "./pages/CommunicationCenter";
 
 const queryClient = new QueryClient();
 
@@ -104,6 +105,24 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={['Admin']}>
                   <FullAnalytics />
+                </ProtectedRoute>
+              } 
+            />
+            {/* Communication Center - All authenticated users */}
+            <Route 
+              path="/communication" 
+              element={
+                <ProtectedRoute allowedRoles={['Admin', 'Manager', 'Employee']}>
+                  <CommunicationCenter />
+                </ProtectedRoute>
+              } 
+            />
+            {/* Organization Management - Admin only */}
+            <Route 
+              path="/organizations" 
+              element={
+                <ProtectedRoute allowedRoles={['Admin']}>
+                  <OrganizationManagement />
                 </ProtectedRoute>
               } 
             />
