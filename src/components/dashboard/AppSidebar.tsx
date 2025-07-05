@@ -34,13 +34,13 @@ export function AppSidebar() {
   const getRoleBadgeColor = (role: string) => {
     switch (role.toLowerCase()) {
       case 'admin':
-        return 'bg-red-500/20 text-red-300 border-red-400/30';
+        return 'bg-gradient-to-r from-red-500/20 to-pink-500/20 text-red-200 border-red-400/40';
       case 'manager':
-        return 'bg-blue-500/20 text-blue-300 border-blue-400/30';
+        return 'bg-gradient-to-r from-blue-500/20 to-indigo-500/20 text-blue-200 border-blue-400/40';
       case 'employee':
-        return 'bg-green-500/20 text-green-300 border-green-400/30';
+        return 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-200 border-green-400/40';
       default:
-        return 'bg-gray-500/20 text-gray-300 border-gray-400/30';
+        return 'bg-gradient-to-r from-gray-500/20 to-slate-500/20 text-gray-200 border-gray-400/40';
     }
   };
 
@@ -57,26 +57,28 @@ export function AppSidebar() {
   const visibleNavigationItems = getVisibleNavigationItems(profile?.role || 'Employee');
 
   return (
-    <Sidebar className="bg-gradient-to-b from-[#111827] to-[#1f2937] border-r-0 shadow-2xl">
-      <SidebarHeader className="p-6 border-b border-gray-700/50">
+    <Sidebar className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 border-r-0 shadow-2xl">
+      <SidebarHeader className="p-6 border-b border-purple-500/20 bg-gradient-to-r from-purple-900/30 to-blue-900/30">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-crm-primary to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-            <Activity className="w-6 h-6 text-white drop-shadow-sm" />
+          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 via-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-2xl ring-2 ring-purple-400/30">
+            <span className="text-white font-bold text-lg drop-shadow-lg">H</span>
           </div>
           <div>
-            <span className="text-white font-bold text-xl tracking-tight">CRM Pro</span>
-            <div className="text-xs text-gray-400 mt-0.5">Professional Edition</div>
+            <span className="text-white font-bold text-xl tracking-tight bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+              Heirlogic CRM
+            </span>
+            <div className="text-xs text-purple-300 mt-0.5 opacity-90">Professional Edition</div>
           </div>
         </div>
       </SidebarHeader>
       
-      <SidebarContent className="py-4">
+      <SidebarContent className="py-4 bg-gradient-to-b from-transparent to-slate-900/20">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-gray-400 text-xs uppercase tracking-wider px-4 py-3 font-semibold">
+          <SidebarGroupLabel className="text-purple-300 text-xs uppercase tracking-wider px-4 py-3 font-semibold">
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent className="px-2">
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu className="space-y-2">
               {visibleNavigationItems.map((item) => {
                 const isActive = location.pathname === item.url;
                 const IconComponent = iconMap[item.url] || Home;
@@ -85,16 +87,16 @@ export function AppSidebar() {
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
                       asChild 
-                      className={`text-gray-300 hover:bg-gradient-to-r hover:from-gray-700/50 hover:to-gray-600/50 hover:text-white group transition-all duration-300 rounded-lg mx-2 px-4 py-3 ${
-                        isActive ? 'bg-gradient-to-r from-blue-600/20 to-blue-500/20 text-white border-r-2 border-blue-400' : ''
+                      className={`text-gray-200 hover:bg-gradient-to-r hover:from-purple-600/30 hover:to-blue-600/30 hover:text-white group transition-all duration-300 rounded-xl mx-2 px-4 py-3 hover:shadow-lg hover:shadow-purple-500/20 ${
+                        isActive ? 'bg-gradient-to-r from-purple-600/40 to-blue-600/40 text-white shadow-lg shadow-purple-500/25 border border-purple-400/30' : ''
                       }`}
                     >
                       <Link to={item.url} className="flex items-center gap-4">
-                        <IconComponent className={`w-5 h-5 text-gray-400 group-hover:text-white group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.5)] transition-all duration-300 ${
-                          isActive ? 'text-blue-400' : ''
+                        <IconComponent className={`w-5 h-5 group-hover:text-white group-hover:scale-110 group-hover:drop-shadow-[0_0_12px_rgba(168,85,247,0.8)] transition-all duration-300 ${
+                          isActive ? 'text-purple-300 drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]' : 'text-gray-400'
                         }`} />
-                        <span className={`font-medium group-hover:translate-x-1 transition-transform duration-300 ${
-                          isActive ? 'text-white' : ''
+                        <span className={`font-medium group-hover:translate-x-1 transition-all duration-300 ${
+                          isActive ? 'text-white font-semibold' : ''
                         }`}>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -106,17 +108,17 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="p-4 border-t border-gray-700/50 bg-gradient-to-r from-gray-800/50 to-gray-700/50">
+      <SidebarFooter className="p-4 border-t border-purple-500/20 bg-gradient-to-r from-slate-800/60 to-purple-800/40">
         <div className="flex items-center gap-3 text-white">
-          <div className="w-10 h-10 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full flex items-center justify-center shadow-lg">
-            <Users className="w-5 h-5 text-gray-300" />
+          <div className="w-12 h-12 bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 rounded-full flex items-center justify-center shadow-xl ring-2 ring-purple-400/40">
+            <Users className="w-6 h-6 text-white" />
           </div>
           <div className="text-sm flex-1">
-            <div className="font-semibold text-gray-100">
+            <div className="font-semibold text-gray-100 text-base">
               {getUserDisplayName()}
             </div>
             <div className="flex items-center gap-2 mt-1">
-              <Badge className={`text-xs ${getRoleBadgeColor(profile?.role || 'Employee')}`}>
+              <Badge className={`text-xs font-medium shadow-lg ${getRoleBadgeColor(profile?.role || 'Employee')}`}>
                 {profile?.role || 'Employee'}
               </Badge>
             </div>

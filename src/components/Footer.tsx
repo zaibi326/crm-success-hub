@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Facebook, Instagram, Linkedin, Youtube } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -10,13 +11,13 @@ const Footer = () => {
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-crm-primary rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">C</span>
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-sm">H</span>
               </div>
-              <span className="font-bold text-xl">SmartCRM</span>
+              <span className="font-bold text-xl">Heirlogic</span>
             </div>
             <p className="text-gray-400 leading-relaxed">
-              The smarter CRM solution that helps sales teams convert more leads and close deals faster.
+              The intelligent CRM solution that helps sales teams convert more leads and close deals faster.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
@@ -66,6 +67,7 @@ const Footer = () => {
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Community</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Training</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Status</a></li>
+              <li><Link to="/pricing" className="text-gray-400 hover:text-white transition-colors">Pricing</Link></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Contact Support</a></li>
             </ul>
           </div>
@@ -75,7 +77,7 @@ const Footer = () => {
         <div className="border-t border-gray-800 pt-8 mt-12">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-gray-400 text-sm mb-4 md:mb-0">
-              © 2024 SmartCRM. All rights reserved.
+              © 2024 Heirlogic. All rights reserved.
             </div>
             <div className="flex space-x-6 text-sm">
               <a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>

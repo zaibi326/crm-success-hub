@@ -14,10 +14,10 @@ const Navbar = () => {
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <Link to="/" className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-crm-primary rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">C</span>
+                <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-sm">H</span>
                 </div>
-                <span className="font-bold text-xl text-gray-900">SmartCRM</span>
+                <span className="font-bold text-xl text-gray-900">Heirlogic</span>
               </Link>
             </div>
           </div>
@@ -25,19 +25,19 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
-              <Link to="/" className="text-gray-900 hover:text-crm-primary px-3 py-2 text-sm font-medium transition-colors">
+              <Link to="/" className="text-gray-900 hover:text-purple-600 px-3 py-2 text-sm font-medium transition-colors">
                 Home
               </Link>
-              <a href="#" className="text-gray-600 hover:text-crm-primary px-3 py-2 text-sm font-medium transition-colors">
+              <a href="#" className="text-gray-600 hover:text-purple-600 px-3 py-2 text-sm font-medium transition-colors">
                 CRM
               </a>
-              <a href="#" className="text-gray-600 hover:text-crm-primary px-3 py-2 text-sm font-medium transition-colors">
+              <a href="#" className="text-gray-600 hover:text-purple-600 px-3 py-2 text-sm font-medium transition-colors">
                 Features
               </a>
-              <a href="#" className="text-gray-600 hover:text-crm-primary px-3 py-2 text-sm font-medium transition-colors">
+              <Link to="/pricing" className="text-gray-600 hover:text-purple-600 px-3 py-2 text-sm font-medium transition-colors">
                 Pricing
-              </a>
-              <a href="#" className="text-gray-600 hover:text-crm-primary px-3 py-2 text-sm font-medium transition-colors">
+              </Link>
+              <a href="#" className="text-gray-600 hover:text-purple-600 px-3 py-2 text-sm font-medium transition-colors">
                 Contact
               </a>
             </div>
@@ -46,7 +46,7 @@ const Navbar = () => {
           {/* CTA Button */}
           <div className="hidden md:block">
             <Link to="/login">
-              <Button className="bg-crm-primary hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105">
+              <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg">
                 Start Free Trial
               </Button>
             </Link>
@@ -72,10 +72,10 @@ const Navbar = () => {
               <Link to="/" className="text-gray-900 block px-3 py-2 text-base font-medium">Home</Link>
               <a href="#" className="text-gray-600 block px-3 py-2 text-base font-medium">CRM</a>
               <a href="#" className="text-gray-600 block px-3 py-2 text-base font-medium">Features</a>
-              <a href="#" className="text-gray-600 block px-3 py-2 text-base font-medium">Pricing</a>
+              <Link to="/pricing" className="text-gray-600 block px-3 py-2 text-base font-medium">Pricing</Link>
               <a href="#" className="text-gray-600 block px-3 py-2 text-base font-medium">Contact</a>
               <Link to="/login">
-                <Button className="bg-crm-primary hover:bg-blue-700 text-white w-full mt-4">
+                <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white w-full mt-4">
                   Start Free Trial
                 </Button>
               </Link>
