@@ -6,13 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Flame, Thermometer, Snowflake, X, TrendingUp } from 'lucide-react';
 
 interface LeadStatusButtonsProps {
-  leadId: number;
   currentStatus: 'HOT' | 'WARM' | 'COLD' | 'PASS';
   onStatusChange: (status: 'HOT' | 'WARM' | 'COLD' | 'PASS') => void;
   disabled?: boolean;
 }
 
-export function LeadStatusButtons({ leadId, currentStatus, onStatusChange, disabled = false }: LeadStatusButtonsProps) {
+export function LeadStatusButtons({ currentStatus, onStatusChange, disabled = false }: LeadStatusButtonsProps) {
   const statusOptions = [
     {
       status: 'HOT' as const,

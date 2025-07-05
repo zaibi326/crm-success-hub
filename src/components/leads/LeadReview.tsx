@@ -1,12 +1,10 @@
 
-import React, { useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { LeadHeader } from './LeadHeader';
-import { LeadContactInfo } from './LeadContactInfo';
-import { LeadDetails } from './LeadDetails';
-import { LeadInsights } from './LeadInsights';
-import { ReviewActions } from './ReviewActions';
-import { ReviewProgress } from './ReviewProgress';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Building, Phone, Mail, MapPin } from 'lucide-react';
 
 interface Lead {
   id: number;
@@ -26,129 +24,98 @@ interface Lead {
   tags: string[];
 }
 
-const mockLeads: Lead[] = [
-  {
-    id: 1,
-    name: "Sarah Johnson",
-    email: "sarah.j@techcorp.com",
-    phone: "+1 (555) 123-4567",
-    company: "TechCorp Solutions",
-    position: "VP of Marketing",
-    address: "123 Innovation Drive",
-    city: "San Francisco",
-    state: "CA",
-    zip: "94105",
-    status: "HOT",
-    score: 92,
-    notes: "Recently visited pricing page multiple times. Showed high engagement with product demo. Ready for enterprise package discussion.",
-    tags: ["Enterprise", "Decision Maker", "High Intent"],
-    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=150&h=150&fit=crop&crop=face"
-  },
-  {
-    id: 2,
-    name: "Michael Chen",
-    email: "m.chen@innovate.co",
-    phone: "+1 (555) 987-6543",
-    company: "Innovate Co",
-    position: "Director of Sales",
-    address: "456 Business Blvd",
-    city: "Austin",
-    state: "TX",
-    zip: "73301",
-    status: "WARM",
-    score: 78,
-    notes: "Downloaded whitepaper and attended webinar. Medium company size, good fit for professional plan. Interested in team features.",
-    tags: ["Professional Plan", "Team Features", "Engaged"],
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
-  },
-  {
-    id: 3,
-    name: "Emma Rodriguez",
-    email: "emma@startup.io",
-    phone: "+1 (555) 456-7890",
-    company: "StartupIO",
-    position: "Founder",
-    address: "789 Startup Street",
-    city: "Denver",
-    state: "CO",
-    zip: "80202",
-    status: "COLD",
-    score: 45,
-    notes: "Early stage startup, limited budget. May be good for basic plan in future. Keep for nurturing campaign.",
-    tags: ["Startup", "Budget Conscious", "Future Potential"],
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face"
-  }
-];
+interface LeadReviewProps {
+  lead: Lead;
+  onStatusChange: (status: 'HOT' | 'WARM' | 'COLD' | 'PASS') => void;
+}
 
-export function LeadReview() {
-  const [currentLeadIndex, setCurrentLeadIndex] = useState(0);
-  const [leads, setLeads] = useState(mockLeads);
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-
-  const currentLead = leads[currentLeadIndex];
-
-  const handleAction = async (action: 'keep' | 'pass') => {
-    if (!currentLead) return;
-
-    setIsLoading(true);
-
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Update lead status if passed
-    if (action === 'pass') {
-      const updatedLeads = leads.map(lead =>
-        lead.id === currentLead.id ? { ...lead, status: 'PASS' as const } : lead
-      );
-      setLeads(updatedLeads);
-    }
-
-    toast({
-      title: action === 'keep' ? "Lead Kept! 🎉" : "Lead Passed",
-      description: `${currentLead.name} has been ${action === 'keep' ? 'added to your pipeline' : 'marked as passed'}.`,
-    });
-
-    // Move to next lead with animation
-    if (currentLeadIndex < leads.length - 1) {
-      setCurrentLeadIndex(currentLeadIndex + 1);
-    } else {
-      toast({
-        title: "Review Complete! ✅",
-        description: "You've reviewed all available leads! Great work!",
-      });
-    }
-
-    setIsLoading(false);
-  };
-
-  if (!currentLead) {
-    return (
-      <div className="text-center py-12">
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No leads to review</h3>
-        <p className="text-gray-600">Upload a CSV file to start reviewing leads.</p>
-      </div>
-    );
-  }
-
+export function LeadReview({ lead, onStatusChange }: LeadReviewProps) {
   return (
-    <div className={`grid grid-cols-1 lg:grid-cols-3 gap-8 transition-all duration-500 ${isLoading ? 'opacity-50' : 'opacity-100'}`}>
-      {/* Left Column - Lead Information */}
-      <div className="lg:col-span-2 space-y-6">
-        <LeadHeader lead={currentLead} />
-        <LeadContactInfo lead={currentLead} />
-        <LeadDetails lead={currentLead} />
-        <ReviewProgress currentIndex={currentLeadIndex} totalLeads={leads.length} />
-      </div>
+    <div className="space-y-6">
+      {/* Lead Header Section */}
+      <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-r from-white to-gray-50">
+        <CardHeader className="pb-4">
+          <div className="flex items-start gap-4">
+            <Avatar className="w-16 h-16 border-4 border-white shadow-lg">
+              <AvatarImage src={lead.avatar} alt={lead.name} />
+              <AvatarFallback className="bg-crm-primary text-white text-lg font-semibold">
+                {lead.name.split(' ').map(n => n[0]).join('')}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <div className="flex items-start justify-between">
+                <div>
+                  <CardTitle className="text-2xl text-gray-900">{lead.name}</CardTitle>
+                  <p className="text-lg text-gray-600 font-medium">{lead.position}</p>
+                  <p className="text-gray-500 flex items-center gap-1 mt-1">
+                    <Building className="w-4 h-4" />
+                    {lead.company}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-crm-primary mb-1">{lead.score}</div>
+                  <div className="text-sm text-gray-500">Lead Score</div>
+                  <Badge className={`mt-2 font-semibold text-sm px-3 py-1`}>
+                    {lead.status}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
 
-      {/* Right Column - Action Buttons */}
-      <div className="space-y-6">
-        <ReviewActions 
-          onAction={handleAction}
-          isLoading={isLoading}
-          leadsRemaining={leads.length - currentLeadIndex - 1}
-        />
-        <LeadInsights lead={currentLead} />
+      {/* Contact Information */}
+      <Card className="border-0 shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-lg">Contact Information</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+              <Mail className="w-5 h-5 text-crm-primary" />
+              <div className="flex-1">
+                <div className="font-medium text-gray-900">{lead.email}</div>
+                <div className="text-sm text-gray-500">Email Address</div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+              <Phone className="w-5 h-5 text-crm-primary" />
+              <div className="flex-1">
+                <div className="font-medium text-gray-900">{lead.phone}</div>
+                <div className="text-sm text-gray-500">Phone Number</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
+            <MapPin className="w-5 h-5 text-crm-primary mt-0.5" />
+            <div className="flex-1">
+              <div className="font-medium text-gray-900">
+                {lead.address}, {lead.city}, {lead.state} {lead.zip}
+              </div>
+              <div className="text-sm text-gray-500">Business Address</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Action Buttons */}
+      <div className="flex gap-4">
+        <Button 
+          onClick={() => onStatusChange('PASS')}
+          variant="outline"
+          className="flex-1 border-red-300 text-red-600 hover:bg-red-50"
+        >
+          Pass
+        </Button>
+        <Button 
+          onClick={() => onStatusChange('HOT')}
+          className="flex-1 bg-green-600 hover:bg-green-700"
+        >
+          Keep & Review
+        </Button>
       </div>
     </div>
   );

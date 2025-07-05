@@ -1,26 +1,10 @@
 
 import React, { useState } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Plus, Filter, ChevronDown, MoreVertical } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { LeadHeader } from './LeadHeader';
-import { LeadInsights } from './LeadInsights';
-import { LeadDetailsForm } from './LeadDetailsForm';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
-import { Badge } from '@/components/ui/badge';
-import { LeadStatusButtons } from './LeadStatusButtons';
-import { EnhancedLeadContactInfo } from './EnhancedLeadContactInfo';
+import { LeadsHeader } from './LeadsHeader';
+import { LeadsFilters } from './LeadsFilters';
+import { LeadsList } from './LeadsList';
+import { LeadDetailView } from './LeadDetailView';
 
 interface Lead {
   id: number;
@@ -170,156 +154,49 @@ export function LeadsContent() {
     }
   });
 
-  const renderLeadItem = (lead: Lead) => (
-    <Card key={lead.id} className="bg-white/95 backdrop-blur-sm shadow-md hover:shadow-lg transition-shadow duration-200 border-0">
-      <CardHeader className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Avatar>
-            <AvatarImage src={lead.avatar} />
-            <AvatarFallback>{lead.name.charAt(0)}</AvatarFallback>
-          </Avatar>
-          <div>
-            <CardTitle className="text-lg font-semibold">{lead.name}</CardTitle>
-            <div className="text-sm text-gray-500">{lead.company}</div>
-          </div>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => setSelectedLead(lead)}>
-              View Details
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              Edit Lead
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              Delete Lead
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-600">Status</div>
-          <Badge variant="secondary">{lead.status}</Badge>
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-600">Score</div>
-          <div className="font-medium">{lead.score}</div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+  const handleStatusChange = (status: 'HOT' | 'WARM' | 'COLD' | 'PASS') => {
+    if (selectedLead) {
+      setMockLeads(prev => prev.map(l => 
+        l.id === selectedLead.id ? { ...l, status } : l
+      ));
+      setSelectedLead(prev => prev ? { ...prev, status } : null);
+    }
+  };
 
-  const renderLeadDetails = (lead: Lead) => (
-    <div className="space-y-6">
-      <LeadHeader lead={lead} onBack={() => setSelectedLead(null)} />
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-6">
-          <EnhancedLeadContactInfo lead={lead} />
-        </div>
-        
-        <div className="space-y-6">
-          <LeadInsights lead={lead} />
-          <LeadStatusButtons 
-            leadId={lead.id}
-            currentStatus={lead.status}
-            onStatusChange={(status) => {
-              setMockLeads(prev => prev.map(l => 
-                l.id === lead.id ? { ...l, status } : l
-              ));
-              setSelectedLead(prev => prev ? { ...prev, status } : null);
-            }}
-          />
-        </div>
-      </div>
-      
-      <LeadDetailsForm 
-        lead={lead} 
-        onSave={(updatedLead) => {
-          setMockLeads(prev => prev.map(l => l.id === updatedLead.id ? updatedLead : l));
-          setSelectedLead(updatedLead);
-        }}
-        canEdit={canViewAllLeads}
-      />
-    </div>
-  );
+  const handleSave = (updatedLead: Lead) => {
+    setMockLeads(prev => prev.map(l => l.id === updatedLead.id ? updatedLead : l));
+    setSelectedLead(updatedLead);
+  };
 
   return (
     <div className="flex flex-col h-full">
-      <header className="sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-gray-200/60 px-6 py-4 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Current Deals</h1>
-              <p className="text-sm text-gray-600 mt-0.5">
-                Manage and view your current leads and opportunities
-              </p>
-            </div>
-          </div>
-          <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
-            <Plus className="w-4 h-4 mr-2" />
-            Add New Lead
-          </Button>
-        </div>
-      </header>
-
-      <div className="px-6 py-4 bg-gray-50/50 border-b border-gray-200/60">
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          <div className="flex flex-col sm:flex-row gap-3 flex-1">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Search leads..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-white shadow-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
-              />
-            </div>
-
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-40 bg-white shadow-sm border-gray-200">
-                <Filter className="w-4 h-4 mr-2 text-gray-400" />
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="hot">Hot</SelectItem>
-                <SelectItem value="warm">Warm</SelectItem>
-                <SelectItem value="cold">Cold</SelectItem>
-                <SelectItem value="pass">Pass</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-40 bg-white shadow-sm border-gray-200">
-                <ChevronDown className="w-4 h-4 mr-2 text-gray-400" />
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="score">Score</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
+      <LeadsHeader />
+      
+      {!selectedLead && (
+        <LeadsFilters
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          filterStatus={filterStatus}
+          onFilterStatusChange={setFilterStatus}
+          sortBy={sortBy}
+          onSortByChange={setSortBy}
+        />
+      )}
 
       <main className="flex-1 p-6 bg-gradient-to-br from-gray-50/30 to-white overflow-y-auto">
         {!selectedLead ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredLeads.map(lead => renderLeadItem(lead))}
-          </div>
+          <LeadsList 
+            leads={filteredLeads} 
+            onSelectLead={setSelectedLead} 
+          />
         ) : (
-          renderLeadDetails(selectedLead)
+          <LeadDetailView
+            lead={selectedLead}
+            onBack={() => setSelectedLead(null)}
+            onStatusChange={handleStatusChange}
+            onSave={handleSave}
+            canEdit={canViewAllLeads}
+          />
         )}
       </main>
     </div>
