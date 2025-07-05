@@ -14,6 +14,10 @@ import Leads from "./pages/Leads";
 import Settings from "./pages/Settings";
 import Calendar from "./pages/Calendar";
 import Notifications from "./pages/Notifications";
+import AdminUsers from "./pages/AdminUsers";
+import SystemSettings from "./pages/SystemSettings";
+import FullAnalytics from "./pages/FullAnalytics";
+import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +32,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/pricing" element={<Pricing />} />
             <Route 
               path="/dashboard" 
               element={
@@ -73,6 +78,30 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={['Admin', 'Manager', 'Employee']}>
                   <Notifications />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/users" 
+              element={
+                <ProtectedRoute allowedRoles={['Admin']}>
+                  <AdminUsers />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/settings" 
+              element={
+                <ProtectedRoute allowedRoles={['Admin']}>
+                  <SystemSettings />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/analytics" 
+              element={
+                <ProtectedRoute allowedRoles={['Admin']}>
+                  <FullAnalytics />
                 </ProtectedRoute>
               } 
             />

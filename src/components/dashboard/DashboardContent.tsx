@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Users, Settings, BarChart3, Shield } from 'lucide-react';
 import { getRoleDashboardTitle } from '@/utils/roleRedirect';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
+import { useNavigate } from 'react-router-dom';
 
 interface DashboardContentProps {
   userRole: string;
@@ -18,6 +19,7 @@ interface DashboardContentProps {
 export function DashboardContent({ userRole }: DashboardContentProps) {
   const dashboardTitle = getRoleDashboardTitle(userRole);
   const { canManageUsers, canManageTeam, canViewAnalytics } = useRoleAccess();
+  const navigate = useNavigate();
   
   const getRoleBadgeColor = (role: string) => {
     switch (role.toLowerCase()) {
@@ -64,15 +66,27 @@ export function DashboardContent({ userRole }: DashboardContentProps) {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Button variant="outline" className="flex items-center gap-2 border-red-200 text-red-700 hover:bg-red-100">
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center gap-2 border-red-200 text-red-700 hover:bg-red-100"
+                    onClick={() => navigate('/admin/users')}
+                  >
                     <Users className="w-4 h-4" />
                     Manage Users
                   </Button>
-                  <Button variant="outline" className="flex items-center gap-2 border-red-200 text-red-700 hover:bg-red-100">
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center gap-2 border-red-200 text-red-700 hover:bg-red-100"
+                    onClick={() => navigate('/admin/settings')}
+                  >
                     <Settings className="w-4 h-4" />
                     System Settings
                   </Button>
-                  <Button variant="outline" className="flex items-center gap-2 border-red-200 text-red-700 hover:bg-red-100">
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center gap-2 border-red-200 text-red-700 hover:bg-red-100"
+                    onClick={() => navigate('/admin/analytics')}
+                  >
                     <BarChart3 className="w-4 h-4" />
                     Full Analytics
                   </Button>
