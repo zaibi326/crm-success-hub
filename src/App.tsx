@@ -41,6 +41,7 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            {/* My Campaigns - Admin and Manager can create/view campaigns */}
             <Route 
               path="/campaigns" 
               element={
@@ -49,6 +50,7 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            {/* Current Deals - All roles can view leads/deals assigned to them */}
             <Route 
               path="/leads" 
               element={
