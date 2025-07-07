@@ -5,29 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LeadReviewCard } from './LeadReviewCard';
 import { Eye, Edit, DollarSign } from 'lucide-react';
-
-interface TaxLead {
-  id: number;
-  taxId: string;
-  ownerName: string;
-  propertyAddress: string;
-  taxLawsuitNumber?: string;
-  currentArrears?: number;
-  status: 'HOT' | 'WARM' | 'COLD' | 'PASS';
-  notes?: string;
-  phone?: string;
-  email?: string;
-  ownerOfRecord?: string;
-  hasDeath?: boolean;
-  deathNotes?: string;
-  hasProbate?: boolean;
-  probateNotes?: string;
-  hasLawsuit?: boolean;
-  lawsuitNotes?: string;
-  hasAdditionalTaxingEntities?: boolean;
-  additionalTaxingNotes?: string;
-  vestingDeedNotes?: string;
-}
+import { TaxLead } from '@/types/taxLead';
 
 interface LeadsListProps {
   leads: TaxLead[];
