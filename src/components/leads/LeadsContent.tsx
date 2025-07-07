@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useMemo, memo } from 'react';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 import { LeadsHeader } from './LeadsHeader';
 import { LeadsFilters } from './LeadsFilters';
@@ -127,7 +128,7 @@ const initialMockLeads: TaxLead[] = [
 // Key for localStorage
 const LEADS_STORAGE_KEY = 'tax-leads-data';
 
-export function LeadsContent() {
+export const LeadsContent = memo(function LeadsContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('ownerName');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -165,29 +166,32 @@ export function LeadsContent() {
     });
   };
 
-  const filteredLeads = mockLeads.filter(lead => {
-    const searchTermLower = searchTerm.toLowerCase();
-    return (
-      lead.ownerName.toLowerCase().includes(searchTermLower) ||
-      lead.taxId.toLowerCase().includes(searchTermLower) ||
-      lead.propertyAddress.toLowerCase().includes(searchTermLower) ||
-      (lead.email && lead.email.toLowerCase().includes(searchTermLower))
-    );
-  }).filter(lead => {
-    if (filterStatus === 'all') return true;
-    return lead.status.toLowerCase() === filterStatus.toLowerCase();
-  }).sort((a, b) => {
-    switch (sortBy) {
-      case 'ownerName':
-        return a.ownerName.localeCompare(b.ownerName);
-      case 'currentArrears':
-        return (b.currentArrears || 0) - (a.currentArrears || 0);
-      case 'taxId':
-        return a.taxId.localeCompare(b.taxId);
-      default:
-        return 0;
-    }
-  });
+  // Memoize filtered leads to prevent unnecessary recalculations
+  const filteredLeads = useMemo(() => {
+    return mockLeads.filter(lead => {
+      const searchTermLower = searchTerm.toLowerCase();
+      return (
+        lead.ownerName.toLowerCase().includes(searchTermLower) ||
+        lead.taxId.toLowerCase().includes(searchTermLower) ||
+        lead.propertyAddress.toLowerCase().includes(searchTermLower) ||
+        (lead.email && lead.email.toLowerCase().includes(searchTermLower))
+      );
+    }).filter(lead => {
+      if (filterStatus === 'all') return true;
+      return lead.status.toLowerCase() === filterStatus.toLowerCase();
+    }).sort((a, b) => {
+      switch (sortBy) {
+        case 'ownerName':
+          return a.ownerName.localeCompare(b.ownerName);
+        case 'currentArrears':
+          return (b.currentArrears || 0) - (a.currentArrears || 0);
+        case 'taxId':
+          return a.taxId.localeCompare(b.taxId);
+        default:
+          return 0;
+      }
+    });
+  }, [mockLeads, searchTerm, filterStatus, sortBy]);
 
   const handleLeadUpdate = (updatedLead: TaxLead) => {
     setMockLeads(prev => prev.map(lead => 
@@ -251,4 +255,4 @@ export function LeadsContent() {
       </main>
     </div>
   );
-}
+});

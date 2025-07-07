@@ -22,6 +22,11 @@ import Notifications from "./pages/Notifications";
 import Pricing from "./pages/Pricing";
 import FullAnalytics from "./pages/FullAnalytics";
 import AppBuilder from "./pages/AppBuilder";
+import Features from "./pages/Features";
+import Integrations from "./pages/Integrations";
+import ApiDocumentation from "./pages/ApiDocumentation";
+import MobileApps from "./pages/MobileApps";
+import Security from "./pages/Security";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,6 +56,11 @@ const App = () => (
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/analytics" element={<FullAnalytics />} />
             <Route path="/app-builder" element={<AppBuilder />} />
+            <Route path="/features" element={<Features />} />
+            <Route path="/integrations" element={<Integrations />} />
+            <Route path="/api-documentation" element={<ApiDocumentation />} />
+            <Route path="/mobile-apps" element={<MobileApps />} />
+            <Route path="/security" element={<Security />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
