@@ -47,7 +47,7 @@ export function AppSidebar() {
     // Communication Features
     {
       title: "Communication",
-      url: "/communication",
+      url: "/communication-center",
       icon: Phone,
       badge: "SmrtPhone.io",
       badgeColor: "bg-blue-100 text-blue-800"
@@ -67,7 +67,7 @@ export function AppSidebar() {
     ...(userRole === 'Admin' ? [
       {
         title: "Organizations",
-        url: "/organizations",
+        url: "/organization-management",
         icon: Building2,
         badge: "Admin",
         badgeColor: "bg-red-100 text-red-800"
@@ -81,7 +81,7 @@ export function AppSidebar() {
     ...(userRole === 'Admin' ? [
       {
         title: "Admin",
-        url: "/admin/users",
+        url: "/admin-users",
         icon: Activity,
       }
     ] : []),

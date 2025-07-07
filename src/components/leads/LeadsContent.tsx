@@ -133,6 +133,10 @@ export function LeadsContent() {
   const [mockLeads, setMockLeads] = useState<TaxLead[]>(initialMockLeads);
   const { canViewAllLeads } = useRoleAccess();
 
+  const handleAddLead = (newLead: TaxLead) => {
+    setMockLeads(prev => [...prev, newLead]);
+  };
+
   const filteredLeads = mockLeads.filter(lead => {
     const searchTermLower = searchTerm.toLowerCase();
     return (
@@ -166,7 +170,7 @@ export function LeadsContent() {
 
   return (
     <div className="flex flex-col h-full">
-      <LeadsHeader />
+      <LeadsHeader onAddLead={handleAddLead} />
       
       {!selectedLead && (
         <LeadsFilters
@@ -194,7 +198,6 @@ export function LeadsContent() {
             >
               ← Back to Leads
             </button>
-            {/* Lead detail view would go here - using simplified approach for now */}
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h2 className="text-2xl font-bold mb-4">{selectedLead.ownerName}</h2>
               <div className="grid grid-cols-2 gap-4">
