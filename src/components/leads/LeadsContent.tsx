@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 import { LeadsHeader } from './LeadsHeader';
 import { LeadsFilters } from './LeadsFilters';
@@ -125,16 +124,45 @@ const initialMockLeads: TaxLead[] = [
   }
 ];
 
+// Key for localStorage
+const LEADS_STORAGE_KEY = 'tax-leads-data';
+
 export function LeadsContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('ownerName');
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedLead, setSelectedLead] = useState<TaxLead | null>(null);
-  const [mockLeads, setMockLeads] = useState<TaxLead[]>(initialMockLeads);
+  const [mockLeads, setMockLeads] = useState<TaxLead[]>([]);
   const { canViewAllLeads } = useRoleAccess();
 
+  // Load leads from localStorage on component mount
+  useEffect(() => {
+    const savedLeads = localStorage.getItem(LEADS_STORAGE_KEY);
+    if (savedLeads) {
+      try {
+        const parsedLeads = JSON.parse(savedLeads);
+        setMockLeads(parsedLeads);
+      } catch (error) {
+        console.error('Error parsing saved leads:', error);
+        setMockLeads(initialMockLeads);
+      }
+    } else {
+      setMockLeads(initialMockLeads);
+    }
+  }, []);
+
+  // Save leads to localStorage whenever mockLeads changes
+  useEffect(() => {
+    if (mockLeads.length > 0) {
+      localStorage.setItem(LEADS_STORAGE_KEY, JSON.stringify(mockLeads));
+    }
+  }, [mockLeads]);
+
   const handleAddLead = (newLead: TaxLead) => {
-    setMockLeads(prev => [...prev, newLead]);
+    setMockLeads(prev => {
+      const updatedLeads = [...prev, newLead];
+      return updatedLeads;
+    });
   };
 
   const filteredLeads = mockLeads.filter(lead => {
