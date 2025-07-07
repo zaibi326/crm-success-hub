@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -9,8 +9,31 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+interface TaxLead {
+  id: number;
+  taxId: string;
+  ownerName: string;
+  propertyAddress: string;
+  taxLawsuitNumber?: string;
+  currentArrears?: number;
+  status: 'HOT' | 'WARM' | 'COLD' | 'PASS';
+  notes?: string;
+  phone?: string;
+  email?: string;
+  ownerOfRecord?: string;
+  hasDeath?: boolean;
+  deathNotes?: string;
+  hasProbate?: boolean;
+  probateNotes?: string;
+  hasLawsuit?: boolean;
+  lawsuitNotes?: string;
+  hasAdditionalTaxingEntities?: boolean;
+  additionalTaxingNotes?: string;
+  vestingDeedNotes?: string;
+}
+
 interface LeadsHeaderProps {
-  onAddLead?: (lead: any) => void;
+  onAddLead?: (lead: TaxLead) => void;
 }
 
 export function LeadsHeader({ onAddLead }: LeadsHeaderProps) {
@@ -26,6 +49,21 @@ export function LeadsHeader({ onAddLead }: LeadsHeaderProps) {
   });
   const { toast } = useToast();
 
+  // Reset form when dialog closes
+  useEffect(() => {
+    if (!isDialogOpen) {
+      setNewLead({
+        ownerName: '',
+        propertyAddress: '',
+        email: '',
+        phone: '',
+        status: 'WARM',
+        currentArrears: '',
+        notes: ''
+      });
+    }
+  }, [isDialogOpen]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -38,8 +76,8 @@ export function LeadsHeader({ onAddLead }: LeadsHeaderProps) {
       return;
     }
 
-    const leadToAdd = {
-      id: Date.now(), // Simple ID generation for demo
+    const leadToAdd: TaxLead = {
+      id: Date.now(),
       taxId: `TAX-${new Date().getFullYear()}-${String(Date.now()).slice(-3)}`,
       ownerName: newLead.ownerName,
       propertyAddress: newLead.propertyAddress,
@@ -65,17 +103,12 @@ export function LeadsHeader({ onAddLead }: LeadsHeaderProps) {
       description: `${newLead.ownerName} has been added to your leads.`,
     });
 
-    // Reset form
-    setNewLead({
-      ownerName: '',
-      propertyAddress: '',
-      email: '',
-      phone: '',
-      status: 'WARM',
-      currentArrears: '',
-      notes: ''
-    });
+    // Close dialog and reset form
     setIsDialogOpen(false);
+  };
+
+  const handleDialogOpenChange = (open: boolean) => {
+    setIsDialogOpen(open);
   };
 
   return (
@@ -90,7 +123,7 @@ export function LeadsHeader({ onAddLead }: LeadsHeaderProps) {
           </div>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
           <DialogTrigger asChild>
             <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
               <Plus className="w-4 h-4 mr-2" />
