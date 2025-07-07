@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,11 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Building2, Users, Settings, Plus, Mail, Shield, Activity } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { UserInvitationManager } from './UserInvitationManager';
 
 export function OrganizationManager() {
   const [newOrgName, setNewOrgName] = useState('');
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState('');
   const { toast } = useToast();
 
   const mockOrganizations = [
@@ -103,17 +101,6 @@ export function OrganizationManager() {
     }
   };
 
-  const handleInviteUser = () => {
-    if (inviteEmail.trim() && inviteRole) {
-      toast({
-        title: "User Invited",
-        description: `Invitation sent to ${inviteEmail} as ${inviteRole}.`,
-      });
-      setInviteEmail('');
-      setInviteRole('');
-    }
-  };
-
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'Admin': return 'bg-red-100 text-red-800';
@@ -128,11 +115,12 @@ export function OrganizationManager() {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="organizations" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="organizations">Organizations</TabsTrigger>
           <TabsTrigger value="users">User Management</TabsTrigger>
           <TabsTrigger value="workspaces">Workspaces</TabsTrigger>
           <TabsTrigger value="invitations">Invitations</TabsTrigger>
+          <TabsTrigger value="permissions">Permissions</TabsTrigger>
         </TabsList>
 
         <TabsContent value="organizations" className="space-y-6">
@@ -273,54 +261,70 @@ export function OrganizationManager() {
         </TabsContent>
 
         <TabsContent value="invitations" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Mail className="w-5 h-5" />
-                Invite New User
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Input
-                  placeholder="Email address..."
-                  type="email"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                />
-                <Select value={inviteRole} onValueChange={setInviteRole}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Admin">Admin</SelectItem>
-                    <SelectItem value="Manager">Manager</SelectItem>
-                    <SelectItem value="Employee">Employee</SelectItem>
-                    <SelectItem value="External Client">External Client</SelectItem>
-                    <SelectItem value="Guest">Guest</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button onClick={handleInviteUser}>
-                  <Mail className="w-4 h-4 mr-2" />
-                  Send Invite
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <UserInvitationManager />
+        </TabsContent>
 
+        <TabsContent value="permissions" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Role Permissions</CardTitle>
+              <CardTitle>Role Permissions Matrix</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {[
-                    { role: 'Admin', permissions: ['Full Access', 'User Management', 'System Settings', 'All Campaigns'] },
-                    { role: 'Manager', permissions: ['Team Management', 'Campaign Creation', 'Lead Assignment', 'Reports'] },
-                    { role: 'Employee', permissions: ['Lead Management', 'Basic Reporting', 'Profile Settings'] },
-                    { role: 'External Client', permissions: ['View Assigned Leads', 'Basic Updates'] },
-                    { role: 'Guest', permissions: ['View Only', 'Limited Access'] }
+                    { 
+                      role: 'Admin', 
+                      permissions: [
+                        'Full System Access',
+                        'User Management', 
+                        'Organization Management',
+                        'System Settings', 
+                        'All Campaigns & Leads',
+                        'Financial Data Access',
+                        'Integration Management'
+                      ] 
+                    },
+                    { 
+                      role: 'Manager', 
+                      permissions: [
+                        'Team Management', 
+                        'Campaign Creation & Management',
+                        'Lead Assignment & Oversight', 
+                        'Reporting & Analytics',
+                        'Workspace Administration',
+                        'User Activity Monitoring'
+                      ] 
+                    },
+                    { 
+                      role: 'Employee', 
+                      permissions: [
+                        'Lead Management (Assigned)',
+                        'Campaign Participation', 
+                        'Basic Reporting',
+                        'Profile Management',
+                        'Communication Tools',
+                        'Task Management'
+                      ] 
+                    },
+                    { 
+                      role: 'External Client', 
+                      permissions: [
+                        'View Assigned Leads Only',
+                        'Limited Lead Updates',
+                        'Communication History',
+                        'Basic Profile Access'
+                      ] 
+                    },
+                    { 
+                      role: 'Guest', 
+                      permissions: [
+                        'View-Only Access',
+                        'Limited Data Visibility',
+                        'No Modification Rights',
+                        'Basic Navigation'
+                      ] 
+                    }
                   ].map((roleInfo) => (
                     <Card key={roleInfo.role}>
                       <CardHeader className="pb-2">
