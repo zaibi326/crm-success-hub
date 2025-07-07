@@ -6,165 +6,161 @@ import { LeadsFilters } from './LeadsFilters';
 import { LeadsList } from './LeadsList';
 import { LeadDetailView } from './LeadDetailView';
 
-interface Lead {
+interface TaxLead {
   id: number;
-  name: string;
-  email: string;
-  phone: string;
-  company: string;
-  position: string;
-  address: string;
-  city: string;
-  state: string;
-  zip: string;
+  taxId: string;
+  ownerName: string;
+  propertyAddress: string;
+  taxLawsuitNumber?: string;
+  currentArrears?: number;
   status: 'HOT' | 'WARM' | 'COLD' | 'PASS';
-  score: number;
-  notes: string;
-  avatar?: string;
-  tags: string[];
+  notes?: string;
+  phone?: string;
+  email?: string;
+  ownerOfRecord?: string;
+  hasDeath?: boolean;
+  deathNotes?: string;
+  hasProbate?: boolean;
+  probateNotes?: string;
+  hasLawsuit?: boolean;
+  lawsuitNotes?: string;
+  hasAdditionalTaxingEntities?: boolean;
+  additionalTaxingNotes?: string;
+  vestingDeedNotes?: string;
 }
 
-const initialMockLeads: Lead[] = [
+const initialMockLeads: TaxLead[] = [
   {
     id: 1,
-    name: "John Smith",
+    taxId: "TAX-2024-001",
+    ownerName: "John Smith",
+    propertyAddress: "123 Main St, Anytown, CA 91234",
     email: "john.123@gmail.com",
     phone: "555-123-4567",
-    company: "ABC Corp",
-    position: "CEO",
-    address: "123 Main St",
-    city: "Anytown",
-    state: "CA",
-    zip: "91234",
     status: "HOT",
-    score: 95,
-    notes: "Interested in expanding their business.",
-    avatar: "https://github.com/shadcn.png",
-    tags: ["Tax Lien", "Real Estate", "Investor"]
+    currentArrears: 15000,
+    taxLawsuitNumber: "LS-2024-001",
+    notes: "Property has significant arrears. Owner interested in quick sale.",
+    ownerOfRecord: "John Smith",
+    hasDeath: false,
+    hasProbate: false,
+    hasLawsuit: true,
+    lawsuitNotes: "Tax lawsuit filed in January 2024",
+    hasAdditionalTaxingEntities: false,
+    vestingDeedNotes: "Clear title, no liens"
   },
   {
     id: 2,
-    name: "Emily Johnson",
+    taxId: "TAX-2024-002",
+    ownerName: "Emily Johnson Estate",
+    propertyAddress: "456 Oak Ave, Springfield, IL 62704",
     email: "emily.j@yahoo.com",
     phone: "555-987-6543",
-    company: "XYZ Inc",
-    position: "Marketing Manager",
-    address: "456 Oak Ave",
-    city: "Springfield",
-    state: "IL",
-    zip: "62704",
     status: "WARM",
-    score: 78,
-    notes: "Needs more information on our services.",
-    avatar: "https://avatars.githubusercontent.com/u/88843?v=4",
-    tags: ["Probate", "Estate Planning"]
+    currentArrears: 8500,
+    notes: "Estate property, heirs need to resolve tax issues.",
+    ownerOfRecord: "Emily Johnson (Deceased)",
+    hasDeath: true,
+    deathNotes: "Owner deceased in 2023, estate in probate",
+    hasProbate: true,
+    probateNotes: "Probate case #PR-2023-456",
+    hasLawsuit: false,
+    hasAdditionalTaxingEntities: true,
+    additionalTaxingNotes: "School district taxes also delinquent",
+    vestingDeedNotes: "Inherited property, deed needs updating"
   },
   {
     id: 3,
-    name: "Michael Brown",
+    taxId: "TAX-2024-003",
+    ownerName: "Michael Brown",
+    propertyAddress: "789 Pine Ln, Hill Valley, GA 30303",
     email: "mike.brown@test.com",
     phone: "555-555-1212",
-    company: "123 Corp",
-    position: "Sales Director",
-    address: "789 Pine Ln",
-    city: "Hill Valley",
-    state: "GA",
-    zip: "30303",
     status: "COLD",
-    score: 32,
-    notes: "Not currently interested.",
-    tags: ["Bankruptcy", "Debt Relief"]
+    currentArrears: 3200,
+    notes: "Small arrears amount, owner not responsive.",
+    ownerOfRecord: "Michael Brown",
+    hasDeath: false,
+    hasProbate: false,
+    hasLawsuit: false,
+    hasAdditionalTaxingEntities: false,
+    vestingDeedNotes: "Standard residential property"
   },
   {
     id: 4,
-    name: "Alice Williams",
+    taxId: "TAX-2024-004",
+    ownerName: "Alice Williams Trust",
+    propertyAddress: "101 Elm St, Gotham, NY 10001",
     email: "alice.w@example.com",
     phone: "555-444-5555",
-    company: "Acme Co",
-    position: "CTO",
-    address: "101 Elm St",
-    city: "Gotham",
-    state: "NY",
-    zip: "10001",
     status: "PASS",
-    score: 12,
-    notes: "Already has a solution in place.",
-    tags: ["Tax Lien", "Real Estate"]
+    currentArrears: 1200,
+    notes: "Trust property, minimal arrears, not pursuing.",
+    ownerOfRecord: "Alice Williams Family Trust",
+    hasDeath: false,
+    hasProbate: false,
+    hasLawsuit: false,
+    hasAdditionalTaxingEntities: false,
+    vestingDeedNotes: "Trust-owned property"
   },
   {
     id: 5,
-    name: "David Garcia",
+    taxId: "TAX-2024-005",
+    ownerName: "David Garcia",
+    propertyAddress: "222 Maple Dr, Metropolis, FL 33101",
     email: "d.garcia@sample.com",
     phone: "555-222-3333",
-    company: "Sample Inc",
-    position: "Project Manager",
-    address: "222 Maple Dr",
-    city: "Metropolis",
-    state: "FL",
-    zip: "33101",
     status: "HOT",
-    score: 88,
-    notes: "Looking for a long-term partnership.",
-    tags: ["Probate", "Estate Planning", "Investor"]
-  },
-  {
-    id: 6,
-    name: "Linda Rodriguez",
-    email: "linda.r@domain.com",
-    phone: "555-777-8888",
-    company: "Domain Corp",
-    position: "HR Manager",
-    address: "333 Oak St",
-    city: "Smallville",
-    state: "KS",
-    zip: "66601",
-    status: "WARM",
-    score: 65,
-    notes: "Evaluating different options.",
-    tags: ["Bankruptcy", "Debt Relief"]
+    currentArrears: 22000,
+    taxLawsuitNumber: "LS-2024-089",
+    notes: "High-value property with substantial arrears. Good investment opportunity.",
+    ownerOfRecord: "David Garcia",
+    hasDeath: false,
+    hasProbate: false,
+    hasLawsuit: true,
+    lawsuitNotes: "Lawsuit filed, foreclosure proceedings started",
+    hasAdditionalTaxingEntities: true,
+    additionalTaxingNotes: "Multiple taxing entities involved",
+    vestingDeedNotes: "Commercial property, complex ownership structure"
   }
 ];
 
 export function LeadsContent() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('name');
+  const [sortBy, setSortBy] = useState('ownerName');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [mockLeads, setMockLeads] = useState<Lead[]>(initialMockLeads);
+  const [selectedLead, setSelectedLead] = useState<TaxLead | null>(null);
+  const [mockLeads, setMockLeads] = useState<TaxLead[]>(initialMockLeads);
   const { canViewAllLeads } = useRoleAccess();
 
   const filteredLeads = mockLeads.filter(lead => {
     const searchTermLower = searchTerm.toLowerCase();
     return (
-      lead.name.toLowerCase().includes(searchTermLower) ||
-      lead.email.toLowerCase().includes(searchTermLower) ||
-      lead.company.toLowerCase().includes(searchTermLower)
+      lead.ownerName.toLowerCase().includes(searchTermLower) ||
+      lead.taxId.toLowerCase().includes(searchTermLower) ||
+      lead.propertyAddress.toLowerCase().includes(searchTermLower) ||
+      (lead.email && lead.email.toLowerCase().includes(searchTermLower))
     );
   }).filter(lead => {
     if (filterStatus === 'all') return true;
     return lead.status.toLowerCase() === filterStatus.toLowerCase();
   }).sort((a, b) => {
     switch (sortBy) {
-      case 'name':
-        return a.name.localeCompare(b.name);
-      case 'score':
-        return b.score - a.score;
+      case 'ownerName':
+        return a.ownerName.localeCompare(b.ownerName);
+      case 'currentArrears':
+        return (b.currentArrears || 0) - (a.currentArrears || 0);
+      case 'taxId':
+        return a.taxId.localeCompare(b.taxId);
       default:
         return 0;
     }
   });
 
-  const handleStatusChange = (status: 'HOT' | 'WARM' | 'COLD' | 'PASS') => {
-    if (selectedLead) {
-      setMockLeads(prev => prev.map(l => 
-        l.id === selectedLead.id ? { ...l, status } : l
-      ));
-      setSelectedLead(prev => prev ? { ...prev, status } : null);
-    }
-  };
-
-  const handleSave = (updatedLead: Lead) => {
-    setMockLeads(prev => prev.map(l => l.id === updatedLead.id ? updatedLead : l));
+  const handleLeadUpdate = (updatedLead: TaxLead) => {
+    setMockLeads(prev => prev.map(lead => 
+      lead.id === updatedLead.id ? updatedLead : lead
+    ));
     setSelectedLead(updatedLead);
   };
 
@@ -186,17 +182,40 @@ export function LeadsContent() {
       <main className="flex-1 p-6 bg-gradient-to-br from-gray-50/30 to-white overflow-y-auto">
         {!selectedLead ? (
           <LeadsList 
-            leads={filteredLeads} 
-            onSelectLead={setSelectedLead} 
+            leads={filteredLeads}
+            onLeadSelect={setSelectedLead}
+            onLeadUpdate={handleLeadUpdate}
           />
         ) : (
-          <LeadDetailView
-            lead={selectedLead}
-            onBack={() => setSelectedLead(null)}
-            onStatusChange={handleStatusChange}
-            onSave={handleSave}
-            canEdit={canViewAllLeads}
-          />
+          <div className="max-w-4xl mx-auto">
+            <button
+              onClick={() => setSelectedLead(null)}
+              className="mb-4 text-crm-primary hover:text-crm-primary/80 flex items-center gap-2"
+            >
+              ← Back to Leads
+            </button>
+            {/* Lead detail view would go here - using simplified approach for now */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-2xl font-bold mb-4">{selectedLead.ownerName}</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p><strong>Tax ID:</strong> {selectedLead.taxId}</p>
+                  <p><strong>Property:</strong> {selectedLead.propertyAddress}</p>
+                  <p><strong>Status:</strong> {selectedLead.status}</p>
+                </div>
+                <div>
+                  <p><strong>Current Arrears:</strong> ${selectedLead.currentArrears?.toLocaleString() || 'N/A'}</p>
+                  <p><strong>Phone:</strong> {selectedLead.phone || 'N/A'}</p>
+                  <p><strong>Email:</strong> {selectedLead.email || 'N/A'}</p>
+                </div>
+              </div>
+              {selectedLead.notes && (
+                <div className="mt-4">
+                  <p><strong>Notes:</strong> {selectedLead.notes}</p>
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </main>
     </div>
