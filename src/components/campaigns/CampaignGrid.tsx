@@ -3,85 +3,29 @@ import React, { useMemo } from 'react';
 import { Search, Plus } from 'lucide-react';
 import { CampaignCard } from './CampaignCard';
 import { Button } from '@/components/ui/button';
-
-const campaigns = [
-  {
-    id: 1,
-    name: "Holiday Campaign 2024",
-    date: "2024-12-15",
-    endDate: "2024-12-31",
-    status: "Active",
-    progress: 85,
-    deals: 32,
-    equity: "$180,000",
-    spend: "$12,500"
-  },
-  {
-    id: 2,
-    name: "Customer Retention Drive",
-    date: "2024-11-10",
-    endDate: "2024-12-31",
-    status: "Active",
-    progress: 70,
-    deals: 28,
-    equity: "$150,000",
-    spend: "$9,800"
-  },
-  {
-    id: 3,
-    name: "New Market Expansion",
-    date: "2024-10-05",
-    endDate: "2024-11-30",
-    status: "Planning",
-    progress: 45,
-    deals: 15,
-    equity: "$85,000",
-    spend: "$6,200"
-  },
-  {
-    id: 4,
-    name: "Q3 Brand Awareness",
-    date: "2024-08-01",
-    endDate: "2024-09-30",
-    status: "Completed",
-    progress: 100,
-    deals: 42,
-    equity: "$220,000",
-    spend: "$15,000"
-  },
-  {
-    id: 5,
-    name: "Summer Product Launch",
-    date: "2024-07-15",
-    endDate: "2024-08-15",
-    status: "Completed",
-    progress: 100,
-    deals: 38,
-    equity: "$195,000",
-    spend: "$11,200"
-  },
-  {
-    id: 6,
-    name: "Spring Collection Launch",
-    date: "2024-03-20",
-    endDate: "2024-05-20",
-    status: "Draft",
-    progress: 10,
-    deals: 3,
-    equity: "$30,000",
-    spend: "$1,800"
-  }
-];
+import { Campaign } from '@/hooks/useCampaigns';
 
 interface CampaignGridProps {
+  campaigns: Campaign[];
   searchTerm: string;
   sortBy: string;
   filterStatus: string;
   canEdit: boolean;
   onCreateCampaign?: () => void;
+  onEditCampaign?: (campaign: Campaign) => void;
+  onDeleteCampaign?: (campaignId: string) => void;
 }
 
-export function CampaignGrid({ searchTerm, sortBy, filterStatus, canEdit, onCreateCampaign }: CampaignGridProps) {
+export function CampaignGrid({ 
+  campaigns, 
+  searchTerm, 
+  sortBy, 
+  filterStatus, 
+  canEdit, 
+  onCreateCampaign,
+  onEditCampaign,
+  onDeleteCampaign 
+}: CampaignGridProps) {
   const filteredAndSortedCampaigns = useMemo(() => {
     let filtered = campaigns;
 
@@ -99,25 +43,25 @@ export function CampaignGrid({ searchTerm, sortBy, filterStatus, canEdit, onCrea
       );
     }
 
-    // Sort campaigns - default to newest first (by date descending)
+    // Sort campaigns - default to newest first (by created_at descending)
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'name':
           return a.name.localeCompare(b.name);
         case 'date':
-          return new Date(b.date).getTime() - new Date(a.date).getTime(); // Newest first
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         case 'progress':
           return b.progress - a.progress;
         case 'status':
           return a.status.localeCompare(b.status);
         default:
-          // Default sort by date descending (newest first)
-          return new Date(b.date).getTime() - new Date(a.date).getTime();
+          // Default sort by created_at descending (newest first)
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
     });
 
     return filtered;
-  }, [searchTerm, sortBy, filterStatus]);
+  }, [campaigns, searchTerm, sortBy, filterStatus]);
 
   if (filteredAndSortedCampaigns.length === 0) {
     return (
@@ -145,7 +89,11 @@ export function CampaignGrid({ searchTerm, sortBy, filterStatus, canEdit, onCrea
           className="animate-fade-in"
           style={{ animationDelay: `${index * 100}ms` }}
         >
-          <CampaignCard campaign={campaign} />
+          <CampaignCard 
+            campaign={campaign} 
+            onEdit={canEdit ? onEditCampaign : undefined}
+            onDelete={canEdit ? onDeleteCampaign : undefined}
+          />
         </div>
       ))}
     </div>

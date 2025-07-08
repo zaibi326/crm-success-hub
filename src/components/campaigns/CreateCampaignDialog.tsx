@@ -9,76 +9,86 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Target, DollarSign, Upload, FileText } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { EnhancedCsvUploader } from '@/components/leads/EnhancedCsvUploader';
+import { CSVUploadSection } from './CSVUploadSection';
 
 interface CreateCampaignDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCampaignCreated: () => void;
+  onCampaignCreated: (campaignData: any) => void;
 }
 
 export function CreateCampaignDialog({ open, onOpenChange, onCampaignCreated }: CreateCampaignDialogProps) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    startDate: '',
-    endDate: '',
+    start_date: '',
+    end_date: '',
     budget: '',
-    targetDeals: '',
+    target_deals: '',
     status: 'draft'
   });
   const [currentTab, setCurrentTab] = useState('details');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
+  const [createdCampaignId, setCreatedCampaignId] = useState<string | null>(null);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleCreateCampaign = async () => {
-    if (!formData.name || !formData.startDate) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields (Name and Start Date).",
-        variant: "destructive"
-      });
+    if (!formData.name || !formData.start_date) {
       return;
     }
 
     setIsSubmitting(true);
     
-    // Simulate campaign creation
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "Campaign Created",
-      description: `Campaign "${formData.name}" has been created successfully.`,
-    });
-    
-    setIsSubmitting(false);
-    onCampaignCreated();
+    try {
+      const campaignData = {
+        ...formData,
+        budget: formData.budget ? parseFloat(formData.budget) : null,
+        target_deals: formData.target_deals ? parseInt(formData.target_deals) : null,
+      };
+      
+      const createdCampaign = await onCampaignCreated(campaignData);
+      setCreatedCampaignId(createdCampaign.id);
+      setCurrentTab('leads');
+    } catch (error) {
+      console.error('Error creating campaign:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCSVUploadComplete = () => {
     onOpenChange(false);
-    
     // Reset form
     setFormData({
       name: '',
       description: '',
-      startDate: '',
-      endDate: '',
+      start_date: '',
+      end_date: '',
       budget: '',
-      targetDeals: '',
+      target_deals: '',
       status: 'draft'
     });
     setCurrentTab('details');
+    setCreatedCampaignId(null);
   };
 
-  const handleCsvUploadComplete = () => {
-    toast({
-      title: "Leads Imported",
-      description: "CSV leads have been successfully imported to this campaign.",
+  const handleSkipCSV = () => {
+    onOpenChange(false);
+    // Reset form
+    setFormData({
+      name: '',
+      description: '',
+      start_date: '',
+      end_date: '',
+      budget: '',
+      target_deals: '',
+      status: 'draft'
     });
     setCurrentTab('details');
+    setCreatedCampaignId(null);
   };
 
   return (
@@ -100,7 +110,7 @@ export function CreateCampaignDialog({ open, onOpenChange, onCampaignCreated }: 
               <FileText className="w-4 h-4" />
               Campaign Details
             </TabsTrigger>
-            <TabsTrigger value="leads" className="flex items-center gap-2">
+            <TabsTrigger value="leads" className="flex items-center gap-2" disabled={!createdCampaignId}>
               <Upload className="w-4 h-4" />
               Import Leads
             </TabsTrigger>
@@ -159,22 +169,22 @@ export function CreateCampaignDialog({ open, onOpenChange, onCampaignCreated }: 
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="startDate">Start Date *</Label>
+                    <Label htmlFor="start_date">Start Date *</Label>
                     <Input
-                      id="startDate"
+                      id="start_date"
                       type="date"
-                      value={formData.startDate}
-                      onChange={(e) => handleInputChange('startDate', e.target.value)}
+                      value={formData.start_date}
+                      onChange={(e) => handleInputChange('start_date', e.target.value)}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="endDate">End Date</Label>
+                    <Label htmlFor="end_date">End Date</Label>
                     <Input
-                      id="endDate"
+                      id="end_date"
                       type="date"
-                      value={formData.endDate}
-                      onChange={(e) => handleInputChange('endDate', e.target.value)}
+                      value={formData.end_date}
+                      onChange={(e) => handleInputChange('end_date', e.target.value)}
                     />
                   </div>
 
@@ -190,13 +200,13 @@ export function CreateCampaignDialog({ open, onOpenChange, onCampaignCreated }: 
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="targetDeals">Target Deals</Label>
+                    <Label htmlFor="target_deals">Target Deals</Label>
                     <Input
-                      id="targetDeals"
+                      id="target_deals"
                       type="number"
                       placeholder="0"
-                      value={formData.targetDeals}
-                      onChange={(e) => handleInputChange('targetDeals', e.target.value)}
+                      value={formData.target_deals}
+                      onChange={(e) => handleInputChange('target_deals', e.target.value)}
                     />
                   </div>
                 </CardContent>
@@ -207,7 +217,10 @@ export function CreateCampaignDialog({ open, onOpenChange, onCampaignCreated }: 
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleCreateCampaign} disabled={isSubmitting}>
+              <Button 
+                onClick={handleCreateCampaign} 
+                disabled={isSubmitting || !formData.name || !formData.start_date}
+              >
                 {isSubmitting ? 'Creating...' : 'Create Campaign'}
               </Button>
             </DialogFooter>
@@ -222,7 +235,13 @@ export function CreateCampaignDialog({ open, onOpenChange, onCampaignCreated }: 
                 </p>
               </CardHeader>
               <CardContent>
-                <EnhancedCsvUploader onUploadComplete={handleCsvUploadComplete} />
+                {createdCampaignId && (
+                  <CSVUploadSection 
+                    campaignId={createdCampaignId}
+                    onUploadComplete={handleCSVUploadComplete}
+                    onSkip={handleSkipCSV}
+                  />
+                )}
               </CardContent>
             </Card>
           </TabsContent>

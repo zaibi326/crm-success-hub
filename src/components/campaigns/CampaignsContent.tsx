@@ -7,24 +7,72 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Search, Filter, ChevronDown, Lock } from 'lucide-react';
 import { CampaignGrid } from './CampaignGrid';
 import { CreateCampaignDialog } from './CreateCampaignDialog';
+import { EditCampaignDialog } from './EditCampaignDialog';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useCampaigns, Campaign } from '@/hooks/useCampaigns';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 export function CampaignsContent() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('date'); // Default to date for newest first
+  const [sortBy, setSortBy] = useState('date');
   const [filterStatus, setFilterStatus] = useState('all');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [campaignToDelete, setCampaignToDelete] = useState<string | null>(null);
+  
   const { canCreateCampaigns, userRole } = useRoleAccess();
+  const { campaigns, loading, createCampaign, updateCampaign, deleteCampaign } = useCampaigns();
 
   const handleCreateCampaign = () => {
     setShowCreateDialog(true);
   };
 
-  const handleCampaignCreated = () => {
-    // Refresh campaigns list or handle success
-    console.log('Campaign created successfully');
+  const handleEditCampaign = (campaign: Campaign) => {
+    setSelectedCampaign(campaign);
+    setShowEditDialog(true);
   };
+
+  const handleDeleteCampaign = (campaignId: string) => {
+    setCampaignToDelete(campaignId);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (campaignToDelete) {
+      await deleteCampaign(campaignToDelete);
+      setShowDeleteDialog(false);
+      setCampaignToDelete(null);
+    }
+  };
+
+  const handleCampaignCreated = async (campaignData: any) => {
+    await createCampaign(campaignData);
+    setShowCreateDialog(false);
+  };
+
+  const handleCampaignUpdated = async (campaignData: any) => {
+    if (selectedCampaign) {
+      await updateCampaign(selectedCampaign.id, campaignData);
+      setShowEditDialog(false);
+      setSelectedCampaign(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <SidebarInset className="flex-1 overflow-auto">
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading campaigns...</p>
+          </div>
+        </div>
+      </SidebarInset>
+    );
+  }
 
   return (
     <SidebarInset className="flex-1 overflow-auto">
@@ -125,11 +173,14 @@ export function CampaignsContent() {
       
       <main className="p-6 bg-gradient-to-br from-gray-50/30 to-white">
         <CampaignGrid 
+          campaigns={campaigns}
           searchTerm={searchTerm} 
           sortBy={sortBy} 
           filterStatus={filterStatus}
           canEdit={canCreateCampaigns}
           onCreateCampaign={handleCreateCampaign}
+          onEditCampaign={handleEditCampaign}
+          onDeleteCampaign={handleDeleteCampaign}
         />
       </main>
 
@@ -139,6 +190,34 @@ export function CampaignsContent() {
         onOpenChange={setShowCreateDialog}
         onCampaignCreated={handleCampaignCreated}
       />
+
+      {/* Edit Campaign Dialog */}
+      {selectedCampaign && (
+        <EditCampaignDialog
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          campaign={selectedCampaign}
+          onCampaignUpdated={handleCampaignUpdated}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Campaign</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this campaign? This action cannot be undone and will also delete all associated leads.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SidebarInset>
   );
 }

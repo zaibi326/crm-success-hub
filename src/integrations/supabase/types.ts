@@ -14,6 +14,116 @@ export type Database = {
   }
   public: {
     Tables: {
+      campaign_leads: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          current_arrears: number | null
+          email: string | null
+          id: string
+          notes: string | null
+          owner_name: string
+          phone: string | null
+          property_address: string
+          status: string | null
+          tax_id: string | null
+          tax_lawsuit_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          current_arrears?: number | null
+          email?: string | null
+          id?: string
+          notes?: string | null
+          owner_name: string
+          phone?: string | null
+          property_address: string
+          status?: string | null
+          tax_id?: string | null
+          tax_lawsuit_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          current_arrears?: number | null
+          email?: string | null
+          id?: string
+          notes?: string | null
+          owner_name?: string
+          phone?: string | null
+          property_address?: string
+          status?: string | null
+          tax_id?: string | null
+          tax_lawsuit_number?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_leads_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          budget: number | null
+          created_at: string
+          created_by: string
+          description: string | null
+          end_date: string | null
+          equity_purchased: number | null
+          expenditure: number | null
+          id: string
+          name: string
+          progress: number | null
+          signed_deals: number | null
+          start_date: string
+          status: string
+          target_deals: number | null
+          updated_at: string
+        }
+        Insert: {
+          budget?: number | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          end_date?: string | null
+          equity_purchased?: number | null
+          expenditure?: number | null
+          id?: string
+          name: string
+          progress?: number | null
+          signed_deals?: number | null
+          start_date: string
+          status?: string
+          target_deals?: number | null
+          updated_at?: string
+        }
+        Update: {
+          budget?: number | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          end_date?: string | null
+          equity_purchased?: number | null
+          expenditure?: number | null
+          id?: string
+          name?: string
+          progress?: number | null
+          signed_deals?: number | null
+          start_date?: string
+          status?: string
+          target_deals?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       custom_app_fields: {
         Row: {
           app_id: string
