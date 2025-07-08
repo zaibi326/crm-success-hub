@@ -10,6 +10,7 @@ export interface TaxLead {
   notes?: string;
   phone?: string;
   email?: string;
+  // Enhanced fields for detailed lead information
   ownerOfRecord?: string;
   hasDeath?: boolean;
   deathNotes?: string;
@@ -20,4 +21,7 @@ export interface TaxLead {
   hasAdditionalTaxingEntities?: boolean;
   additionalTaxingNotes?: string;
   vestingDeedNotes?: string;
+  // File uploads
+  probateDocuments?: File[];
+  vestingDeedDocuments?: File[];
 }

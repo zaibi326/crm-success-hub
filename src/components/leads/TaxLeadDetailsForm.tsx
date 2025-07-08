@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,7 +23,7 @@ interface TaxLead {
   notes?: string;
   phone?: string;
   email?: string;
-  // New Phase 6 fields
+  // Enhanced fields for detailed lead information
   ownerOfRecord?: string;
   hasDeath?: boolean;
   deathNotes?: string;
@@ -354,7 +355,7 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole = 'editor' }: TaxLea
               {/* Vesting Deed Upload */}
               <div className="space-y-4">
                 <FileUploadSection
-                  title="Upload Vesting Deed"
+                  title="Upload Last Known Vesting Deed"
                   category="vesting_deed"
                   files={files.filter(f => f.category === 'vesting_deed')}
                   onFileUpload={(files) => handleFileUpload(files, 'vesting_deed')}
