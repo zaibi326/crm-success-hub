@@ -14,7 +14,7 @@ import { CSVUploadSection } from './CSVUploadSection';
 interface CreateCampaignDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCampaignCreated: (campaignData: any) => void;
+  onCampaignCreated: (campaignData: any) => Promise<any>;
 }
 
 export function CreateCampaignDialog({ open, onOpenChange, onCampaignCreated }: CreateCampaignDialogProps) {
@@ -50,8 +50,10 @@ export function CreateCampaignDialog({ open, onOpenChange, onCampaignCreated }: 
       };
       
       const createdCampaign = await onCampaignCreated(campaignData);
-      setCreatedCampaignId(createdCampaign.id);
-      setCurrentTab('leads');
+      if (createdCampaign && createdCampaign.id) {
+        setCreatedCampaignId(createdCampaign.id);
+        setCurrentTab('leads');
+      }
     } catch (error) {
       console.error('Error creating campaign:', error);
     } finally {

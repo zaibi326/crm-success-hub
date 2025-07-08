@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
@@ -49,8 +48,8 @@ export function CampaignsContent() {
   };
 
   const handleCampaignCreated = async (campaignData: any) => {
-    await createCampaign(campaignData);
-    setShowCreateDialog(false);
+    const createdCampaign = await createCampaign(campaignData);
+    return createdCampaign;
   };
 
   const handleCampaignUpdated = async (campaignData: any) => {
@@ -107,7 +106,6 @@ export function CampaignsContent() {
         </div>
       </header>
 
-      {/* Role-based access notice for Employees */}
       {userRole === 'Employee' && (
         <div className="p-6 bg-yellow-50/50 border-b border-yellow-200/60">
           <Card className="border-yellow-200 bg-yellow-50">
@@ -124,11 +122,9 @@ export function CampaignsContent() {
         </div>
       )}
       
-      {/* Filters and Search Bar */}
       <div className="p-6 bg-gray-50/50 border-b border-gray-200/60">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div className="flex flex-col sm:flex-row gap-3 flex-1">
-            {/* Search */}
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
@@ -139,7 +135,6 @@ export function CampaignsContent() {
               />
             </div>
 
-            {/* Status Filter */}
             <Select value={filterStatus} onValueChange={setFilterStatus}>
               <SelectTrigger className="w-40 bg-white shadow-sm border-gray-200">
                 <Filter className="w-4 h-4 mr-2 text-gray-400" />
@@ -154,7 +149,6 @@ export function CampaignsContent() {
               </SelectContent>
             </Select>
 
-            {/* Sort */}
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-40 bg-white shadow-sm border-gray-200">
                 <ChevronDown className="w-4 h-4 mr-2 text-gray-400" />
@@ -184,14 +178,12 @@ export function CampaignsContent() {
         />
       </main>
 
-      {/* Create Campaign Dialog */}
       <CreateCampaignDialog
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
         onCampaignCreated={handleCampaignCreated}
       />
 
-      {/* Edit Campaign Dialog */}
       {selectedCampaign && (
         <EditCampaignDialog
           open={showEditDialog}
@@ -201,7 +193,6 @@ export function CampaignsContent() {
         />
       )}
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
