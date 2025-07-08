@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Cloud, Upload, CheckCircle, FileText, X, AlertCircle } from 'lucide-react';
@@ -10,9 +9,11 @@ import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { TaxLead } from '@/types/taxLead';
 
 interface EnhancedCsvUploaderProps {
-  onUploadComplete: () => void;
+  onUploadComplete: (uploadedLeads: TaxLead[]) => void;
+  expectedColumns?: string[];
 }
 
 const fieldOptions = [
@@ -33,7 +34,7 @@ interface ValidationError {
   message: string;
 }
 
-export function EnhancedCsvUploader({ onUploadComplete }: EnhancedCsvUploaderProps) {
+export function EnhancedCsvUploader({ onUploadComplete, expectedColumns }: EnhancedCsvUploaderProps) {
   const [csvData, setCsvData] = useState<string[][]>([]);
   const [fieldMapping, setFieldMapping] = useState<Record<number, string>>({});
   const [isUploading, setIsUploading] = useState(false);
@@ -170,6 +171,57 @@ export function EnhancedCsvUploader({ onUploadComplete }: EnhancedCsvUploaderPro
     }
   };
 
+  const convertToTaxLeads = (): TaxLead[] => {
+    const leads: TaxLead[] = [];
+    
+    csvData.slice(1).forEach((row, index) => {
+      const lead: Partial<TaxLead> = {
+        id: Date.now() + index, // Temporary ID
+        status: 'WARM' as const
+      };
+
+      Object.entries(fieldMapping).forEach(([colIndex, fieldName]) => {
+        const cellValue = row[parseInt(colIndex)]?.trim() || '';
+        
+        if (fieldName !== 'ignore' && cellValue) {
+          switch (fieldName) {
+            case 'taxId':
+              lead.taxId = cellValue;
+              break;
+            case 'ownerName':
+              lead.ownerName = cellValue;
+              break;
+            case 'propertyAddress':
+              lead.propertyAddress = cellValue;
+              break;
+            case 'taxLawsuitNumber':
+              lead.taxLawsuitNumber = cellValue;
+              break;
+            case 'currentArrears':
+              lead.currentArrears = parseFloat(cellValue.replace(/[$,]/g, '')) || 0;
+              break;
+            case 'phone':
+              lead.phone = cellValue;
+              break;
+            case 'email':
+              lead.email = cellValue;
+              break;
+            case 'notes':
+              lead.notes = cellValue;
+              break;
+          }
+        }
+      });
+
+      // Only add if we have required fields
+      if (lead.taxId && lead.ownerName && lead.propertyAddress) {
+        leads.push(lead as TaxLead);
+      }
+    });
+
+    return leads;
+  };
+
   const handleUpload = async () => {
     setShowConfirmModal(false);
     setIsUploading(true);
@@ -194,9 +246,12 @@ export function EnhancedCsvUploader({ onUploadComplete }: EnhancedCsvUploaderPro
     setIsUploading(false);
     setShowSuccessModal(true);
     
+    // Convert CSV data to TaxLead objects
+    const taxLeads = convertToTaxLeads();
+    
     toast({
       title: "Upload Successful",
-      description: `Successfully processed ${csvData.length - 1} leads from ${fileName}`,
+      description: `Successfully processed ${taxLeads.length} leads from ${fileName}`,
     });
   };
 
@@ -483,8 +538,9 @@ export function EnhancedCsvUploader({ onUploadComplete }: EnhancedCsvUploaderPro
                 Import More
               </Button>
               <Button onClick={() => {
+                const taxLeads = convertToTaxLeads();
                 setShowSuccessModal(false);
-                onUploadComplete();
+                onUploadComplete(taxLeads);
               }} className="bg-green-600 hover:bg-green-700">
                 Review Leads
               </Button>
