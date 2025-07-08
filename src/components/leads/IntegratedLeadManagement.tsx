@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { EnhancedCsvUploader } from './EnhancedCsvUploader';
 import { LeadProcessingWorkflow } from './LeadProcessingWorkflow';
-import { LeadsOverview } from './LeadsOverview';
+import { TaxLeadOverview } from './TaxLeadOverview';
 import { TaxLead } from '@/types/taxLead';
 
 // Mock data for demonstration
@@ -161,7 +161,7 @@ export function IntegratedLeadManagement() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <LeadsOverview 
+            <TaxLeadOverview 
               leads={leads} 
               onStartProcessing={handleStartProcessing}
               onLeadUpdate={handleLeadUpdate}
@@ -230,7 +230,7 @@ export function IntegratedLeadManagement() {
           </TabsContent>
 
           <TabsContent value="review" className="space-y-6">
-            <LeadsOverview 
+            <TaxLeadOverview 
               leads={leads} 
               onStartProcessing={handleStartProcessing}
               onLeadUpdate={handleLeadUpdate}
