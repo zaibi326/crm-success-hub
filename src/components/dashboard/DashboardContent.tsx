@@ -6,7 +6,7 @@ import { DashboardStats } from './DashboardStats';
 import { ActivityFeed } from './ActivityFeed';
 import { LeadsPieChart } from './LeadsPieChart';
 import { LeadsTableView } from './LeadsTableView';
-import { TaxLeadDetailView } from '@/components/leads/TaxLeadDetailView';
+import { LeadDetailsPage } from '@/components/leads/LeadDetailsPage';
 import { TaxLead } from '@/types/taxLead';
 import { BarChart3, Users, Activity } from 'lucide-react';
 
@@ -26,7 +26,7 @@ const mockLeads: TaxLead[] = [
     currentArrears: 15000,
     status: 'HOT',
     notes: 'High-value property with significant arrears',
-    phone: '(555) 123-4567',
+    phone: '(773) 851-9461',
     email: 'mario.rojas@email.com',
     ownerOfRecord: 'Mario Rojas'
   },
@@ -84,12 +84,18 @@ const mockLeads: TaxLead[] = [
 export function DashboardContent({ userRole, showLeadsInDashboard = false }: DashboardContentProps) {
   const [selectedLead, setSelectedLead] = useState<TaxLead | null>(null);
 
+  const handleLeadUpdate = (updatedLead: TaxLead) => {
+    setSelectedLead(updatedLead);
+    // Here you would typically update the lead in your backend
+  };
+
   if (selectedLead) {
     return (
       <SidebarInset className="flex-1 overflow-auto">
-        <TaxLeadDetailView 
-          selectedLead={selectedLead}
+        <LeadDetailsPage 
+          lead={selectedLead}
           onBack={() => setSelectedLead(null)}
+          onLeadUpdate={handleLeadUpdate}
         />
       </SidebarInset>
     );
