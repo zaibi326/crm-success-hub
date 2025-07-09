@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DashboardStats } from './DashboardStats';
 import { ActivityFeed } from './ActivityFeed';
 import { LeadsPieChart } from './LeadsPieChart';
+import { LeadsTableView } from './LeadsTableView';
 import { TaxLeadDetailView } from '@/components/leads/TaxLeadDetailView';
 import { TaxLead } from '@/types/taxLead';
 import { BarChart3, Users, Activity } from 'lucide-react';
@@ -134,13 +135,10 @@ export function DashboardContent({ userRole, showLeadsInDashboard = false }: Das
           </TabsContent>
 
           <TabsContent value="leads" className="space-y-6">
-            <div className="text-center py-12">
-              <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Lead Management</h3>
-              <p className="text-gray-600">
-                Access lead management features through the dedicated Current Deals section.
-              </p>
-            </div>
+            <LeadsTableView 
+              leads={mockLeads} 
+              onLeadSelect={setSelectedLead}
+            />
           </TabsContent>
 
           <TabsContent value="activity" className="space-y-6">
