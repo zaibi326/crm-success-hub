@@ -130,7 +130,7 @@ export function DashboardContent({ userRole, showLeadsInDashboard = false }: Das
             <DashboardStats userRole={userRole} />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <LeadsPieChart />
-              <ActivityFeed />
+              <ActivityFeed userRole={userRole} />
             </div>
           </TabsContent>
 
@@ -142,7 +142,7 @@ export function DashboardContent({ userRole, showLeadsInDashboard = false }: Das
           </TabsContent>
 
           <TabsContent value="activity" className="space-y-6">
-            <ActivityFeed />
+            <ActivityFeed userRole={userRole} />
           </TabsContent>
         </Tabs>
       </main>
