@@ -8,7 +8,7 @@ import { LeadsPieChart } from './LeadsPieChart';
 import { LeadsTableView } from './LeadsTableView';
 import { TaxLeadDetailView } from '@/components/leads/TaxLeadDetailView';
 import { TaxLead } from '@/types/taxLead';
-import { BarChart3, Users, Activity } from 'lucide-react';
+import { BarChart3, Users, Activity, Target } from 'lucide-react';
 
 interface DashboardContentProps {
   userRole: string;
@@ -111,14 +111,18 @@ export function DashboardContent({ userRole, showLeadsInDashboard = false }: Das
 
       <main className="p-6 bg-gradient-to-br from-gray-50/30 to-white">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Overview
             </TabsTrigger>
             <TabsTrigger value="deals" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
+              <Target className="w-4 h-4" />
               Current Deals
+            </TabsTrigger>
+            <TabsTrigger value="leads" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Leads
             </TabsTrigger>
             <TabsTrigger value="activity" className="flex items-center gap-2">
               <Activity className="w-4 h-4" />
@@ -135,6 +139,13 @@ export function DashboardContent({ userRole, showLeadsInDashboard = false }: Das
           </TabsContent>
 
           <TabsContent value="deals" className="space-y-6">
+            <LeadsTableView 
+              leads={mockLeads}
+              onLeadSelect={setSelectedLead}
+            />
+          </TabsContent>
+
+          <TabsContent value="leads" className="space-y-6">
             <LeadsTableView 
               leads={mockLeads}
               onLeadSelect={setSelectedLead}
