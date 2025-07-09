@@ -30,6 +30,15 @@ export function AppSidebar() {
       icon: Home,
     },
     
+    // Enhanced Current Deals with Lead Processing
+    {
+      title: "Current Deals",
+      url: "/current-deals",
+      icon: Target,
+      badge: "Enhanced",
+      badgeColor: "bg-green-100 text-green-800"
+    },
+    
     // Core CRM Features
     {
       title: "My Campaigns",

@@ -5,10 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DashboardStats } from './DashboardStats';
 import { ActivityFeed } from './ActivityFeed';
 import { LeadsPieChart } from './LeadsPieChart';
-import { LeadsTableView } from './LeadsTableView';
 import { TaxLeadDetailView } from '@/components/leads/TaxLeadDetailView';
 import { TaxLead } from '@/types/taxLead';
-import { BarChart3, Users, Activity, Target } from 'lucide-react';
+import { BarChart3, Users, Activity } from 'lucide-react';
 
 interface DashboardContentProps {
   userRole: string;
@@ -111,14 +110,10 @@ export function DashboardContent({ userRole, showLeadsInDashboard = false }: Das
 
       <main className="p-6 bg-gradient-to-br from-gray-50/30 to-white">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Overview
-            </TabsTrigger>
-            <TabsTrigger value="deals" className="flex items-center gap-2">
-              <Target className="w-4 h-4" />
-              Current Deals
             </TabsTrigger>
             <TabsTrigger value="leads" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
@@ -138,18 +133,14 @@ export function DashboardContent({ userRole, showLeadsInDashboard = false }: Das
             </div>
           </TabsContent>
 
-          <TabsContent value="deals" className="space-y-6">
-            <LeadsTableView 
-              leads={mockLeads}
-              onLeadSelect={setSelectedLead}
-            />
-          </TabsContent>
-
           <TabsContent value="leads" className="space-y-6">
-            <LeadsTableView 
-              leads={mockLeads}
-              onLeadSelect={setSelectedLead}
-            />
+            <div className="text-center py-12">
+              <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Lead Management</h3>
+              <p className="text-gray-600">
+                Access lead management features through the dedicated Current Deals section.
+              </p>
+            </div>
           </TabsContent>
 
           <TabsContent value="activity" className="space-y-6">
