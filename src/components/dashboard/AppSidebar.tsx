@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, Users, Calendar, Bell, Settings, Activity, Target, Phone, Building2 } from 'lucide-react';
+import { Home, Calendar, Bell, Settings, Activity, Target, Phone, Building2 } from 'lucide-react';
 import { 
   Sidebar, 
   SidebarTrigger, 
@@ -37,11 +37,6 @@ export function AppSidebar() {
       icon: Target,
       badge: userRole === 'Employee' ? 'View Only' : undefined,
       badgeColor: userRole === 'Employee' ? 'bg-yellow-100 text-yellow-800' : undefined
-    },
-    {
-      title: "Current Deals",
-      url: "/leads",
-      icon: Users,
     },
     
     // Communication Features

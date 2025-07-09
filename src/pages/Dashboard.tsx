@@ -13,7 +13,7 @@ const Dashboard = () => {
       <SidebarProvider>
         <div className="min-h-screen flex w-full">
           <AppSidebar />
-          <DashboardContent userRole={user?.role || 'Employee'} />
+          <DashboardContent userRole={user?.role || 'Employee'} showLeadsInDashboard={true} />
         </div>
       </SidebarProvider>
     </div>
