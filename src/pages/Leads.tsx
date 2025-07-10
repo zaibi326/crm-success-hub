@@ -2,7 +2,7 @@
 import React from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/dashboard/AppSidebar';
-import { LeadsContent } from '@/components/leads/LeadsContent';
+import { EnhancedLeadsContent } from '@/components/leads/EnhancedLeadsContent';
 
 const Leads = () => {
   return (
@@ -10,7 +10,7 @@ const Leads = () => {
       <SidebarProvider>
         <div className="min-h-screen flex w-full">
           <AppSidebar />
-          <LeadsContent />
+          <EnhancedLeadsContent />
         </div>
       </SidebarProvider>
     </div>
