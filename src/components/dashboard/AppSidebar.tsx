@@ -30,9 +30,9 @@ export function AppSidebar() {
       icon: Home,
     },
     
-    // Enhanced Current Deals with Lead Processing
+    // Leads Management - moved from Current Deals position
     {
-      title: "Current Deals",
+      title: "Leads",
       url: "/current-deals",
       icon: Target,
       badge: "Enhanced",
