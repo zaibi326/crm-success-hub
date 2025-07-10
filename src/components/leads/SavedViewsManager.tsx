@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Eye, EyeOff, Trash2, Share } from 'lucide-react';
+import { Plus, Eye, EyeOff, Trash2, Share, Bookmark } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface SavedView {
@@ -27,6 +27,7 @@ interface SavedViewsManagerProps {
 }
 
 export function SavedViewsManager({ views, onSaveView, onDeleteView, onApplyView }: SavedViewsManagerProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newViewName, setNewViewName] = useState('');
   const [newViewType, setNewViewType] = useState<'public' | 'private'>('private');
@@ -63,88 +64,106 @@ export function SavedViewsManager({ views, onSaveView, onDeleteView, onApplyView
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Saved Views</CardTitle>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" className="flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                Save Current View
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Save View</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="viewName">View Name</Label>
-                  <Input
-                    id="viewName"
-                    value={newViewName}
-                    onChange={(e) => setNewViewName(e.target.value)}
-                    placeholder="Enter view name"
-                  />
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Bookmark className="w-5 h-5" />
+            Saved Views
+            {views.length > 0 && (
+              <Badge variant="secondary">{views.length}</Badge>
+            )}
+          </CardTitle>
+          <div className="flex gap-2">
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" className="flex items-center gap-2">
+                  <Plus className="w-4 h-4" />
+                  Save Current View
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Save View</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="viewName">View Name</Label>
+                    <Input
+                      id="viewName"
+                      value={newViewName}
+                      onChange={(e) => setNewViewName(e.target.value)}
+                      placeholder="Enter view name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="viewType">Visibility</Label>
+                    <Select value={newViewType} onValueChange={(value: 'public' | 'private') => setNewViewType(value)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="private">Private (Only me)</SelectItem>
+                        <SelectItem value="public">Public (Team shared)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex gap-2 justify-end">
+                    <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSaveView}>
+                      Save View
+                    </Button>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="viewType">Visibility</Label>
-                  <Select value={newViewType} onValueChange={(value: 'public' | 'private') => setNewViewType(value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="private">Private (Only me)</SelectItem>
-                      <SelectItem value="public">Public (Team shared)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex gap-2 justify-end">
-                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleSaveView}>
-                    Save View
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setIsExpanded(!isExpanded)}
+            >
+              {isExpanded ? 'Collapse' : 'Expand'}
+            </Button>
+          </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-2">
-        {views.length === 0 ? (
-          <p className="text-gray-500 text-sm">No saved views yet</p>
-        ) : (
-          views.map((view) => (
-            <div key={view.id} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
-              <div className="flex items-center gap-2">
+      
+      {isExpanded && (
+        <CardContent className="space-y-2">
+          {views.length === 0 ? (
+            <p className="text-gray-500 text-sm">No saved views yet</p>
+          ) : (
+            views.map((view) => (
+              <div key={view.id} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onApplyView(view)}
+                    className="text-left justify-start"
+                  >
+                    {view.name}
+                  </Button>
+                  <Badge variant={view.type === 'public' ? 'default' : 'secondary'} className="text-xs">
+                    {view.type === 'public' ? (
+                      <><Share className="w-3 h-3 mr-1" />Public</>
+                    ) : (
+                      <><EyeOff className="w-3 h-3 mr-1" />Private</>
+                    )}
+                  </Badge>
+                </div>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onApplyView(view)}
-                  className="text-left justify-start"
+                  onClick={() => onDeleteView(view.id)}
+                  className="text-red-600 hover:text-red-800"
                 >
-                  {view.name}
+                  <Trash2 className="w-4 h-4" />
                 </Button>
-                <Badge variant={view.type === 'public' ? 'default' : 'secondary'} className="text-xs">
-                  {view.type === 'public' ? (
-                    <><Share className="w-3 h-3 mr-1" />Public</>
-                  ) : (
-                    <><EyeOff className="w-3 h-3 mr-1" />Private</>
-                  )}
-                </Badge>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onDeleteView(view.id)}
-                className="text-red-600 hover:text-red-800"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
-          ))
-        )}
-      </CardContent>
+            ))
+          )}
+        </CardContent>
+      )}
     </Card>
   );
 }

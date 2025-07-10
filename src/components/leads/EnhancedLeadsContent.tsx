@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Input } from '@/components/ui/input';
@@ -55,13 +54,10 @@ export function EnhancedLeadsContent() {
 
   // Available fields for filtering
   const availableFields = [
-    { key: 'ownerName', label: 'Owner Name', type: 'text' },
-    { key: 'propertyAddress', label: 'Property Address', type: 'text' },
     { key: 'status', label: 'Status', type: 'select' },
     { key: 'currentArrears', label: 'Current Arrears', type: 'number' },
-    { key: 'phone', label: 'Phone', type: 'text' },
-    { key: 'email', label: 'Email', type: 'text' },
-    { key: 'taxId', label: 'Tax ID', type: 'text' },
+    { key: 'createdBy', label: 'Created By', type: 'text' },
+    { key: 'createdOn', label: 'Created On', type: 'date' },
   ];
 
   // Filter and search logic
