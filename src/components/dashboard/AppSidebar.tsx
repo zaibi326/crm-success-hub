@@ -30,10 +30,10 @@ export function AppSidebar() {
       icon: Home,
     },
     
-    // Leads Management - moved from Current Deals position
+    // Seller Leads Management - updated name and route
     {
-      title: "Leads",
-      url: "/current-deals",
+      title: "Seller Leads",
+      url: "/leads",
       icon: Target,
       badge: "Enhanced",
       badgeColor: "bg-green-100 text-green-800"
