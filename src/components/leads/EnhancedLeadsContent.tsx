@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Input } from '@/components/ui/input';
@@ -8,7 +9,6 @@ import { useToast } from '@/hooks/use-toast';
 
 // Import all the new view components
 import { ViewSwitcher } from './ViewSwitcher';
-import { SavedViewsManager } from './SavedViewsManager';
 import { AdvancedFilters } from './AdvancedFilters';
 import { LeadCardView } from './LeadCardView';
 import { LeadCalendarView } from './LeadCalendarView';
@@ -30,15 +30,6 @@ interface FilterCondition {
   value: string;
 }
 
-interface SavedView {
-  id: string;
-  name: string;
-  type: 'public' | 'private';
-  filters: Record<string, any>;
-  createdBy: string;
-  createdAt: Date;
-}
-
 export function EnhancedLeadsContent() {
   const [currentView, setCurrentView] = useState<'table' | 'card' | 'calendar' | 'timeline' | 'badge'>('table');
   const [searchTerm, setSearchTerm] = useState('');
@@ -47,7 +38,6 @@ export function EnhancedLeadsContent() {
   const [selectedLead, setSelectedLead] = useState<TaxLead | null>(null);
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
   const [filters, setFilters] = useState<FilterCondition[]>([]);
-  const [savedViews, setSavedViews] = useState<SavedView[]>([]);
   
   const { mockLeads, handleAddLead, handleLeadUpdate } = useLeadsData();
   const { toast } = useToast();
@@ -136,32 +126,6 @@ export function EnhancedLeadsContent() {
 
   const handleSort = (field: string) => {
     setSortBy(field);
-  };
-
-  const handleSaveView = (view: Omit<SavedView, 'id' | 'createdAt'>) => {
-    const newView: SavedView = {
-      ...view,
-      id: Date.now().toString(),
-      createdAt: new Date()
-    };
-    setSavedViews(prev => [...prev, newView]);
-  };
-
-  const handleDeleteView = (viewId: string) => {
-    setSavedViews(prev => prev.filter(v => v.id !== viewId));
-    toast({
-      title: "View deleted",
-      description: "The saved view has been removed",
-    });
-  };
-
-  const handleApplyView = (view: SavedView) => {
-    // Apply the saved view's filters
-    // This would restore the state from the saved view
-    toast({
-      title: "View applied",
-      description: `Applied view: ${view.name}`,
-    });
   };
 
   const handleExportData = () => {
@@ -275,18 +239,12 @@ export function EnhancedLeadsContent() {
 
       <main className="p-6 bg-gradient-to-br from-gray-50/30 to-white space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Filters and Saved Views Sidebar */}
+          {/* Filters Sidebar */}
           <div className="lg:col-span-1 space-y-4">
             <AdvancedFilters
               filters={filters}
               onFiltersChange={setFilters}
               availableFields={availableFields}
-            />
-            <SavedViewsManager
-              views={savedViews}
-              onSaveView={handleSaveView}
-              onDeleteView={handleDeleteView}
-              onApplyView={handleApplyView}
             />
           </div>
 
