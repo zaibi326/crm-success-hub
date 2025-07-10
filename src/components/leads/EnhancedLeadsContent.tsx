@@ -2,7 +2,7 @@
 import React from 'react';
 import { SidebarInset } from '@/components/ui/sidebar';
 import { AdvancedFilters } from './AdvancedFilters';
-import { LeadDetailsPage } from './LeadDetailsPage';
+import { EnhancedLeadDetailPage } from './EnhancedLeadDetailPage';
 import { TemplateModificationDialog } from './TemplateModificationDialog';
 import { LeadsHeader } from './LeadsHeader';
 import { LeadsFiltersSection } from './LeadsFiltersSection';
@@ -36,9 +36,14 @@ export function EnhancedLeadsContent() {
     handleBulkLeadsUpdate
   } = useLeadsLogic();
 
+  const handleSellerAdded = (seller: any) => {
+    // Redirect to the seller detail page after adding
+    setSelectedLead(seller);
+  };
+
   if (selectedLead) {
     return (
-      <LeadDetailsPage
+      <EnhancedLeadDetailPage
         lead={selectedLead}
         onBack={() => setSelectedLead(null)}
         onLeadUpdate={(updatedLead) => {
@@ -55,6 +60,7 @@ export function EnhancedLeadsContent() {
         onExport={handleExportData}
         onTemplateClick={() => setIsTemplateDialogOpen(true)}
         onAddLead={handleAddLead}
+        onSellerAdded={handleSellerAdded}
       />
 
       <div className="px-6 py-4">

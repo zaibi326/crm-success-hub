@@ -24,4 +24,17 @@ export interface TaxLead {
   // File uploads
   probateDocuments?: File[];
   vestingDeedDocuments?: File[];
+  // New comprehensive fields
+  firstName: string;
+  lastName: string;
+  leadSource?: string;
+  temperature: 'HOT' | 'WARM' | 'COLD';
+  occupancyStatus: 'OWNER_OCCUPIED' | 'TENANT_OCCUPIED' | 'VACANT';
+  agentName?: string;
+  askingPrice?: number;
+  mortgagePrice?: number;
+  campaignId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  attachedFiles?: File[];
 }

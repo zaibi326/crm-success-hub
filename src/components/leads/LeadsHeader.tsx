@@ -3,15 +3,17 @@ import React from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Download, Settings } from 'lucide-react';
-import { AddSellerDialog } from './AddSellerDialog';
+import { ComprehensiveAddSellerDialog } from './ComprehensiveAddSellerDialog';
+import { TaxLead } from '@/types/taxLead';
 
 interface LeadsHeaderProps {
   onExport: () => void;
   onTemplateClick: () => void;
-  onAddLead: (lead: any) => void;
+  onAddLead: (lead: TaxLead) => void;
+  onSellerAdded?: (seller: TaxLead) => void;
 }
 
-export function LeadsHeader({ onExport, onTemplateClick, onAddLead }: LeadsHeaderProps) {
+export function LeadsHeader({ onExport, onTemplateClick, onAddLead, onSellerAdded }: LeadsHeaderProps) {
   return (
     <header className="sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-gray-200/60 px-6 py-4 shadow-sm">
       <div className="flex items-center gap-4 mb-4">
@@ -31,7 +33,10 @@ export function LeadsHeader({ onExport, onTemplateClick, onAddLead }: LeadsHeade
             <Settings className="w-4 h-4 mr-2" />
             Templates
           </Button>
-          <AddSellerDialog onAddSeller={onAddLead} />
+          <ComprehensiveAddSellerDialog 
+            onAddSeller={onAddLead}
+            onSellerAdded={onSellerAdded}
+          />
         </div>
       </div>
     </header>
