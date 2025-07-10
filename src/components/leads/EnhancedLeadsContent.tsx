@@ -32,7 +32,8 @@ export function EnhancedLeadsContent() {
     handleSort,
     handleExportData,
     handleAddLead,
-    handleLeadUpdate
+    handleLeadUpdate,
+    handleBulkLeadsUpdate
   } = useLeadsLogic();
 
   if (selectedLead) {
@@ -87,6 +88,7 @@ export function EnhancedLeadsContent() {
             onLeadSelect={setSelectedLead}
             getStatusBadge={getStatusBadge}
             handleSort={handleSort}
+            onLeadsUpdate={handleBulkLeadsUpdate}
           />
         </div>
 

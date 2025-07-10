@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Phone, 
   Mail, 
@@ -14,11 +13,13 @@ import {
   ArrowLeft,
   Home,
   User,
-  FileText
+  FileText,
+  Activity
 } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
 import { PropertyMap } from './PropertyMap';
 import { TemplateModificationDialog } from './TemplateModificationDialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface LeadDetailsPageProps {
   lead: TaxLead;
@@ -50,6 +51,34 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
+
+  // Mock activity data
+  const activities = [
+    {
+      id: 1,
+      type: 'created',
+      title: 'Lead Created',
+      description: `Lead for ${lead.ownerName} was created`,
+      timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      user: 'System'
+    },
+    {
+      id: 2,
+      type: 'note',
+      title: 'Note Added',
+      description: lead.notes || 'Initial contact attempted',
+      timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      user: 'John Doe'
+    },
+    {
+      id: 3,
+      type: 'status_change',
+      title: 'Status Updated',
+      description: `Status changed to ${lead.status}`,
+      timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000),
+      user: 'Jane Smith'
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-crm-gradient-start via-white to-crm-gradient-end">
@@ -85,16 +114,14 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
           </div>
         </div>
 
-        {/* Lead Status Navigation */}
-        <Tabs defaultValue="details" className="w-full mb-6">
-          <TabsList className="grid w-full grid-cols-4">
+        {/* Tabs for Details and Activity */}
+        <Tabs defaultValue="details" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="details">Lead Details</TabsTrigger>
-            <TabsTrigger value="all">All Leads</TabsTrigger>
-            <TabsTrigger value="untouched">Untouched Leads</TabsTrigger>
-            <TabsTrigger value="followup">Follow-up Needed</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="details" className="space-y-6">
+          <TabsContent value="details" className="space-y-6 mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Column */}
               <div className="space-y-6">
@@ -288,22 +315,36 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
             </div>
           </TabsContent>
 
-          <TabsContent value="all">
-            <div className="text-center py-8">
-              <p className="text-gray-600">Navigate to All Leads view</p>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="untouched">
-            <div className="text-center py-8">
-              <p className="text-gray-600">Navigate to Untouched Leads view</p>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="followup">
-            <div className="text-center py-8">
-              <p className="text-gray-600">Navigate to Follow-up Needed view</p>
-            </div>
+          <TabsContent value="activity" className="space-y-6 mt-6">
+            <Card className="shadow-lg border-0">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-crm-primary" />
+                  Lead Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {activities.map((activity, index) => (
+                    <div key={activity.id} className="flex gap-4 pb-4 border-b border-gray-100 last:border-b-0">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                        <Activity className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-semibold text-gray-900">{activity.title}</h4>
+                          <span className="text-xs text-gray-500">
+                            {activity.timestamp.toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-gray-600 text-sm mb-1">{activity.description}</p>
+                        <p className="text-xs text-gray-500">by {activity.user}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

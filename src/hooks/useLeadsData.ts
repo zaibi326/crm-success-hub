@@ -44,6 +44,7 @@ export function useLeadsData() {
 
   return {
     mockLeads,
+    setMockLeads,
     handleAddLead,
     handleLeadUpdate
   };

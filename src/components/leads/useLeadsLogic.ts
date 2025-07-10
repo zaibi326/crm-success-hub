@@ -20,7 +20,7 @@ export function useLeadsLogic() {
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
   const [filters, setFilters] = useState<FilterCondition[]>([]);
   
-  const { mockLeads, handleAddLead, handleLeadUpdate } = useLeadsData();
+  const { mockLeads, handleAddLead, handleLeadUpdate, setMockLeads } = useLeadsData();
   const { toast } = useToast();
 
   // Available fields for filtering
@@ -138,6 +138,10 @@ export function useLeadsLogic() {
     });
   };
 
+  const handleBulkLeadsUpdate = (updatedLeads: TaxLead[]) => {
+    setMockLeads(updatedLeads);
+  };
+
   return {
     // State
     currentView,
@@ -166,6 +170,7 @@ export function useLeadsLogic() {
     handleExportData,
     handleAddLead,
     handleLeadUpdate,
+    handleBulkLeadsUpdate,
     
     // External dependencies
     toast

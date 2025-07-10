@@ -13,6 +13,7 @@ interface LeadsMainContentProps {
   onLeadSelect: (lead: TaxLead) => void;
   getStatusBadge: (status: string) => string;
   handleSort: (field: string) => void;
+  onLeadsUpdate?: (leads: TaxLead[]) => void;
 }
 
 export function LeadsMainContent({
@@ -20,7 +21,8 @@ export function LeadsMainContent({
   filteredLeads,
   onLeadSelect,
   getStatusBadge,
-  handleSort
+  handleSort,
+  onLeadsUpdate
 }: LeadsMainContentProps) {
   return (
     <div className="lg:col-span-3">
@@ -30,6 +32,7 @@ export function LeadsMainContent({
           onLeadSelect={onLeadSelect}
           getStatusBadge={getStatusBadge}
           handleSort={handleSort}
+          onLeadsUpdate={onLeadsUpdate}
         />
       )}
       

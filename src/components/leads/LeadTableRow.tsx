@@ -9,9 +9,18 @@ interface LeadTableRowProps {
   index: number;
   onLeadSelect: (lead: TaxLead) => void;
   getStatusBadge: (status: string) => string;
+  isSelected?: boolean;
+  onSelectChange?: (checked: boolean) => void;
 }
 
-export function LeadTableRow({ lead, index, onLeadSelect, getStatusBadge }: LeadTableRowProps) {
+export function LeadTableRow({ 
+  lead, 
+  index, 
+  onLeadSelect, 
+  getStatusBadge, 
+  isSelected = false,
+  onSelectChange 
+}: LeadTableRowProps) {
   return (
     <TableRow 
       key={lead.id} 
@@ -22,6 +31,8 @@ export function LeadTableRow({ lead, index, onLeadSelect, getStatusBadge }: Lead
         <input 
           type="checkbox" 
           className="rounded border-gray-300"
+          checked={isSelected}
+          onChange={(e) => onSelectChange?.(e.target.checked)}
         />
       </TableCell>
       <TableCell className="font-medium text-blue-600 hover:text-blue-800">
