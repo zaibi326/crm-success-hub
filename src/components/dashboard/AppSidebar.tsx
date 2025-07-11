@@ -21,6 +21,7 @@ import { useRoleAccess } from '@/hooks/useRoleAccess';
 
 export function AppSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { userRole } = useRoleAccess();
 
   const navigationItems = [
@@ -84,6 +85,10 @@ export function AppSidebar() {
     },
   ];
 
+  const handleNavigation = (url: string) => {
+    navigate(url);
+  };
+
   return (
     <Sidebar className="bg-white/95 backdrop-blur-sm border-r border-gray-200/50 shadow-xl">
       <SidebarContent>
@@ -91,8 +96,12 @@ export function AppSidebar() {
           <SidebarMenu>
             {navigationItems.map((item) => (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild isActive={location.pathname === item.url}>
-                  <a href={item.url} className="flex items-center gap-2">
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={location.pathname === item.url}
+                  onClick={() => handleNavigation(item.url)}
+                >
+                  <button className="flex items-center gap-2 w-full">
                     <item.icon className="w-4 h-4" />
                     <span>{item.title}</span>
                     {item.badge && (
@@ -100,7 +109,7 @@ export function AppSidebar() {
                         {item.badge}
                       </SidebarMenuBadge>
                     )}
-                  </a>
+                  </button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}

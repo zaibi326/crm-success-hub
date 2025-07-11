@@ -4,7 +4,10 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/dashboard/AppSidebar';
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { OrganizationManager } from '@/components/organization/OrganizationManager';
-import { Building2 } from 'lucide-react';
+import { UserInvitationManager } from '@/components/organization/UserInvitationManager';
+import { Building2, Users, Settings2, Shield } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const OrganizationManagement = () => {
   return (
@@ -29,7 +32,120 @@ const OrganizationManagement = () => {
             </header>
             
             <main className="p-6">
-              <OrganizationManager />
+              <div className="max-w-7xl mx-auto">
+                <Tabs defaultValue="organizations" className="space-y-6">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="organizations" className="flex items-center gap-2">
+                      <Building2 className="w-4 h-4" />
+                      Organizations
+                    </TabsTrigger>
+                    <TabsTrigger value="users" className="flex items-center gap-2">
+                      <Users className="w-4 h-4" />
+                      User Management
+                    </TabsTrigger>
+                    <TabsTrigger value="permissions" className="flex items-center gap-2">
+                      <Shield className="w-4 h-4" />
+                      Permissions
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="organizations" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Building2 className="w-5 h-5" />
+                          Organization Overview
+                        </CardTitle>
+                        <CardDescription>
+                          Manage your organization settings and structure
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <OrganizationManager />
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="users" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Users className="w-5 h-5" />
+                          User Invitations & Management
+                        </CardTitle>
+                        <CardDescription>
+                          Invite new users and manage existing team members
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <UserInvitationManager />
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="permissions" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5" />
+                          Role Permissions
+                        </CardTitle>
+                        <CardDescription>
+                          Configure access levels and permissions for different roles
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <Card>
+                              <CardHeader>
+                                <CardTitle className="text-lg">Admin</CardTitle>
+                                <CardDescription>Full system access</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <ul className="text-sm space-y-1">
+                                  <li>• Manage organizations</li>
+                                  <li>• User management</li>
+                                  <li>• System settings</li>
+                                  <li>• All CRM features</li>
+                                </ul>
+                              </CardContent>
+                            </Card>
+                            <Card>
+                              <CardHeader>
+                                <CardTitle className="text-lg">Manager</CardTitle>
+                                <CardDescription>Team management access</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <ul className="text-sm space-y-1">
+                                  <li>• Manage team leads</li>
+                                  <li>• Campaign management</li>
+                                  <li>• Reports & analytics</li>
+                                  <li>• Communication tools</li>
+                                </ul>
+                              </CardContent>
+                            </Card>
+                            <Card>
+                              <CardHeader>
+                                <CardTitle className="text-lg">Employee</CardTitle>
+                                <CardDescription>Standard user access</CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <ul className="text-sm space-y-1">
+                                  <li>• View assigned leads</li>
+                                  <li>• Basic communication</li>
+                                  <li>• Update lead status</li>
+                                  <li>• Personal dashboard</li>
+                                </ul>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </div>
             </main>
           </SidebarInset>
         </div>
