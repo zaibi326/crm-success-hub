@@ -62,95 +62,116 @@ export function AdvancedFilters({ filters, onFiltersChange, availableFields }: A
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Filter className="w-5 h-5" />
-            Advanced Filters
-            {filters.length > 0 && (
-              <Badge variant="secondary">{filters.length}</Badge>
-            )}
-          </CardTitle>
-          <div className="flex gap-2">
-            {filters.length > 0 && (
-              <Button variant="outline" size="sm" onClick={clearAllFilters}>
-                Clear All
-              </Button>
-            )}
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => setIsExpanded(!isExpanded)}
+    <div>
+      {/* Compact Filter Toggle Button */}
+      <div className="flex items-center gap-2 mb-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="relative w-9 h-9 p-0 bg-white border-gray-200 hover:bg-gray-50"
+        >
+          <Filter className="w-4 h-4" />
+          {filters.length > 0 && (
+            <Badge 
+              variant="secondary" 
+              className="absolute -top-2 -right-2 w-5 h-5 p-0 flex items-center justify-center text-xs"
             >
-              {isExpanded ? 'Collapse' : 'Expand'}
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      
-      {isExpanded && (
-        <CardContent className="space-y-4">
-          {filters.map((filter) => (
-            <div key={filter.id} className="flex items-center gap-2 p-3 border rounded-lg">
-              <Select
-                value={filter.field}
-                onValueChange={(value) => updateFilter(filter.id, { field: value })}
-              >
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select field" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableFields.map((field) => (
-                    <SelectItem key={field.key} value={field.key}>
-                      {field.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={filter.operator}
-                onValueChange={(value) => updateFilter(filter.id, { operator: value })}
-              >
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {operators.map((op) => (
-                    <SelectItem key={op.value} value={op.value}>
-                      {op.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {!['is_empty', 'is_not_empty'].includes(filter.operator) && (
-                <Input
-                  value={filter.value}
-                  onChange={(e) => updateFilter(filter.id, { value: e.target.value })}
-                  placeholder="Enter value"
-                  className="flex-1"
-                />
-              )}
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => removeFilter(filter.id)}
-                className="text-red-600 hover:text-red-800"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-          ))}
-
-          <Button onClick={addFilter} variant="outline" className="w-full">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Filter Condition
+              {filters.length}
+            </Badge>
+          )}
+        </Button>
+        {filters.length > 0 && (
+          <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs">
+            Clear All
           </Button>
-        </CardContent>
+        )}
+      </div>
+
+      {/* Expanded Filter Panel */}
+      {isExpanded && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between text-lg">
+              <div className="flex items-center gap-2">
+                <Filter className="w-5 h-5" />
+                Advanced Filters
+                {filters.length > 0 && (
+                  <Badge variant="secondary">{filters.length}</Badge>
+                )}
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setIsExpanded(false)}
+              >
+                Collapse
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          
+          <CardContent className="space-y-4">
+            {filters.map((filter) => (
+              <div key={filter.id} className="flex items-center gap-2 p-3 border rounded-lg">
+                <Select
+                  value={filter.field}
+                  onValueChange={(value) => updateFilter(filter.id, { field: value })}
+                >
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Select field" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableFields.map((field) => (
+                      <SelectItem key={field.key} value={field.key}>
+                        {field.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={filter.operator}
+                  onValueChange={(value) => updateFilter(filter.id, { operator: value })}
+                >
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {operators.map((op) => (
+                      <SelectItem key={op.value} value={op.value}>
+                        {op.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {!['is_empty', 'is_not_empty'].includes(filter.operator) && (
+                  <Input
+                    value={filter.value}
+                    onChange={(e) => updateFilter(filter.id, { value: e.target.value })}
+                    placeholder="Enter value"
+                    className="flex-1"
+                  />
+                )}
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeFilter(filter.id)}
+                  className="text-red-600 hover:text-red-800"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
+
+            <Button onClick={addFilter} variant="outline" className="w-full">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Filter Condition
+            </Button>
+          </CardContent>
+        </Card>
       )}
-    </Card>
+    </div>
   );
 }

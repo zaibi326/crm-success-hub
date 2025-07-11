@@ -13,7 +13,6 @@ import {
   LayoutGrid, 
   Activity, 
   Calendar,
-  ChevronDown,
   Sparkles
 } from 'lucide-react';
 
@@ -33,15 +32,16 @@ export function ViewSwitcherDropdown({ currentView, onViewChange }: ViewSwitcher
   ] as const;
 
   const handleViewSelect = (viewId: string) => {
-    // Map 'table-enhanced' to 'table' for now, as we don't have a separate enhanced table view yet
     const actualView = viewId === 'table-enhanced' ? 'table' : viewId;
     onViewChange(actualView as 'table' | 'card' | 'calendar' | 'timeline' | 'badge');
   };
 
-  const getCurrentViewLabel = () => {
+  const getCurrentViewIcon = () => {
     const view = viewOptions.find(v => v.id === currentView || (v.id === 'table-enhanced' && currentView === 'table'));
-    return view ? view.label : 'Table';
+    return view ? view.icon : TableIcon;
   };
+
+  const CurrentIcon = getCurrentViewIcon();
 
   return (
     <DropdownMenu>
@@ -49,11 +49,9 @@ export function ViewSwitcherDropdown({ currentView, onViewChange }: ViewSwitcher
         <Button 
           variant="outline" 
           size="sm" 
-          className="flex items-center gap-2 text-sm bg-white border-gray-200 hover:bg-gray-50"
+          className="w-9 h-9 p-0 bg-white border-gray-200 hover:bg-gray-50"
         >
-          <TableIcon className="w-4 h-4" />
-          <span className="hidden sm:inline">{getCurrentViewLabel()}</span>
-          <ChevronDown className="w-3 h-3" />
+          <CurrentIcon className="w-4 h-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
