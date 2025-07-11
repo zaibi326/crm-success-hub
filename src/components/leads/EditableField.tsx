@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Edit, Check, X } from 'lucide-react';
 
@@ -10,10 +11,18 @@ interface EditableFieldProps {
   value: string;
   onSave: (newValue: string) => void;
   multiline?: boolean;
-  type?: 'text' | 'email' | 'tel';
+  type?: 'text' | 'email' | 'tel' | 'select';
+  options?: Array<{ value: string; label: string }>;
 }
 
-export function EditableField({ label, value, onSave, multiline = false, type = 'text' }: EditableFieldProps) {
+export function EditableField({ 
+  label, 
+  value, 
+  onSave, 
+  multiline = false, 
+  type = 'text',
+  options = []
+}: EditableFieldProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
 
@@ -32,7 +41,20 @@ export function EditableField({ label, value, onSave, multiline = false, type = 
       <div className="grid grid-cols-3 gap-4 text-sm">
         <div className="font-medium text-gray-700">{label}</div>
         <div className="col-span-2 flex items-center gap-2">
-          {multiline ? (
+          {type === 'select' ? (
+            <Select value={editValue} onValueChange={setEditValue}>
+              <SelectTrigger className="flex-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {options.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : multiline ? (
             <Textarea
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}

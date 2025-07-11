@@ -68,11 +68,6 @@ export function LeadsFiltersSection({
       
       {/* Compact Icons Section */}
       <div className="flex items-center gap-2">
-        <AdvancedFilters
-          filters={[]}
-          onFiltersChange={() => {}}
-          availableFields={[]}
-        />
         <ViewSwitcherDropdown currentView={currentView} onViewChange={onViewChange} />
       </div>
     </div>

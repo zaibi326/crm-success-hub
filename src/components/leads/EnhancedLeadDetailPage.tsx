@@ -176,6 +176,18 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
     return `$${amount.toLocaleString()}`;
   };
 
+  const temperatureOptions = [
+    { value: 'HOT', label: '🔥 HOT' },
+    { value: 'WARM', label: '🌤️ WARM' },
+    { value: 'COLD', label: '❄️ COLD' }
+  ];
+
+  const occupancyOptions = [
+    { value: 'OWNER_OCCUPIED', label: 'Owner Occupied' },
+    { value: 'TENANT_OCCUPIED', label: 'Tenant Occupied' },
+    { value: 'VACANT', label: 'Vacant' }
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-crm-gradient-start via-white to-crm-gradient-end">
       <div className="max-w-7xl mx-auto p-6">
@@ -214,9 +226,13 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
 
         {/* Tabs for Details and Activity */}
         <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="details">Lead Details</TabsTrigger>
-            <TabsTrigger value="activity">Activity & Comments</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
+            <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+            <TabsTrigger value="communication">Communication</TabsTrigger>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsTrigger value="tasks">Tasks</TabsTrigger>
           </TabsList>
 
           <TabsContent value="details" className="space-y-6 mt-6">
@@ -243,65 +259,21 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
                     />
                     
                     {leadData.phone && (
-                      <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div className="font-medium text-gray-700">Phone</div>
-                        <div className="col-span-2 flex items-center gap-2 group">
-                          <span className="text-gray-900 flex-1">{leadData.phone}</span>
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleCall(leadData.phone!)}
-                              className="h-6 px-2"
-                            >
-                              <Phone className="w-3 h-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleSendText(leadData.phone!)}
-                              className="h-6 px-2"
-                            >
-                              <MessageSquare className="w-3 h-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => {}}
-                              className="h-6 px-2"
-                            >
-                              <Edit className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
+                      <EditableField
+                        label="Phone"
+                        value={leadData.phone}
+                        onSave={(value) => handleFieldUpdate('phone', value)}
+                        type="tel"
+                      />
                     )}
                     
                     {leadData.email && (
-                      <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div className="font-medium text-gray-700">Email</div>
-                        <div className="col-span-2 flex items-center gap-2 group">
-                          <span className="text-gray-900 flex-1">{leadData.email}</span>
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleEmail(leadData.email!)}
-                              className="h-6 px-2"
-                            >
-                              <Mail className="w-3 h-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => {}}
-                              className="h-6 px-2"
-                            >
-                              <Edit className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
+                      <EditableField
+                        label="Email"
+                        value={leadData.email}
+                        onSave={(value) => handleFieldUpdate('email', value)}
+                        type="email"
+                      />
                     )}
 
                     {leadData.agentName && (
@@ -331,8 +303,10 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
                     
                     <EditableField
                       label="Occupancy"
-                      value={getOccupancyLabel(leadData.occupancyStatus)}
+                      value={leadData.occupancyStatus}
                       onSave={(value) => handleFieldUpdate('occupancyStatus', value)}
+                      type="select"
+                      options={occupancyOptions}
                     />
 
                     {leadData.taxId && (
@@ -435,14 +409,13 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
                       />
                     )}
                     
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div className="font-medium text-gray-700">Temperature</div>
-                      <div className="col-span-2">
-                        <Badge className={getStatusColor(leadData.temperature)}>
-                          {getTemperatureIcon(leadData.temperature)} {leadData.temperature}
-                        </Badge>
-                      </div>
-                    </div>
+                    <EditableField
+                      label="Temperature"
+                      value={leadData.temperature}
+                      onSave={(value) => handleFieldUpdate('temperature', value)}
+                      type="select"
+                      options={temperatureOptions}
+                    />
 
                     {leadData.campaignId && (
                       <EditableField
@@ -592,6 +565,51 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* New Tabs */}
+          <TabsContent value="campaigns" className="space-y-6 mt-6">
+            <Card className="shadow-lg border-0">
+              <CardHeader>
+                <CardTitle>Campaigns</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">Campaign management features coming soon...</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="communication" className="space-y-6 mt-6">
+            <Card className="shadow-lg border-0">
+              <CardHeader>
+                <CardTitle>Communication</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">Communication tracking features coming soon...</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="documents" className="space-y-6 mt-6">
+            <Card className="shadow-lg border-0">
+              <CardHeader>
+                <CardTitle>Documents</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">Document management features coming soon...</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="tasks" className="space-y-6 mt-6">
+            <Card className="shadow-lg border-0">
+              <CardHeader>
+                <CardTitle>Tasks</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">Task management features coming soon...</p>
               </CardContent>
             </Card>
           </TabsContent>
