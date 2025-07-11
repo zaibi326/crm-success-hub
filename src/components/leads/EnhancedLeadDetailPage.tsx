@@ -29,6 +29,7 @@ import { TaxLead } from '@/types/taxLead';
 import { PropertyMap } from './PropertyMap';
 import { TemplateModificationDialog } from './TemplateModificationDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { EditableField } from './EditableField';
 import { useToast } from '@/hooks/use-toast';
 
 interface EnhancedLeadDetailPageProps {
@@ -51,6 +52,7 @@ interface ActivityItem {
 export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedLeadDetailPageProps) {
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
   const [newComment, setNewComment] = useState('');
+  const [leadData, setLeadData] = useState(lead);
   const [activities, setActivities] = useState<ActivityItem[]>([
     {
       id: 1,
@@ -93,6 +95,17 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
 
   const handleEmail = (email: string) => {
     window.open(`mailto:${email}`, '_self');
+  };
+
+  const handleFieldUpdate = (field: keyof TaxLead, value: string) => {
+    const updatedLead = { ...leadData, [field]: value };
+    setLeadData(updatedLead);
+    onLeadUpdate(updatedLead);
+    
+    toast({
+      title: "Field Updated",
+      description: `${field} has been updated successfully`,
+    });
   };
 
   const getStatusColor = (status: string) => {
@@ -179,14 +192,14 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
             </Button>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                {lead.firstName} {lead.lastName}
+                {leadData.firstName} {leadData.lastName}
               </h1>
-              <p className="text-gray-600">{lead.propertyAddress}</p>
+              <p className="text-gray-600">{leadData.propertyAddress}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Badge className={getStatusColor(lead.temperature)}>
-              {getTemperatureIcon(lead.temperature)} {lead.temperature}
+            <Badge className={getStatusColor(leadData.temperature)}>
+              {getTemperatureIcon(leadData.temperature)} {leadData.temperature}
             </Badge>
             <Button 
               variant="outline"
@@ -219,62 +232,84 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div className="font-medium text-gray-700">Full Name</div>
-                      <div className="col-span-2 text-gray-900">
-                        {lead.firstName} {lead.lastName}
-                      </div>
-                    </div>
+                    <EditableField
+                      label="Full Name"
+                      value={`${leadData.firstName} ${leadData.lastName}`}
+                      onSave={(value) => {
+                        const [firstName, ...lastNameParts] = value.split(' ');
+                        handleFieldUpdate('firstName', firstName || '');
+                        handleFieldUpdate('lastName', lastNameParts.join(' ') || '');
+                      }}
+                    />
                     
-                    {lead.phone && (
+                    {leadData.phone && (
                       <div className="grid grid-cols-3 gap-4 text-sm">
                         <div className="font-medium text-gray-700">Phone</div>
-                        <div className="col-span-2 flex items-center gap-2">
-                          <span className="text-gray-900">{lead.phone}</span>
-                          <div className="flex gap-1">
+                        <div className="col-span-2 flex items-center gap-2 group">
+                          <span className="text-gray-900 flex-1">{leadData.phone}</span>
+                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => handleCall(lead.phone!)}
-                              className="h-8 px-2"
+                              onClick={() => handleCall(leadData.phone!)}
+                              className="h-6 px-2"
                             >
                               <Phone className="w-3 h-3" />
                             </Button>
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => handleSendText(lead.phone!)}
-                              className="h-8 px-2"
+                              onClick={() => handleSendText(leadData.phone!)}
+                              className="h-6 px-2"
                             >
                               <MessageSquare className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {}}
+                              className="h-6 px-2"
+                            >
+                              <Edit className="w-3 h-3" />
                             </Button>
                           </div>
                         </div>
                       </div>
                     )}
                     
-                    {lead.email && (
+                    {leadData.email && (
                       <div className="grid grid-cols-3 gap-4 text-sm">
                         <div className="font-medium text-gray-700">Email</div>
-                        <div className="col-span-2 flex items-center gap-2">
-                          <span className="text-gray-900">{lead.email}</span>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEmail(lead.email!)}
-                            className="h-8 px-2"
-                          >
-                            <Mail className="w-3 h-3" />
-                          </Button>
+                        <div className="col-span-2 flex items-center gap-2 group">
+                          <span className="text-gray-900 flex-1">{leadData.email}</span>
+                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEmail(leadData.email!)}
+                              className="h-6 px-2"
+                            >
+                              <Mail className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {}}
+                              className="h-6 px-2"
+                            >
+                              <Edit className="w-3 h-3" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     )}
 
-                    {lead.agentName && (
-                      <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div className="font-medium text-gray-700">Agent</div>
-                        <div className="col-span-2 text-gray-900">{lead.agentName}</div>
-                      </div>
+                    {leadData.agentName && (
+                      <EditableField
+                        label="Agent"
+                        value={leadData.agentName}
+                        onSave={(value) => handleFieldUpdate('agentName', value)}
+                      />
                     )}
                   </CardContent>
                 </Card>
@@ -288,23 +323,24 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div className="font-medium text-gray-700">Address</div>
-                      <div className="col-span-2 text-gray-900">{lead.propertyAddress}</div>
-                    </div>
+                    <EditableField
+                      label="Address"
+                      value={leadData.propertyAddress}
+                      onSave={(value) => handleFieldUpdate('propertyAddress', value)}
+                    />
                     
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div className="font-medium text-gray-700">Occupancy</div>
-                      <div className="col-span-2 text-gray-900">
-                        {getOccupancyLabel(lead.occupancyStatus)}
-                      </div>
-                    </div>
+                    <EditableField
+                      label="Occupancy"
+                      value={getOccupancyLabel(leadData.occupancyStatus)}
+                      onSave={(value) => handleFieldUpdate('occupancyStatus', value)}
+                    />
 
-                    {lead.taxId && (
-                      <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div className="font-medium text-gray-700">Tax ID</div>
-                        <div className="col-span-2 text-gray-900 font-mono">{lead.taxId}</div>
-                      </div>
+                    {leadData.taxId && (
+                      <EditableField
+                        label="Tax ID"
+                        value={leadData.taxId}
+                        onSave={(value) => handleFieldUpdate('taxId', value)}
+                      />
                     )}
 
                     {/* Property Links */}
@@ -314,7 +350,7 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
                         <Button
                           variant="link"
                           className="p-0 h-auto text-crm-primary hover:text-crm-accent"
-                          onClick={() => window.open(`https://www.zillow.com/homes/${encodeURIComponent(lead.propertyAddress)}/`, '_blank')}
+                          onClick={() => window.open(`https://www.zillow.com/homes/${encodeURIComponent(leadData.propertyAddress)}/`, '_blank')}
                         >
                           <ExternalLink className="w-3 h-3 mr-1" />
                           Zillow
@@ -322,7 +358,7 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
                         <Button
                           variant="link"
                           className="p-0 h-auto text-crm-primary hover:text-crm-accent"
-                          onClick={() => window.open(`https://www.homes.com/property/${encodeURIComponent(lead.propertyAddress)}/`, '_blank')}
+                          onClick={() => window.open(`https://www.homes.com/property/${encodeURIComponent(leadData.propertyAddress)}/`, '_blank')}
                         >
                           <ExternalLink className="w-3 h-3 mr-1" />
                           Homes.com
@@ -341,31 +377,43 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {lead.askingPrice && (
-                      <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div className="font-medium text-gray-700">Asking Price</div>
-                        <div className="col-span-2 text-green-600 font-bold">
-                          {formatCurrency(lead.askingPrice)}
-                        </div>
-                      </div>
+                    {leadData.askingPrice && (
+                      <EditableField
+                        label="Asking Price"
+                        value={formatCurrency(leadData.askingPrice)}
+                        onSave={(value) => {
+                          const numValue = parseFloat(value.replace(/[$,]/g, ''));
+                          if (!isNaN(numValue)) {
+                            handleFieldUpdate('askingPrice', numValue.toString());
+                          }
+                        }}
+                      />
                     )}
                     
-                    {lead.mortgagePrice && (
-                      <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div className="font-medium text-gray-700">Mortgage Price</div>
-                        <div className="col-span-2 text-orange-600 font-bold">
-                          {formatCurrency(lead.mortgagePrice)}
-                        </div>
-                      </div>
+                    {leadData.mortgagePrice && (
+                      <EditableField
+                        label="Mortgage Price"
+                        value={formatCurrency(leadData.mortgagePrice)}
+                        onSave={(value) => {
+                          const numValue = parseFloat(value.replace(/[$,]/g, ''));
+                          if (!isNaN(numValue)) {
+                            handleFieldUpdate('mortgagePrice', numValue.toString());
+                          }
+                        }}
+                      />
                     )}
                     
-                    {lead.currentArrears && (
-                      <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div className="font-medium text-gray-700">Current Arrears</div>
-                        <div className="col-span-2 text-red-600 font-bold">
-                          {formatCurrency(lead.currentArrears)}
-                        </div>
-                      </div>
+                    {leadData.currentArrears && (
+                      <EditableField
+                        label="Current Arrears"
+                        value={formatCurrency(leadData.currentArrears)}
+                        onSave={(value) => {
+                          const numValue = parseFloat(value.replace(/[$,]/g, ''));
+                          if (!isNaN(numValue)) {
+                            handleFieldUpdate('currentArrears', numValue.toString());
+                          }
+                        }}
+                      />
                     )}
                   </CardContent>
                 </Card>
@@ -379,27 +427,29 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {lead.leadSource && (
-                      <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div className="font-medium text-gray-700">Lead Source</div>
-                        <div className="col-span-2 text-gray-900">{lead.leadSource}</div>
-                      </div>
+                    {leadData.leadSource && (
+                      <EditableField
+                        label="Lead Source"
+                        value={leadData.leadSource}
+                        onSave={(value) => handleFieldUpdate('leadSource', value)}
+                      />
                     )}
                     
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div className="font-medium text-gray-700">Temperature</div>
                       <div className="col-span-2">
-                        <Badge className={getStatusColor(lead.temperature)}>
-                          {getTemperatureIcon(lead.temperature)} {lead.temperature}
+                        <Badge className={getStatusColor(leadData.temperature)}>
+                          {getTemperatureIcon(leadData.temperature)} {leadData.temperature}
                         </Badge>
                       </div>
                     </div>
 
-                    {lead.campaignId && (
-                      <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div className="font-medium text-gray-700">Campaign</div>
-                        <div className="col-span-2 text-gray-900">{lead.campaignId}</div>
-                      </div>
+                    {leadData.campaignId && (
+                      <EditableField
+                        label="Campaign"
+                        value={leadData.campaignId}
+                        onSave={(value) => handleFieldUpdate('campaignId', value)}
+                      />
                     )}
                   </CardContent>
                 </Card>
@@ -415,26 +465,29 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <PropertyMap address={lead.propertyAddress} />
+                    <PropertyMap address={leadData.propertyAddress} />
                   </CardContent>
                 </Card>
 
                 {/* Notes */}
-                {lead.notes && (
+                {leadData.notes && (
                   <Card className="shadow-lg border-0">
                     <CardHeader>
                       <CardTitle>Notes</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                        <p className="text-gray-700 text-sm leading-relaxed">{lead.notes}</p>
-                      </div>
+                      <EditableField
+                        label=""
+                        value={leadData.notes}
+                        onSave={(value) => handleFieldUpdate('notes', value)}
+                        multiline={true}
+                      />
                     </CardContent>
                   </Card>
                 )}
 
                 {/* Attached Files */}
-                {lead.attachedFiles && lead.attachedFiles.length > 0 && (
+                {leadData.attachedFiles && leadData.attachedFiles.length > 0 && (
                   <Card className="shadow-lg border-0">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -444,7 +497,7 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
-                        {lead.attachedFiles.map((file, index) => (
+                        {leadData.attachedFiles.map((file, index) => (
                           <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
                             <Paperclip className="w-4 h-4 text-gray-500" />
                             <span className="text-sm text-gray-700">{file.name}</span>
@@ -494,7 +547,6 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
               </CardContent>
             </Card>
 
-            {/* Activity Timeline */}
             <Card className="shadow-lg border-0">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -550,7 +602,7 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
       <TemplateModificationDialog
         isOpen={isTemplateDialogOpen}
         onClose={() => setIsTemplateDialogOpen(false)}
-        lead={lead}
+        lead={leadData}
         onSave={onLeadUpdate}
       />
     </div>

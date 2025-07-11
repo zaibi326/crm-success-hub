@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search } from 'lucide-react';
 import { ViewSwitcherDropdown } from './ViewSwitcherDropdown';
+import { AdvancedFilters } from './AdvancedFilters';
 
 interface LeadsFiltersSectionProps {
   searchTerm: string;
@@ -65,7 +66,15 @@ export function LeadsFiltersSection({
         </Select>
       </div>
       
-      <ViewSwitcherDropdown currentView={currentView} onViewChange={onViewChange} />
+      {/* Compact Icons Section */}
+      <div className="flex items-center gap-2">
+        <AdvancedFilters
+          filters={[]}
+          onFiltersChange={() => {}}
+          availableFields={[]}
+        />
+        <ViewSwitcherDropdown currentView={currentView} onViewChange={onViewChange} />
+      </div>
     </div>
   );
 }

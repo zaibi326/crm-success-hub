@@ -2,10 +2,20 @@
 import React, { useState } from 'react';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, Trash2, Edit, Download } from 'lucide-react';
+import { ArrowUpDown, Trash2 } from 'lucide-react';
 import { LeadTableRow } from './LeadTableRow';
 import { TaxLead } from '@/types/taxLead';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface LeadTableViewProps {
   leads: TaxLead[];
@@ -17,6 +27,7 @@ interface LeadTableViewProps {
 
 export function LeadTableView({ leads, onLeadSelect, getStatusBadge, handleSort, onLeadsUpdate }: LeadTableViewProps) {
   const [selectedLeads, setSelectedLeads] = useState<number[]>([]);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
 
   const SortableHeader = ({ field, children }: { field: string; children: React.ReactNode }) => (
@@ -46,48 +57,17 @@ export function LeadTableView({ leads, onLeadSelect, getStatusBadge, handleSort,
     }
   };
 
-  const handleBulkDelete = () => {
+  const handleDeleteConfirm = () => {
     if (selectedLeads.length === 0) return;
     
     const remainingLeads = leads.filter(lead => !selectedLeads.includes(lead.id));
     onLeadsUpdate?.(remainingLeads);
     setSelectedLeads([]);
+    setShowDeleteDialog(false);
     
     toast({
       title: "Leads deleted",
       description: `Successfully deleted ${selectedLeads.length} lead(s)`,
-    });
-  };
-
-  const handleBulkExport = () => {
-    if (selectedLeads.length === 0) return;
-    
-    const selectedLeadsData = leads.filter(lead => selectedLeads.includes(lead.id));
-    
-    const csvContent = [
-      ['Owner Name', 'Property Address', 'Status', 'Phone', 'Email', 'Current Arrears', 'Tax ID'].join(','),
-      ...selectedLeadsData.map(lead => [
-        lead.ownerName,
-        `"${lead.propertyAddress}"`,
-        lead.status,
-        lead.phone || '',
-        lead.email || '',
-        lead.currentArrears || 0,
-        lead.taxId || ''
-      ].join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'selected-leads.csv';
-    a.click();
-    window.URL.revokeObjectURL(url);
-
-    toast({
-      title: "Export completed",
-      description: `Exported ${selectedLeads.length} selected lead(s) to CSV`,
     });
   };
 
@@ -106,30 +86,7 @@ export function LeadTableView({ leads, onLeadSelect, getStatusBadge, handleSort,
             <Button
               size="sm"
               variant="outline"
-              onClick={handleBulkExport}
-              className="text-blue-600 border-blue-200 hover:bg-blue-100"
-            >
-              <Download className="w-4 h-4 mr-1" />
-              Export CSV
-            </Button>
-            <Button
-              size="sm"
-              variant="outline" 
-              onClick={() => {
-                const firstSelectedLead = leads.find(lead => selectedLeads.includes(lead.id));
-                if (firstSelectedLead) {
-                  onLeadSelect(firstSelectedLead);
-                }
-              }}
-              className="text-blue-600 border-blue-200 hover:bg-blue-100"
-            >
-              <Edit className="w-4 h-4 mr-1" />
-              Edit
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleBulkDelete}
+              onClick={() => setShowDeleteDialog(true)}
               className="text-red-600 border-red-200 hover:bg-red-100"
             >
               <Trash2 className="w-4 h-4 mr-1" />
@@ -179,6 +136,27 @@ export function LeadTableView({ leads, onLeadSelect, getStatusBadge, handleSort,
           </TableBody>
         </Table>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove {selectedLeads.length} selected lead(s)? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteConfirm}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

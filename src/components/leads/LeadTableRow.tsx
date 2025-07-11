@@ -9,8 +9,8 @@ interface LeadTableRowProps {
   index: number;
   onLeadSelect: (lead: TaxLead) => void;
   getStatusBadge: (status: string) => string;
-  isSelected?: boolean;
-  onSelectChange?: (checked: boolean) => void;
+  isSelected: boolean;
+  onSelectChange: (checked: boolean) => void;
 }
 
 export function LeadTableRow({ 
@@ -18,42 +18,42 @@ export function LeadTableRow({
   index, 
   onLeadSelect, 
   getStatusBadge, 
-  isSelected = false,
+  isSelected, 
   onSelectChange 
 }: LeadTableRowProps) {
+  const handleRowClick = (e: React.MouseEvent) => {
+    // Don't trigger row click if clicking on checkbox
+    if ((e.target as HTMLElement).closest('input[type="checkbox"]')) {
+      return;
+    }
+    onLeadSelect(lead);
+  };
+
   return (
     <TableRow 
-      key={lead.id} 
-      className="hover:bg-gray-50 cursor-pointer border-b"
-      onClick={() => onLeadSelect(lead)}
+      className={`hover:bg-gray-50 cursor-pointer ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}`}
+      onClick={handleRowClick}
     >
-      <TableCell onClick={(e) => e.stopPropagation()}>
+      <TableCell>
         <input 
           type="checkbox" 
           className="rounded border-gray-300"
           checked={isSelected}
-          onChange={(e) => onSelectChange?.(e.target.checked)}
+          onChange={(e) => onSelectChange(e.target.checked)}
+          onClick={(e) => e.stopPropagation()}
         />
       </TableCell>
       <TableCell className="font-medium text-blue-600 hover:text-blue-800">
         {lead.ownerName}
       </TableCell>
-      <TableCell className="text-gray-600 max-w-xs truncate">
-        {lead.propertyAddress}
-      </TableCell>
+      <TableCell className="max-w-xs truncate">{lead.propertyAddress}</TableCell>
       <TableCell>
         <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs">
           Streamlinerz
         </Badge>
       </TableCell>
-      <TableCell className="text-gray-600 text-sm">
-        {new Date().toLocaleDateString('en-US', { 
-          month: '2-digit', 
-          day: '2-digit', 
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        })}
+      <TableCell className="text-gray-600">
+        {new Date(lead.createdAt || Date.now()).toLocaleDateString()}
       </TableCell>
       <TableCell>
         <Badge className={`${getStatusBadge(lead.status)} border text-xs`}>
