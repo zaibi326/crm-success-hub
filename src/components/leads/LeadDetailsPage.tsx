@@ -52,7 +52,6 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
     }
   };
 
-  // Mock activity data
   const activities = [
     {
       id: 1,
@@ -81,272 +80,233 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-crm-gradient-start via-white to-crm-gradient-end">
-      <div className="max-w-7xl mx-auto p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              onClick={onBack}
-              className="flex items-center gap-2 text-crm-primary hover:text-crm-accent"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Leads
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{lead.ownerName}</h1>
-              <p className="text-gray-600">{lead.propertyAddress}</p>
+    <div className="min-h-screen bg-podio-surface">
+      <div className="max-w-7xl mx-auto">
+        {/* Podio-style sticky header */}
+        <div className="sticky top-0 z-20 bg-podio-background border-b border-podio-border p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="ghost" 
+                onClick={onBack}
+                className="podio-button-secondary flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Leads
+              </Button>
+              <div>
+                <h1 className="text-2xl font-semibold text-podio-text">{lead.ownerName}</h1>
+                <p className="text-sm text-podio-text-muted">{lead.propertyAddress}</p>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Badge className={getStatusColor(lead.status)}>
-              {lead.status}
-            </Badge>
-            <Button 
-              variant="outline"
-              onClick={() => setIsTemplateDialogOpen(true)}
-              className="flex items-center gap-2"
-            >
-              <Edit className="w-4 h-4" />
-              Modify Template
-            </Button>
+            <div className="flex items-center gap-3">
+              <Badge className={getStatusColor(lead.status)}>
+                {lead.status}
+              </Badge>
+              <Button 
+                variant="outline"
+                onClick={() => setIsTemplateDialogOpen(true)}
+                className="podio-button-secondary flex items-center gap-2"
+              >
+                <Edit className="w-4 h-4" />
+                Modify Template
+              </Button>
+            </div>
           </div>
         </div>
 
-        {/* Tabs for Details and Activity */}
-        <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="details">Lead Details</TabsTrigger>
-            <TabsTrigger value="activity">Activity</TabsTrigger>
-          </TabsList>
+        <div className="p-6">
+          {/* Podio-style tabs */}
+          <Tabs defaultValue="details" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 bg-podio-background border border-podio-border rounded-lg p-1">
+              <TabsTrigger 
+                value="details" 
+                className="data-[state=active]:bg-podio-primary data-[state=active]:text-white rounded-md"
+              >
+                Lead Details
+              </TabsTrigger>
+              <TabsTrigger 
+                value="activity"
+                className="data-[state=active]:bg-podio-primary data-[state=active]:text-white rounded-md"
+              >
+                Activity
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="details" className="space-y-6 mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Column */}
-              <div className="space-y-6">
-                {/* Seller Contact */}
-                <Card className="shadow-lg border-0">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <User className="w-5 h-5 text-crm-primary" />
-                      Seller Contact
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div className="font-medium text-gray-700">Seller Name</div>
-                      <div className="col-span-2 text-gray-900">{lead.ownerName}</div>
+            <TabsContent value="details" className="space-y-6 mt-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Left Column - Podio style fields */}
+                <div className="space-y-6">
+                  {/* Seller Contact - Podio style */}
+                  <div className="podio-container p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <User className="w-5 h-5 text-podio-primary" />
+                      <h3 className="font-semibold text-podio-text">Seller Contact</h3>
                     </div>
-                    
-                    {lead.phone && (
-                      <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div className="font-medium text-gray-700">Seller Phone</div>
-                        <div className="col-span-2 flex items-center gap-2">
-                          <span className="text-gray-900">{lead.phone}</span>
-                          <div className="flex gap-1">
+                    <div className="space-y-4">
+                      <div className="podio-field-row">
+                        <div className="podio-field-label">Seller Name</div>
+                        <div className="podio-field-value font-medium">{lead.ownerName}</div>
+                      </div>
+                      
+                      {lead.phone && (
+                        <div className="podio-field-row">
+                          <div className="podio-field-label">Seller Phone</div>
+                          <div className="podio-field-value flex items-center gap-2">
+                            <span>{lead.phone}</span>
+                            <div className="flex gap-1">
+                              <Button
+                                size="sm"
+                                onClick={() => handleCall(lead.phone!)}
+                                className="h-7 px-2 bg-green-600 hover:bg-green-700 text-white"
+                              >
+                                <Phone className="w-3 h-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() => handleSendText(lead.phone!)}
+                                className="h-7 px-2 bg-blue-600 hover:bg-blue-700 text-white"
+                              >
+                                <MessageSquare className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {lead.email && (
+                        <div className="podio-field-row">
+                          <div className="podio-field-label">Seller Email</div>
+                          <div className="podio-field-value flex items-center gap-2">
+                            <span>{lead.email}</span>
                             <Button
                               size="sm"
-                              variant="outline"
-                              onClick={() => handleCall(lead.phone!)}
-                              className="h-8 px-2"
+                              onClick={() => handleEmail(lead.email!)}
+                              className="h-7 px-2 bg-podio-primary hover:bg-blue-600 text-white"
                             >
-                              <Phone className="w-3 h-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleSendText(lead.phone!)}
-                              className="h-8 px-2"
-                            >
-                              <MessageSquare className="w-3 h-3" />
+                              <Mail className="w-3 h-3" />
                             </Button>
                           </div>
                         </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Property Information - Podio style */}
+                  <div className="podio-container p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Home className="w-5 h-5 text-podio-primary" />
+                      <h3 className="font-semibold text-podio-text">Property Information</h3>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="podio-field-row">
+                        <div className="podio-field-label">Tax ID</div>
+                        <div className="podio-field-value font-mono">{lead.taxId}</div>
                       </div>
-                    )}
-                    
-                    {lead.email && (
-                      <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div className="font-medium text-gray-700">Seller Email</div>
-                        <div className="col-span-2 flex items-center gap-2">
-                          <span className="text-gray-900">{lead.email}</span>
+                      
+                      <div className="podio-field-row">
+                        <div className="podio-field-label">Property Address</div>
+                        <div className="podio-field-value">{lead.propertyAddress}</div>
+                      </div>
+                      
+                      {lead.currentArrears && (
+                        <div className="podio-field-row">
+                          <div className="podio-field-label">Current Arrears</div>
+                          <div className="podio-field-value font-semibold text-green-600">
+                            ${lead.currentArrears.toLocaleString()}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {lead.taxLawsuitNumber && (
+                        <div className="podio-field-row">
+                          <div className="podio-field-label">Tax Lawsuit Number</div>
+                          <div className="podio-field-value font-mono">{lead.taxLawsuitNumber}</div>
+                        </div>
+                      )}
+
+                      {/* External Links - Podio style */}
+                      <div className="podio-field-row">
+                        <div className="podio-field-label">External Links</div>
+                        <div className="podio-field-value flex flex-col gap-2">
                           <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEmail(lead.email!)}
-                            className="h-8 px-2"
+                            variant="link"
+                            className="p-0 h-auto text-podio-primary hover:text-blue-600 justify-start"
+                            onClick={() => window.open(`https://www.zillow.com/homes/${encodeURIComponent(lead.propertyAddress)}/`, '_blank')}
                           >
-                            <Mail className="w-3 h-3" />
+                            <ExternalLink className="w-3 h-3 mr-1" />
+                            View on Zillow
+                          </Button>
+                          <Button
+                            variant="link"
+                            className="p-0 h-auto text-podio-primary hover:text-blue-600 justify-start"
+                            onClick={() => window.open(`https://www.homes.com/property/${encodeURIComponent(lead.propertyAddress)}/`, '_blank')}
+                          >
+                            <ExternalLink className="w-3 h-3 mr-1" />
+                            View on Homes.com
                           </Button>
                         </div>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Property Information */}
-                <Card className="shadow-lg border-0">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Home className="w-5 h-5 text-crm-primary" />
-                      Property Information
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div className="font-medium text-gray-700">Tax ID</div>
-                      <div className="col-span-2 text-gray-900 font-mono">{lead.taxId}</div>
                     </div>
-                    
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div className="font-medium text-gray-700">Property Address</div>
-                      <div className="col-span-2 text-gray-900">{lead.propertyAddress}</div>
-                    </div>
-                    
-                    {lead.currentArrears && (
-                      <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div className="font-medium text-gray-700">Current Arrears</div>
-                        <div className="col-span-2 text-green-600 font-bold">
-                          ${lead.currentArrears.toLocaleString()}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {lead.taxLawsuitNumber && (
-                      <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div className="font-medium text-gray-700">Tax Lawsuit Number</div>
-                        <div className="col-span-2 text-gray-900 font-mono">{lead.taxLawsuitNumber}</div>
-                      </div>
-                    )}
+                  </div>
+                </div>
 
-                    {/* Property Links */}
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div className="font-medium text-gray-700">Zillow Link</div>
-                      <div className="col-span-2">
-                        <Button
-                          variant="link"
-                          className="p-0 h-auto text-crm-primary hover:text-crm-accent"
-                          onClick={() => window.open(`https://www.zillow.com/homes/${encodeURIComponent(lead.propertyAddress)}/`, '_blank')}
-                        >
-                          <ExternalLink className="w-3 h-3 mr-1" />
-                          View on Zillow
-                        </Button>
-                      </div>
+                {/* Right Column - Map and Notes */}
+                <div className="space-y-6">
+                  {/* Property Map - Podio style */}
+                  <div className="podio-container p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <MapPin className="w-5 h-5 text-podio-primary" />
+                      <h3 className="font-semibold text-podio-text">Property Location</h3>
                     </div>
-
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div className="font-medium text-gray-700">Homes Link</div>
-                      <div className="col-span-2">
-                        <Button
-                          variant="link"
-                          className="p-0 h-auto text-crm-primary hover:text-crm-accent"
-                          onClick={() => window.open(`https://www.homes.com/property/${encodeURIComponent(lead.propertyAddress)}/`, '_blank')}
-                        >
-                          <ExternalLink className="w-3 h-3 mr-1" />
-                          View on Homes.com
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Lead Status */}
-                <Card className="shadow-lg border-0">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-crm-primary" />
-                      Lead Status
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex flex-wrap gap-2">
-                      <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-                        #New Untouched#
-                      </Badge>
-                      <Badge className="bg-purple-100 text-purple-800 border-purple-200">
-                        Discovery
-                      </Badge>
-                      <Badge className="bg-orange-100 text-orange-800 border-orange-200">
-                        Check Phone Number
-                      </Badge>
-                      <Badge className="bg-green-100 text-green-800 border-green-200">
-                        Already Listed
-                      </Badge>
-                      <Badge className="bg-red-100 text-red-800 border-red-200">
-                        Price Too High
-                      </Badge>
-                      <Badge className="bg-gray-100 text-gray-800 border-gray-200">
-                        Low Motivation
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Right Column - Map */}
-              <div className="space-y-6">
-                <Card className="shadow-lg border-0">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MapPin className="w-5 h-5 text-crm-primary" />
-                      Property Address Map
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
                     <PropertyMap address={lead.propertyAddress} />
-                  </CardContent>
-                </Card>
+                  </div>
 
-                {/* Notes */}
-                {lead.notes && (
-                  <Card className="shadow-lg border-0">
-                    <CardHeader>
-                      <CardTitle>Notes</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                        <p className="text-gray-700 text-sm leading-relaxed">{lead.notes}</p>
+                  {/* Notes - Podio style */}
+                  {lead.notes && (
+                    <div className="podio-container p-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <FileText className="w-5 h-5 text-podio-primary" />
+                        <h3 className="font-semibold text-podio-text">Notes</h3>
                       </div>
-                    </CardContent>
-                  </Card>
-                )}
+                      <div className="bg-podio-surface border border-podio-border rounded-lg p-4">
+                        <p className="text-sm text-podio-text leading-relaxed">{lead.notes}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </TabsContent>
+            </TabsContent>
 
-          <TabsContent value="activity" className="space-y-6 mt-6">
-            <Card className="shadow-lg border-0">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="w-5 h-5 text-crm-primary" />
-                  Lead Activity
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+            <TabsContent value="activity" className="space-y-6 mt-6">
+              <div className="podio-container p-6">
+                <div className="flex items-center gap-2 mb-6">
+                  <Activity className="w-5 h-5 text-podio-primary" />
+                  <h3 className="font-semibold text-podio-text">Lead Activity</h3>
+                </div>
                 <div className="space-y-4">
                   {activities.map((activity, index) => (
-                    <div key={activity.id} className="flex gap-4 pb-4 border-b border-gray-100 last:border-b-0">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                        <Activity className="w-4 h-4 text-blue-600" />
+                    <div key={activity.id} className="flex gap-4 pb-4 border-b border-podio-border last:border-b-0">
+                      <div className="w-8 h-8 rounded-full bg-podio-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Activity className="w-4 h-4 text-podio-primary" />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
-                          <h4 className="font-semibold text-gray-900">{activity.title}</h4>
-                          <span className="text-xs text-gray-500">
+                          <h4 className="font-medium text-podio-text">{activity.title}</h4>
+                          <span className="text-xs text-podio-text-muted">
                             {activity.timestamp.toLocaleDateString()}
                           </span>
                         </div>
-                        <p className="text-gray-600 text-sm mb-1">{activity.description}</p>
-                        <p className="text-xs text-gray-500">by {activity.user}</p>
+                        <p className="text-sm text-podio-text-muted mb-1">{activity.description}</p>
+                        <p className="text-xs text-podio-text-muted">by {activity.user}</p>
                       </div>
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
 
       {/* Template Modification Dialog */}

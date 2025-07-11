@@ -2,7 +2,7 @@
 import React from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Download, Settings } from 'lucide-react';
+import { Download, Settings, Plus } from 'lucide-react';
 import { ComprehensiveAddSellerDialog } from './ComprehensiveAddSellerDialog';
 import { TaxLead } from '@/types/taxLead';
 
@@ -15,27 +15,45 @@ interface LeadsHeaderProps {
 
 export function LeadsHeader({ onExport, onTemplateClick, onAddLead, onSellerAdded }: LeadsHeaderProps) {
   return (
-    <header className="sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-gray-200/60 px-6 py-4 shadow-sm">
-      <div className="flex items-center gap-4 mb-4">
-        <SidebarTrigger className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-all duration-200" />
+    <header className="sticky top-0 z-10 bg-podio-background border-b border-podio-border px-6 py-4">
+      <div className="flex items-center gap-4">
+        <SidebarTrigger className="text-podio-text-muted hover:text-podio-text hover:bg-podio-hover p-2 rounded-md transition-colors duration-200" />
+        
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900">Seller Leads</h1>
-          <p className="text-sm text-gray-600 mt-0.5">
+          <h1 className="text-2xl font-semibold text-podio-text">Seller Leads</h1>
+          <p className="text-sm text-podio-text-muted mt-1">
             Manage and track your seller leads with advanced filtering and multiple view options
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={onExport}>
-            <Download className="w-4 h-4 mr-2" />
+
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            onClick={onExport}
+            className="podio-button-secondary flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" />
             Export
           </Button>
-          <Button onClick={onTemplateClick} variant="outline">
-            <Settings className="w-4 h-4 mr-2" />
+          
+          <Button 
+            onClick={onTemplateClick} 
+            variant="outline"
+            className="podio-button-secondary flex items-center gap-2"
+          >
+            <Settings className="w-4 h-4" />
             Templates
           </Button>
+          
           <ComprehensiveAddSellerDialog 
             onAddSeller={onAddLead}
             onSellerAdded={onSellerAdded}
+            trigger={
+              <Button className="podio-button-primary flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                Add Seller
+              </Button>
+            }
           />
         </div>
       </div>

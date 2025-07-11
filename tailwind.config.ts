@@ -20,8 +20,7 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				'inter': ['Inter', 'sans-serif'],
-				'sans': ['Inter', 'sans-serif'],
+				'sans': ['Inter', 'Helvetica Neue', 'Arial', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -30,8 +29,13 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: '#2563EB',
-					foreground: '#ffffff'
+					DEFAULT: '#03A9F4',
+					foreground: '#ffffff',
+					50: '#E1F5FE',
+					100: '#B3E5FC',
+					500: '#03A9F4',
+					600: '#0288D1',
+					700: '#0277BD'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -42,94 +46,75 @@ export default {
 					foreground: 'hsl(var(--destructive-foreground))'
 				},
 				muted: {
-					DEFAULT: 'hsl(var(--muted))',
-					foreground: 'hsl(var(--muted-foreground))'
+					DEFAULT: '#F8F9FA',
+					foreground: '#6C757D'
 				},
 				accent: {
-					DEFAULT: '#10B981',
-					foreground: '#ffffff'
+					DEFAULT: '#E3F2FD',
+					foreground: '#1976D2'
 				},
 				popover: {
 					DEFAULT: 'hsl(var(--popover))',
 					foreground: 'hsl(var(--popover-foreground))'
 				},
 				card: {
-					DEFAULT: 'hsl(var(--card))',
-					foreground: 'hsl(var(--card-foreground))'
+					DEFAULT: '#FFFFFF',
+					foreground: '#212529'
 				},
 				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
+					DEFAULT: '#FFFFFF',
+					foreground: '#495057',
+					primary: '#03A9F4',
+					'primary-foreground': '#FFFFFF',
+					accent: '#F8F9FA',
+					'accent-foreground': '#495057',
+					border: '#E9ECEF',
+					ring: '#03A9F4'
 				},
-				'crm-bg': '#F9FAFB',
-				'crm-primary': '#2563EB',
-				'crm-accent': '#10B981',
-				'crm-gradient-start': '#E0F2FE',
-				'crm-gradient-end': '#DBEAFE',
+				// Podio-inspired colors
+				'podio-primary': '#03A9F4',
+				'podio-secondary': '#6C757D',
+				'podio-background': '#FFFFFF',
+				'podio-surface': '#F8F9FA',
+				'podio-border': '#E9ECEF',
+				'podio-hover': '#E3F2FD',
+				'podio-text': '#212529',
+				'podio-text-muted': '#6C757D',
 			},
 			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				lg: '8px',
+				md: '6px',
+				sm: '4px'
+			},
+			boxShadow: {
+				'podio': '0 1px 3px rgba(0, 0, 0, 0.1)',
+				'podio-hover': '0 2px 8px rgba(0, 0, 0, 0.15)',
 			},
 			keyframes: {
-				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
-				},
-				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
-				},
-				'fade-in-up': {
+				'fade-in': {
 					'0%': {
 						opacity: '0',
-						transform: 'translateY(30px)'
+						transform: 'translateY(10px)'
 					},
 					'100%': {
 						opacity: '1',
 						transform: 'translateY(0)'
 					}
 				},
-				'slide-in-right': {
+				'slide-in-left': {
 					'0%': {
 						opacity: '0',
-						transform: 'translateX(50px)'
+						transform: 'translateX(-20px)'
 					},
 					'100%': {
 						opacity: '1',
 						transform: 'translateX(0)'
 					}
-				},
-				'float': {
-					'0%, 100%': {
-						transform: 'translateY(0px)'
-					},
-					'50%': {
-						transform: 'translateY(-10px)'
-					}
 				}
 			},
 			animation: {
-				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out',
-				'fade-in-up': 'fade-in-up 0.6s ease-out',
-				'slide-in-right': 'slide-in-right 0.8s ease-out',
-				'float': 'float 3s ease-in-out infinite',
+				'fade-in': 'fade-in 0.3s ease-out',
+				'slide-in-left': 'slide-in-left 0.3s ease-out',
 			}
 		}
 	},

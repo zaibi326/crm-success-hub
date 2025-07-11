@@ -1,94 +1,89 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
+/* Podio-inspired Design System */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 255 255 255;
+    --foreground: 33 37 41;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 255 255 255;
+    --card-foreground: 33 37 41;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 255 255 255;
+    --popover-foreground: 33 37 41;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 3 169 244;
+    --primary-foreground: 255 255 255;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 248 249 250;
+    --secondary-foreground: 73 80 87;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 248 249 250;
+    --muted-foreground: 108 117 125;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 227 242 253;
+    --accent-foreground: 25 118 210;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 220 53 69;
+    --destructive-foreground: 255 255 255;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 233 236 239;
+    --input: 233 236 239;
+    --ring: 3 169 244;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 255 255 255;
+    --sidebar-foreground: 73 80 87;
+    --sidebar-primary: 3 169 244;
+    --sidebar-primary-foreground: 255 255 255;
+    --sidebar-accent: 248 249 250;
+    --sidebar-accent-foreground: 73 80 87;
+    --sidebar-border: 233 236 239;
+    --sidebar-ring: 3 169 244;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 33 37 41;
+    --foreground: 248 249 250;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 52 58 64;
+    --card-foreground: 248 249 250;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 52 58 64;
+    --popover-foreground: 248 249 250;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 3 169 244;
+    --primary-foreground: 255 255 255;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 73 80 87;
+    --secondary-foreground: 248 249 250;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 73 80 87;
+    --muted-foreground: 173 181 189;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 73 80 87;
+    --accent-foreground: 248 249 250;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 220 53 69;
+    --destructive-foreground: 248 249 250;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 73 80 87;
+    --input: 73 80 87;
+    --ring: 3 169 244;
+
+    --sidebar-background: 52 58 64;
+    --sidebar-foreground: 206 212 218;
+    --sidebar-primary: 3 169 244;
+    --sidebar-primary-foreground: 255 255 255;
+    --sidebar-accent: 73 80 87;
+    --sidebar-accent-foreground: 206 212 218;
+    --sidebar-border: 73 80 87;
+    --sidebar-ring: 3 169 244;
   }
 }
 
@@ -98,6 +93,73 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Podio-style scrollbars */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+}
+
+@layer components {
+  /* Podio-style containers */
+  .podio-container {
+    @apply bg-white border border-podio-border rounded-lg shadow-podio;
+  }
+
+  .podio-hover {
+    @apply hover:bg-podio-hover transition-colors duration-200;
+  }
+
+  .podio-button-primary {
+    @apply bg-podio-primary text-white hover:bg-blue-600 border-0 rounded-md px-4 py-2 font-medium transition-colors duration-200;
+  }
+
+  .podio-button-secondary {
+    @apply bg-white text-podio-text border border-podio-border hover:bg-podio-surface rounded-md px-4 py-2 font-medium transition-colors duration-200;
+  }
+
+  .podio-table-row {
+    @apply border-b border-podio-border hover:bg-podio-hover transition-colors duration-150;
+  }
+
+  .podio-table-row:nth-child(even) {
+    @apply bg-podio-surface/30;
+  }
+
+  .podio-sidebar-item {
+    @apply flex items-center gap-3 px-3 py-2 text-sm text-podio-text-muted hover:bg-podio-hover hover:text-podio-text rounded-md transition-colors duration-200;
+  }
+
+  .podio-sidebar-item.active {
+    @apply bg-podio-primary/10 text-podio-primary font-medium;
+  }
+
+  .podio-field-row {
+    @apply grid grid-cols-3 gap-4 py-3 border-b border-podio-border/50 last:border-b-0;
+  }
+
+  .podio-field-label {
+    @apply text-sm font-medium text-podio-text-muted;
+  }
+
+  .podio-field-value {
+    @apply col-span-2 text-sm text-podio-text;
   }
 }

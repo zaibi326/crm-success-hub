@@ -37,7 +37,6 @@ export function EnhancedLeadsContent() {
   } = useLeadsLogic();
 
   const handleSellerAdded = (seller: any) => {
-    // Redirect to the seller detail page after adding
     setSelectedLead(seller);
   };
 
@@ -55,7 +54,7 @@ export function EnhancedLeadsContent() {
   }
 
   return (
-    <SidebarInset className="flex-1 overflow-auto">
+    <SidebarInset className="flex-1 overflow-auto bg-podio-surface">
       <LeadsHeader
         onExport={handleExportData}
         onTemplateClick={() => setIsTemplateDialogOpen(true)}
@@ -63,7 +62,8 @@ export function EnhancedLeadsContent() {
         onSellerAdded={handleSellerAdded}
       />
 
-      <div className="px-6 py-4">
+      {/* Podio-style top filters bar */}
+      <div className="bg-podio-background border-b border-podio-border px-6 py-4">
         <LeadsFiltersSection
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
@@ -76,32 +76,42 @@ export function EnhancedLeadsContent() {
         />
       </div>
 
-      <main className="p-6 bg-gradient-to-br from-gray-50/30 to-white space-y-6">
+      <main className="p-6 space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Filters Sidebar */}
+          {/* Filters Sidebar - Podio style */}
           <div className="lg:col-span-1 space-y-4">
-            <AdvancedFilters
-              filters={filters}
-              onFiltersChange={setFilters}
-              availableFields={availableFields}
-            />
+            <div className="podio-container p-4">
+              <AdvancedFilters
+                filters={filters}
+                onFiltersChange={setFilters}
+                availableFields={availableFields}
+              />
+            </div>
           </div>
 
-          {/* Main Content Area */}
-          <LeadsMainContent
-            currentView={currentView}
-            filteredLeads={filteredLeads}
-            onLeadSelect={setSelectedLead}
-            getStatusBadge={getStatusBadge}
-            handleSort={handleSort}
-            onLeadsUpdate={handleBulkLeadsUpdate}
-          />
+          {/* Main Content Area - Podio style */}
+          <div className="lg:col-span-3">
+            <div className="podio-container">
+              <LeadsMainContent
+                currentView={currentView}
+                filteredLeads={filteredLeads}
+                onLeadSelect={setSelectedLead}
+                getStatusBadge={getStatusBadge}
+                handleSort={handleSort}
+                onLeadsUpdate={handleBulkLeadsUpdate}
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Results Summary */}
-        <div className="text-sm text-gray-600 text-center py-4 border-t">
-          Showing {filteredLeads.length} of {mockLeads.length} leads
-          {searchTerm && ` matching "${searchTerm}"`}
+        {/* Results Summary - Podio style */}
+        <div className="podio-container p-4">
+          <div className="text-sm text-podio-text-muted text-center">
+            Showing <span className="font-medium text-podio-text">{filteredLeads.length}</span> of <span className="font-medium text-podio-text">{mockLeads.length}</span> seller leads
+            {searchTerm && (
+              <span> matching <span className="font-medium text-podio-primary">"{searchTerm}"</span></span>
+            )}
+          </div>
         </div>
       </main>
 

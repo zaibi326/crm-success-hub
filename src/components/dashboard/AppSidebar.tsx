@@ -1,12 +1,13 @@
 
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, Calendar, Bell, Settings, Activity, Target, Phone, Building2 } from 'lucide-react';
+import { Home, Calendar, Bell, Settings, Activity, Target, Phone, Building2, Filter, Users, Briefcase } from 'lucide-react';
 import { 
   Sidebar, 
   SidebarTrigger, 
   SidebarContent, 
-  SidebarGroup, 
+  SidebarGroup,
+  SidebarGroupLabel,
   SidebarFooter,
   SidebarMenu,
   SidebarMenuItem,
@@ -31,22 +32,22 @@ export function AppSidebar() {
       icon: Home,
     },
     
-    // Seller Leads Management - updated name and route
+    // Seller Leads Management - Podio style grouping
     {
-      title: "Seller Leads",
+      title: "All Seller Leads",
       url: "/leads",
       icon: Target,
       badge: "Enhanced",
-      badgeColor: "bg-green-100 text-green-800"
+      badgeColor: "bg-podio-primary/10 text-podio-primary"
     },
     
     // Core CRM Features
     {
       title: "My Campaigns",
-      url: "/campaigns",
-      icon: Target,
+      url: "/campaigns", 
+      icon: Briefcase,
       badge: userRole === 'Employee' ? 'View Only' : undefined,
-      badgeColor: userRole === 'Employee' ? 'bg-yellow-100 text-yellow-800' : undefined
+      badgeColor: userRole === 'Employee' ? 'bg-amber-100 text-amber-800' : undefined
     },
     
     // Communication Features
@@ -55,7 +56,7 @@ export function AppSidebar() {
       url: "/communication-center",
       icon: Phone,
       badge: "SmrtPhone.io",
-      badgeColor: "bg-blue-100 text-blue-800"
+      badgeColor: "bg-podio-primary/10 text-podio-primary"
     },
     {
       title: "Calendar",
@@ -90,22 +91,25 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="bg-white/95 backdrop-blur-sm border-r border-gray-200/50 shadow-xl">
-      <SidebarContent>
+    <Sidebar className="bg-podio-background border-r border-podio-border shadow-podio">
+      <SidebarContent className="p-4">
         <SidebarGroup>
-          <SidebarMenu>
+          <SidebarGroupLabel className="text-xs font-semibold text-podio-text-muted uppercase tracking-wider mb-4">
+            Navigation
+          </SidebarGroupLabel>
+          <SidebarMenu className="space-y-1">
             {navigationItems.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton 
                   asChild 
-                  isActive={location.pathname === item.url}
+                  className={`podio-sidebar-item ${location.pathname === item.url ? 'active' : ''}`}
                   onClick={() => handleNavigation(item.url)}
                 >
-                  <button className="flex items-center gap-2 w-full">
+                  <button className="w-full justify-start">
                     <item.icon className="w-4 h-4" />
-                    <span>{item.title}</span>
+                    <span className="font-normal">{item.title}</span>
                     {item.badge && (
-                      <SidebarMenuBadge className={item.badgeColor}>
+                      <SidebarMenuBadge className={`ml-auto text-xs px-2 py-1 rounded-full ${item.badgeColor}`}>
                         {item.badge}
                       </SidebarMenuBadge>
                     )}
@@ -115,15 +119,60 @@ export function AppSidebar() {
             ))}
           </SidebarMenu>
         </SidebarGroup>
+
+        {/* Quick Filters Section - Podio style */}
+        <SidebarGroup className="mt-8">
+          <SidebarGroupLabel className="text-xs font-semibold text-podio-text-muted uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Filter className="w-3 h-3" />
+            Quick Filters
+          </SidebarGroupLabel>
+          <SidebarMenu className="space-y-1">
+            <SidebarMenuItem>
+              <SidebarMenuButton className="podio-sidebar-item text-xs">
+                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                <span>Hot Leads</span>
+                <span className="ml-auto text-podio-text-muted">12</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton className="podio-sidebar-item text-xs">
+                <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                <span>Warm Leads</span>
+                <span className="ml-auto text-podio-text-muted">24</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton className="podio-sidebar-item text-xs">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>Cold Leads</span>
+                <span className="ml-auto text-podio-text-muted">8</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton className="podio-sidebar-item text-xs">
+                <Users className="w-3 h-3" />
+                <span>Untouched</span>
+                <span className="ml-auto text-podio-text-muted">15</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <div className="flex items-center justify-between w-full p-4">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src="https://github.com/shadcn.png" alt="Heirlogic CRM" />
-            <AvatarFallback>CRM</AvatarFallback>
-          </Avatar>
+
+      <SidebarFooter className="p-4 border-t border-podio-border">
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src="https://github.com/shadcn.png" alt="User" />
+              <AvatarFallback className="bg-podio-primary text-white text-xs">CRM</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+              <span className="text-xs font-medium text-podio-text">Admin User</span>
+              <span className="text-xs text-podio-text-muted">admin@heirlogic.com</span>
+            </div>
+          </div>
           <a href="https://heirlogic.com" target="_blank" rel="noreferrer">
-            <Button variant="outline" size="sm">
+            <Button variant="ghost" size="sm" className="podio-button-secondary h-8 px-2 text-xs">
               Heirlogic
             </Button>
           </a>
