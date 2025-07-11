@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, Calendar, Bell, Settings, Activity, Target, Phone, Building2, Database } from 'lucide-react';
+import { Home, Calendar, Bell, Settings, Activity, Target, Phone, Building2 } from 'lucide-react';
 import { 
   Sidebar, 
   SidebarTrigger, 
@@ -65,15 +65,6 @@ export function AppSidebar() {
       title: "Notifications",
       url: "/notifications",
       icon: Bell,
-    },
-    
-    // Lead Source Management
-    {
-      title: "Lead Source",
-      url: "/lead-source",
-      icon: Database,
-      badge: "New",
-      badgeColor: "bg-purple-100 text-purple-800"
     },
     
     // Organization & User Management

@@ -13,7 +13,8 @@ import ProfileSection from '@/components/settings/ProfileSection';
 import SecuritySection from '@/components/settings/SecuritySection';
 import RoleBasedSettings from '@/components/settings/RoleBasedSettings';
 import AdminUsersSection from '@/components/settings/AdminUsersSection';
-import { LogOut, User, Shield, Settings as SettingsIcon, Crown } from 'lucide-react';
+import LeadSourceSection from '@/components/settings/LeadSourceSection';
+import { LogOut, User, Shield, Settings as SettingsIcon, Crown, Database } from 'lucide-react';
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -75,7 +76,7 @@ const Settings = () => {
             <main className="p-6">
               <div className="max-w-6xl mx-auto">
                 <Tabs defaultValue="profile" className="space-y-6">
-                  <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'} lg:w-auto bg-white shadow-sm`}>
+                  <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-5' : 'grid-cols-4'} lg:w-auto bg-white shadow-sm`}>
                     <TabsTrigger value="profile" className="flex items-center gap-2">
                       <User className="w-4 h-4" />
                       Profile
@@ -87,6 +88,10 @@ const Settings = () => {
                     <TabsTrigger value="role-settings" className="flex items-center gap-2">
                       <SettingsIcon className="w-4 h-4" />
                       Role Settings
+                    </TabsTrigger>
+                    <TabsTrigger value="lead-source" className="flex items-center gap-2">
+                      <Database className="w-4 h-4" />
+                      Lead Source
                     </TabsTrigger>
                     {isAdmin && (
                       <TabsTrigger value="admin" className="flex items-center gap-2">
@@ -106,6 +111,10 @@ const Settings = () => {
 
                   <TabsContent value="role-settings" className="space-y-6">
                     <RoleBasedSettings userRole={getUserRole()} />
+                  </TabsContent>
+
+                  <TabsContent value="lead-source" className="space-y-6">
+                    <LeadSourceSection />
                   </TabsContent>
 
                   {isAdmin && (
@@ -130,9 +139,6 @@ const Settings = () => {
                       </Button>
                       <Button variant="outline" onClick={() => navigate('/campaigns')}>
                         View Campaigns
-                      </Button>
-                      <Button variant="outline" onClick={() => navigate('/lead-source')}>
-                        Lead Sources
                       </Button>
                       {(getUserRole() === 'Admin' || getUserRole() === 'Manager') && (
                         <Button variant="outline" onClick={() => navigate('/notifications')}>
