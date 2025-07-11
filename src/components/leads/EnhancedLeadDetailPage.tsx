@@ -224,15 +224,11 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
           </div>
         </div>
 
-        {/* Tabs for Details and Activity */}
+        {/* Tabs for Details and Activity only */}
         <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
-            <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-            <TabsTrigger value="communication">Communication</TabsTrigger>
-            <TabsTrigger value="documents">Documents</TabsTrigger>
-            <TabsTrigger value="tasks">Tasks</TabsTrigger>
           </TabsList>
 
           <TabsContent value="details" className="space-y-6 mt-6">
@@ -565,51 +561,6 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* New Tabs */}
-          <TabsContent value="campaigns" className="space-y-6 mt-6">
-            <Card className="shadow-lg border-0">
-              <CardHeader>
-                <CardTitle>Campaigns</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Campaign management features coming soon...</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="communication" className="space-y-6 mt-6">
-            <Card className="shadow-lg border-0">
-              <CardHeader>
-                <CardTitle>Communication</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Communication tracking features coming soon...</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="documents" className="space-y-6 mt-6">
-            <Card className="shadow-lg border-0">
-              <CardHeader>
-                <CardTitle>Documents</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Document management features coming soon...</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="tasks" className="space-y-6 mt-6">
-            <Card className="shadow-lg border-0">
-              <CardHeader>
-                <CardTitle>Tasks</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Task management features coming soon...</p>
               </CardContent>
             </Card>
           </TabsContent>
