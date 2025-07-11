@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -30,6 +29,7 @@ import Leads from "./pages/Leads";
 import TaxLeads from "./pages/TaxLeads";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
+import LeadSource from "./pages/LeadSource";
 
 const queryClient = new QueryClient();
 
@@ -85,6 +85,12 @@ function App() {
               <Route path="/notifications" element={
                 <ProtectedRoute>
                   <Notifications />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/lead-source" element={
+                <ProtectedRoute>
+                  <LeadSource />
                 </ProtectedRoute>
               } />
               

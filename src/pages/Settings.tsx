@@ -12,7 +12,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import ProfileSection from '@/components/settings/ProfileSection';
 import SecuritySection from '@/components/settings/SecuritySection';
 import RoleBasedSettings from '@/components/settings/RoleBasedSettings';
-import { LogOut, User, Shield, Settings as SettingsIcon } from 'lucide-react';
+import AdminUsersSection from '@/components/settings/AdminUsersSection';
+import { LogOut, User, Shield, Settings as SettingsIcon, Crown } from 'lucide-react';
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -40,6 +41,8 @@ const Settings = () => {
     }
     return 'Employee';
   };
+
+  const isAdmin = getUserRole() === 'Admin';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-crm-gradient-start via-white to-crm-gradient-end">
@@ -72,7 +75,7 @@ const Settings = () => {
             <main className="p-6">
               <div className="max-w-6xl mx-auto">
                 <Tabs defaultValue="profile" className="space-y-6">
-                  <TabsList className="grid w-full grid-cols-3 lg:w-[400px] bg-white shadow-sm">
+                  <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'} lg:w-auto bg-white shadow-sm`}>
                     <TabsTrigger value="profile" className="flex items-center gap-2">
                       <User className="w-4 h-4" />
                       Profile
@@ -85,6 +88,12 @@ const Settings = () => {
                       <SettingsIcon className="w-4 h-4" />
                       Role Settings
                     </TabsTrigger>
+                    {isAdmin && (
+                      <TabsTrigger value="admin" className="flex items-center gap-2">
+                        <Crown className="w-4 h-4" />
+                        Admin
+                      </TabsTrigger>
+                    )}
                   </TabsList>
 
                   <TabsContent value="profile" className="space-y-6">
@@ -98,6 +107,12 @@ const Settings = () => {
                   <TabsContent value="role-settings" className="space-y-6">
                     <RoleBasedSettings userRole={getUserRole()} />
                   </TabsContent>
+
+                  {isAdmin && (
+                    <TabsContent value="admin" className="space-y-6">
+                      <AdminUsersSection />
+                    </TabsContent>
+                  )}
                 </Tabs>
 
                 {/* Quick Actions Card */}
@@ -115,6 +130,9 @@ const Settings = () => {
                       </Button>
                       <Button variant="outline" onClick={() => navigate('/campaigns')}>
                         View Campaigns
+                      </Button>
+                      <Button variant="outline" onClick={() => navigate('/lead-source')}>
+                        Lead Sources
                       </Button>
                       {(getUserRole() === 'Admin' || getUserRole() === 'Manager') && (
                         <Button variant="outline" onClick={() => navigate('/notifications')}>
