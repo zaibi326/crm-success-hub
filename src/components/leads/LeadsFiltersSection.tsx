@@ -3,7 +3,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search } from 'lucide-react';
-import { ViewSwitcher } from './ViewSwitcher';
+import { ViewSwitcherDropdown } from './ViewSwitcherDropdown';
 
 interface LeadsFiltersSectionProps {
   searchTerm: string;
@@ -65,7 +65,7 @@ export function LeadsFiltersSection({
         </Select>
       </div>
       
-      <ViewSwitcher currentView={currentView} onViewChange={onViewChange} />
+      <ViewSwitcherDropdown currentView={currentView} onViewChange={onViewChange} />
     </div>
   );
 }

@@ -1,5 +1,4 @@
-
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useLeadsData } from '@/hooks/useLeadsData';
 import { TaxLead } from '@/types/taxLead';
@@ -12,7 +11,20 @@ interface FilterCondition {
 }
 
 export function useLeadsLogic() {
-  const [currentView, setCurrentView] = useState<'table' | 'card' | 'calendar' | 'timeline' | 'badge'>('table');
+  // Load saved view preference from localStorage, default to 'table'
+  const getSavedView = (): 'table' | 'card' | 'calendar' | 'timeline' | 'badge' => {
+    try {
+      const saved = localStorage.getItem('leads-preferred-view');
+      if (saved && ['table', 'card', 'calendar', 'timeline', 'badge'].includes(saved)) {
+        return saved as 'table' | 'card' | 'calendar' | 'timeline' | 'badge';
+      }
+    } catch (error) {
+      console.log('Could not load saved view preference');
+    }
+    return 'table';
+  };
+
+  const [currentView, setCurrentView] = useState<'table' | 'card' | 'calendar' | 'timeline' | 'badge'>(getSavedView);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('ownerName');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -22,6 +34,15 @@ export function useLeadsLogic() {
   
   const { mockLeads, handleAddLead, handleLeadUpdate, setMockLeads } = useLeadsData();
   const { toast } = useToast();
+
+  // Save view preference to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('leads-preferred-view', currentView);
+    } catch (error) {
+      console.log('Could not save view preference');
+    }
+  }, [currentView]);
 
   // Available fields for filtering
   const availableFields = [
