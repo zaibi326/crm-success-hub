@@ -13,9 +13,10 @@ import { TaxLead } from '@/types/taxLead';
 interface ComprehensiveAddSellerDialogProps {
   onAddSeller: (seller: TaxLead) => void;
   onSellerAdded?: (seller: TaxLead) => void;
+  trigger?: React.ReactNode;
 }
 
-export function ComprehensiveAddSellerDialog({ onAddSeller, onSellerAdded }: ComprehensiveAddSellerDialogProps) {
+export function ComprehensiveAddSellerDialog({ onAddSeller, onSellerAdded, trigger }: ComprehensiveAddSellerDialogProps) {
   const [open, setOpen] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [formData, setFormData] = useState({
@@ -139,10 +140,12 @@ export function ComprehensiveAddSellerDialog({ onAddSeller, onSellerAdded }: Com
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Seller
-        </Button>
+        {trigger || (
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Seller
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
