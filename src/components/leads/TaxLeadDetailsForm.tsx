@@ -43,7 +43,7 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole = 'editor' }: TaxLea
   const [disposition, setDisposition] = useState<'keep' | 'pass' | null>(null);
   const [passReason, setPassReason] = useState('');
   const [newNote, setNewNote] = useState('');
-  const [notes, setNotes setNotes] = useState<NoteEntry[]>([
+  const [notes, setNotes] = useState<NoteEntry[]>([
     {
       id: '1',
       text: 'Initial lead imported from campaign',
