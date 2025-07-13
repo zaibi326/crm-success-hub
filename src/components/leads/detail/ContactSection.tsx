@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Phone, Mail, MessageSquare, User } from 'lucide-react';
+import { User } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
+import { CommunicationButton } from '@/components/communication/CommunicationButton';
 
 interface ContactSectionProps {
   lead: TaxLead;
@@ -31,20 +31,20 @@ export function ContactSection({ lead, onCall, onSendText, onEmail }: ContactSec
             <div className="podio-field-value flex items-center gap-2">
               <span>{lead.phone}</span>
               <div className="flex gap-1">
-                <Button
-                  size="sm"
-                  onClick={() => onCall(lead.phone!)}
-                  className="h-7 px-2 bg-green-600 hover:bg-green-700 text-white"
-                >
-                  <Phone className="w-3 h-3" />
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => onSendText(lead.phone!)}
-                  className="h-7 px-2 bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <MessageSquare className="w-3 h-3" />
-                </Button>
+                <CommunicationButton
+                  phoneNumber={lead.phone}
+                  leadId={lead.id.toString()}
+                  leadName={lead.ownerName}
+                  type="call"
+                  onCommunicationStart={onCall}
+                />
+                <CommunicationButton
+                  phoneNumber={lead.phone}
+                  leadId={lead.id.toString()}
+                  leadName={lead.ownerName}
+                  type="sms"
+                  onCommunicationStart={onSendText}
+                />
               </div>
             </div>
           </div>
@@ -55,13 +55,6 @@ export function ContactSection({ lead, onCall, onSendText, onEmail }: ContactSec
             <div className="podio-field-label">Seller Email</div>
             <div className="podio-field-value flex items-center gap-2">
               <span>{lead.email}</span>
-              <Button
-                size="sm"
-                onClick={() => onEmail(lead.email!)}
-                className="h-7 px-2 bg-podio-primary hover:bg-blue-600 text-white"
-              >
-                <Mail className="w-3 h-3" />
-              </Button>
             </div>
           </div>
         )}

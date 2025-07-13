@@ -3,8 +3,9 @@ import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Phone, Mail, MapPin, ExternalLink, Eye, Edit, MessageSquare } from 'lucide-react';
+import { MapPin, ExternalLink, Eye, Edit, MessageSquare } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
+import { CommunicationButton } from '@/components/communication/CommunicationButton';
 
 interface LeadCardViewProps {
   leads: TaxLead[];
@@ -16,7 +17,12 @@ interface LeadCardViewProps {
 export function LeadCardView({ leads, onLeadSelect, onLeadEdit, getStatusBadge }: LeadCardViewProps) {
   const handleCall = (phoneNumber: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    window.open(`tel:${phoneNumber}`, '_self');
+    console.log(`Calling ${phoneNumber}`);
+  };
+
+  const handleSMS = (phoneNumber: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log(`SMS to ${phoneNumber}`);
   };
 
   const handleEmail = (email: string, e: React.MouseEvent) => {
@@ -50,38 +56,44 @@ export function LeadCardView({ leads, onLeadSelect, onLeadEdit, getStatusBadge }
           </CardHeader>
           
           <CardContent className="space-y-3">
-            {/* Contact Information */}
+            {/* Contact Information with Communication Buttons */}
             <div className="space-y-2">
               {lead.phone && (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm">
-                    <Phone className="w-4 h-4 text-gray-500" />
                     <span>{lead.phone}</span>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={(e) => handleCall(lead.phone!, e)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Phone className="w-3 h-3" />
-                  </Button>
+                  <div className="flex gap-1">
+                    <CommunicationButton
+                      phoneNumber={lead.phone}
+                      leadId={lead.id.toString()}
+                      leadName={lead.ownerName}
+                      type="call"
+                      onCommunicationStart={handleCall}
+                    />
+                    <CommunicationButton
+                      phoneNumber={lead.phone}
+                      leadId={lead.id.toString()}
+                      leadName={lead.ownerName}
+                      type="sms"
+                      onCommunicationStart={handleSMS}
+                    />
+                  </div>
                 </div>
               )}
               
               {lead.email && (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm">
-                    <Mail className="w-4 h-4 text-gray-500" />
                     <span className="truncate">{lead.email}</span>
                   </div>
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={(e) => handleEmail(lead.email!, e)}
-                    className="h-8 w-8 p-0"
+                    className="h-8 w-8 p-0 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
                   >
-                    <Mail className="w-3 h-3" />
+                    <MessageSquare className="w-3 h-3" />
                   </Button>
                 </div>
               )}
@@ -97,14 +109,12 @@ export function LeadCardView({ leads, onLeadSelect, onLeadEdit, getStatusBadge }
               </div>
             )}
 
-            {/* Tax ID */}
             {lead.taxId && (
               <div className="text-xs text-gray-500">
                 Tax ID: {lead.taxId}
               </div>
             )}
 
-            {/* Notes Preview */}
             {lead.notes && (
               <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
                 <div className="flex items-center gap-1 mb-1">

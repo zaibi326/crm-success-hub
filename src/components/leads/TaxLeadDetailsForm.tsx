@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
@@ -9,6 +8,10 @@ import { SaveButton } from './detail/SaveButton';
 import { ViewOnlyMessage } from './detail/ViewOnlyMessage';
 import { PropertyMapSection } from './detail/PropertyMapSection';
 import { EditableLeadInfoSection } from './detail/EditableLeadInfoSection';
+import { ContactSection } from './detail/ContactSection';
+import { CallStatusPanel } from '@/components/communication/CallStatusPanel';
+import { SMSPanel } from '@/components/communication/SMSPanel';
+import { CommunicationSidebar } from '@/components/communication/CommunicationSidebar';
 
 interface TaxLeadDetailsFormProps {
   lead: TaxLead;
@@ -55,6 +58,9 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole = 'editor' }: TaxLea
   ]);
   const { toast } = useToast();
   const { canManageUsers, userRole: currentUserRole } = useRoleAccess();
+  const [callStatus, setCallStatus] = useState({ isActive: false, phoneNumber: '', leadName: '' });
+  const [smsPanel, setSmsPanel] = useState({ isOpen: false, phoneNumber: '', leadName: '' });
+  const [commSidebar, setCommSidebar] = useState(false);
 
   const canEdit = userRole === 'admin' || userRole === 'editor';
   const canViewSensitive = canManageUsers || userRole === 'admin';
@@ -182,66 +188,143 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole = 'editor' }: TaxLea
     setIsSaving(false);
   };
 
+  const handleCall = (phoneNumber: string) => {
+    setCallStatus({
+      isActive: true,
+      phoneNumber,
+      leadName: formData.ownerName
+    });
+    
+    // Add call activity to timeline
+    const callActivity = {
+      id: Date.now().toString(),
+      text: `Call initiated to ${phoneNumber}`,
+      timestamp: new Date(),
+      userName: 'Current User'
+    };
+    setNotes(prev => [callActivity, ...prev]);
+  };
+
+  const handleSendText = (phoneNumber: string) => {
+    setSmsPanel({
+      isOpen: true,
+      phoneNumber,
+      leadName: formData.ownerName
+    });
+  };
+
+  const handleEmail = (email: string) => {
+    window.open(`mailto:${email}`, '_self');
+  };
+
+  const handleEndCall = () => {
+    setCallStatus({ isActive: false, phoneNumber: '', leadName: '' });
+  };
+
+  const handleCloseSMS = () => {
+    setSmsPanel({ isOpen: false, phoneNumber: '', leadName: '' });
+  };
+
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      {/* Main Grid Layout */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Left Column - Main Content */}
-        <div className="xl:col-span-2 space-y-6">
-          {/* Editable Lead Information */}
-          <EditableLeadInfoSection
-            formData={formData}
-            onInputChange={handleInputChange}
-            canEdit={canEdit}
-          />
+    <>
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Main Grid Layout */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* Left Column - Main Content */}
+          <div className="xl:col-span-2 space-y-6">
+            {/* Contact Section with Communication Buttons */}
+            <ContactSection
+              lead={formData}
+              onCall={handleCall}
+              onSendText={handleSendText}
+              onEmail={handleEmail}
+            />
 
-          {/* Property Map */}
-          <PropertyMapSection address={formData.propertyAddress} />
+            {/* ... keep existing EditableLeadInfoSection, PropertyMapSection, MainContent */}
+            <EditableLeadInfoSection
+              formData={formData}
+              onInputChange={handleInputChange}
+              canEdit={canEdit}
+            />
 
-          {/* Main Content Sections */}
-          <MainContent
-            formData={formData}
-            disposition={disposition}
-            passReason={passReason}
-            notes={notes}
-            newNote={newNote}
-            files={files}
-            canEdit={canEdit}
-            onInputChange={handleInputChange}
-            onDisposition={handleDisposition}
-            onPassReasonChange={setPassReason}
-            onNewNoteChange={setNewNote}
-            onAddNote={handleAddNote}
-            onFileUpload={handleFileUpload}
-            onRemoveFile={removeFile}
-          />
-        </div>
+            <PropertyMapSection address={formData.propertyAddress} />
 
-        {/* Right Column - Sidebar */}
-        <div className="xl:col-span-1">
-          <div className="sticky top-6">
-            <Sidebar
-              currentStatus={formData.status}
+            <MainContent
+              formData={formData}
+              disposition={disposition}
+              passReason={passReason}
+              notes={notes}
+              newNote={newNote}
               files={files}
               canEdit={canEdit}
-              onStatusChange={handleStatusChange}
-              onRemoveFile={removeFile}
+              onInputChange={handleInputChange}
+              onDisposition={handleDisposition}
+              onPassReasonChange={setPassReason}
+              onNewNoteChange={setNewNote}
+              onAddNote={handleAddNote}
               onFileUpload={handleFileUpload}
+              onRemoveFile={removeFile}
             />
           </div>
+
+          {/* Right Column - Sidebar */}
+          <div className="xl:col-span-1">
+            <div className="sticky top-6 space-y-4">
+              <Sidebar
+                currentStatus={formData.status}
+                files={files}
+                canEdit={canEdit}
+                onStatusChange={handleStatusChange}
+                onRemoveFile={removeFile}
+                onFileUpload={handleFileUpload}
+              />
+
+              {/* Communication Quick Actions */}
+              <div className="bg-white rounded-lg shadow-sm border p-4">
+                <h3 className="font-semibold mb-3">Quick Actions</h3>
+                <button
+                  onClick={() => setCommSidebar(true)}
+                  className="w-full text-left p-2 rounded hover:bg-gray-50 text-sm"
+                >
+                  📞 View Communication Log
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
+
+        {/* ... keep existing SaveButton and ViewOnlyMessage */}
+        <SaveButton
+          onSave={handleSave}
+          isSaving={isSaving}
+          canEdit={canEdit}
+          disposition={disposition}
+        />
+
+        <ViewOnlyMessage canEdit={canEdit} />
       </div>
 
-      {/* Save Button */}
-      <SaveButton
-        onSave={handleSave}
-        isSaving={isSaving}
-        canEdit={canEdit}
-        disposition={disposition}
+      {/* Communication Panels */}
+      <CallStatusPanel
+        isVisible={callStatus.isActive}
+        phoneNumber={callStatus.phoneNumber}
+        leadName={callStatus.leadName}
+        onEndCall={handleEndCall}
       />
 
-      {/* View Only Message */}
-      <ViewOnlyMessage canEdit={canEdit} />
-    </div>
+      <SMSPanel
+        isVisible={smsPanel.isOpen}
+        phoneNumber={smsPanel.phoneNumber}
+        leadName={smsPanel.leadName}
+        leadId={formData.id.toString()}
+        onClose={handleCloseSMS}
+      />
+
+      <CommunicationSidebar
+        isOpen={commSidebar}
+        onClose={() => setCommSidebar(false)}
+        leadId={formData.id.toString()}
+      />
+    </>
   );
 }
