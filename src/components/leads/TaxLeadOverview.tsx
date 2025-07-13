@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,13 +16,15 @@ import {
   FileText,
   TrendingUp,
   Users,
-  CheckCircle
+  CheckCircle,
+  Eye
 } from 'lucide-react';
 
 interface TaxLeadOverviewProps {
   leads: TaxLead[];
   onStartProcessing: (selectedLeads: TaxLead[]) => void;
   onLeadUpdate: (updatedLead: TaxLead) => void;
+  onLeadSelect?: (lead: TaxLead) => void;
   showAllLeads?: boolean;
 }
 
@@ -31,6 +32,7 @@ export function TaxLeadOverview({
   leads, 
   onStartProcessing, 
   onLeadUpdate, 
+  onLeadSelect,
   showAllLeads = false 
 }: TaxLeadOverviewProps) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -78,6 +80,12 @@ export function TaxLeadOverview({
   const handleStartProcessing = () => {
     const selectedLeadObjects = leads.filter(lead => selectedLeads.includes(lead.id));
     onStartProcessing(selectedLeadObjects);
+  };
+
+  const handleLeadClick = (lead: TaxLead) => {
+    if (onLeadSelect) {
+      onLeadSelect(lead);
+    }
   };
 
   const getStatusBadgeColor = (status: string) => {
@@ -204,24 +212,47 @@ export function TaxLeadOverview({
       {/* Leads List */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {filteredLeads.map((lead) => (
-          <Card key={lead.id} className="hover:shadow-lg transition-shadow duration-200">
+          <Card 
+            key={lead.id} 
+            className="hover:shadow-lg transition-shadow duration-200 cursor-pointer"
+            onClick={() => handleLeadClick(lead)}
+          >
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     checked={selectedLeads.includes(lead.id)}
-                    onChange={() => handleLeadSelection(lead.id)}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      handleLeadSelection(lead.id);
+                    }}
                     className="rounded border-gray-300"
                   />
                   <div>
-                    <h3 className="font-semibold text-lg text-gray-900">{lead.ownerName}</h3>
+                    <h3 className="font-semibold text-lg text-gray-900 hover:text-crm-primary transition-colors">
+                      {lead.ownerName}
+                    </h3>
                     <p className="text-sm text-gray-600">Tax ID: {lead.taxId}</p>
                   </div>
                 </div>
-                <Badge className={`${getStatusBadgeColor(lead.status)} border`}>
-                  {lead.status}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge className={`${getStatusBadgeColor(lead.status)} border`}>
+                    {lead.status}
+                  </Badge>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleLeadClick(lead);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Eye className="w-4 h-4 mr-1" />
+                    View
+                  </Button>
+                </div>
               </div>
 
               <div className="space-y-3">
