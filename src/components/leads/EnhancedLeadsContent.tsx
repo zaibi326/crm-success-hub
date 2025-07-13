@@ -12,7 +12,6 @@ import { useLeadsLogic } from './useLeadsLogic';
 export function EnhancedLeadsContent() {
   const {
     currentView,
-    searchTerm,
     sortBy,
     filterStatus,
     selectedLead,
@@ -22,7 +21,6 @@ export function EnhancedLeadsContent() {
     filteredLeads,
     mockLeads,
     setCurrentView,
-    setSearchTerm,
     setSortBy,
     setFilterStatus,
     setSelectedLead,
@@ -30,7 +28,6 @@ export function EnhancedLeadsContent() {
     setFilters,
     getStatusBadge,
     handleSort,
-    handleExportData,
     handleAddLead,
     handleLeadUpdate,
     handleBulkLeadsUpdate
@@ -56,8 +53,6 @@ export function EnhancedLeadsContent() {
   return (
     <SidebarInset className="flex-1 overflow-auto bg-podio-surface">
       <LeadsHeader
-        onExport={handleExportData}
-        onTemplateClick={() => setIsTemplateDialogOpen(true)}
         onAddLead={handleAddLead}
         onSellerAdded={handleSellerAdded}
       />
@@ -65,8 +60,6 @@ export function EnhancedLeadsContent() {
       {/* Podio-style top filters bar */}
       <div className="bg-podio-background border-b border-podio-border px-6 py-4">
         <LeadsFiltersSection
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
           filterStatus={filterStatus}
           onFilterStatusChange={setFilterStatus}
           sortBy={sortBy}
@@ -108,9 +101,6 @@ export function EnhancedLeadsContent() {
         <div className="podio-container p-4">
           <div className="text-sm text-podio-text-muted text-center">
             Showing <span className="font-medium text-podio-text">{filteredLeads.length}</span> of <span className="font-medium text-podio-text">{mockLeads.length}</span> seller leads
-            {searchTerm && (
-              <span> matching <span className="font-medium text-podio-primary">"{searchTerm}"</span></span>
-            )}
           </div>
         </div>
       </main>

@@ -1,3 +1,4 @@
+
 import { useState, useMemo, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useLeadsData } from '@/hooks/useLeadsData';
@@ -25,7 +26,6 @@ export function useLeadsLogic() {
   };
 
   const [currentView, setCurrentView] = useState<'table' | 'card' | 'calendar' | 'timeline' | 'badge'>(getSavedView);
-  const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('ownerName');
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedLead, setSelectedLead] = useState<TaxLead | null>(null);
@@ -55,16 +55,6 @@ export function useLeadsLogic() {
   // Filter and search logic
   const filteredLeads = useMemo(() => {
     let result = mockLeads;
-
-    // Apply search
-    if (searchTerm) {
-      result = result.filter(lead =>
-        lead.ownerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        lead.propertyAddress.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (lead.taxId && lead.taxId.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (lead.email && lead.email.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-    }
 
     // Apply status filter
     if (filterStatus !== 'all') {
@@ -114,7 +104,7 @@ export function useLeadsLogic() {
     });
 
     return result;
-  }, [mockLeads, searchTerm, filterStatus, filters, sortBy]);
+  }, [mockLeads, filterStatus, filters, sortBy]);
 
   const getStatusBadge = (status: string) => {
     const colors = {
@@ -130,35 +120,6 @@ export function useLeadsLogic() {
     setSortBy(field);
   };
 
-  const handleExportData = () => {
-    // Convert leads to CSV
-    const csvContent = [
-      ['Owner Name', 'Property Address', 'Status', 'Phone', 'Email', 'Current Arrears', 'Tax ID'].join(','),
-      ...filteredLeads.map(lead => [
-        lead.ownerName,
-        `"${lead.propertyAddress}"`,
-        lead.status,
-        lead.phone || '',
-        lead.email || '',
-        lead.currentArrears || 0,
-        lead.taxId || ''
-      ].join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'seller-leads.csv';
-    a.click();
-    window.URL.revokeObjectURL(url);
-
-    toast({
-      title: "Export completed",
-      description: `Exported ${filteredLeads.length} leads to CSV`,
-    });
-  };
-
   const handleBulkLeadsUpdate = (updatedLeads: TaxLead[]) => {
     setMockLeads(updatedLeads);
   };
@@ -166,7 +127,6 @@ export function useLeadsLogic() {
   return {
     // State
     currentView,
-    searchTerm,
     sortBy,
     filterStatus,
     selectedLead,
@@ -178,7 +138,6 @@ export function useLeadsLogic() {
     
     // State setters
     setCurrentView,
-    setSearchTerm,
     setSortBy,
     setFilterStatus,
     setSelectedLead,
@@ -188,7 +147,6 @@ export function useLeadsLogic() {
     // Functions
     getStatusBadge,
     handleSort,
-    handleExportData,
     handleAddLead,
     handleLeadUpdate,
     handleBulkLeadsUpdate,

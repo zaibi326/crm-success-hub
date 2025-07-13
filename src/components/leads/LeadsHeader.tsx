@@ -1,19 +1,17 @@
 
 import React from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Download, Settings, Plus } from 'lucide-react';
 import { ComprehensiveAddSellerDialog } from './ComprehensiveAddSellerDialog';
 import { TaxLead } from '@/types/taxLead';
 
 interface LeadsHeaderProps {
-  onExport: () => void;
-  onTemplateClick: () => void;
   onAddLead: (lead: TaxLead) => void;
   onSellerAdded?: (seller: TaxLead) => void;
 }
 
-export function LeadsHeader({ onExport, onTemplateClick, onAddLead, onSellerAdded }: LeadsHeaderProps) {
+export function LeadsHeader({ onAddLead, onSellerAdded }: LeadsHeaderProps) {
   return (
     <header className="sticky top-0 z-10 bg-podio-background border-b border-podio-border px-6 py-4">
       <div className="flex items-center gap-4">
@@ -27,24 +25,6 @@ export function LeadsHeader({ onExport, onTemplateClick, onAddLead, onSellerAdde
         </div>
 
         <div className="flex items-center gap-3">
-          <Button 
-            variant="outline" 
-            onClick={onExport}
-            className="podio-button-secondary flex items-center gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Export
-          </Button>
-          
-          <Button 
-            onClick={onTemplateClick} 
-            variant="outline"
-            className="podio-button-secondary flex items-center gap-2"
-          >
-            <Settings className="w-4 h-4" />
-            Templates
-          </Button>
-          
           <ComprehensiveAddSellerDialog 
             onAddSeller={onAddLead}
             onSellerAdded={onSellerAdded}

@@ -4,8 +4,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowUpDown, Phone, Mail, MapPin, DollarSign, Eye } from 'lucide-react';
+import { ArrowUpDown, Phone, Mail, MapPin, DollarSign, Eye, Trash2 } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface LeadTableViewProps {
   leads: TaxLead[];
@@ -23,6 +33,7 @@ export function LeadTableView({
   onLeadsUpdate
 }: LeadTableViewProps) {
   const [selectedLeads, setSelectedLeads] = useState<number[]>([]);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const handleSelectAll = () => {
     if (selectedLeads.length === leads.length) {
@@ -38,6 +49,15 @@ export function LeadTableView({
         ? prev.filter(id => id !== leadId)
         : [...prev, leadId]
     );
+  };
+
+  const handleDeleteSelected = () => {
+    if (onLeadsUpdate) {
+      const updatedLeads = leads.filter(lead => !selectedLeads.includes(lead.id));
+      onLeadsUpdate(updatedLeads);
+    }
+    setSelectedLeads([]);
+    setShowDeleteDialog(false);
   };
 
   const getStatusColor = (status: string) => {
@@ -60,11 +80,14 @@ export function LeadTableView({
               {selectedLeads.length} lead{selectedLeads.length > 1 ? 's' : ''} selected
             </span>
             <div className="flex gap-2">
-              <Button size="sm" className="podio-button-secondary">
-                Export Selected
-              </Button>
-              <Button size="sm" className="podio-button-secondary">
-                Update Status
+              <Button 
+                size="sm" 
+                variant="destructive"
+                onClick={() => setShowDeleteDialog(true)}
+                className="flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete Selected
               </Button>
             </div>
           </div>
@@ -207,6 +230,28 @@ export function LeadTableView({
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Leads Deletion</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {selectedLeads.length} selected lead{selectedLeads.length > 1 ? 's' : ''}? 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteSelected}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
