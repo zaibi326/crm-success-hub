@@ -1,6 +1,9 @@
 
 import React from 'react';
 import { TaxLead } from '@/types/taxLead';
+import { TaxLeadDetailsForm } from './TaxLeadDetailsForm';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 interface TaxLeadDetailViewProps {
   selectedLead: TaxLead;
@@ -8,33 +11,42 @@ interface TaxLeadDetailViewProps {
 }
 
 export function TaxLeadDetailView({ selectedLead, onBack }: TaxLeadDetailViewProps) {
+  const handleSave = (updatedLead: TaxLead) => {
+    console.log('Lead updated:', updatedLead);
+    // Here you would typically update the lead in your state management system
+  };
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <button
-        onClick={onBack}
-        className="mb-4 text-crm-primary hover:text-crm-primary/80 flex items-center gap-2"
-      >
-        ← Back to Leads
-      </button>
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-bold mb-4">{selectedLead.ownerName}</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p><strong>Tax ID:</strong> {selectedLead.taxId}</p>
-            <p><strong>Property:</strong> {selectedLead.propertyAddress}</p>
-            <p><strong>Status:</strong> {selectedLead.status}</p>
-          </div>
-          <div>
-            <p><strong>Current Arrears:</strong> ${selectedLead.currentArrears?.toLocaleString() || 'N/A'}</p>
-            <p><strong>Phone:</strong> {selectedLead.phone || 'N/A'}</p>
-            <p><strong>Email:</strong> {selectedLead.email || 'N/A'}</p>
+    <div className="min-h-screen bg-gradient-to-br from-crm-gradient-start via-white to-crm-gradient-end">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-gray-200/50 p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                onClick={onBack}
+                className="flex items-center gap-2 text-crm-primary hover:text-crm-accent hover:bg-crm-primary/10"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Leads
+              </Button>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">{selectedLead.ownerName}</h1>
+                <p className="text-gray-600 mt-1">{selectedLead.propertyAddress}</p>
+              </div>
+            </div>
           </div>
         </div>
-        {selectedLead.notes && (
-          <div className="mt-4">
-            <p><strong>Notes:</strong> {selectedLead.notes}</p>
-          </div>
-        )}
+
+        {/* Enhanced Lead Details Form */}
+        <div className="pb-6">
+          <TaxLeadDetailsForm
+            lead={selectedLead}
+            onSave={handleSave}
+            userRole="editor"
+          />
+        </div>
       </div>
     </div>
   );
