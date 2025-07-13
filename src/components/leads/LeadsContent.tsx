@@ -31,48 +31,11 @@ export const LeadsContent = memo(function LeadsContent() {
     setSelectedLead(updatedLead);
   };
 
-  const handleExportData = () => {
-    // Convert leads to CSV
-    const csvContent = [
-      ['Owner Name', 'Property Address', 'Status', 'Phone', 'Email', 'Current Arrears', 'Tax ID'].join(','),
-      ...filteredLeads.map(lead => [
-        lead.ownerName,
-        `"${lead.propertyAddress}"`,
-        lead.status,
-        lead.phone || '',
-        lead.email || '',
-        lead.currentArrears || 0,
-        lead.taxId || ''
-      ].join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'seller-leads.csv';
-    a.click();
-    window.URL.revokeObjectURL(url);
-
-    toast({
-      title: "Export completed",
-      description: `Exported ${filteredLeads.length} leads to CSV`,
-    });
-  };
-
-  const handleTemplateClick = () => {
-    toast({
-      title: "Templates",
-      description: "Template management feature coming soon",
-    });
-  };
-
   return (
     <div className="flex flex-col h-full">
       <LeadsHeader 
         onAddLead={handleAddLead}
-        onExport={handleExportData}
-        onTemplateClick={handleTemplateClick}
+        onSellerAdded={(seller: TaxLead) => setSelectedLead(seller)}
       />
       
       {!selectedLead && (

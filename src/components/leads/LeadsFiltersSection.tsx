@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Filter, Grid, List, Calendar, Timeline, Badge } from 'lucide-react';
+import { Filter, Grid, List, Calendar, Activity, Badge } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface LeadsFiltersSectionProps {
@@ -26,7 +26,7 @@ export function LeadsFiltersSection({
       case 'table': return <Grid className="w-4 h-4" />;
       case 'card': return <List className="w-4 h-4" />;
       case 'calendar': return <Calendar className="w-4 h-4" />;
-      case 'timeline': return <Timeline className="w-4 h-4" />;
+      case 'timeline': return <Activity className="w-4 h-4" />;
       case 'badge': return <Badge className="w-4 h-4" />;
       default: return <Grid className="w-4 h-4" />;
     }
