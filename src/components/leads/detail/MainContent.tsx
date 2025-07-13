@@ -58,9 +58,7 @@ export function MainContent({
   onRemoveFile
 }: MainContentProps) {
   return (
-    <div className="lg:col-span-3 space-y-6">
-      <ImportedDataSection lead={formData} />
-
+    <div className="space-y-6">
       <DispositionSection
         disposition={disposition}
         passReason={passReason}

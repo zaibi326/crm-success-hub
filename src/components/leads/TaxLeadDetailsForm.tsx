@@ -7,6 +7,8 @@ import { MainContent } from './detail/MainContent';
 import { Sidebar } from './detail/Sidebar';
 import { SaveButton } from './detail/SaveButton';
 import { ViewOnlyMessage } from './detail/ViewOnlyMessage';
+import { PropertyMapSection } from './detail/PropertyMapSection';
+import { EditableLeadInfoSection } from './detail/EditableLeadInfoSection';
 
 interface TaxLeadDetailsFormProps {
   lead: TaxLead;
@@ -107,14 +109,14 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole = 'editor' }: TaxLea
   };
 
   const handleFileUpload = (uploadedFiles: File[], category: 'probate' | 'vesting_deed' | 'other') => {
-    const validTypes = ['application/pdf'];
+    const validTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
     const maxSize = 10 * 1024 * 1024; // 10MB
 
     uploadedFiles.forEach(file => {
       if (!validTypes.includes(file.type)) {
         toast({
           title: "Invalid file type",
-          description: "Please upload PDF files only.",
+          description: "Please upload PDF, JPG, or PNG files only.",
           variant: "destructive",
         });
         return;
@@ -181,34 +183,56 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole = 'editor' }: TaxLea
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <MainContent
-          formData={formData}
-          disposition={disposition}
-          passReason={passReason}
-          notes={notes}
-          newNote={newNote}
-          files={files}
-          canEdit={canEdit}
-          onInputChange={handleInputChange}
-          onDisposition={handleDisposition}
-          onPassReasonChange={setPassReason}
-          onNewNoteChange={setNewNote}
-          onAddNote={handleAddNote}
-          onFileUpload={handleFileUpload}
-          onRemoveFile={removeFile}
-        />
+    <div className="max-w-7xl mx-auto p-6">
+      {/* Main Grid Layout */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Left Column - Main Content */}
+        <div className="xl:col-span-2 space-y-6">
+          {/* Editable Lead Information */}
+          <EditableLeadInfoSection
+            formData={formData}
+            onInputChange={handleInputChange}
+            canEdit={canEdit}
+          />
 
-        <Sidebar
-          currentStatus={formData.status}
-          files={files}
-          canEdit={canEdit}
-          onStatusChange={handleStatusChange}
-          onRemoveFile={removeFile}
-        />
+          {/* Property Map */}
+          <PropertyMapSection address={formData.propertyAddress} />
+
+          {/* Main Content Sections */}
+          <MainContent
+            formData={formData}
+            disposition={disposition}
+            passReason={passReason}
+            notes={notes}
+            newNote={newNote}
+            files={files}
+            canEdit={canEdit}
+            onInputChange={handleInputChange}
+            onDisposition={handleDisposition}
+            onPassReasonChange={setPassReason}
+            onNewNoteChange={setNewNote}
+            onAddNote={handleAddNote}
+            onFileUpload={handleFileUpload}
+            onRemoveFile={removeFile}
+          />
+        </div>
+
+        {/* Right Column - Sidebar */}
+        <div className="xl:col-span-1">
+          <div className="sticky top-6">
+            <Sidebar
+              currentStatus={formData.status}
+              files={files}
+              canEdit={canEdit}
+              onStatusChange={handleStatusChange}
+              onRemoveFile={removeFile}
+              onFileUpload={handleFileUpload}
+            />
+          </div>
+        </div>
       </div>
 
+      {/* Save Button */}
       <SaveButton
         onSave={handleSave}
         isSaving={isSaving}
@@ -216,6 +240,7 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole = 'editor' }: TaxLea
         disposition={disposition}
       />
 
+      {/* View Only Message */}
       <ViewOnlyMessage canEdit={canEdit} />
     </div>
   );

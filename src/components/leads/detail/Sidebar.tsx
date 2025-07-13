@@ -17,6 +17,7 @@ interface SidebarProps {
   canEdit: boolean;
   onStatusChange: (status: 'HOT' | 'WARM' | 'COLD' | 'PASS') => void;
   onRemoveFile: (fileId: string) => void;
+  onFileUpload?: (files: File[], category: 'probate' | 'vesting_deed' | 'other') => void;
 }
 
 export function Sidebar({
@@ -24,7 +25,8 @@ export function Sidebar({
   files,
   canEdit,
   onStatusChange,
-  onRemoveFile
+  onRemoveFile,
+  onFileUpload
 }: SidebarProps) {
   return (
     <div className="space-y-6">
@@ -37,6 +39,7 @@ export function Sidebar({
       <AttachmentsSection
         files={files}
         onRemoveFile={onRemoveFile}
+        onFileUpload={onFileUpload}
         canEdit={canEdit}
       />
     </div>
