@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Filter, Grid, List, Calendar, Activity, Badge } from 'lucide-react';
+import { Grid, List, Calendar, Activity, Badge, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -71,15 +71,39 @@ export function LeadsFiltersSection({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Advanced Filter Button */}
-      <Button 
-        variant="outline" 
-        size="sm" 
-        className="h-8 px-3 border-podio-border bg-podio-background hover:bg-podio-hover text-sm"
-      >
-        <Filter className="w-4 h-4 mr-2" />
-        Advanced Filter
-      </Button>
+      {/* Simple Filter Dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="h-8 px-3 border-podio-border bg-podio-background hover:bg-podio-hover text-sm flex items-center gap-2"
+          >
+            <span>Filter</span>
+            <ChevronDown className="w-3 h-3" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent 
+          align="start" 
+          className="w-48 bg-podio-background border-podio-border"
+        >
+          <DropdownMenuItem className="hover:bg-podio-hover cursor-pointer">
+            Status Filter
+          </DropdownMenuItem>
+          <DropdownMenuItem className="hover:bg-podio-hover cursor-pointer">
+            Date Range
+          </DropdownMenuItem>
+          <DropdownMenuItem className="hover:bg-podio-hover cursor-pointer">
+            Property Type
+          </DropdownMenuItem>
+          <DropdownMenuItem className="hover:bg-podio-hover cursor-pointer">
+            Location
+          </DropdownMenuItem>
+          <DropdownMenuItem className="hover:bg-podio-hover cursor-pointer">
+            Advanced Options
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

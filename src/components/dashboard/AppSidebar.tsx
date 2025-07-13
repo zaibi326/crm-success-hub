@@ -105,7 +105,7 @@ export function AppSidebar() {
                   asChild 
                   className={`podio-sidebar-item ${location.pathname === item.url ? 'active' : ''}`}
                 >
-                  <div 
+                  <button 
                     className="w-full justify-start cursor-pointer flex items-center gap-2 p-2 rounded-md hover:bg-podio-hover transition-colors"
                     onClick={() => handleNavigation(item.url)}
                   >
@@ -116,7 +116,7 @@ export function AppSidebar() {
                         {item.badge}
                       </SidebarMenuBadge>
                     )}
-                  </div>
+                  </button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
