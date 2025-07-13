@@ -1,54 +1,12 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Save, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { LeadStatusButtons } from './LeadStatusButtons';
-import { OwnershipBreakdownChart } from './OwnershipBreakdownChart';
-import { LeadActivityTimeline } from './LeadActivityTimeline';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
-import { ImportedDataSection } from './detail/ImportedDataSection';
-import { DispositionSection, PassReasonSection } from './detail/DispositionSection';
-import { NotesSection } from './detail/NotesSection';
-import { EditableFieldsSection } from './detail/EditableFieldsSection';
-import { ConditionalFieldsSection } from './detail/ConditionalFieldsSection';
-import { AttachmentsSection } from './detail/AttachmentsSection';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
-interface TaxLead {
-  id: number;
-  taxId: string;
-  ownerName: string;
-  propertyAddress: string;
-  taxLawsuitNumber?: string;
-  currentArrears?: number;
-  status: 'HOT' | 'WARM' | 'COLD' | 'PASS';
-  notes?: string;
-  phone?: string;
-  email?: string;
-  ownerOfRecord?: string;
-  hasDeath?: boolean;
-  deathNotes?: string;
-  hasProbate?: boolean;
-  probateNotes?: string;
-  hasLawsuit?: boolean;
-  lawsuitNotes?: string;
-  hasAdditionalTaxingEntities?: boolean;
-  additionalTaxingNotes?: string;
-  vestingDeedNotes?: string;
-  firstName: string;
-  lastName: string;
-  temperature: 'HOT' | 'WARM' | 'COLD';
-  occupancyStatus: 'OWNER_OCCUPIED' | 'TENANT_OCCUPIED' | 'VACANT';
-  leadSource?: string;
-  agentName?: string;
-  askingPrice?: number;
-  mortgagePrice?: number;
-  campaignId?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  attachedFiles?: File[];
-}
+import { TaxLead } from '@/types/taxLead';
+import { MainContent } from './detail/MainContent';
+import { Sidebar } from './detail/Sidebar';
+import { SaveButton } from './detail/SaveButton';
+import { ViewOnlyMessage } from './detail/ViewOnlyMessage';
 
 interface TaxLeadDetailsFormProps {
   lead: TaxLead;
@@ -85,7 +43,7 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole = 'editor' }: TaxLea
   const [disposition, setDisposition] = useState<'keep' | 'pass' | null>(null);
   const [passReason, setPassReason] = useState('');
   const [newNote, setNewNote] = useState('');
-  const [notes, setNotes] = useState<NoteEntry[]>([
+  const [notes, setNotes setNotes] = useState<NoteEntry[]>([
     {
       id: '1',
       text: 'Initial lead imported from campaign',
@@ -225,112 +183,40 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole = 'editor' }: TaxLea
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Main Content - 3 columns */}
-        <div className="lg:col-span-3 space-y-6">
-          <ImportedDataSection lead={formData} />
+        <MainContent
+          formData={formData}
+          disposition={disposition}
+          passReason={passReason}
+          notes={notes}
+          newNote={newNote}
+          files={files}
+          canEdit={canEdit}
+          onInputChange={handleInputChange}
+          onDisposition={handleDisposition}
+          onPassReasonChange={setPassReason}
+          onNewNoteChange={setNewNote}
+          onAddNote={handleAddNote}
+          onFileUpload={handleFileUpload}
+          onRemoveFile={removeFile}
+        />
 
-          <DispositionSection
-            disposition={disposition}
-            passReason={passReason}
-            onDisposition={handleDisposition}
-            onPassReasonChange={setPassReason}
-            canEdit={canEdit}
-          />
-
-          {disposition === 'pass' && (
-            <PassReasonSection
-              passReason={passReason}
-              onPassReasonChange={setPassReason}
-              canEdit={canEdit}
-            />
-          )}
-
-          <NotesSection
-            notes={notes}
-            newNote={newNote}
-            onNewNoteChange={setNewNote}
-            onAddNote={handleAddNote}
-            canEdit={canEdit}
-          />
-
-          {disposition === 'keep' && (
-            <>
-              <EditableFieldsSection
-                formData={formData}
-                onInputChange={handleInputChange}
-                canEdit={canEdit}
-              />
-
-              <ConditionalFieldsSection
-                formData={formData}
-                files={files}
-                onInputChange={handleInputChange}
-                onFileUpload={handleFileUpload}
-                onRemoveFile={removeFile}
-                canEdit={canEdit}
-              />
-
-              <Card className="shadow-lg border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3">
-                    <Users className="w-5 h-5 text-crm-primary" />
-                    Ownership Breakdown
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <OwnershipBreakdownChart onSave={(heirs) => console.log('Heirs saved:', heirs)} />
-                </CardContent>
-              </Card>
-            </>
-          )}
-
-          <LeadActivityTimeline leadId={lead.id} />
-        </div>
-
-        {/* Status Classification Sidebar - 1 column */}
-        <div className="space-y-6">
-          <LeadStatusButtons
-            currentStatus={formData.status}
-            onStatusChange={handleStatusChange}
-            disabled={!canEdit}
-          />
-
-          <AttachmentsSection
-            files={files}
-            onRemoveFile={removeFile}
-            canEdit={canEdit}
-          />
-        </div>
+        <Sidebar
+          currentStatus={formData.status}
+          files={files}
+          canEdit={canEdit}
+          onStatusChange={handleStatusChange}
+          onRemoveFile={removeFile}
+        />
       </div>
 
-      {/* Save Button */}
-      {canEdit && disposition && (
-        <div className="sticky bottom-6 z-10 flex justify-center">
-          <Button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="bg-gradient-to-r from-crm-primary to-crm-accent hover:from-crm-primary/90 hover:to-crm-accent/90 text-white px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transform transition-all duration-200 hover:scale-105"
-          >
-            {isSaving ? (
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Saving...
-              </div>
-            ) : (
-              <>
-                <Save className="w-5 h-5 mr-2" />
-                Save Lead Details
-              </>
-            )}
-          </Button>
-        </div>
-      )}
+      <SaveButton
+        onSave={handleSave}
+        isSaving={isSaving}
+        canEdit={canEdit}
+        disposition={disposition}
+      />
 
-      {!canEdit && (
-        <div className="text-center py-4">
-          <p className="text-gray-600">You have view-only access to this lead.</p>
-        </div>
-      )}
+      <ViewOnlyMessage canEdit={canEdit} />
     </div>
   );
 }
