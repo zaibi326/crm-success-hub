@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Save, Users } from 'lucide-react';
@@ -36,6 +35,18 @@ interface TaxLead {
   hasAdditionalTaxingEntities?: boolean;
   additionalTaxingNotes?: string;
   vestingDeedNotes?: string;
+  firstName: string;
+  lastName: string;
+  temperature: 'HOT' | 'WARM' | 'COLD';
+  occupancyStatus: 'OWNER_OCCUPIED' | 'TENANT_OCCUPIED' | 'VACANT';
+  leadSource?: string;
+  agentName?: string;
+  askingPrice?: number;
+  mortgagePrice?: number;
+  campaignId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  attachedFiles?: File[];
 }
 
 interface TaxLeadDetailsFormProps {
@@ -60,7 +71,14 @@ interface NoteEntry {
 }
 
 export function TaxLeadDetailsForm({ lead, onSave, userRole = 'editor' }: TaxLeadDetailsFormProps) {
-  const [formData, setFormData] = useState<TaxLead>(lead);
+  const [formData, setFormData] = useState<TaxLead>({
+    ...lead,
+    firstName: lead.firstName || lead.ownerName?.split(' ')[0] || '',
+    lastName: lead.lastName || lead.ownerName?.split(' ').slice(1).join(' ') || '',
+    temperature: lead.temperature || 'WARM',
+    occupancyStatus: lead.occupancyStatus || 'OWNER_OCCUPIED'
+  });
+  
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [disposition, setDisposition] = useState<'keep' | 'pass' | null>(null);
@@ -85,7 +103,11 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole = 'editor' }: TaxLea
   };
 
   const handleStatusChange = (status: 'HOT' | 'WARM' | 'COLD' | 'PASS') => {
-    setFormData(prev => ({ ...prev, status }));
+    setFormData(prev => ({ 
+      ...prev, 
+      status,
+      temperature: status as 'HOT' | 'WARM' | 'COLD'
+    }));
     if (status === 'PASS') {
       setDisposition('pass');
     }
