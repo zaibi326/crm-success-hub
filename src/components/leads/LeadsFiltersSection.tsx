@@ -19,8 +19,6 @@ interface LeadsFiltersSectionProps {
 }
 
 export function LeadsFiltersSection({
-  filterStatus,
-  onFilterStatusChange,
   currentView,
   onViewChange
 }: LeadsFiltersSectionProps) {
@@ -73,68 +71,15 @@ export function LeadsFiltersSection({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Filter Dropdown */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="h-8 px-2 border-podio-border bg-podio-background hover:bg-podio-hover"
-          >
-            <Filter className="w-4 h-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent 
-          align="start" 
-          className="w-48 bg-podio-background border-podio-border"
-        >
-          <DropdownMenuItem 
-            onClick={() => onFilterStatusChange('all')}
-            className="hover:bg-podio-hover cursor-pointer"
-          >
-            All Status
-            {filterStatus === 'all' && (
-              <div className="w-2 h-2 bg-podio-primary rounded-full ml-auto" />
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuItem 
-            onClick={() => onFilterStatusChange('HOT')}
-            className="hover:bg-podio-hover cursor-pointer"
-          >
-            Hot
-            {filterStatus === 'HOT' && (
-              <div className="w-2 h-2 bg-podio-primary rounded-full ml-auto" />
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuItem 
-            onClick={() => onFilterStatusChange('WARM')}
-            className="hover:bg-podio-hover cursor-pointer"
-          >
-            Warm
-            {filterStatus === 'WARM' && (
-              <div className="w-2 h-2 bg-podio-primary rounded-full ml-auto" />
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuItem 
-            onClick={() => onFilterStatusChange('COLD')}
-            className="hover:bg-podio-hover cursor-pointer"
-          >
-            Cold
-            {filterStatus === 'COLD' && (
-              <div className="w-2 h-2 bg-podio-primary rounded-full ml-auto" />
-            )}
-          </DropdownMenuItem>
-          <DropdownMenuItem 
-            onClick={() => onFilterStatusChange('PASS')}
-            className="hover:bg-podio-hover cursor-pointer"
-          >
-            Pass
-            {filterStatus === 'PASS' && (
-              <div className="w-2 h-2 bg-podio-primary rounded-full ml-auto" />
-            )}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {/* Advanced Filter Button */}
+      <Button 
+        variant="outline" 
+        size="sm" 
+        className="h-8 px-3 border-podio-border bg-podio-background hover:bg-podio-hover text-sm"
+      >
+        <Filter className="w-4 h-4 mr-2" />
+        Advanced Filter
+      </Button>
     </div>
   );
 }
