@@ -5,7 +5,6 @@ import { AdvancedFilters } from './AdvancedFilters';
 import { EnhancedLeadDetailPage } from './EnhancedLeadDetailPage';
 import { TemplateModificationDialog } from './TemplateModificationDialog';
 import { LeadsHeader } from './LeadsHeader';
-import { LeadsFiltersSection } from './LeadsFiltersSection';
 import { LeadsMainContent } from './LeadsMainContent';
 import { useLeadsLogic } from './useLeadsLogic';
 
@@ -55,19 +54,9 @@ export function EnhancedLeadsContent() {
       <LeadsHeader
         onAddLead={handleAddLead}
         onSellerAdded={handleSellerAdded}
+        currentView={currentView}
+        onViewChange={setCurrentView}
       />
-
-      {/* Podio-style top filters bar */}
-      <div className="bg-podio-background border-b border-podio-border px-6 py-4">
-        <LeadsFiltersSection
-          filterStatus={filterStatus}
-          onFilterStatusChange={setFilterStatus}
-          sortBy={sortBy}
-          onSortByChange={setSortBy}
-          currentView={currentView}
-          onViewChange={setCurrentView}
-        />
-      </div>
 
       <main className="p-6 space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
