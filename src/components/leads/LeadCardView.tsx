@@ -15,14 +15,8 @@ interface LeadCardViewProps {
 }
 
 export function LeadCardView({ leads, onLeadSelect, onLeadEdit, getStatusBadge }: LeadCardViewProps) {
-  const handleCall = (phoneNumber: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    console.log(`Calling ${phoneNumber}`);
-  };
-
-  const handleSMS = (phoneNumber: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    console.log(`SMS to ${phoneNumber}`);
+  const handleCommunication = (type: 'call' | 'sms', phoneNumber: string) => {
+    console.log(`${type === 'call' ? 'Calling' : 'SMS to'} ${phoneNumber}`);
   };
 
   const handleEmail = (email: string, e: React.MouseEvent) => {
@@ -69,14 +63,14 @@ export function LeadCardView({ leads, onLeadSelect, onLeadEdit, getStatusBadge }
                       leadId={lead.id.toString()}
                       leadName={lead.ownerName}
                       type="call"
-                      onCommunicationStart={handleCall}
+                      onCommunicationStart={handleCommunication}
                     />
                     <CommunicationButton
                       phoneNumber={lead.phone}
                       leadId={lead.id.toString()}
                       leadName={lead.ownerName}
                       type="sms"
-                      onCommunicationStart={handleSMS}
+                      onCommunicationStart={handleCommunication}
                     />
                   </div>
                 </div>
