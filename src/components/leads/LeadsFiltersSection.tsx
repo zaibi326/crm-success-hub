@@ -29,20 +29,16 @@ export function LeadsFiltersSection({
 }: LeadsFiltersSectionProps) {
   const getViewIcon = (view: string) => {
     switch (view) {
-      case 'table': return <Grid className="w-4 h-4" />;
-      case 'card': return <List className="w-4 h-4" />;
-      case 'calendar': return <Calendar className="w-4 h-4" />;
-      case 'timeline': return <Activity className="w-4 h-4" />;
-      case 'badge': return <Badge className="w-4 h-4" />;
-      default: return <Grid className="w-4 h-4" />;
+      case 'table': return Grid;
+      case 'card': return List;
+      case 'calendar': return Calendar;
+      case 'timeline': return Activity;
+      case 'badge': return Badge;
+      default: return Grid;
     }
   };
 
-  const getCurrentViewIcon = () => {
-    return getViewIcon(currentView);
-  };
-
-  const CurrentIcon = getCurrentViewIcon();
+  const CurrentViewIcon = getViewIcon(currentView);
 
   return (
     <div className="flex items-center gap-3">
@@ -54,26 +50,29 @@ export function LeadsFiltersSection({
             size="sm" 
             className="h-8 px-2 border-podio-border bg-podio-background hover:bg-podio-hover"
           >
-            <CurrentIcon />
+            <CurrentViewIcon className="w-4 h-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent 
           align="start" 
           className="w-48 bg-podio-background border-podio-border"
         >
-          {['table', 'card', 'calendar', 'timeline', 'badge'].map((view) => (
-            <DropdownMenuItem
-              key={view}
-              onClick={() => onViewChange(view as any)}
-              className="flex items-center gap-3 px-3 py-2 text-sm hover:bg-podio-hover cursor-pointer"
-            >
-              {getViewIcon(view)}
-              <span className="capitalize">{view}</span>
-              {currentView === view && (
-                <div className="w-2 h-2 bg-podio-primary rounded-full ml-auto" />
-              )}
-            </DropdownMenuItem>
-          ))}
+          {['table', 'card', 'calendar', 'timeline', 'badge'].map((view) => {
+            const ViewIcon = getViewIcon(view);
+            return (
+              <DropdownMenuItem
+                key={view}
+                onClick={() => onViewChange(view as any)}
+                className="flex items-center gap-3 px-3 py-2 text-sm hover:bg-podio-hover cursor-pointer"
+              >
+                <ViewIcon className="w-4 h-4" />
+                <span className="capitalize">{view}</span>
+                {currentView === view && (
+                  <div className="w-2 h-2 bg-podio-primary rounded-full ml-auto" />
+                )}
+              </DropdownMenuItem>
+            );
+          })}
         </DropdownMenuContent>
       </DropdownMenu>
 
