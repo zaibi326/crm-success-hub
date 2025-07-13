@@ -1,12 +1,14 @@
 
 import React from 'react';
 import { SidebarInset } from '@/components/ui/sidebar';
-import { EnhancedLeadDetailPage } from './EnhancedLeadDetailPage';
+import { TaxLeadDetailsForm } from './TaxLeadDetailsForm';
 import { TemplateModificationDialog } from './TemplateModificationDialog';
 import { LeadsHeader } from './LeadsHeader';
 import { LeadsMainContent } from './LeadsMainContent';
 import { FilterChips } from './FilterChips';
 import { useLeadsLogic } from './useLeadsLogic';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 export function EnhancedLeadsContent() {
   const {
@@ -45,16 +47,42 @@ export function EnhancedLeadsContent() {
     setFilters([]);
   };
 
+  // If a lead is selected, show the enhanced detail view
   if (selectedLead) {
     return (
-      <EnhancedLeadDetailPage
-        lead={selectedLead}
-        onBack={() => setSelectedLead(null)}
-        onLeadUpdate={(updatedLead) => {
-          handleLeadUpdate(updatedLead);
-          setSelectedLead(updatedLead);
-        }}
-      />
+      <SidebarInset className="flex-1 overflow-auto bg-podio-surface">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50/30 to-white">
+          {/* Header with back button */}
+          <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-gray-200/50 p-6">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                onClick={() => setSelectedLead(null)}
+                className="flex items-center gap-2 text-crm-primary hover:text-crm-accent hover:bg-crm-primary/10"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Leads
+              </Button>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">{selectedLead.ownerName}</h1>
+                <p className="text-gray-600 mt-1">{selectedLead.propertyAddress}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Enhanced Lead Details Form */}
+          <div className="pb-6">
+            <TaxLeadDetailsForm
+              lead={selectedLead}
+              onSave={(updatedLead) => {
+                handleLeadUpdate(updatedLead);
+                setSelectedLead(updatedLead);
+              }}
+              userRole="editor"
+            />
+          </div>
+        </div>
+      </SidebarInset>
     );
   }
 
