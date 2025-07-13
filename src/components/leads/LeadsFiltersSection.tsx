@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Filter, Grid, List, Calendar, Activity, Badge } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,8 +21,6 @@ interface LeadsFiltersSectionProps {
 export function LeadsFiltersSection({
   filterStatus,
   onFilterStatusChange,
-  sortBy,
-  onSortByChange,
   currentView,
   onViewChange
 }: LeadsFiltersSectionProps) {
@@ -104,10 +101,7 @@ export function LeadsFiltersSection({
             onClick={() => onFilterStatusChange('HOT')}
             className="hover:bg-podio-hover cursor-pointer"
           >
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-              Hot
-            </div>
+            Hot
             {filterStatus === 'HOT' && (
               <div className="w-2 h-2 bg-podio-primary rounded-full ml-auto" />
             )}
@@ -116,10 +110,7 @@ export function LeadsFiltersSection({
             onClick={() => onFilterStatusChange('WARM')}
             className="hover:bg-podio-hover cursor-pointer"
           >
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-              Warm
-            </div>
+            Warm
             {filterStatus === 'WARM' && (
               <div className="w-2 h-2 bg-podio-primary rounded-full ml-auto" />
             )}
@@ -128,10 +119,7 @@ export function LeadsFiltersSection({
             onClick={() => onFilterStatusChange('COLD')}
             className="hover:bg-podio-hover cursor-pointer"
           >
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              Cold
-            </div>
+            Cold
             {filterStatus === 'COLD' && (
               <div className="w-2 h-2 bg-podio-primary rounded-full ml-auto" />
             )}
@@ -140,29 +128,13 @@ export function LeadsFiltersSection({
             onClick={() => onFilterStatusChange('PASS')}
             className="hover:bg-podio-hover cursor-pointer"
           >
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-              Pass
-            </div>
+            Pass
             {filterStatus === 'PASS' && (
               <div className="w-2 h-2 bg-podio-primary rounded-full ml-auto" />
             )}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
-      {/* Sort by Owner Name */}
-      <Select value={sortBy} onValueChange={onSortByChange}>
-        <SelectTrigger className="w-[140px] h-8 border-podio-border bg-podio-background text-sm">
-          <SelectValue placeholder="Owner Name" />
-        </SelectTrigger>
-        <SelectContent className="bg-podio-background border-podio-border">
-          <SelectItem value="ownerName">Owner Name</SelectItem>
-          <SelectItem value="propertyAddress">Property Address</SelectItem>
-          <SelectItem value="currentArrears">Current Arrears</SelectItem>
-          <SelectItem value="status">Status</SelectItem>
-        </SelectContent>
-      </Select>
     </div>
   );
 }

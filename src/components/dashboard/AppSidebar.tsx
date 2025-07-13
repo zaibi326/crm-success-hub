@@ -87,6 +87,7 @@ export function AppSidebar() {
   ];
 
   const handleNavigation = (url: string) => {
+    console.log('Navigating to:', url);
     navigate(url);
   };
 
@@ -103,9 +104,11 @@ export function AppSidebar() {
                 <SidebarMenuButton 
                   asChild 
                   className={`podio-sidebar-item ${location.pathname === item.url ? 'active' : ''}`}
-                  onClick={() => handleNavigation(item.url)}
                 >
-                  <button className="w-full justify-start">
+                  <button 
+                    className="w-full justify-start"
+                    onClick={() => handleNavigation(item.url)}
+                  >
                     <item.icon className="w-4 h-4" />
                     <span className="font-normal">{item.title}</span>
                     {item.badge && (
