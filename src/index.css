@@ -180,7 +180,7 @@
 
   /* Animated sidebar */
   .sidebar-item {
-    @apply flex items-center gap-3 px-4 py-3 text-sm text-slate-600 hover:text-bright-blue hover:bg-gradient-to-r hover:from-bright-blue/10 hover:to-bright-teal/10 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-md cursor-pointer group;
+    @apply flex items-center gap-3 px-4 py-3 text-sm text-slate-600 hover:text-bright-blue hover:bg-gradient-to-r hover:from-bright-blue/10 hover:to-bright-teal/10 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-md cursor-pointer;
   }
 
   .sidebar-item.active {
