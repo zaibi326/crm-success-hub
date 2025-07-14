@@ -4,14 +4,25 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { Plus, Trash2, Users, PieChart as PieChartIcon } from 'lucide-react';
+import { Plus, Trash2, Users, PieChart as PieChartIcon, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 interface Heir {
   id: string;
   name: string;
+  relationship: string;
+  customRelationship?: string;
+  email: string;
+  propertyAddress: string;
+  phoneNumber: string;
   percentage: number;
+  notes?: string;
+  documents?: File[];
 }
 
 interface OwnershipBreakdownChartProps {
@@ -25,6 +36,12 @@ const COLORS = [
   '#06B6D4', '#F97316', '#84CC16', '#EC4899', '#6366F1'
 ];
 
+const RELATIONSHIP_OPTIONS = [
+  'Mother', 'Father', 'Son', 'Daughter', 'Brother', 'Sister',
+  'Husband', 'Wife', 'Grandfather', 'Grandmother', 'Uncle',
+  'Aunt', 'Cousin', 'Other'
+];
+
 export function OwnershipBreakdownChart({ 
   onSave, 
   initialHeirs = [], 
@@ -32,17 +49,42 @@ export function OwnershipBreakdownChart({
 }: OwnershipBreakdownChartProps) {
   const [heirs, setHeirs] = useState<Heir[]>(
     initialHeirs.length > 0 ? initialHeirs : [
-      { id: '1', name: 'John Smith', percentage: 50 },
-      { id: '2', name: 'Jane Smith', percentage: 50 }
+      { 
+        id: '1', 
+        name: 'John Smith', 
+        relationship: 'Father',
+        email: '',
+        propertyAddress: '',
+        phoneNumber: '',
+        percentage: 50,
+        notes: ''
+      },
+      { 
+        id: '2', 
+        name: 'Jane Smith', 
+        relationship: 'Mother',
+        email: '',
+        propertyAddress: '',
+        phoneNumber: '',
+        percentage: 50,
+        notes: ''
+      }
     ]
   );
+  const [editingHeir, setEditingHeir] = useState<Heir | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { toast } = useToast();
 
   const addHeir = () => {
     const newHeir: Heir = {
       id: Date.now().toString(),
       name: '',
-      percentage: 0
+      relationship: 'Other',
+      email: '',
+      propertyAddress: '',
+      phoneNumber: '',
+      percentage: 0,
+      notes: ''
     };
     setHeirs(prev => [...prev, newHeir]);
   };
@@ -59,12 +101,27 @@ export function OwnershipBreakdownChart({
     setHeirs(prev => prev.filter(heir => heir.id !== id));
   };
 
-  const updateHeir = (id: string, field: 'name' | 'percentage', value: string | number) => {
+  const updateHeir = (id: string, field: keyof Heir, value: string | number) => {
     setHeirs(prev => prev.map(heir => 
       heir.id === id 
-        ? { ...heir, [field]: field === 'percentage' ? Number(value) : value }
+        ? { ...heir, [field]: value }
         : heir
     ));
+  };
+
+  const openEditModal = (heir: Heir) => {
+    setEditingHeir({ ...heir });
+    setIsEditModalOpen(true);
+  };
+
+  const saveHeirChanges = () => {
+    if (editingHeir) {
+      setHeirs(prev => prev.map(heir => 
+        heir.id === editingHeir.id ? editingHeir : heir
+      ));
+      setIsEditModalOpen(false);
+      setEditingHeir(null);
+    }
   };
 
   const normalizePercentages = () => {
@@ -120,11 +177,28 @@ export function OwnershipBreakdownChart({
     .filter(heir => heir.percentage > 0 && heir.name.trim())
     .map(heir => ({
       name: heir.name,
-      value: heir.percentage
+      value: heir.percentage,
+      relationship: heir.relationship === 'Other' ? heir.customRelationship : heir.relationship,
+      email: heir.email
     }));
 
   const totalPercentage = getTotalPercentage();
   const isValidTotal = Math.abs(totalPercentage - 100) < 0.01;
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white p-3 border rounded shadow-lg">
+          <p className="font-semibold">{data.name}</p>
+          <p className="text-sm text-gray-600">{data.relationship}</p>
+          <p className="text-sm font-medium">{data.value.toFixed(1)}%</p>
+          {data.email && <p className="text-xs text-gray-500">{data.email}</p>}
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="space-y-6">
@@ -132,60 +206,135 @@ export function OwnershipBreakdownChart({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="w-5 h-5 text-crm-primary" />
-            Heirs & Ownership
+            Heirs & Ownership Details
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {heirs.map((heir, index) => (
-            <div key={heir.id} className="grid grid-cols-12 gap-4 items-center">
-              <div className="col-span-6">
-                <Label htmlFor={`heir-name-${heir.id}`} className="sr-only">
-                  Heir {index + 1} Name
-                </Label>
-                <Input
-                  id={`heir-name-${heir.id}`}
-                  value={heir.name}
-                  onChange={(e) => updateHeir(heir.id, 'name', e.target.value)}
-                  placeholder={`Heir ${index + 1} name`}
-                  disabled={readOnly}
-                />
-              </div>
-              <div className="col-span-4">
-                <div className="relative">
-                  <Input
-                    type="number"
-                    value={heir.percentage}
-                    onChange={(e) => updateHeir(heir.id, 'percentage', e.target.value)}
-                    placeholder="0"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    disabled={readOnly}
-                    className="pr-6"
-                  />
-                  <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">
-                    %
-                  </span>
-                </div>
-              </div>
-              <div className="col-span-2">
-                {!readOnly && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeHeir(heir.id)}
-                    disabled={heirs.length <= 1}
-                    className="text-red-600 hover:text-red-800 hover:bg-red-50"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-          ))}
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Heir Name</TableHead>
+                  <TableHead>Relationship</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Property Address</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Ownership %</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {heirs.map((heir) => (
+                  <TableRow key={heir.id}>
+                    <TableCell>
+                      <Input
+                        value={heir.name}
+                        onChange={(e) => updateHeir(heir.id, 'name', e.target.value)}
+                        placeholder="Enter name"
+                        disabled={readOnly}
+                        className="min-w-[120px]"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        value={heir.relationship}
+                        onValueChange={(value) => updateHeir(heir.id, 'relationship', value)}
+                        disabled={readOnly}
+                      >
+                        <SelectTrigger className="min-w-[120px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {RELATIONSHIP_OPTIONS.map(option => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        type="email"
+                        value={heir.email}
+                        onChange={(e) => updateHeir(heir.id, 'email', e.target.value)}
+                        placeholder="Email address"
+                        disabled={readOnly}
+                        className="min-w-[160px]"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        value={heir.propertyAddress}
+                        onChange={(e) => updateHeir(heir.id, 'propertyAddress', e.target.value)}
+                        placeholder="Property address"
+                        disabled={readOnly}
+                        className="min-w-[180px]"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        type="tel"
+                        value={heir.phoneNumber}
+                        onChange={(e) => updateHeir(heir.id, 'phoneNumber', e.target.value)}
+                        placeholder="Phone number"
+                        disabled={readOnly}
+                        className="min-w-[140px]"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          value={heir.percentage}
+                          onChange={(e) => updateHeir(heir.id, 'percentage', parseFloat(e.target.value) || 0)}
+                          placeholder="0"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          disabled={readOnly}
+                          className="pr-6 min-w-[80px]"
+                        />
+                        <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">
+                          %
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openEditModal(heir)}
+                              disabled={readOnly}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          </DialogTrigger>
+                        </Dialog>
+                        {!readOnly && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeHeir(heir.id)}
+                            disabled={heirs.length <= 1}
+                            className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
 
           {!readOnly && (
-            <div className="flex gap-2 pt-4 border-t">
+            <div className="flex gap-2 pt-4 border-t mt-4">
               <Button
                 variant="outline"
                 onClick={addHeir}
@@ -204,7 +353,7 @@ export function OwnershipBreakdownChart({
             </div>
           )}
 
-          <div className="flex items-center justify-between pt-4 border-t">
+          <div className="flex items-center justify-between pt-4 border-t mt-4">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Total:</span>
               <span className={`text-sm font-bold ${isValidTotal ? 'text-green-600' : 'text-red-600'}`}>
@@ -223,6 +372,133 @@ export function OwnershipBreakdownChart({
           </div>
         </CardContent>
       </Card>
+
+      {/* Edit Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Heir Details</DialogTitle>
+          </DialogHeader>
+          {editingHeir && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-name">Name</Label>
+                  <Input
+                    id="edit-name"
+                    value={editingHeir.name}
+                    onChange={(e) => setEditingHeir({ ...editingHeir, name: e.target.value })}
+                    placeholder="Enter name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-relationship">Relationship</Label>
+                  <Select
+                    value={editingHeir.relationship}
+                    onValueChange={(value) => setEditingHeir({ ...editingHeir, relationship: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {RELATIONSHIP_OPTIONS.map(option => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {editingHeir.relationship === 'Other' && (
+                <div>
+                  <Label htmlFor="edit-custom-relationship">Custom Relationship</Label>
+                  <Input
+                    id="edit-custom-relationship"
+                    value={editingHeir.customRelationship || ''}
+                    onChange={(e) => setEditingHeir({ ...editingHeir, customRelationship: e.target.value })}
+                    placeholder="Specify relationship"
+                  />
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-email">Email Address</Label>
+                  <Input
+                    id="edit-email"
+                    type="email"
+                    value={editingHeir.email}
+                    onChange={(e) => setEditingHeir({ ...editingHeir, email: e.target.value })}
+                    placeholder="Email address"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-phone">Phone Number</Label>
+                  <Input
+                    id="edit-phone"
+                    type="tel"
+                    value={editingHeir.phoneNumber}
+                    onChange={(e) => setEditingHeir({ ...editingHeir, phoneNumber: e.target.value })}
+                    placeholder="Phone number"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="edit-address">Property Address</Label>
+                <Input
+                  id="edit-address"
+                  value={editingHeir.propertyAddress}
+                  onChange={(e) => setEditingHeir({ ...editingHeir, propertyAddress: e.target.value })}
+                  placeholder="Property address"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="edit-percentage">Ownership Percentage</Label>
+                <div className="relative">
+                  <Input
+                    id="edit-percentage"
+                    type="number"
+                    value={editingHeir.percentage}
+                    onChange={(e) => setEditingHeir({ ...editingHeir, percentage: parseFloat(e.target.value) || 0 })}
+                    placeholder="0"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    className="pr-6"
+                  />
+                  <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">
+                    %
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="edit-notes">Notes</Label>
+                <Textarea
+                  id="edit-notes"
+                  value={editingHeir.notes || ''}
+                  onChange={(e) => setEditingHeir({ ...editingHeir, notes: e.target.value })}
+                  placeholder="Additional notes about this heir"
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={saveHeirChanges}>
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Pie Chart Visualization */}
       {chartData.length > 0 && (
@@ -250,9 +526,7 @@ export function OwnershipBreakdownChart({
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip 
-                    formatter={(value: number) => [`${value.toFixed(1)}%`, 'Ownership']}
-                  />
+                  <Tooltip content={<CustomTooltip />} />
                   <Legend 
                     formatter={(value, entry) => (
                       <span style={{ color: entry.color }}>
