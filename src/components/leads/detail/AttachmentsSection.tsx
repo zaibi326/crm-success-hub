@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,18 +12,18 @@ interface UploadedFile {
   name: string;
   type: string;
   url: string;
-  category: 'probate' | 'vesting_deed' | 'other';
+  category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities';
 }
 
 interface AttachmentsSectionProps {
   files: UploadedFile[];
   onRemoveFile: (fileId: string) => void;
-  onFileUpload?: (files: File[], category: 'probate' | 'vesting_deed' | 'other') => void;
+  onFileUpload?: (files: File[], category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities') => void;
   canEdit: boolean;
 }
 
 export function AttachmentsSection({ 
-  files, 
+  files = [], // Default to empty array to prevent undefined errors
   onRemoveFile, 
   onFileUpload,
   canEdit 
@@ -102,6 +103,12 @@ export function AttachmentsSection({
         return 'bg-purple-100 text-purple-800';
       case 'vesting_deed':
         return 'bg-green-100 text-green-800';
+      case 'death':
+        return 'bg-red-100 text-red-800';
+      case 'lawsuit':
+        return 'bg-orange-100 text-orange-800';
+      case 'taxing_entities':
+        return 'bg-blue-100 text-blue-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -113,6 +120,12 @@ export function AttachmentsSection({
         return 'Probate';
       case 'vesting_deed':
         return 'Vesting Deed';
+      case 'death':
+        return 'Death';
+      case 'lawsuit':
+        return 'Lawsuit';
+      case 'taxing_entities':
+        return 'Taxing Entities';
       default:
         return 'Other';
     }
@@ -124,7 +137,7 @@ export function AttachmentsSection({
         <CardTitle className="flex items-center justify-between text-lg">
           <div className="flex items-center gap-2">
             <Paperclip className="w-5 h-5 text-purple-600" />
-            Attachments ({files.length})
+            Attachments ({files?.length || 0})
           </div>
           {canEdit && (
             <div className="flex gap-2">
@@ -177,7 +190,7 @@ export function AttachmentsSection({
 
         {/* Files List */}
         <div className="space-y-3">
-          {files.length === 0 ? (
+          {!files || files.length === 0 ? (
             <div className="text-center py-8">
               <Paperclip className="w-12 h-12 text-gray-300 mx-auto mb-3" />
               <p className="text-gray-500 text-sm">No files attached</p>

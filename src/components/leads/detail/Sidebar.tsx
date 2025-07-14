@@ -25,7 +25,7 @@ interface SidebarProps {
 
 export function Sidebar({
   currentStatus,
-  files,
+  files = [], // Default to empty array
   canEdit,
   onStatusChange,
   onRemoveFile,
