@@ -6,17 +6,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { 
-  Activity, 
   MessageSquare, 
-  Send, 
-  AtSign, 
+  Plus, 
+  Clock, 
   User, 
   FileText, 
-  Tag, 
-  Edit, 
-  Paperclip 
+  Upload,
+  Edit,
+  TrendingUp
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { formatDistanceToNow } from 'date-fns';
 
 interface ActivityItem {
   id: number;
@@ -34,118 +33,177 @@ interface ActivityTimelineSectionProps {
   onAddComment: (comment: string) => void;
 }
 
-export function ActivityTimelineSection({ activities, onAddComment }: ActivityTimelineSectionProps) {
+export function ActivityTimelineSection({ 
+  activities, 
+  onAddComment 
+}: ActivityTimelineSectionProps) {
   const [newComment, setNewComment] = useState('');
-  const { toast } = useToast();
+  const [isAddingComment, setIsAddingComment] = useState(false);
 
-  const handleAddComment = () => {
-    if (!newComment.trim()) return;
-    
-    onAddComment(newComment);
-    setNewComment('');
-    
-    toast({
-      title: "Comment Added",
-      description: "Your comment has been added to the activity timeline",
-    });
+  const handleSubmitComment = () => {
+    if (newComment.trim()) {
+      onAddComment(newComment);
+      setNewComment('');
+      setIsAddingComment(false);
+    }
   };
 
   const getActivityIcon = (type: string) => {
     switch (type) {
-      case 'created': return <User className="w-4 h-4" />;
-      case 'note': return <FileText className="w-4 h-4" />;
-      case 'status_change': return <Tag className="w-4 h-4" />;
-      case 'field_update': return <Edit className="w-4 h-4" />;
-      case 'file_upload': return <Paperclip className="w-4 h-4" />;
-      case 'comment': return <MessageSquare className="w-4 h-4" />;
-      default: return <Activity className="w-4 h-4" />;
+      case 'created':
+        return <Plus className="w-4 h-4 text-green-600" />;
+      case 'note':
+        return <FileText className="w-4 h-4 text-blue-600" />;
+      case 'status_change':
+        return <TrendingUp className="w-4 h-4 text-orange-600" />;
+      case 'field_update':
+        return <Edit className="w-4 h-4 text-purple-600" />;
+      case 'file_upload':
+        return <Upload className="w-4 h-4 text-indigo-600" />;
+      case 'comment':
+        return <MessageSquare className="w-4 h-4 text-gray-600" />;
+      default:
+        return <Clock className="w-4 h-4 text-gray-600" />;
+    }
+  };
+
+  const getActivityColor = (type: string) => {
+    switch (type) {
+      case 'created':
+        return 'bg-green-100 border-green-200';
+      case 'note':
+        return 'bg-blue-100 border-blue-200';
+      case 'status_change':
+        return 'bg-orange-100 border-orange-200';
+      case 'field_update':
+        return 'bg-purple-100 border-purple-200';
+      case 'file_upload':
+        return 'bg-indigo-100 border-indigo-200';
+      case 'comment':
+        return 'bg-gray-100 border-gray-200';
+      default:
+        return 'bg-gray-100 border-gray-200';
     }
   };
 
   return (
-    <>
-      {/* Comment Input */}
+    <div className="space-y-6">
+      {/* Add Comment Section */}
       <Card className="shadow-lg border-0">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5 text-crm-primary" />
-            Add Comment
+            Activity & Comments
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <Textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Add a comment... Use @username to mention team members"
-              rows={3}
-              className="w-full"
-            />
-            <div className="flex justify-between items-center">
-              <div className="text-xs text-gray-500">
-                <AtSign className="w-3 h-3 inline mr-1" />
-                Mention users with @username
+          {isAddingComment ? (
+            <div className="space-y-3">
+              <Textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Add a comment or note about this lead..."
+                className="min-h-[100px]"
+              />
+              <div className="flex gap-2">
+                <Button onClick={handleSubmitComment} size="sm">
+                  Add Comment
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setIsAddingComment(false);
+                    setNewComment('');
+                  }}
+                  size="sm"
+                >
+                  Cancel
+                </Button>
               </div>
-              <Button 
-                onClick={handleAddComment}
-                disabled={!newComment.trim()}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                <Send className="w-4 h-4 mr-2" />
-                Add Comment
-              </Button>
             </div>
-          </div>
+          ) : (
+            <Button
+              onClick={() => setIsAddingComment(true)}
+              variant="outline"
+              className="w-full"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Comment
+            </Button>
+          )}
         </CardContent>
       </Card>
 
+      {/* Activity Timeline */}
       <Card className="shadow-lg border-0">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="w-5 h-5 text-crm-primary" />
-            Activity Timeline
-          </CardTitle>
+          <CardTitle>Activity Timeline</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {activities.map((activity, index) => (
-              <div key={activity.id} className="flex gap-4 pb-4 border-b border-gray-100 last:border-b-0">
-                <Avatar className="w-10 h-10 flex-shrink-0">
-                  <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">
-                    {activity.userInitials}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                        {getActivityIcon(activity.type)}
-                      </div>
-                      <h4 className="font-semibold text-gray-900 text-sm">{activity.title}</h4>
-                    </div>
-                    <span className="text-xs text-gray-500 flex-shrink-0">
-                      {activity.timestamp.toLocaleDateString()} {activity.timestamp.toLocaleTimeString()}
-                    </span>
+              <div key={activity.id} className="flex gap-4">
+                {/* Timeline indicator */}
+                <div className="flex flex-col items-center">
+                  <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${getActivityColor(activity.type)}`}>
+                    {getActivityIcon(activity.type)}
                   </div>
-                  <p className="text-gray-600 text-sm mb-1 break-words">{activity.description}</p>
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-gray-500">by {activity.user}</p>
-                    {activity.mentions && activity.mentions.length > 0 && (
-                      <div className="flex gap-1">
-                        {activity.mentions.map((mention, i) => (
-                          <Badge key={i} variant="secondary" className="text-xs">
-                            {mention}
-                          </Badge>
-                        ))}
+                  {index < activities.length - 1 && (
+                    <div className="w-px h-8 bg-gray-200 mt-2" />
+                  )}
+                </div>
+
+                {/* Activity content */}
+                <div className="flex-1 pb-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-medium text-gray-900">{activity.title}</h4>
+                        <Badge variant="outline" className="text-xs">
+                          {activity.type.replace('_', ' ')}
+                        </Badge>
                       </div>
-                    )}
+                      <p className="text-gray-600 text-sm mb-2">{activity.description}</p>
+                      
+                      {/* Mentions */}
+                      {activity.mentions && activity.mentions.length > 0 && (
+                        <div className="flex gap-1 mb-2">
+                          {activity.mentions.map((mention, idx) => (
+                            <Badge key={idx} variant="secondary" className="text-xs">
+                              {mention}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <Avatar className="w-4 h-4">
+                          <AvatarFallback className="text-xs bg-gray-200">
+                            {activity.userInitials}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span>{activity.user}</span>
+                        <span>•</span>
+                        <span>{formatDistanceToNow(activity.timestamp, { addSuffix: true })}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             ))}
+
+            {activities.length === 0 && (
+              <div className="text-center py-8">
+                <Clock className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500 text-sm">No activity yet</p>
+                <p className="text-gray-400 text-xs mt-1">
+                  Activity will appear here as you work with this lead
+                </p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 }

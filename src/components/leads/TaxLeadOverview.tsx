@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -5,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { TaxLead } from '@/types/taxLead';
+import { EditableField } from './EditableField';
 import { 
   Search, 
   Filter, 
@@ -85,6 +87,14 @@ export function TaxLeadOverview({
   const handleLeadClick = (lead: TaxLead) => {
     if (onLeadSelect) {
       onLeadSelect(lead);
+    }
+  };
+
+  const handleFieldUpdate = (leadId: number, field: keyof TaxLead, value: string) => {
+    const leadToUpdate = leads.find(lead => lead.id === leadId);
+    if (leadToUpdate) {
+      const updatedLead = { ...leadToUpdate, [field]: value };
+      onLeadUpdate(updatedLead);
     }
   };
 
@@ -194,7 +204,6 @@ export function TaxLeadOverview({
             </Select>
           </div>
 
-          {/* Select All Checkbox */}
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -209,13 +218,12 @@ export function TaxLeadOverview({
         </CardContent>
       </Card>
 
-      {/* Leads List */}
+      {/* Leads List with Editable Fields */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {filteredLeads.map((lead) => (
           <Card 
             key={lead.id} 
-            className="hover:shadow-lg transition-shadow duration-200 cursor-pointer"
-            onClick={() => handleLeadClick(lead)}
+            className="hover:shadow-lg transition-shadow duration-200"
           >
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">
@@ -229,10 +237,13 @@ export function TaxLeadOverview({
                     }}
                     className="rounded border-gray-300"
                   />
-                  <div>
-                    <h3 className="font-semibold text-lg text-gray-900 hover:text-crm-primary transition-colors">
-                      {lead.ownerName}
-                    </h3>
+                  <div className="flex-1">
+                    <EditableField
+                      label=""
+                      value={lead.ownerName}
+                      onSave={(value) => handleFieldUpdate(lead.id, 'ownerName', value)}
+                      className="text-lg font-semibold text-gray-900 hover:text-crm-primary"
+                    />
                     <p className="text-sm text-gray-600">Tax ID: {lead.taxId}</p>
                   </div>
                 </div>
@@ -243,10 +254,7 @@ export function TaxLeadOverview({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleLeadClick(lead);
-                    }}
+                    onClick={() => handleLeadClick(lead)}
                     className="opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <Eye className="w-4 h-4 mr-1" />
@@ -256,9 +264,16 @@ export function TaxLeadOverview({
               </div>
 
               <div className="space-y-3">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <MapPin className="w-4 h-4" />
-                  <span className="text-sm">{lead.propertyAddress}</span>
+                <div className="flex items-start gap-2 text-gray-600">
+                  <MapPin className="w-4 h-4 mt-1 flex-shrink-0" />
+                  <div className="flex-1">
+                    <EditableField
+                      label=""
+                      value={lead.propertyAddress}
+                      onSave={(value) => handleFieldUpdate(lead.id, 'propertyAddress', value)}
+                      className="text-sm"
+                    />
+                  </div>
                 </div>
 
                 {lead.currentArrears && (
@@ -273,14 +288,26 @@ export function TaxLeadOverview({
                 {lead.phone && (
                   <div className="flex items-center gap-2 text-gray-600">
                     <Phone className="w-4 h-4" />
-                    <span className="text-sm">{lead.phone}</span>
+                    <EditableField
+                      label=""
+                      value={lead.phone}
+                      onSave={(value) => handleFieldUpdate(lead.id, 'phone', value)}
+                      type="tel"
+                      className="text-sm"
+                    />
                   </div>
                 )}
 
                 {lead.email && (
                   <div className="flex items-center gap-2 text-gray-600">
                     <Mail className="w-4 h-4" />
-                    <span className="text-sm">{lead.email}</span>
+                    <EditableField
+                      label=""
+                      value={lead.email}
+                      onSave={(value) => handleFieldUpdate(lead.id, 'email', value)}
+                      type="email"
+                      className="text-sm"
+                    />
                   </div>
                 )}
 

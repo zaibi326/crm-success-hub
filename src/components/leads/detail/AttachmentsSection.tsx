@@ -3,7 +3,9 @@ import React, { useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Paperclip, Upload, X, FileIcon, Image } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Paperclip, Upload, X, FileIcon, Image, FileText, File } from 'lucide-react';
 
 interface UploadedFile {
   id: string;
@@ -27,6 +29,7 @@ export function AttachmentsSection({
   canEdit 
 }: AttachmentsSectionProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pdfLinkInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(event.target.files || []);
@@ -39,11 +42,50 @@ export function AttachmentsSection({
     }
   };
 
-  const getFileIcon = (type: string) => {
-    if (type.startsWith('image/')) {
-      return <Image className="w-4 h-4 text-blue-500" />;
+  const handleAddPdfLink = () => {
+    const linkInput = pdfLinkInputRef.current;
+    if (linkInput && linkInput.value.trim()) {
+      // Create a mock file object for the PDF link
+      const mockFile = new File([''], 'PDF Link', { type: 'application/pdf' });
+      Object.defineProperty(mockFile, 'webkitRelativePath', { value: linkInput.value });
+      
+      if (onFileUpload) {
+        onFileUpload([mockFile], 'other');
+      }
+      linkInput.value = '';
     }
-    return <FileIcon className="w-4 h-4 text-gray-500" />;
+  };
+
+  const getFileIcon = (type: string, fileName: string) => {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    
+    if (type.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(extension || '')) {
+      return <Image className="w-5 h-5 text-blue-500" />;
+    }
+    
+    if (type === 'application/pdf' || extension === 'pdf') {
+      return <FileText className="w-5 h-5 text-red-500" />;
+    }
+    
+    if (['doc', 'docx'].includes(extension || '') || type.includes('document')) {
+      return <FileText className="w-5 h-5 text-blue-600" />;
+    }
+    
+    return <File className="w-5 h-5 text-gray-500" />;
+  };
+
+  const getFileFormat = (type: string, fileName: string) => {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    
+    if (type === 'application/pdf' || extension === 'pdf') return 'PDF';
+    if (['doc', 'docx'].includes(extension || '')) return 'DOC';
+    if (['jpg', 'jpeg'].includes(extension || '')) return 'JPG';
+    if (extension === 'png') return 'PNG';
+    if (extension === 'gif') return 'GIF';
+    if (extension === 'bmp') return 'BMP';
+    if (extension === 'webp') return 'WEBP';
+    
+    return extension?.toUpperCase() || 'FILE';
   };
 
   const getCategoryColor = (category: string) => {
@@ -77,14 +119,16 @@ export function AttachmentsSection({
             Attachments ({files.length})
           </div>
           {canEdit && (
-            <Button
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-              className="bg-purple-600 hover:bg-purple-700 text-white"
-            >
-              <Upload className="w-4 h-4 mr-2" />
-              Upload
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Upload Files
+              </Button>
+            </div>
           )}
         </CardTitle>
       </CardHeader>
@@ -96,8 +140,32 @@ export function AttachmentsSection({
           multiple
           onChange={handleFileSelect}
           className="hidden"
-          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.gif,.bmp,.webp"
         />
+
+        {/* PDF Link Input */}
+        {canEdit && (
+          <div className="mb-4 p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+            <Label htmlFor="pdf-link" className="text-sm font-medium text-gray-700 mb-2 block">
+              Add PDF Link
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                ref={pdfLinkInputRef}
+                type="url"
+                placeholder="https://example.com/document.pdf"
+                className="flex-1"
+              />
+              <Button
+                size="sm"
+                onClick={handleAddPdfLink}
+                variant="outline"
+              >
+                Add Link
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Files List */}
         <div className="space-y-3">
@@ -107,7 +175,7 @@ export function AttachmentsSection({
               <p className="text-gray-500 text-sm">No files attached</p>
               {canEdit && (
                 <p className="text-gray-400 text-xs mt-1">
-                  Click the Upload button to add files
+                  Click the Upload Files button or add a PDF link
                 </p>
               )}
             </div>
@@ -115,10 +183,10 @@ export function AttachmentsSection({
             files.map((file) => (
               <div 
                 key={file.id} 
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border hover:bg-gray-100 transition-colors group"
+                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border hover:bg-gray-100 transition-colors group"
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  {getFileIcon(file.type)}
+                  {getFileIcon(file.type, file.name)}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">
                       {file.name}
@@ -127,9 +195,9 @@ export function AttachmentsSection({
                       <Badge className={`text-xs ${getCategoryColor(file.category)}`}>
                         {getCategoryLabel(file.category)}
                       </Badge>
-                      <span className="text-xs text-gray-500">
-                        {file.type.split('/')[1]?.toUpperCase()}
-                      </span>
+                      <Badge variant="outline" className="text-xs">
+                        {getFileFormat(file.type, file.name)}
+                      </Badge>
                     </div>
                   </div>
                 </div>
@@ -163,7 +231,7 @@ export function AttachmentsSection({
         {canEdit && (
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-blue-800 text-xs">
-              Supported formats: PDF, JPG, PNG, DOC, DOCX • Maximum file size: 10MB
+              Supported formats: PDF, JPG, PNG, DOC, DOCX, GIF, BMP, WEBP • Maximum file size: 10MB
             </p>
           </div>
         )}

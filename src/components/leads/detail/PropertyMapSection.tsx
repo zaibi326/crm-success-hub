@@ -11,10 +11,6 @@ interface PropertyMapSectionProps {
 export function PropertyMapSection({ address }: PropertyMapSectionProps) {
   const encodedAddress = encodeURIComponent(address);
   
-  const openZillow = () => {
-    window.open(`https://www.zillow.com/homes/${encodedAddress}/`, '_blank');
-  };
-
   const openGoogleMaps = () => {
     window.open(`https://www.google.com/maps/search/${encodedAddress}`, '_blank');
   };
@@ -33,7 +29,7 @@ export function PropertyMapSection({ address }: PropertyMapSectionProps) {
           <p className="text-gray-900 font-medium">{address}</p>
         </div>
 
-        {/* Map Placeholder with Zillow Integration */}
+        {/* Map Placeholder */}
         <div className="w-full h-64 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200 flex items-center justify-center mb-4">
           <div className="text-center">
             <div className="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -44,33 +40,15 @@ export function PropertyMapSection({ address }: PropertyMapSectionProps) {
           </div>
         </div>
 
-        {/* External Links */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <Button
-            onClick={openZillow}
-            variant="outline"
-            className="flex items-center gap-2 hover:bg-green-50 hover:border-green-300 transition-colors"
-          >
-            <ExternalLink className="w-4 h-4" />
-            View on Zillow
-          </Button>
-          
+        {/* Only Google Maps Link */}
+        <div className="flex justify-center">
           <Button
             onClick={openGoogleMaps}
             variant="outline"
             className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-300 transition-colors"
           >
             <ExternalLink className="w-4 h-4" />
-            Google Maps
-          </Button>
-          
-          <Button
-            onClick={() => window.open(`https://www.realtor.com/realestateandhomes-search/${encodedAddress}`, '_blank')}
-            variant="outline"
-            className="flex items-center gap-2 hover:bg-red-50 hover:border-red-300 transition-colors"
-          >
-            <ExternalLink className="w-4 h-4" />
-            Realtor.com
+            View on Google Maps
           </Button>
         </div>
       </CardContent>
