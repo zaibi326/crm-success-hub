@@ -11,8 +11,8 @@ interface PropertyMapSectionProps {
 export function PropertyMapSection({ address }: PropertyMapSectionProps) {
   const encodedAddress = encodeURIComponent(address);
   
-  const openGoogleMaps = () => {
-    window.open(`https://www.google.com/maps/search/${encodedAddress}`, '_blank');
+  const openZillow = () => {
+    window.open(`https://www.zillow.com/homes/${encodedAddress}/`, '_blank');
   };
 
   return (
@@ -40,15 +40,15 @@ export function PropertyMapSection({ address }: PropertyMapSectionProps) {
           </div>
         </div>
 
-        {/* Only Google Maps Link */}
+        {/* Only Zillow Link */}
         <div className="flex justify-center">
           <Button
-            onClick={openGoogleMaps}
+            onClick={openZillow}
             variant="outline"
             className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-300 transition-colors"
           >
             <ExternalLink className="w-4 h-4" />
-            View on Google Maps
+            View on Zillow
           </Button>
         </div>
       </CardContent>

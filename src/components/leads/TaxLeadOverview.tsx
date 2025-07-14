@@ -223,7 +223,7 @@ export function TaxLeadOverview({
         {filteredLeads.map((lead) => (
           <Card 
             key={lead.id} 
-            className="hover:shadow-lg transition-shadow duration-200"
+            className="hover:shadow-lg transition-shadow duration-200 group"
           >
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">
