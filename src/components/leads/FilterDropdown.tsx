@@ -29,6 +29,23 @@ interface FilterDropdownProps {
   onClearAll: () => void;
 }
 
+const leadStatusOptions = [
+  { value: 'not_set', label: 'Not set' },
+  { value: 'new_untouched', label: '#New Untouched#' },
+  { value: 'discovery', label: 'Discovery' },
+  { value: 'already_listed', label: 'Already Listed' },
+  { value: 'price_too_high', label: 'Price Too High' },
+  { value: 'low_motivation', label: 'Low Motivation' },
+  { value: 'add_to_follow_up', label: 'Add to Follow up' },
+  { value: 'inquiry', label: 'Inquiry' },
+  { value: 'interested_listing', label: 'Interested - Listing' },
+  { value: 'appointment_completed', label: 'Appointment Completed' },
+  { value: 'interested_follow_up', label: 'Interested - Add to Follow up' },
+  { value: 'interested_offer_status', label: 'Interested - Set Offer Status' },
+  { value: 'contract_sent_out', label: 'Contract Sent Out - Set Contract Status' },
+  { value: 'in_contract', label: 'In Contract - Set Manually' }
+];
+
 export function FilterDropdown({
   isOpen,
   onClose,
@@ -76,7 +93,7 @@ export function FilterDropdown({
   };
 
   return (
-    <div className="absolute top-full right-0 mt-2 w-96 bg-white border border-agile-gray-200 rounded-lg shadow-lg z-50 animate-fade-in">
+    <div className="absolute top-full right-0 mt-2 w-[480px] bg-white border border-agile-gray-200 rounded-lg shadow-lg z-50 animate-fade-in">
       <div className="p-4 border-b border-agile-gray-100">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-agile-gray-900">Filter Leads</h3>
@@ -86,21 +103,23 @@ export function FilterDropdown({
         </div>
       </div>
 
-      <div className="p-4 space-y-4 max-h-96 overflow-y-auto">
+      <div className="p-4 space-y-6 max-h-96 overflow-y-auto">
         {/* Lead Status Filter */}
-        <div className="space-y-2">
+        <div className="space-y-3">
           <Label className="text-sm font-medium text-agile-gray-700">Lead Status</Label>
-          <Select onValueChange={(value) => addFilter('status', 'equals', value, `Status: ${value}`)}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select status..." />
-            </SelectTrigger>
-            <SelectContent className="bg-white border-agile-gray-200 z-50">
-              <SelectItem value="HOT">🔥 HOT</SelectItem>
-              <SelectItem value="WARM">🟡 WARM</SelectItem>
-              <SelectItem value="COLD">❄️ COLD</SelectItem>
-              <SelectItem value="PASS">⏭️ PASS</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="grid grid-cols-2 gap-2">
+            {leadStatusOptions.map((option) => (
+              <Button
+                key={option.value}
+                variant="outline"
+                size="sm"
+                onClick={() => addFilter('status', 'equals', option.value, `Status: ${option.label}`)}
+                className="justify-start text-xs h-8 hover:bg-agile-blue-50 hover:border-agile-blue-300"
+              >
+                {option.label}
+              </Button>
+            ))}
+          </div>
         </div>
 
         {/* Created By Filter */}
@@ -114,6 +133,7 @@ export function FilterDropdown({
               <SelectItem value="John Doe">John Doe</SelectItem>
               <SelectItem value="Jane Smith">Jane Smith</SelectItem>
               <SelectItem value="Admin User">Admin User</SelectItem>
+              <SelectItem value="Lead Manager">Lead Manager</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -198,6 +218,22 @@ export function FilterDropdown({
           </Select>
         </div>
 
+        {/* Last Edited Filter */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-agile-gray-700">Last Edited</Label>
+          <Select onValueChange={(value) => addFilter('lastEdited', 'equals', value, `Last Edited: ${value}`)}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select timeframe..." />
+            </SelectTrigger>
+            <SelectContent className="bg-white border-agile-gray-200 z-50">
+              <SelectItem value="today">Today</SelectItem>
+              <SelectItem value="yesterday">Yesterday</SelectItem>
+              <SelectItem value="last_7_days">Last 7 days</SelectItem>
+              <SelectItem value="last_30_days">Last 30 days</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Tags Filter */}
         <div className="space-y-2">
           <Label className="text-sm font-medium text-agile-gray-700">Tags</Label>
@@ -212,12 +248,12 @@ export function FilterDropdown({
           />
         </div>
 
-        {/* Email/Phone Filters */}
-        <div className="grid grid-cols-2 gap-2">
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-agile-gray-700">Email</Label>
+        {/* Seller Contact Filters */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-agile-gray-700">Seller Contact</Label>
+          <div className="grid grid-cols-2 gap-2">
             <Input
-              placeholder="Enter email..."
+              placeholder="Email..."
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && e.currentTarget.value) {
                   addFilter('email', 'contains', e.currentTarget.value, `Email: ${e.currentTarget.value}`);
@@ -225,11 +261,8 @@ export function FilterDropdown({
                 }
               }}
             />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-agile-gray-700">Phone</Label>
             <Input
-              placeholder="Enter phone..."
+              placeholder="Phone..."
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && e.currentTarget.value) {
                   addFilter('phone', 'contains', e.currentTarget.value, `Phone: ${e.currentTarget.value}`);
@@ -238,6 +271,38 @@ export function FilterDropdown({
               }}
             />
           </div>
+        </div>
+
+        {/* Move To Filter */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-agile-gray-700">Move To</Label>
+          <Select onValueChange={(value) => addFilter('moveTo', 'equals', value, `Move To: ${value}`)}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select destination..." />
+            </SelectTrigger>
+            <SelectContent className="bg-white border-agile-gray-200 z-50">
+              <SelectItem value="hot_leads">Hot Leads</SelectItem>
+              <SelectItem value="warm_leads">Warm Leads</SelectItem>
+              <SelectItem value="cold_leads">Cold Leads</SelectItem>
+              <SelectItem value="archive">Archive</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Lead Manager Filter */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-agile-gray-700">Lead Manager</Label>
+          <Select onValueChange={(value) => addFilter('leadManager', 'equals', value, `Manager: ${value}`)}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select manager..." />
+            </SelectTrigger>
+            <SelectContent className="bg-white border-agile-gray-200 z-50">
+              <SelectItem value="Sarah Johnson">Sarah Johnson</SelectItem>
+              <SelectItem value="Mike Davis">Mike Davis</SelectItem>
+              <SelectItem value="Lisa Chen">Lisa Chen</SelectItem>
+              <SelectItem value="David Wilson">David Wilson</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Current Filters */}

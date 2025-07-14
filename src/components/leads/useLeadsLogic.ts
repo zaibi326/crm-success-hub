@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { TaxLead } from '@/types/taxLead';
 import { mockTaxLeads } from '@/data/mockTaxLeads';
 
@@ -11,6 +11,8 @@ interface FilterCondition {
   label?: string;
 }
 
+const FILTERS_STORAGE_KEY = 'seller-leads-filters';
+
 export function useLeadsLogic() {
   const [currentView, setCurrentView] = useState<'table' | 'card' | 'calendar' | 'timeline' | 'badge'>('table');
   const [sortBy, setSortBy] = useState('ownerName');
@@ -21,16 +23,40 @@ export function useLeadsLogic() {
   const [showFilterSidebar, setShowFilterSidebar] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
+  // Load filters from session storage on mount
+  useEffect(() => {
+    const savedFilters = sessionStorage.getItem(FILTERS_STORAGE_KEY);
+    if (savedFilters) {
+      try {
+        const parsedFilters = JSON.parse(savedFilters);
+        setFilters(parsedFilters);
+        if (parsedFilters.length > 0) {
+          setShowFilterSidebar(true);
+        }
+      } catch (error) {
+        console.error('Error loading saved filters:', error);
+      }
+    }
+  }, []);
+
+  // Save filters to session storage whenever they change
+  useEffect(() => {
+    sessionStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(filters));
+  }, [filters]);
+
   const availableFields = [
     { key: 'status', label: 'Lead Status', type: 'select' },
     { key: 'createdBy', label: 'Created By', type: 'select' },
     { key: 'createdOn', label: 'Created On', type: 'date' },
     { key: 'createdVia', label: 'Created Via', type: 'select' },
+    { key: 'lastEdited', label: 'Last Edited', type: 'select' },
     { key: 'tags', label: 'Tags', type: 'multiselect' },
     { key: 'currentArrears', label: 'Current Arrears', type: 'number' },
     { key: 'ownerName', label: 'Owner Name', type: 'text' },
     { key: 'email', label: 'Email', type: 'text' },
-    { key: 'phone', label: 'Phone', type: 'text' }
+    { key: 'phone', label: 'Phone', type: 'text' },
+    { key: 'moveTo', label: 'Move To', type: 'select' },
+    { key: 'leadManager', label: 'Lead Manager', type: 'select' }
   ];
 
   const filteredLeads = useMemo(() => {
@@ -40,10 +66,13 @@ export function useLeadsLogic() {
     filters.forEach(filter => {
       result = result.filter(lead => {
         const fieldValue = lead[filter.field as keyof TaxLead];
-        if (!fieldValue) return false;
+        if (!fieldValue && filter.value !== 'not_set') return false;
         
         switch (filter.operator) {
           case 'equals':
+            if (filter.value === 'not_set') {
+              return !fieldValue || fieldValue === '';
+            }
             return String(fieldValue).toLowerCase() === filter.value.toLowerCase();
           case 'contains':
             return String(fieldValue).toLowerCase().includes(filter.value.toLowerCase());
@@ -59,7 +88,7 @@ export function useLeadsLogic() {
       });
     });
 
-    // Apply status filter
+    // Apply status filter (legacy support)
     if (filterStatus !== 'all') {
       result = result.filter(lead => lead.status.toLowerCase() === filterStatus.toLowerCase());
     }
@@ -107,6 +136,12 @@ export function useLeadsLogic() {
     }
   };
 
+  const handleClearAllFilters = () => {
+    setFilters([]);
+    setShowFilterSidebar(false);
+    sessionStorage.removeItem(FILTERS_STORAGE_KEY);
+  };
+
   return {
     currentView,
     sortBy,
@@ -133,6 +168,7 @@ export function useLeadsLogic() {
     handleLeadUpdate,
     handleBulkLeadsUpdate,
     handleAllSellerLeadsClick,
-    handleFilterToggle
+    handleFilterToggle,
+    handleClearAllFilters
   };
 }

@@ -19,6 +19,8 @@ interface FilterSidebarProps {
   filters: FilterCondition[];
   onRemoveFilter: (filterId: string) => void;
   onClearAll: () => void;
+  totalResults?: number;
+  filteredResults?: number;
 }
 
 export function FilterSidebar({ 
@@ -26,7 +28,9 @@ export function FilterSidebar({
   onClose, 
   filters, 
   onRemoveFilter, 
-  onClearAll 
+  onClearAll,
+  totalResults,
+  filteredResults
 }: FilterSidebarProps) {
   if (!isOpen) return null;
 
@@ -35,13 +39,20 @@ export function FilterSidebar({
       case 'status':
         return 'bg-agile-coral-100 text-agile-coral-800 border-agile-coral-200';
       case 'createdBy':
+      case 'leadManager':
         return 'bg-agile-blue-100 text-agile-blue-800 border-agile-blue-200';
       case 'createdOn':
+      case 'lastEdited':
         return 'bg-agile-gray-100 text-agile-gray-800 border-agile-gray-200';
       case 'createdVia':
         return 'bg-agile-green-100 text-agile-green-800 border-agile-green-200';
       case 'tags':
         return 'bg-agile-purple-100 text-agile-purple-800 border-agile-purple-200';
+      case 'email':
+      case 'phone':
+        return 'bg-agile-yellow-100 text-agile-yellow-800 border-agile-yellow-200';
+      case 'moveTo':
+        return 'bg-agile-red-100 text-agile-red-800 border-agile-red-200';
       default:
         return 'bg-agile-gray-100 text-agile-gray-800 border-agile-gray-200';
     }
@@ -63,6 +74,18 @@ export function FilterSidebar({
           <X className="w-4 h-4" />
         </Button>
       </div>
+
+      {/* Results Summary */}
+      {filteredResults !== undefined && totalResults !== undefined && (
+        <div className="p-4 bg-agile-blue-50 border-b border-agile-blue-200">
+          <div className="text-sm">
+            <span className="font-semibold text-agile-blue-900">{filteredResults}</span>
+            <span className="text-agile-blue-700"> of </span>
+            <span className="font-semibold text-agile-blue-900">{totalResults}</span>
+            <span className="text-agile-blue-700"> leads shown</span>
+          </div>
+        </div>
+      )}
 
       <ScrollArea className="flex-1 p-4">
         {filters.length === 0 ? (

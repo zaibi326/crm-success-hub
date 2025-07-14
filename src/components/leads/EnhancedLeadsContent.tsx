@@ -173,6 +173,8 @@ export function EnhancedLeadsContent() {
         filters={filters}
         onRemoveFilter={handleRemoveFilter}
         onClearAll={handleClearAllFilters}
+        totalResults={mockLeads.length}
+        filteredResults={filteredLeads.length}
       />
     </>
   );
