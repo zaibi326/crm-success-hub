@@ -10,63 +10,45 @@ interface DashboardStatsProps {
 export function DashboardStats({ userRole }: DashboardStatsProps) {
   const stats = [
     {
-      title: 'Total Leads',
-      value: '2,847',
-      change: '+12.5%',
+      title: 'HOT Deals',
+      value: '45',
+      change: 'Ready to close',
+      trend: 'up',
+      icon: TrendingUp,
+      gradient: 'metric-card-coral',
+      iconGradient: 'from-bright-coral to-bright-purple'
+    },
+    {
+      title: 'WARM Deals',
+      value: '78',
+      change: 'In progress',
       trend: 'up',
       icon: Users,
       gradient: 'metric-card-teal',
       iconGradient: 'from-bright-teal to-bright-blue'
     },
     {
-      title: 'Revenue',
-      value: '$847,293',
-      change: '+8.2%',
-      trend: 'up',
-      icon: DollarSign,
-      gradient: 'metric-card-green',
-      iconGradient: 'from-bright-green to-bright-teal'
-    },
-    {
-      title: 'Conversion Rate',
-      value: '24.3%',
-      change: '+3.1%',
+      title: 'COLD Deals',
+      value: '123',
+      change: 'Need attention',
       trend: 'up',
       icon: Target,
-      gradient: 'metric-card-purple',
-      iconGradient: 'from-bright-purple to-bright-coral'
-    },
-    {
-      title: 'Active Campaigns',
-      value: '18',
-      change: '+2',
-      trend: 'up',
-      icon: Award,
-      gradient: 'metric-card-coral',
-      iconGradient: 'from-bright-coral to-bright-purple'
-    },
-    {
-      title: 'Calls Made',
-      value: '1,247',
-      change: '+15.8%',
-      trend: 'up',
-      icon: Phone,
       gradient: 'metric-card-blue',
       iconGradient: 'from-bright-blue to-bright-purple'
     },
     {
-      title: 'Appointments',
-      value: '89',
-      change: '+7.4%',
+      title: 'Pass Rate',
+      value: '12%',
+      change: '34 of 280 leads',
       trend: 'up',
-      icon: Calendar,
-      gradient: 'metric-card-teal',
-      iconGradient: 'from-bright-teal to-bright-green'
+      icon: Award,
+      gradient: 'metric-card-green',
+      iconGradient: 'from-bright-green to-bright-teal'
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       {stats.map((stat, index) => (
         <Card 
           key={stat.title} 
@@ -99,7 +81,7 @@ export function DashboardStats({ userRole }: DashboardStatsProps) {
                   )}
                   {stat.change}
                 </div>
-                <span className="text-xs text-slate-500">vs last month</span>
+                
               </div>
             </div>
           </CardContent>
