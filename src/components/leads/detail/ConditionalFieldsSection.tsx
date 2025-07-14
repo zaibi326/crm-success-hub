@@ -13,14 +13,14 @@ interface UploadedFile {
   name: string;
   type: string;
   url: string;
-  category: 'probate' | 'vesting_deed' | 'other';
+  category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities';
 }
 
 interface ConditionalFieldsSectionProps {
   formData: TaxLead;
   files: UploadedFile[];
   onInputChange: (field: keyof TaxLead, value: any) => void;
-  onFileUpload: (files: File[], category: 'probate' | 'vesting_deed' | 'other') => void;
+  onFileUpload: (files: File[], category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities') => void;
   onRemoveFile: (fileId: string) => void;
   canEdit: boolean;
 }
