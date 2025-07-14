@@ -138,9 +138,12 @@ export function useDashboardData() {
   useEffect(() => {
     fetchLeads();
 
-    // Set up real-time subscription
+    // Create a unique channel name with timestamp to avoid conflicts
+    const channelName = `dashboard-changes-${Date.now()}`;
+    console.log('Creating Supabase channel:', channelName);
+
     const channel = supabase
-      .channel('dashboard-changes')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -148,16 +151,20 @@ export function useDashboardData() {
           schema: 'public',
           table: 'campaign_leads'
         },
-        () => {
+        (payload) => {
+          console.log('Received realtime update:', payload);
           fetchLeads();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Channel subscription status:', status);
+      });
 
     return () => {
+      console.log('Cleaning up channel:', channelName);
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, []); // Empty dependency array to ensure this only runs once
 
   return {
     leads,
