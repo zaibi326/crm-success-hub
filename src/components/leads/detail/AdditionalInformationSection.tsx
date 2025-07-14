@@ -18,14 +18,14 @@ interface UploadedFile {
   name: string;
   type: string;
   url: string;
-  category: 'death' | 'probate' | 'lawsuit' | 'taxing_entities';
+  category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities';
 }
 
 interface AdditionalInformationSectionProps {
   formData: TaxLead;
   files: UploadedFile[];
   onInputChange: (field: keyof TaxLead, value: any) => void;
-  onFileUpload: (files: File[], category: 'death' | 'probate' | 'lawsuit' | 'taxing_entities') => void;
+  onFileUpload: (files: File[], category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities') => void;
   onRemoveFile: (fileId: string) => void;
   canEdit: boolean;
 }

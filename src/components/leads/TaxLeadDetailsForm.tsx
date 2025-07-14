@@ -1,5 +1,5 @@
+
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -26,30 +26,16 @@ interface NoteEntry {
   userName: string;
 }
 
-export function TaxLeadDetailsForm() {
-  const navigate = useNavigate();
-  const { id } = useParams();
+interface TaxLeadDetailsFormProps {
+  lead: TaxLead;
+  onSave: (updatedLead: TaxLead) => void;
+  userRole: 'admin' | 'editor' | 'viewer';
+}
+
+export function TaxLeadDetailsForm({ lead, onSave, userRole }: TaxLeadDetailsFormProps) {
   const { user } = useAuth();
   
-  const [formData, setFormData] = useState<TaxLead>({
-    id: 1,
-    taxId: '',
-    ownerName: '',
-    propertyAddress: '',
-    taxLawsuitNumber: '',
-    currentArrears: 0,
-    status: 'COLD',
-    notes: '',
-    phone: '',
-    email: '',
-    firstName: '',
-    lastName: '',
-    temperature: 'COLD',
-    occupancyStatus: 'VACANT',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  });
-
+  const [formData, setFormData] = useState<TaxLead>(lead);
   const [disposition, setDisposition] = useState<'keep' | 'pass' | null>(null);
   const [passReason, setPassReason] = useState('');
   const [notes, setNotes] = useState<NoteEntry[]>([]);
@@ -59,34 +45,11 @@ export function TaxLeadDetailsForm() {
   const [loading, setLoading] = useState(false);
 
   // User role and permissions
-  const userRole = user?.role || 'Employee';
-  const canEdit = ['Admin', 'Manager'].includes(userRole);
+  const canEdit = ['admin', 'editor'].includes(userRole);
 
   useEffect(() => {
-    // Load lead data based on ID
-    if (id) {
-      // Mock data loading - replace with actual API call
-      const mockLead: TaxLead = {
-        id: parseInt(id),
-        taxId: 'TX123456',
-        ownerName: 'John Doe',
-        propertyAddress: '123 Main St, Austin, TX 78701',
-        taxLawsuitNumber: 'TL-2024-001',
-        currentArrears: 15000,
-        status: 'WARM',
-        notes: 'Initial contact made',
-        phone: '(555) 123-4567',
-        email: 'john.doe@email.com',
-        firstName: 'John',
-        lastName: 'Doe',
-        temperature: 'WARM',
-        occupancyStatus: 'OCCUPIED',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      setFormData(mockLead);
-    }
-  }, [id]);
+    setFormData(lead);
+  }, [lead]);
 
   const handleInputChange = (field: keyof TaxLead, value: any) => {
     setFormData(prev => ({
@@ -116,7 +79,7 @@ export function TaxLeadDetailsForm() {
         id: Date.now().toString(),
         text: newNote.trim(),
         timestamp: new Date(),
-        userName: user?.first_name ? `${user.first_name} ${user.last_name}` : 'Current User'
+        userName: user?.email ? `${user.email}` : 'Current User'
       };
       setNotes(prev => [note, ...prev]);
       setNewNote('');
@@ -148,6 +111,7 @@ export function TaxLeadDetailsForm() {
       // Save logic here - API call to update lead
       await new Promise(resolve => setTimeout(resolve, 1000)); // Mock delay
       
+      onSave(formData);
       toast.success('Lead details saved successfully');
       setHasUnsavedChanges(false);
     } catch (error) {
@@ -157,39 +121,18 @@ export function TaxLeadDetailsForm() {
     }
   };
 
-  const handleBack = () => {
-    if (hasUnsavedChanges) {
-      if (window.confirm('You have unsaved changes. Are you sure you want to leave?')) {
-        navigate('/leads');
-      }
-    } else {
-      navigate('/leads');
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/80 to-purple-50/60">
       <div className="container mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleBack}
-              className="hover:bg-white/80"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Leads
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Lead Details
-              </h1>
-              <p className="text-sm text-gray-600">
-                {formData.ownerName} - {formData.propertyAddress}
-              </p>
-            </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Lead Details
+            </h1>
+            <p className="text-sm text-gray-600">
+              {formData.ownerName} - {formData.propertyAddress}
+            </p>
           </div>
           
           <div className="flex items-center gap-3">
@@ -213,7 +156,7 @@ export function TaxLeadDetailsForm() {
           </div>
         </div>
 
-        {!canEdit && <ViewOnlyMessage />}
+        <ViewOnlyMessage canEdit={canEdit} />
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Main Content */}
@@ -239,12 +182,12 @@ export function TaxLeadDetailsForm() {
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <Sidebar
-              formData={formData}
+              currentStatus={formData.status}
+              files={files}
               canEdit={canEdit}
-              onInputChange={handleInputChange}
-              onSave={handleSave}
-              hasUnsavedChanges={hasUnsavedChanges}
-              loading={loading}
+              onStatusChange={(status) => handleInputChange('status', status)}
+              onRemoveFile={handleRemoveFile}
+              onFileUpload={handleFileUpload}
             />
           </div>
         </div>
