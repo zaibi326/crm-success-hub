@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, Calendar, Bell, Settings, Activity, Target, Phone, Building2, Filter, Users, Briefcase } from 'lucide-react';
+import { Home, Calendar, Bell, Settings, Activity, Target, Phone, Building2, Filter, Users, Briefcase, Sparkles } from 'lucide-react';
 import { 
   Sidebar, 
   SidebarTrigger, 
@@ -30,59 +30,63 @@ export function AppSidebar() {
       title: "Dashboard",
       url: "/dashboard",
       icon: Home,
+      gradient: "from-bright-teal to-bright-blue"
     },
     
-    // Seller Leads Management - Podio style grouping
     {
       title: "All Seller Leads",
       url: "/leads",
       icon: Target,
       badge: "Enhanced",
-      badgeColor: "bg-podio-primary/10 text-podio-primary"
+      badgeColor: "bg-gradient-to-r from-bright-purple/20 to-bright-coral/20 text-bright-purple border border-bright-purple/20",
+      gradient: "from-bright-green to-bright-teal"
     },
     
-    // Core CRM Features
     {
       title: "My Campaigns",
       url: "/campaigns", 
       icon: Briefcase,
       badge: userRole === 'Employee' ? 'View Only' : undefined,
-      badgeColor: userRole === 'Employee' ? 'bg-amber-100 text-amber-800' : undefined
+      badgeColor: userRole === 'Employee' ? 'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-200' : undefined,
+      gradient: "from-bright-coral to-bright-purple"
     },
     
-    // Communication Features
     {
       title: "Communication",
       url: "/communication-center",
       icon: Phone,
       badge: "SmrtPhone.io",
-      badgeColor: "bg-podio-primary/10 text-podio-primary"
+      badgeColor: "bg-gradient-to-r from-bright-blue/20 to-bright-teal/20 text-bright-blue border border-bright-blue/20",
+      gradient: "from-bright-blue to-bright-purple"
     },
     {
       title: "Calendar",
       url: "/calendar",
       icon: Calendar,
+      gradient: "from-bright-purple to-bright-coral"
     },
     {
       title: "Notifications",
       url: "/notifications",
       icon: Bell,
+      gradient: "from-bright-coral to-bright-green"
     },
     
-    // Organization & User Management
     ...(userRole === 'Admin' ? [
       {
         title: "Organizations",
         url: "/organization-management",
         icon: Building2,
         badge: "Admin",
-        badgeColor: "bg-red-100 text-red-800"
+        badgeColor: "bg-gradient-to-r from-red-100 to-red-200 text-red-800 border border-red-200",
+        gradient: "from-red-500 to-pink-500"
       }
     ] : []),
     {
       title: "Settings",
       url: "/settings",
       icon: Settings,
+      gradient: "from-gray-500 to-slate-600"
     },
   ];
 
@@ -92,25 +96,44 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="bg-podio-background border-r border-podio-border shadow-podio">
-      <SidebarContent className="p-4">
+    <Sidebar className="bg-gradient-to-br from-white via-slate-50/50 to-blue-50/30 border-r border-white/20 shadow-bright backdrop-blur-sm">
+      <SidebarContent className="p-6">
+        {/* Logo Section */}
+        <div className="mb-8 p-4 bg-gradient-to-r from-bright-teal/10 to-bright-blue/10 rounded-xl border border-white/30 backdrop-blur-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-bright-teal to-bright-blue rounded-lg flex items-center justify-center shadow-lg animate-pulse-slow">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="font-bold text-lg bg-gradient-to-r from-bright-teal to-bright-blue bg-clip-text text-transparent">
+                Top2Quotes
+              </h2>
+              <p className="text-xs text-slate-500">CRM Dashboard</p>
+            </div>
+          </div>
+        </div>
+
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold text-podio-text-muted uppercase tracking-wider mb-4">
+          <SidebarGroupLabel className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <div className="w-4 h-0.5 bg-gradient-to-r from-bright-teal to-bright-blue rounded"></div>
             Navigation
           </SidebarGroupLabel>
-          <SidebarMenu className="space-y-1">
-            {navigationItems.map((item) => (
+          <SidebarMenu className="space-y-2">
+            {navigationItems.map((item, index) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton 
                   asChild 
-                  className={`podio-sidebar-item ${location.pathname === item.url ? 'active' : ''}`}
+                  className={`sidebar-item ${location.pathname === item.url ? 'active' : ''} animate-slide-in-left`}
+                  style={{ animationDelay: `${index * 0.1}s` }}
                   onClick={() => handleNavigation(item.url)}
                 >
-                  <div className="w-full justify-start cursor-pointer flex items-center gap-2 p-2 rounded-md hover:bg-podio-hover transition-colors">
-                    <item.icon className="w-4 h-4" />
-                    <span className="font-normal">{item.title}</span>
+                  <div className="w-full justify-start cursor-pointer flex items-center gap-3 p-3 rounded-lg transition-all duration-300 hover:scale-105 group">
+                    <div className={`sidebar-item-icon p-2 rounded-lg bg-gradient-to-r ${item.gradient} shadow-md`}>
+                      <item.icon className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium">{item.title}</span>
                     {item.badge && (
-                      <SidebarMenuBadge className={`ml-auto text-xs px-2 py-1 rounded-full ${item.badgeColor}`}>
+                      <SidebarMenuBadge className={`ml-auto text-xs px-3 py-1 rounded-full backdrop-blur-sm ${item.badgeColor}`}>
                         {item.badge}
                       </SidebarMenuBadge>
                     )}
@@ -121,60 +144,60 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        {/* Quick Filters Section - Podio style */}
+        {/* Quick Stats Section */}
         <SidebarGroup className="mt-8">
-          <SidebarGroupLabel className="text-xs font-semibold text-podio-text-muted uppercase tracking-wider mb-4 flex items-center gap-2">
+          <SidebarGroupLabel className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
             <Filter className="w-3 h-3" />
-            Quick Filters
+            Quick Stats
           </SidebarGroupLabel>
-          <SidebarMenu className="space-y-1">
+          <SidebarMenu className="space-y-2">
             <SidebarMenuItem>
-              <SidebarMenuButton className="podio-sidebar-item text-xs">
-                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              <SidebarMenuButton className="sidebar-item text-sm hover:scale-105 transition-all duration-300">
+                <div className="w-3 h-3 bg-gradient-to-r from-red-500 to-pink-500 rounded-full shadow-neon-teal"></div>
                 <span>Hot Leads</span>
-                <span className="ml-auto text-podio-text-muted">12</span>
+                <span className="ml-auto text-slate-500 font-bold">12</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton className="podio-sidebar-item text-xs">
-                <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+              <SidebarMenuButton className="sidebar-item text-sm hover:scale-105 transition-all duration-300">
+                <div className="w-3 h-3 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"></div>
                 <span>Warm Leads</span>
-                <span className="ml-auto text-podio-text-muted">24</span>
+                <span className="ml-auto text-slate-500 font-bold">24</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton className="podio-sidebar-item text-xs">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <SidebarMenuButton className="sidebar-item text-sm hover:scale-105 transition-all duration-300">
+                <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"></div>
                 <span>Cold Leads</span>
-                <span className="ml-auto text-podio-text-muted">8</span>
+                <span className="ml-auto text-slate-500 font-bold">8</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton className="podio-sidebar-item text-xs">
-                <Users className="w-3 h-3" />
+              <SidebarMenuButton className="sidebar-item text-sm hover:scale-105 transition-all duration-300">
+                <Users className="w-3 h-3 text-bright-purple" />
                 <span>Untouched</span>
-                <span className="ml-auto text-podio-text-muted">15</span>
+                <span className="ml-auto text-slate-500 font-bold">15</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-podio-border">
+      <SidebarFooter className="p-6 border-t border-white/20 bg-gradient-to-r from-white/50 to-slate-50/50 backdrop-blur-sm">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8">
+            <Avatar className="h-10 w-10 border-2 border-white shadow-bright">
               <AvatarImage src="https://github.com/shadcn.png" alt="User" />
-              <AvatarFallback className="bg-podio-primary text-white text-xs">CRM</AvatarFallback>
+              <AvatarFallback className="bg-gradient-to-br from-bright-teal to-bright-blue text-white text-sm font-bold">CRM</AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <span className="text-xs font-medium text-podio-text">Admin User</span>
-              <span className="text-xs text-podio-text-muted">admin@heirlogic.com</span>
+              <span className="text-sm font-medium text-slate-800">Admin User</span>
+              <span className="text-xs text-slate-500">admin@top2quotes.shop</span>
             </div>
           </div>
-          <a href="https://heirlogic.com" target="_blank" rel="noreferrer">
-            <Button variant="ghost" size="sm" className="podio-button-secondary h-8 px-2 text-xs">
-              Heirlogic
+          <a href="https://top2quotes.shop" target="_blank" rel="noreferrer">
+            <Button variant="ghost" size="sm" className="bright-button-primary h-8 px-3 text-xs">
+              Visit Site
             </Button>
           </a>
         </div>

@@ -9,7 +9,7 @@ const Dashboard = () => {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-crm-gradient-start via-white to-crm-gradient-end">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/80 to-purple-50/60 animate-fade-in">
       <SidebarProvider>
         <div className="min-h-screen flex w-full">
           <AppSidebar />
