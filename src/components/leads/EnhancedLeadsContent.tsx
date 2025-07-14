@@ -37,7 +37,6 @@ export function EnhancedLeadsContent() {
     handleAddLead,
     handleLeadUpdate,
     handleBulkLeadsUpdate,
-    handleAllSellerLeadsClick,
     handleFilterToggle
   } = useLeadsLogic();
 
@@ -109,7 +108,6 @@ export function EnhancedLeadsContent() {
           filters={filters}
           onFiltersChange={setFilters}
           availableFields={availableFields}
-          onAllSellerLeadsClick={handleAllSellerLeadsClick}
           onFilterToggle={handleFilterToggle}
           showFilterSidebar={showFilterSidebar}
           sidebarCollapsed={sidebarCollapsed}

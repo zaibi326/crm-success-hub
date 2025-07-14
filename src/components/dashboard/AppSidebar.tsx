@@ -14,7 +14,6 @@ import {
   SidebarMenuButton,
   SidebarMenuBadge
 } from "@/components/ui/sidebar"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from '@/contexts/AuthContext';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 
@@ -170,21 +169,6 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-
-      <SidebarFooter className="p-6 border-t border-agile-gray-200 bg-agile-gray-50">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10 border-2 border-white shadow-agile-card">
-              <AvatarImage src="https://github.com/shadcn.png" alt="User" />
-              <AvatarFallback className="bg-agile-blue text-white text-sm font-bold">AU</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium text-agile-gray-800">Admin User</span>
-              <span className="text-xs text-agile-gray-500">admin@heirlogic.com</span>
-            </div>
-          </div>
-        </div>
-      </SidebarFooter>
     </Sidebar>
   );
 }

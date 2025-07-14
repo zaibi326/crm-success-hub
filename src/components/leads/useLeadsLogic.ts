@@ -118,11 +118,6 @@ export function useLeadsLogic() {
     console.log('Bulk updating leads:', leads);
   };
 
-  const handleAllSellerLeadsClick = () => {
-    setSidebarCollapsed(true);
-    setShowFilterSidebar(false);
-  };
-
   const handleFilterToggle = () => {
     if (filters.length > 0) {
       setShowFilterSidebar(true);
@@ -160,7 +155,6 @@ export function useLeadsLogic() {
     handleAddLead,
     handleLeadUpdate,
     handleBulkLeadsUpdate,
-    handleAllSellerLeadsClick,
     handleFilterToggle,
     handleClearAllFilters
   };

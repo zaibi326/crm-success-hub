@@ -29,7 +29,6 @@ interface LeadsHeaderProps {
   filters?: FilterCondition[];
   onFiltersChange?: (filters: FilterCondition[]) => void;
   availableFields?: Array<{ key: string; label: string; type: string }>;
-  onAllSellerLeadsClick?: () => void;
   onFilterToggle?: () => void;
   showFilterSidebar?: boolean;
   sidebarCollapsed?: boolean;
@@ -43,7 +42,6 @@ export function LeadsHeader({
   filters = [],
   onFiltersChange,
   availableFields = [],
-  onAllSellerLeadsClick,
   onFilterToggle,
   showFilterSidebar = false,
   sidebarCollapsed = false
@@ -87,16 +85,6 @@ export function LeadsHeader({
         <div className="flex-1">
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-semibold text-agile-gray-900">Seller Leads</h1>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onAllSellerLeadsClick}
-              className={`text-agile-blue-600 hover:text-agile-blue-700 hover:bg-agile-blue-50 border border-agile-blue-200 transition-all duration-200 ${
-                sidebarCollapsed ? 'bg-agile-blue-50 border-agile-blue-300' : ''
-              }`}
-            >
-              All Seller Leads
-            </Button>
           </div>
           <p className="text-sm text-agile-gray-600 mt-1">
             Manage and track your seller leads with advanced filtering and multiple view options
