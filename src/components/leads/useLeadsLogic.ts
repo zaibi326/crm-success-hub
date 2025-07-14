@@ -1,7 +1,7 @@
 
 import { useState, useMemo } from 'react';
 import { TaxLead } from '@/types/taxLead';
-import { mockLeads } from '@/data/mockTaxLeads';
+import { mockTaxLeads } from '@/data/mockTaxLeads';
 
 interface FilterCondition {
   id: string;
@@ -33,7 +33,7 @@ export function useLeadsLogic() {
   ];
 
   const filteredLeads = useMemo(() => {
-    let result = mockLeads;
+    let result = mockTaxLeads;
 
     // Apply filters
     filters.forEach(filter => {
@@ -109,7 +109,7 @@ export function useLeadsLogic() {
     filters,
     availableFields,
     filteredLeads,
-    mockLeads,
+    mockLeads: mockTaxLeads,
     showFilterSidebar,
     sidebarCollapsed,
     setCurrentView,
