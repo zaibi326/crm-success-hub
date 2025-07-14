@@ -44,20 +44,31 @@ export function useDashboardData() {
         return;
       }
 
-      const leadsData = data?.map(lead => ({
-        id: lead.id,
-        ownerName: lead.owner_name,
-        propertyAddress: lead.property_address,
-        phone: lead.phone || '',
-        email: lead.email || '',
-        taxId: lead.tax_id || '',
-        currentArrears: lead.current_arrears || 0,
-        taxLawsuitNumber: lead.tax_lawsuit_number || '',
-        status: lead.status || 'COLD',
-        notes: lead.notes || '',
-        createdAt: new Date(lead.created_at),
-        updatedAt: new Date(lead.updated_at)
-      })) || [];
+      const leadsData = data?.map(lead => {
+        // Split owner_name into firstName and lastName
+        const nameParts = lead.owner_name?.split(' ') || ['', ''];
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+
+        return {
+          id: lead.id,
+          taxId: lead.tax_id || '',
+          ownerName: lead.owner_name,
+          propertyAddress: lead.property_address,
+          taxLawsuitNumber: lead.tax_lawsuit_number || '',
+          currentArrears: lead.current_arrears || 0,
+          status: lead.status || 'COLD',
+          notes: lead.notes || '',
+          phone: lead.phone || '',
+          email: lead.email || '',
+          firstName,
+          lastName,
+          temperature: (lead.status || 'COLD') as 'HOT' | 'WARM' | 'COLD',
+          occupancyStatus: 'VACANT' as const,
+          createdAt: lead.created_at,
+          updatedAt: lead.updated_at
+        } as TaxLead;
+      }) || [];
 
       setLeads(leadsData);
       calculateStats(leadsData);
@@ -92,18 +103,18 @@ export function useDashboardData() {
     
     // Sort leads by most recently updated
     const sortedLeads = [...leadsData].sort((a, b) => 
-      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime()
     );
 
     // Generate activities for the most recent 10 leads
     sortedLeads.slice(0, 10).forEach((lead, index) => {
-      const timeDiff = Date.now() - new Date(lead.updatedAt).getTime();
-      const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
+      const updatedAt = new Date(lead.updatedAt || Date.now());
+      const createdAt = new Date(lead.createdAt || Date.now());
       
       let description = '';
       let type: ActivityItem['type'] = 'lead_updated';
       
-      if (new Date(lead.createdAt).getTime() === new Date(lead.updatedAt).getTime()) {
+      if (createdAt.getTime() === updatedAt.getTime()) {
         description = `New lead created for ${lead.ownerName}`;
         type = 'lead_created';
       } else {
@@ -116,8 +127,8 @@ export function useDashboardData() {
         type,
         description,
         userName: 'Current User',
-        timestamp: new Date(lead.updatedAt),
-        leadId: lead.id
+        timestamp: updatedAt,
+        leadId: lead.id.toString()
       });
     });
 
