@@ -44,14 +44,14 @@ export function useDashboardData() {
         return;
       }
 
-      const leadsData = data?.map(lead => {
+      const leadsData = data?.map((lead, index) => {
         // Split owner_name into firstName and lastName
         const nameParts = lead.owner_name?.split(' ') || ['', ''];
         const firstName = nameParts[0] || '';
         const lastName = nameParts.slice(1).join(' ') || '';
 
         return {
-          id: lead.id,
+          id: index + 1, // Use index + 1 for numeric ID as expected by TaxLead interface
           taxId: lead.tax_id || '',
           ownerName: lead.owner_name,
           propertyAddress: lead.property_address,
