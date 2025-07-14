@@ -6,6 +6,7 @@ import { DashboardStats } from './DashboardStats';
 import { ActivityFeed } from './ActivityFeed';
 import { LeadsPieChart } from './LeadsPieChart';
 import { BarChart3, Activity, TrendingUp, Users, Target, Award } from 'lucide-react';
+import { useDashboardData } from '@/hooks/useDashboardData';
 
 interface DashboardContentProps {
   userRole: string;
@@ -14,6 +15,68 @@ interface DashboardContentProps {
 
 export function DashboardContent({ userRole, showLeadsInDashboard = false }: DashboardContentProps) {
   const [activeTab, setActiveTab] = useState('overview');
+  const { stats, loading } = useDashboardData();
+
+  const renderTabContent = (tabType: 'hot' | 'warm' | 'cold' | 'pass') => {
+    const configs = {
+      hot: {
+        title: 'Hot Deals - Ready to Close',
+        subtitle: `${stats.hotDeals} deals ready for closing`,
+        color: 'text-red-600',
+        bgColor: 'bg-red-50',
+        icon: TrendingUp
+      },
+      warm: {
+        title: 'Warm Deals - In Progress',
+        subtitle: `${stats.warmDeals} deals currently in progress`,
+        color: 'text-orange-600',
+        bgColor: 'bg-orange-50',
+        icon: Users
+      },
+      cold: {
+        title: 'Cold Deals - Need Attention',
+        subtitle: `${stats.coldDeals} deals requiring follow-up`,
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-50',
+        icon: Target
+      },
+      pass: {
+        title: 'Pass Rate Statistics',
+        subtitle: `${stats.passRate}% pass rate from ${stats.totalLeads} total leads`,
+        color: 'text-gray-600',
+        bgColor: 'bg-gray-50',
+        icon: Award
+      }
+    };
+
+    const config = configs[tabType];
+    const IconComponent = config.icon;
+
+    return (
+      <div className="space-y-6">
+        <DashboardStats userRole={userRole} />
+        <div className={`text-center py-12 rounded-lg ${config.bgColor} border-2 border-dashed border-gray-200`}>
+          <div className="flex flex-col items-center space-y-4">
+            <div className={`w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center`}>
+              <IconComponent className={`w-8 h-8 ${config.color}`} />
+            </div>
+            <div>
+              <h3 className={`text-2xl font-bold ${config.color} mb-2`}>
+                {config.title}
+              </h3>
+              <p className="text-gray-600 text-lg">
+                {loading ? 'Loading...' : config.subtitle}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <LeadsPieChart />
+          <ActivityFeed userRole={userRole} />
+        </div>
+      </div>
+    );
+  };
 
   return (
     <SidebarInset className="flex-1 overflow-auto">
@@ -67,35 +130,19 @@ export function DashboardContent({ userRole, showLeadsInDashboard = false }: Das
           </TabsContent>
 
           <TabsContent value="hot-deals" className="space-y-6">
-            <DashboardStats userRole={userRole} />
-            <div className="text-center py-8">
-              <h3 className="text-xl font-semibold text-red-600 mb-2">Hot Deals - Ready to Close</h3>
-              <p className="text-gray-600">45 deals ready for closing</p>
-            </div>
+            {renderTabContent('hot')}
           </TabsContent>
 
           <TabsContent value="warm-deals" className="space-y-6">
-            <DashboardStats userRole={userRole} />
-            <div className="text-center py-8">
-              <h3 className="text-xl font-semibold text-yellow-600 mb-2">Warm Deals - In Progress</h3>
-              <p className="text-gray-600">78 deals currently in progress</p>
-            </div>
+            {renderTabContent('warm')}
           </TabsContent>
 
           <TabsContent value="cold-deals" className="space-y-6">
-            <DashboardStats userRole={userRole} />
-            <div className="text-center py-8">
-              <h3 className="text-xl font-semibold text-blue-600 mb-2">Cold Deals - Need Attention</h3>
-              <p className="text-gray-600">123 deals requiring follow-up</p>
-            </div>
+            {renderTabContent('cold')}
           </TabsContent>
 
           <TabsContent value="pass-rate" className="space-y-6">
-            <DashboardStats userRole={userRole} />
-            <div className="text-center py-8">
-              <h3 className="text-xl font-semibold text-green-600 mb-2">Pass Rate - 12%</h3>
-              <p className="text-gray-600">34 of 280 leads converted successfully</p>
-            </div>
+            {renderTabContent('pass')}
           </TabsContent>
 
           <TabsContent value="activity" className="space-y-6">
