@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -46,8 +45,17 @@ export function AttachmentsSection({
     const linkInput = pdfLinkInputRef.current;
     if (linkInput && linkInput.value.trim()) {
       // Create a mock file object for the PDF link
-      const mockFile = new File([''], 'PDF Link', { type: 'application/pdf' });
-      Object.defineProperty(mockFile, 'webkitRelativePath', { value: linkInput.value });
+      const mockFile = {
+        name: 'PDF Link',
+        type: 'application/pdf',
+        size: 0,
+        lastModified: Date.now(),
+        webkitRelativePath: linkInput.value,
+        arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+        slice: () => new Blob(),
+        stream: () => new ReadableStream(),
+        text: () => Promise.resolve('')
+      } as File;
       
       if (onFileUpload) {
         onFileUpload([mockFile], 'other');
