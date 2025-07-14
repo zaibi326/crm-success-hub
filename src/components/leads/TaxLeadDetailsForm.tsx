@@ -72,6 +72,12 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole = 'editor' }: TaxLea
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleLeadUpdate = (field: keyof TaxLead, value: string) => {
+    const updatedLead = { ...formData, [field]: value };
+    setFormData(updatedLead);
+    onSave(updatedLead);
+  };
+
   const handleStatusChange = (status: 'HOT' | 'WARM' | 'COLD' | 'PASS') => {
     setFormData(prev => ({ 
       ...prev, 
@@ -241,6 +247,7 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole = 'editor' }: TaxLea
               onCall={handleCall}
               onSendText={handleSendText}
               onEmail={handleEmail}
+              onLeadUpdate={handleLeadUpdate}
             />
 
             {/* Tabbed Content */}

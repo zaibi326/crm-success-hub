@@ -11,6 +11,12 @@ interface PropertyDetailsSectionProps {
 }
 
 export function PropertyDetailsSection({ lead, onLeadUpdate }: PropertyDetailsSectionProps) {
+  const handleCurrentArrearsUpdate = (value: string) => {
+    // Convert string to number for currentArrears field
+    const numericValue = parseFloat(value) || 0;
+    onLeadUpdate('currentArrears', numericValue.toString());
+  };
+
   return (
     <div className="podio-container p-6">
       <div className="flex items-center gap-2 mb-4">
@@ -48,7 +54,7 @@ export function PropertyDetailsSection({ lead, onLeadUpdate }: PropertyDetailsSe
               <EditableField
                 label=""
                 value={lead.currentArrears.toString()}
-                onSave={(value) => onLeadUpdate('currentArrears', parseFloat(value) || 0)}
+                onSave={handleCurrentArrearsUpdate}
                 className="font-semibold text-green-600"
               />
             </div>
