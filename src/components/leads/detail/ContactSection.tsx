@@ -4,15 +4,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { User } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
 import { CommunicationButton } from '@/components/communication/CommunicationButton';
+import { EditableField } from '../EditableField';
 
 interface ContactSectionProps {
   lead: TaxLead;
   onCall: (phoneNumber: string) => void;
   onSendText: (phoneNumber: string) => void;
   onEmail: (email: string) => void;
+  onLeadUpdate: (field: keyof TaxLead, value: string) => void;
 }
 
-export function ContactSection({ lead, onCall, onSendText, onEmail }: ContactSectionProps) {
+export function ContactSection({ lead, onCall, onSendText, onEmail, onLeadUpdate }: ContactSectionProps) {
   return (
     <div className="podio-container p-6">
       <div className="flex items-center gap-2 mb-4">
@@ -22,14 +24,28 @@ export function ContactSection({ lead, onCall, onSendText, onEmail }: ContactSec
       <div className="space-y-4">
         <div className="podio-field-row">
           <div className="podio-field-label">Seller Name</div>
-          <div className="podio-field-value font-medium">{lead.ownerName}</div>
+          <div className="podio-field-value">
+            <EditableField
+              label=""
+              value={lead.ownerName}
+              onSave={(value) => onLeadUpdate('ownerName', value)}
+              className="font-medium"
+            />
+          </div>
         </div>
         
         {lead.phone && (
           <div className="podio-field-row">
             <div className="podio-field-label">Seller Phone</div>
             <div className="podio-field-value flex items-center gap-2">
-              <span>{lead.phone}</span>
+              <div className="flex-1">
+                <EditableField
+                  label=""
+                  value={lead.phone}
+                  onSave={(value) => onLeadUpdate('phone', value)}
+                  type="tel"
+                />
+              </div>
               <div className="flex gap-1">
                 <CommunicationButton
                   phoneNumber={lead.phone}
@@ -53,8 +69,13 @@ export function ContactSection({ lead, onCall, onSendText, onEmail }: ContactSec
         {lead.email && (
           <div className="podio-field-row">
             <div className="podio-field-label">Seller Email</div>
-            <div className="podio-field-value flex items-center gap-2">
-              <span>{lead.email}</span>
+            <div className="podio-field-value">
+              <EditableField
+                label=""
+                value={lead.email}
+                onSave={(value) => onLeadUpdate('email', value)}
+                type="email"
+              />
             </div>
           </div>
         )}

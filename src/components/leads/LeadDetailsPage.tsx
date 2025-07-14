@@ -18,6 +18,7 @@ interface LeadDetailsPageProps {
 
 export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageProps) {
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
+  const [leadData, setLeadData] = useState<TaxLead>(lead);
   
   const handleCall = (phoneNumber: string) => {
     window.open(`tel:${phoneNumber}`, '_self');
@@ -29,6 +30,12 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
 
   const handleEmail = (email: string) => {
     window.open(`mailto:${email}`, '_self');
+  };
+
+  const handleFieldUpdate = (field: keyof TaxLead, value: string) => {
+    const updatedLead = { ...leadData, [field]: value };
+    setLeadData(updatedLead);
+    onLeadUpdate(updatedLead);
   };
 
   const getStatusColor = (status: string) => {
@@ -46,7 +53,7 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
       id: 1,
       type: 'created',
       title: 'Lead Created',
-      description: `Lead for ${lead.ownerName} was created`,
+      description: `Lead for ${leadData.ownerName} was created`,
       timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
       user: 'System'
     },
@@ -54,7 +61,7 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
       id: 2,
       type: 'note',
       title: 'Note Added',
-      description: lead.notes || 'Initial contact attempted',
+      description: leadData.notes || 'Initial contact attempted',
       timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
       user: 'John Doe'
     },
@@ -62,7 +69,7 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
       id: 3,
       type: 'status_change',
       title: 'Status Updated',
-      description: `Status changed to ${lead.status}`,
+      description: `Status changed to ${leadData.status}`,
       timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000),
       user: 'Jane Smith'
     }
@@ -72,7 +79,7 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
     <div className="min-h-screen bg-podio-surface">
       <div className="max-w-7xl mx-auto">
         <LeadDetailsHeader
-          lead={lead}
+          lead={leadData}
           onBack={onBack}
           onEditClick={() => setIsTemplateDialogOpen(true)}
           getStatusColor={getStatusColor}
@@ -99,20 +106,24 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-6">
                   <ContactSection
-                    lead={lead}
+                    lead={leadData}
                     onCall={handleCall}
                     onSendText={handleSendText}
                     onEmail={handleEmail}
+                    onLeadUpdate={handleFieldUpdate}
                   />
 
-                  <PropertyDetailsSection lead={lead} />
+                  <PropertyDetailsSection 
+                    lead={leadData} 
+                    onLeadUpdate={handleFieldUpdate}
+                  />
                 </div>
 
                 <div className="space-y-6">
-                  <PropertyMapSection address={lead.propertyAddress} />
+                  <PropertyMapSection address={leadData.propertyAddress} />
 
-                  {lead.notes && (
-                    <NotesDisplaySection notes={lead.notes} />
+                  {leadData.notes && (
+                    <NotesDisplaySection notes={leadData.notes} />
                   )}
                 </div>
               </div>
@@ -128,7 +139,7 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
       <TemplateModificationDialog
         isOpen={isTemplateDialogOpen}
         onClose={() => setIsTemplateDialogOpen(false)}
-        lead={lead}
+        lead={leadData}
         onSave={onLeadUpdate}
       />
     </div>

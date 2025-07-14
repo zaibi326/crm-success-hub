@@ -3,12 +3,14 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Home, ExternalLink } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
+import { EditableField } from '../EditableField';
 
 interface PropertyDetailsSectionProps {
   lead: TaxLead;
+  onLeadUpdate: (field: keyof TaxLead, value: string) => void;
 }
 
-export function PropertyDetailsSection({ lead }: PropertyDetailsSectionProps) {
+export function PropertyDetailsSection({ lead, onLeadUpdate }: PropertyDetailsSectionProps) {
   return (
     <div className="podio-container p-6">
       <div className="flex items-center gap-2 mb-4">
@@ -18,19 +20,37 @@ export function PropertyDetailsSection({ lead }: PropertyDetailsSectionProps) {
       <div className="space-y-4">
         <div className="podio-field-row">
           <div className="podio-field-label">Tax ID</div>
-          <div className="podio-field-value font-mono">{lead.taxId}</div>
+          <div className="podio-field-value">
+            <EditableField
+              label=""
+              value={lead.taxId || ''}
+              onSave={(value) => onLeadUpdate('taxId', value)}
+              className="font-mono"
+            />
+          </div>
         </div>
         
         <div className="podio-field-row">
           <div className="podio-field-label">Property Address</div>
-          <div className="podio-field-value">{lead.propertyAddress}</div>
+          <div className="podio-field-value">
+            <EditableField
+              label=""
+              value={lead.propertyAddress}
+              onSave={(value) => onLeadUpdate('propertyAddress', value)}
+            />
+          </div>
         </div>
         
         {lead.currentArrears && (
           <div className="podio-field-row">
             <div className="podio-field-label">Current Arrears</div>
-            <div className="podio-field-value font-semibold text-green-600">
-              ${lead.currentArrears.toLocaleString()}
+            <div className="podio-field-value">
+              <EditableField
+                label=""
+                value={lead.currentArrears.toString()}
+                onSave={(value) => onLeadUpdate('currentArrears', parseFloat(value) || 0)}
+                className="font-semibold text-green-600"
+              />
             </div>
           </div>
         )}
@@ -38,7 +58,14 @@ export function PropertyDetailsSection({ lead }: PropertyDetailsSectionProps) {
         {lead.taxLawsuitNumber && (
           <div className="podio-field-row">
             <div className="podio-field-label">Tax Lawsuit Number</div>
-            <div className="podio-field-value font-mono">{lead.taxLawsuitNumber}</div>
+            <div className="podio-field-value">
+              <EditableField
+                label=""
+                value={lead.taxLawsuitNumber}
+                onSave={(value) => onLeadUpdate('taxLawsuitNumber', value)}
+                className="font-mono"
+              />
+            </div>
           </div>
         )}
 
@@ -52,14 +79,6 @@ export function PropertyDetailsSection({ lead }: PropertyDetailsSectionProps) {
             >
               <ExternalLink className="w-3 h-3 mr-1" />
               View on Zillow
-            </Button>
-            <Button
-              variant="link"
-              className="p-0 h-auto text-podio-primary hover:text-blue-600 justify-start"
-              onClick={() => window.open(`https://www.homes.com/property/${encodeURIComponent(lead.propertyAddress)}/`, '_blank')}
-            >
-              <ExternalLink className="w-3 h-3 mr-1" />
-              View on Homes.com
             </Button>
           </div>
         </div>
