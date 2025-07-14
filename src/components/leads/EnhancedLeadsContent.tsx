@@ -6,6 +6,7 @@ import { TemplateModificationDialog } from './TemplateModificationDialog';
 import { LeadsHeader } from './LeadsHeader';
 import { LeadsMainContent } from './LeadsMainContent';
 import { FilterChips } from './FilterChips';
+import { FilterSidebar } from './FilterSidebar';
 import { useLeadsLogic } from './useLeadsLogic';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -21,17 +22,22 @@ export function EnhancedLeadsContent() {
     availableFields,
     filteredLeads,
     mockLeads,
+    showFilterSidebar,
+    sidebarCollapsed,
     setCurrentView,
     setSortBy,
     setFilterStatus,
     setSelectedLead,
     setIsTemplateDialogOpen,
     setFilters,
+    setShowFilterSidebar,
     getStatusBadge,
     handleSort,
     handleAddLead,
     handleLeadUpdate,
-    handleBulkLeadsUpdate
+    handleBulkLeadsUpdate,
+    handleAllSellerLeadsClick,
+    handleFilterToggle
   } = useLeadsLogic();
 
   const handleSellerAdded = (seller: any) => {
@@ -45,27 +51,28 @@ export function EnhancedLeadsContent() {
 
   const handleClearAllFilters = () => {
     setFilters([]);
+    setShowFilterSidebar(false);
   };
 
   // If a lead is selected, show the enhanced detail view
   if (selectedLead) {
     return (
-      <SidebarInset className="flex-1 overflow-auto bg-podio-surface">
-        <div className="min-h-screen bg-gradient-to-br from-gray-50/30 to-white">
+      <SidebarInset className="flex-1 overflow-auto bg-white">
+        <div className="min-h-screen bg-gradient-to-br from-agile-gray-50 to-white">
           {/* Header with back button */}
-          <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-gray-200/50 p-6">
+          <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-agile-gray-200 p-6">
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
                 onClick={() => setSelectedLead(null)}
-                className="flex items-center gap-2 text-crm-primary hover:text-crm-accent hover:bg-crm-primary/10"
+                className="flex items-center gap-2 text-agile-blue-600 hover:text-agile-blue-700 hover:bg-agile-blue-50"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Leads
               </Button>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">{selectedLead.ownerName}</h1>
-                <p className="text-gray-600 mt-1">{selectedLead.propertyAddress}</p>
+                <h1 className="text-3xl font-bold text-agile-gray-900">{selectedLead.ownerName}</h1>
+                <p className="text-agile-gray-600 mt-1">{selectedLead.propertyAddress}</p>
               </div>
             </div>
           </div>
@@ -87,59 +94,73 @@ export function EnhancedLeadsContent() {
   }
 
   return (
-    <SidebarInset className="flex-1 overflow-auto bg-podio-surface">
-      <LeadsHeader
-        onAddLead={handleAddLead}
-        onSellerAdded={handleSellerAdded}
-        currentView={currentView}
-        onViewChange={setCurrentView}
-        filters={filters}
-        onFiltersChange={setFilters}
-        availableFields={availableFields}
-      />
+    <>
+      <SidebarInset className={`flex-1 overflow-auto bg-white transition-all duration-300 ${showFilterSidebar ? 'mr-80' : ''}`}>
+        <LeadsHeader
+          onAddLead={handleAddLead}
+          onSellerAdded={handleSellerAdded}
+          currentView={currentView}
+          onViewChange={setCurrentView}
+          filters={filters}
+          onFiltersChange={setFilters}
+          availableFields={availableFields}
+          onAllSellerLeadsClick={handleAllSellerLeadsClick}
+          onFilterToggle={handleFilterToggle}
+          showFilterSidebar={showFilterSidebar}
+        />
 
-      {/* Filter Chips */}
-      <FilterChips
+        {/* Filter Chips */}
+        <FilterChips
+          filters={filters}
+          onRemoveFilter={handleRemoveFilter}
+          onClearAll={handleClearAllFilters}
+        />
+
+        <main className="p-6 space-y-6">
+          {/* Full-width Main Content Area */}
+          <div className="w-full">
+            <div className="bg-white rounded-lg shadow-sm border border-agile-gray-200">
+              <LeadsMainContent
+                currentView={currentView}
+                filteredLeads={filteredLeads}
+                onLeadSelect={setSelectedLead}
+                getStatusBadge={getStatusBadge}
+                handleSort={handleSort}
+                onLeadsUpdate={handleBulkLeadsUpdate}
+              />
+            </div>
+          </div>
+
+          {/* Results Summary */}
+          <div className="bg-white rounded-lg shadow-sm border border-agile-gray-200 p-4">
+            <div className="text-sm text-agile-gray-600 text-center">
+              Showing <span className="font-medium text-agile-gray-900">{filteredLeads.length}</span> of <span className="font-medium text-agile-gray-900">{mockLeads.length}</span> seller leads
+            </div>
+          </div>
+        </main>
+
+        {/* Template Modification Dialog */}
+        {isTemplateDialogOpen && mockLeads.length > 0 && (
+          <TemplateModificationDialog
+            isOpen={isTemplateDialogOpen}
+            onClose={() => setIsTemplateDialogOpen(false)}
+            lead={mockLeads[0]}
+            onSave={(updatedLead) => {
+              handleLeadUpdate(updatedLead);
+              setIsTemplateDialogOpen(false);
+            }}
+          />
+        )}
+      </SidebarInset>
+
+      {/* Filter Sidebar */}
+      <FilterSidebar
+        isOpen={showFilterSidebar}
+        onClose={() => setShowFilterSidebar(false)}
         filters={filters}
         onRemoveFilter={handleRemoveFilter}
         onClearAll={handleClearAllFilters}
       />
-
-      <main className="p-6 space-y-6">
-        {/* Full-width Main Content Area */}
-        <div className="w-full">
-          <div className="podio-container">
-            <LeadsMainContent
-              currentView={currentView}
-              filteredLeads={filteredLeads}
-              onLeadSelect={setSelectedLead}
-              getStatusBadge={getStatusBadge}
-              handleSort={handleSort}
-              onLeadsUpdate={handleBulkLeadsUpdate}
-            />
-          </div>
-        </div>
-
-        {/* Results Summary */}
-        <div className="podio-container p-4">
-          <div className="text-sm text-podio-text-muted text-center">
-            Showing <span className="font-medium text-podio-text">{filteredLeads.length}</span> of <span className="font-medium text-podio-text">{mockLeads.length}</span> seller leads
-          </div>
-        </div>
-      </main>
-
-      {/* Template Modification Dialog */}
-      {isTemplateDialogOpen && mockLeads.length > 0 && (
-        <TemplateModificationDialog
-          isOpen={isTemplateDialogOpen}
-          onClose={() => setIsTemplateDialogOpen(false)}
-          lead={mockLeads[0]}
-          onSave={(updatedLead) => {
-            handleLeadUpdate(updatedLead);
-            setIsTemplateDialogOpen(false);
-          }}
-        />
-      )}
-    </SidebarInset>
+    </>
   );
 }

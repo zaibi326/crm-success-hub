@@ -1,8 +1,7 @@
 
-import { useState, useMemo, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { useLeadsData } from '@/hooks/useLeadsData';
+import { useState, useMemo } from 'react';
 import { TaxLead } from '@/types/taxLead';
+import { mockLeads } from '@/data/mockTaxLeads';
 
 interface FilterCondition {
   id: string;
@@ -12,120 +11,96 @@ interface FilterCondition {
 }
 
 export function useLeadsLogic() {
-  // Load saved view preference from localStorage, default to 'table'
-  const getSavedView = (): 'table' | 'card' | 'calendar' | 'timeline' | 'badge' => {
-    try {
-      const saved = localStorage.getItem('leads-preferred-view');
-      if (saved && ['table', 'card', 'calendar', 'timeline', 'badge'].includes(saved)) {
-        return saved as 'table' | 'card' | 'calendar' | 'timeline' | 'badge';
-      }
-    } catch (error) {
-      console.log('Could not load saved view preference');
-    }
-    return 'table';
-  };
-
-  const [currentView, setCurrentView] = useState<'table' | 'card' | 'calendar' | 'timeline' | 'badge'>(getSavedView);
+  const [currentView, setCurrentView] = useState<'table' | 'card' | 'calendar' | 'timeline' | 'badge'>('table');
   const [sortBy, setSortBy] = useState('ownerName');
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedLead, setSelectedLead] = useState<TaxLead | null>(null);
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
   const [filters, setFilters] = useState<FilterCondition[]>([]);
-  
-  const { mockLeads, handleAddLead, handleLeadUpdate, setMockLeads } = useLeadsData();
-  const { toast } = useToast();
+  const [showFilterSidebar, setShowFilterSidebar] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // Save view preference to localStorage whenever it changes
-  useEffect(() => {
-    try {
-      localStorage.setItem('leads-preferred-view', currentView);
-    } catch (error) {
-      console.log('Could not save view preference');
-    }
-  }, [currentView]);
-
-  // Available fields for filtering
   const availableFields = [
-    { key: 'status', label: 'Status', type: 'select' },
-    { key: 'currentArrears', label: 'Current Arrears', type: 'number' },
-    { key: 'createdBy', label: 'Created By', type: 'text' },
+    { key: 'status', label: 'Lead Status', type: 'select' },
+    { key: 'createdBy', label: 'Created By', type: 'select' },
     { key: 'createdOn', label: 'Created On', type: 'date' },
+    { key: 'createdVia', label: 'Created Via', type: 'select' },
+    { key: 'tags', label: 'Tags', type: 'multiselect' },
+    { key: 'currentArrears', label: 'Current Arrears', type: 'number' },
+    { key: 'ownerName', label: 'Owner Name', type: 'text' },
+    { key: 'email', label: 'Email', type: 'text' },
+    { key: 'phone', label: 'Phone', type: 'text' }
   ];
 
-  // Filter and search logic
   const filteredLeads = useMemo(() => {
     let result = mockLeads;
 
+    // Apply filters
+    filters.forEach(filter => {
+      result = result.filter(lead => {
+        const fieldValue = lead[filter.field as keyof TaxLead];
+        if (!fieldValue) return false;
+        
+        switch (filter.operator) {
+          case 'equals':
+            return String(fieldValue).toLowerCase() === filter.value.toLowerCase();
+          case 'contains':
+            return String(fieldValue).toLowerCase().includes(filter.value.toLowerCase());
+          case 'starts_with':
+            return String(fieldValue).toLowerCase().startsWith(filter.value.toLowerCase());
+          default:
+            return true;
+        }
+      });
+    });
+
     // Apply status filter
     if (filterStatus !== 'all') {
-      result = result.filter(lead => lead.status === filterStatus);
+      result = result.filter(lead => lead.status.toLowerCase() === filterStatus.toLowerCase());
     }
 
-    // Apply advanced filters
-    filters.forEach(filter => {
-      if (filter.field && filter.operator && (filter.value || ['is_empty', 'is_not_empty'].includes(filter.operator))) {
-        result = result.filter(lead => {
-          const fieldValue = (lead as any)[filter.field];
-          
-          switch (filter.operator) {
-            case 'equals':
-              return fieldValue === filter.value;
-            case 'contains':
-              return fieldValue && fieldValue.toString().toLowerCase().includes(filter.value.toLowerCase());
-            case 'starts_with':
-              return fieldValue && fieldValue.toString().toLowerCase().startsWith(filter.value.toLowerCase());
-            case 'ends_with':
-              return fieldValue && fieldValue.toString().toLowerCase().endsWith(filter.value.toLowerCase());
-            case 'greater_than':
-              return fieldValue && parseFloat(fieldValue) > parseFloat(filter.value);
-            case 'less_than':
-              return fieldValue && parseFloat(fieldValue) < parseFloat(filter.value);
-            case 'is_empty':
-              return !fieldValue || fieldValue === '';
-            case 'is_not_empty':
-              return fieldValue && fieldValue !== '';
-            default:
-              return true;
-          }
-        });
-      }
-    });
-
-    // Apply sorting
-    result.sort((a, b) => {
-      const aValue = (a as any)[sortBy];
-      const bValue = (b as any)[sortBy];
-      
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return aValue.localeCompare(bValue);
-      }
-      
-      return (aValue || 0) - (bValue || 0);
-    });
-
     return result;
-  }, [mockLeads, filterStatus, filters, sortBy]);
+  }, [filters, filterStatus]);
 
   const getStatusBadge = (status: string) => {
-    const colors = {
-      'HOT': 'bg-red-100 text-red-800 border-red-200',
-      'WARM': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      'COLD': 'bg-blue-100 text-blue-800 border-blue-200',
-      'PASS': 'bg-gray-100 text-gray-800 border-gray-200'
+    const statusColors = {
+      'HOT': 'bg-agile-red-100 text-agile-red-800 border-agile-red-200',
+      'WARM': 'bg-agile-coral-100 text-agile-coral-800 border-agile-coral-200',
+      'COLD': 'bg-agile-blue-100 text-agile-blue-800 border-agile-blue-200',
+      'PASS': 'bg-agile-gray-100 text-agile-gray-800 border-agile-gray-200'
     };
-    return colors[status as keyof typeof colors] || colors.COLD;
+    return statusColors[status as keyof typeof statusColors] || statusColors.COLD;
   };
 
   const handleSort = (field: string) => {
     setSortBy(field);
   };
 
-  const handleBulkLeadsUpdate = (updatedLeads: TaxLead[]) => {
-    setMockLeads(updatedLeads);
+  const handleAddLead = (lead: TaxLead) => {
+    // Implementation for adding lead
+    console.log('Adding lead:', lead);
+  };
+
+  const handleLeadUpdate = (updatedLead: TaxLead) => {
+    // Implementation for updating lead
+    console.log('Updating lead:', updatedLead);
+  };
+
+  const handleBulkLeadsUpdate = (leads: TaxLead[]) => {
+    // Implementation for bulk update
+    console.log('Bulk updating leads:', leads);
+  };
+
+  const handleAllSellerLeadsClick = () => {
+    setSidebarCollapsed(true);
+    setShowFilterSidebar(false);
+  };
+
+  const handleFilterToggle = () => {
+    setShowFilterSidebar(!showFilterSidebar);
   };
 
   return {
-    // State
     currentView,
     sortBy,
     filterStatus,
@@ -135,23 +110,22 @@ export function useLeadsLogic() {
     availableFields,
     filteredLeads,
     mockLeads,
-    
-    // State setters
+    showFilterSidebar,
+    sidebarCollapsed,
     setCurrentView,
     setSortBy,
     setFilterStatus,
     setSelectedLead,
     setIsTemplateDialogOpen,
     setFilters,
-    
-    // Functions
+    setShowFilterSidebar,
+    setSidebarCollapsed,
     getStatusBadge,
     handleSort,
     handleAddLead,
     handleLeadUpdate,
     handleBulkLeadsUpdate,
-    
-    // External dependencies
-    toast
+    handleAllSellerLeadsClick,
+    handleFilterToggle
   };
 }
