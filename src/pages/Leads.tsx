@@ -7,7 +7,7 @@ import { EnhancedLeadsContent } from '@/components/leads/EnhancedLeadsContent';
 const Leads = () => {
   return (
     <div className="min-h-screen bg-white">
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={true}>
         <div className="min-h-screen flex w-full">
           <AppSidebar />
           <EnhancedLeadsContent />

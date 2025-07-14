@@ -9,16 +9,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
 import { ComprehensiveAddSellerDialog } from './ComprehensiveAddSellerDialog';
-import { AdvancedFilters } from './AdvancedFilters';
+import { FilterDropdown } from './FilterDropdown';
 import { TaxLead } from '@/types/taxLead';
 
 interface FilterCondition {
@@ -26,6 +18,7 @@ interface FilterCondition {
   field: string;
   operator: string;
   value: string;
+  label?: string;
 }
 
 interface LeadsHeaderProps {
@@ -39,6 +32,7 @@ interface LeadsHeaderProps {
   onAllSellerLeadsClick?: () => void;
   onFilterToggle?: () => void;
   showFilterSidebar?: boolean;
+  sidebarCollapsed?: boolean;
 }
 
 export function LeadsHeader({ 
@@ -51,9 +45,10 @@ export function LeadsHeader({
   availableFields = [],
   onAllSellerLeadsClick,
   onFilterToggle,
-  showFilterSidebar = false
+  showFilterSidebar = false,
+  sidebarCollapsed = false
 }: LeadsHeaderProps) {
-  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
 
   const getViewIcon = (view: string) => {
     switch (view) {
@@ -68,10 +63,26 @@ export function LeadsHeader({
 
   const CurrentViewIcon = getViewIcon(currentView);
 
+  const handleApplyFilters = () => {
+    onFilterToggle?.();
+  };
+
+  const handleSaveView = () => {
+    // TODO: Implement save view functionality
+    console.log('Save view functionality to be implemented');
+  };
+
+  const handleClearAllFilters = () => {
+    onFiltersChange?.([]);
+  };
+
   return (
     <header className="sticky top-0 z-10 bg-white border-b border-agile-gray-200 px-6 py-4 shadow-sm">
       <div className="flex items-center gap-4">
-        <SidebarTrigger className="text-agile-gray-600 hover:text-agile-gray-900 hover:bg-agile-gray-100 p-2 rounded-md transition-colors duration-200" />
+        {/* Show sidebar trigger only when sidebar is not collapsed */}
+        {!sidebarCollapsed && (
+          <SidebarTrigger className="text-agile-gray-600 hover:text-agile-gray-900 hover:bg-agile-gray-100 p-2 rounded-md transition-colors duration-200" />
+        )}
         
         <div className="flex-1">
           <div className="flex items-center gap-4">
@@ -80,7 +91,9 @@ export function LeadsHeader({
               variant="ghost"
               size="sm"
               onClick={onAllSellerLeadsClick}
-              className="text-agile-blue-600 hover:text-agile-blue-700 hover:bg-agile-blue-50 border border-agile-blue-200"
+              className={`text-agile-blue-600 hover:text-agile-blue-700 hover:bg-agile-blue-50 border border-agile-blue-200 transition-all duration-200 ${
+                sidebarCollapsed ? 'bg-agile-blue-50 border-agile-blue-300' : ''
+              }`}
             >
               All Seller Leads
             </Button>
@@ -91,98 +104,82 @@ export function LeadsHeader({
         </div>
 
         {/* Top Bar Controls */}
-        <div className="flex items-center gap-3">
-          {/* View Switcher Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-8 px-2 border-agile-gray-300 bg-white hover:bg-agile-gray-50"
+        <div className="flex items-center gap-3 relative">
+          {/* View Switcher Dropdown - Only show when sidebar is not collapsed */}
+          {!sidebarCollapsed && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-8 px-2 border-agile-gray-300 bg-white hover:bg-agile-gray-50"
+                >
+                  <CurrentViewIcon className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent 
+                align="start" 
+                className="w-48 bg-white border-agile-gray-200 z-50"
               >
-                <CurrentViewIcon className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent 
-              align="start" 
-              className="w-48 bg-white border-agile-gray-200 z-50"
+                {['table', 'card', 'calendar', 'timeline', 'badge'].map((view) => {
+                  const ViewIcon = getViewIcon(view);
+                  return (
+                    <DropdownMenuItem
+                      key={view}
+                      onClick={() => onViewChange?.(view as any)}
+                      className="flex items-center gap-3 px-3 py-2 text-sm hover:bg-agile-gray-50 cursor-pointer"
+                    >
+                      <ViewIcon className="w-4 h-4" />
+                      <span className="capitalize">{view}</span>
+                      {currentView === view && (
+                        <div className="w-2 h-2 bg-agile-blue-600 rounded-full ml-auto" />
+                      )}
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
+          {/* Filter Button with Dropdown */}
+          <div className="relative">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
+              className={`h-8 px-3 border-agile-gray-300 text-sm flex items-center gap-2 transition-all duration-200 ${
+                isFilterDropdownOpen || showFilterSidebar
+                  ? 'bg-agile-blue-50 border-agile-blue-300 text-agile-blue-700' 
+                  : 'bg-white hover:bg-agile-gray-50'
+              }`}
             >
-              {['table', 'card', 'calendar', 'timeline', 'badge'].map((view) => {
-                const ViewIcon = getViewIcon(view);
-                return (
-                  <DropdownMenuItem
-                    key={view}
-                    onClick={() => onViewChange?.(view as any)}
-                    className="flex items-center gap-3 px-3 py-2 text-sm hover:bg-agile-gray-50 cursor-pointer"
-                  >
-                    <ViewIcon className="w-4 h-4" />
-                    <span className="capitalize">{view}</span>
-                    {currentView === view && (
-                      <div className="w-2 h-2 bg-agile-blue-600 rounded-full ml-auto" />
-                    )}
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+              <Filter className="w-4 h-4" />
+              <span>Filter</span>
+              {filters.length > 0 && (
+                <span className="bg-agile-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[18px] h-[18px] flex items-center justify-center">
+                  {filters.length}
+                </span>
+              )}
+            </Button>
 
-          {/* Filter Button */}
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={onFilterToggle}
-            className={`h-8 px-3 border-agile-gray-300 text-sm flex items-center gap-2 transition-colors ${
-              showFilterSidebar 
-                ? 'bg-agile-blue-50 border-agile-blue-300 text-agile-blue-700' 
-                : 'bg-white hover:bg-agile-gray-50'
-            }`}
-          >
-            <Filter className="w-4 h-4" />
-            <span>Filter</span>
-            {filters.length > 0 && (
-              <span className="bg-agile-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[18px] h-[18px] flex items-center justify-center">
-                {filters.length}
-              </span>
-            )}
-          </Button>
-
-          {/* Advanced Filter Sheet (for complex filter creation) */}
-          <Sheet open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
-            <SheetTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 px-2 text-agile-gray-600 hover:text-agile-gray-900 hover:bg-agile-gray-100"
-              >
-                Advanced
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[400px] sm:w-[540px] bg-white">
-              <SheetHeader>
-                <SheetTitle className="text-agile-gray-900">Advanced Filters</SheetTitle>
-                <SheetDescription className="text-agile-gray-600">
-                  Apply multiple filters to narrow down your seller leads.
-                </SheetDescription>
-              </SheetHeader>
-              <div className="mt-6">
-                <AdvancedFilters
-                  filters={filters}
-                  onFiltersChange={(newFilters) => {
-                    onFiltersChange?.(newFilters);
-                    setIsFilterSheetOpen(false);
-                  }}
-                  availableFields={availableFields}
-                />
-              </div>
-            </SheetContent>
-          </Sheet>
+            {/* Filter Dropdown */}
+            <FilterDropdown
+              isOpen={isFilterDropdownOpen}
+              onClose={() => setIsFilterDropdownOpen(false)}
+              filters={filters}
+              onFiltersChange={onFiltersChange || (() => {})}
+              onApplyFilters={handleApplyFilters}
+              onSaveView={handleSaveView}
+              onClearAll={handleClearAllFilters}
+            />
+          </div>
 
           {/* Add Seller Button */}
           <ComprehensiveAddSellerDialog 
             onAddSeller={onAddLead}
             onSellerAdded={onSellerAdded}
             trigger={
-              <Button className="bg-agile-blue-600 hover:bg-agile-blue-700 text-white flex items-center gap-2 shadow-sm">
+              <Button className="bg-agile-blue-600 hover:bg-agile-blue-700 text-white flex items-center gap-2 shadow-sm transition-all duration-200">
                 <Plus className="w-4 h-4" />
                 Add Seller
               </Button>

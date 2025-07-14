@@ -31,6 +31,7 @@ export function EnhancedLeadsContent() {
     setIsTemplateDialogOpen,
     setFilters,
     setShowFilterSidebar,
+    setSidebarCollapsed,
     getStatusBadge,
     handleSort,
     handleAddLead,
@@ -95,7 +96,11 @@ export function EnhancedLeadsContent() {
 
   return (
     <>
-      <SidebarInset className={`flex-1 overflow-auto bg-white transition-all duration-300 ${showFilterSidebar ? 'mr-80' : ''}`}>
+      <SidebarInset 
+        className={`flex-1 overflow-auto bg-white transition-all duration-300 ${
+          showFilterSidebar ? 'mr-80' : ''
+        } ${sidebarCollapsed ? 'ml-0' : ''}`}
+      >
         <LeadsHeader
           onAddLead={handleAddLead}
           onSellerAdded={handleSellerAdded}
@@ -107,14 +112,17 @@ export function EnhancedLeadsContent() {
           onAllSellerLeadsClick={handleAllSellerLeadsClick}
           onFilterToggle={handleFilterToggle}
           showFilterSidebar={showFilterSidebar}
+          sidebarCollapsed={sidebarCollapsed}
         />
 
-        {/* Filter Chips */}
-        <FilterChips
-          filters={filters}
-          onRemoveFilter={handleRemoveFilter}
-          onClearAll={handleClearAllFilters}
-        />
+        {/* Filter Chips - Show only when filters are active */}
+        {filters.length > 0 && (
+          <FilterChips
+            filters={filters}
+            onRemoveFilter={handleRemoveFilter}
+            onClearAll={handleClearAllFilters}
+          />
+        )}
 
         <main className="p-6 space-y-6">
           {/* Full-width Main Content Area */}
@@ -135,6 +143,11 @@ export function EnhancedLeadsContent() {
           <div className="bg-white rounded-lg shadow-sm border border-agile-gray-200 p-4">
             <div className="text-sm text-agile-gray-600 text-center">
               Showing <span className="font-medium text-agile-gray-900">{filteredLeads.length}</span> of <span className="font-medium text-agile-gray-900">{mockLeads.length}</span> seller leads
+              {filters.length > 0 && (
+                <span className="ml-2 text-agile-blue-600">
+                  ({filters.length} filter{filters.length !== 1 ? 's' : ''} applied)
+                </span>
+              )}
             </div>
           </div>
         </main>

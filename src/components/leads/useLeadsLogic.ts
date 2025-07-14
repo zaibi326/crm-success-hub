@@ -8,6 +8,7 @@ interface FilterCondition {
   field: string;
   operator: string;
   value: string;
+  label?: string;
 }
 
 export function useLeadsLogic() {
@@ -48,6 +49,10 @@ export function useLeadsLogic() {
             return String(fieldValue).toLowerCase().includes(filter.value.toLowerCase());
           case 'starts_with':
             return String(fieldValue).toLowerCase().startsWith(filter.value.toLowerCase());
+          case 'gte':
+            return new Date(String(fieldValue)) >= new Date(filter.value);
+          case 'lte':
+            return new Date(String(fieldValue)) <= new Date(filter.value);
           default:
             return true;
         }
@@ -97,7 +102,9 @@ export function useLeadsLogic() {
   };
 
   const handleFilterToggle = () => {
-    setShowFilterSidebar(!showFilterSidebar);
+    if (filters.length > 0) {
+      setShowFilterSidebar(true);
+    }
   };
 
   return {
