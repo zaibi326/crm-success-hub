@@ -12,6 +12,9 @@ import { ContactSection } from './detail/ContactSection';
 import { CallStatusPanel } from '@/components/communication/CallStatusPanel';
 import { SMSPanel } from '@/components/communication/SMSPanel';
 import { CommunicationSidebar } from '@/components/communication/CommunicationSidebar';
+import { LeadActivityTimeline } from './LeadActivityTimeline';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { User, Activity } from 'lucide-react';
 
 interface TaxLeadDetailsFormProps {
   lead: TaxLead;
@@ -230,7 +233,7 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole = 'editor' }: TaxLea
       <div className="max-w-7xl mx-auto p-6">
         {/* Main Grid Layout */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Left Column - Main Content */}
+          {/* Left Column - Main Content with Tabs */}
           <div className="xl:col-span-2 space-y-6">
             {/* Contact Section with Communication Buttons */}
             <ContactSection
@@ -240,31 +243,52 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole = 'editor' }: TaxLea
               onEmail={handleEmail}
             />
 
-            {/* ... keep existing EditableLeadInfoSection, PropertyMapSection, MainContent */}
-            <EditableLeadInfoSection
-              formData={formData}
-              onInputChange={handleInputChange}
-              canEdit={canEdit}
-            />
+            {/* Tabbed Content */}
+            <Tabs defaultValue="details" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="details" className="flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  Lead Details
+                </TabsTrigger>
+                <TabsTrigger value="activity" className="flex items-center gap-2">
+                  <Activity className="w-4 h-4" />
+                  Activity & History
+                </TabsTrigger>
+              </TabsList>
 
-            <PropertyMapSection address={formData.propertyAddress} />
+              <TabsContent value="details" className="space-y-6">
+                <EditableLeadInfoSection
+                  formData={formData}
+                  onInputChange={handleInputChange}
+                  canEdit={canEdit}
+                />
 
-            <MainContent
-              formData={formData}
-              disposition={disposition}
-              passReason={passReason}
-              notes={notes}
-              newNote={newNote}
-              files={files}
-              canEdit={canEdit}
-              onInputChange={handleInputChange}
-              onDisposition={handleDisposition}
-              onPassReasonChange={setPassReason}
-              onNewNoteChange={setNewNote}
-              onAddNote={handleAddNote}
-              onFileUpload={handleFileUpload}
-              onRemoveFile={removeFile}
-            />
+                <PropertyMapSection address={formData.propertyAddress} />
+
+                <MainContent
+                  formData={formData}
+                  disposition={disposition}
+                  passReason={passReason}
+                  notes={notes}
+                  newNote={newNote}
+                  files={files}
+                  canEdit={canEdit}
+                  onInputChange={handleInputChange}
+                  onDisposition={handleDisposition}
+                  onPassReasonChange={setPassReason}
+                  onNewNoteChange={setNewNote}
+                  onAddNote={handleAddNote}
+                  onFileUpload={handleFileUpload}
+                  onRemoveFile={removeFile}
+                />
+              </TabsContent>
+
+              <TabsContent value="activity" className="space-y-6">
+                <div className="bg-white rounded-lg shadow-sm border p-6">
+                  <LeadActivityTimeline leadId={formData.id} />
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
 
           {/* Right Column - Sidebar */}

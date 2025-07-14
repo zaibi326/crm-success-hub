@@ -104,7 +104,7 @@ export function MainContent({
         </>
       )}
 
-      <LeadActivityTimeline leadId={formData.id} />
+      
     </div>
   );
 }

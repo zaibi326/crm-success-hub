@@ -73,8 +73,6 @@ export function AppSidebar() {
         title: "Organizations",
         url: "/organization-management",
         icon: Building2,
-        badge: "Admin",
-        badgeColor: "bg-gradient-to-r from-red-100 to-red-200 text-red-800 border border-red-200",
         gradient: "from-red-500 to-pink-500"
       }
     ] : []),
@@ -191,11 +189,6 @@ export function AppSidebar() {
               <span className="text-xs text-slate-500">admin@heirlogic.com</span>
             </div>
           </div>
-          <a href="https://heirlogic.com" target="_blank" rel="noreferrer">
-            <Button variant="ghost" size="sm" className="bright-button-primary h-8 px-3 text-xs">
-              Visit Site
-            </Button>
-          </a>
         </div>
       </SidebarFooter>
     </Sidebar>
