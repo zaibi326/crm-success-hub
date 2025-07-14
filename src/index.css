@@ -3,87 +3,87 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Bright CRM Design System */
+/* AgileCRM Design System */
 
 @layer base {
   :root {
-    --background: 248 250 252;
-    --foreground: 15 23 42;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 20%;
 
-    --card: 255 255 255;
-    --card-foreground: 15 23 42;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 20%;
 
-    --popover: 255 255 255;
-    --popover-foreground: 15 23 42;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 20%;
 
-    --primary: 59 130 246;
-    --primary-foreground: 255 255 255;
+    --primary: 216 91% 55%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 241 245 249;
-    --secondary-foreground: 51 65 85;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 9% 46%;
 
-    --muted: 241 245 249;
-    --muted-foreground: 100 116 139;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
 
-    --accent: 241 245 249;
-    --accent-foreground: 51 65 85;
+    --accent: 220 14% 96%;
+    --accent-foreground: 220 9% 46%;
 
-    --destructive: 239 68 68;
-    --destructive-foreground: 255 255 255;
+    --destructive: 0 65% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 226 232 240;
-    --input: 226 232 240;
-    --ring: 59 130 246;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 216 91% 55%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    --sidebar-background: 255 255 255;
-    --sidebar-foreground: 51 65 85;
-    --sidebar-primary: 59 130 246;
-    --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 241 245 249;
-    --sidebar-accent-foreground: 51 65 85;
-    --sidebar-border: 226 232 240;
-    --sidebar-ring: 59 130 246;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 33%;
+    --sidebar-primary: 216 91% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 0 0% 33%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 216 91% 55%;
   }
 
   .dark {
-    --background: 15 23 42;
-    --foreground: 241 245 249;
+    --background: 0 0% 4%;
+    --foreground: 0 0% 95%;
 
-    --card: 30 41 59;
-    --card-foreground: 241 245 249;
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 30 41 59;
-    --popover-foreground: 241 245 249;
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 59 130 246;
-    --primary-foreground: 15 23 42;
+    --primary: 216 91% 55%;
+    --primary-foreground: 0 0% 4%;
 
-    --secondary: 51 65 85;
-    --secondary-foreground: 241 245 249;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 51 65 85;
-    --muted-foreground: 148 163 184;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 51 65 85;
-    --accent-foreground: 241 245 249;
+    --accent: 217 33% 17%;
+    --accent-foreground: 0 0% 95%;
 
-    --destructive: 239 68 68;
-    --destructive-foreground: 241 245 249;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 95%;
 
-    --border: 51 65 85;
-    --input: 51 65 85;
-    --ring: 59 130 246;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 216 91% 55%;
 
-    --sidebar-background: 30 41 59;
-    --sidebar-foreground: 203 213 225;
-    --sidebar-primary: 59 130 246;
-    --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 51 65 85;
-    --sidebar-accent-foreground: 203 213 225;
-    --sidebar-border: 51 65 85;
-    --sidebar-ring: 59 130 246;
+    --sidebar-background: 0 0% 4%;
+    --sidebar-foreground: 0 0% 65%;
+    --sidebar-primary: 216 91% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-ring: 216 91% 55%;
   }
 }
 
@@ -93,47 +93,55 @@
   }
 
   body {
-    @apply bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 text-foreground font-sans;
+    @apply bg-white text-agile-gray-800 font-sans;
     font-feature-settings: "rlig" 1, "calt" 1;
     min-height: 100vh;
   }
 
-  /* Bright scrollbars */
+  /* Clean scrollbars */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
-    border-radius: 4px;
+    background: #f3f4f6;
+    border-radius: 3px;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #06b6d4, #3b82f6);
-    border-radius: 4px;
+    background: #d1d5db;
+    border-radius: 3px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #0891b2, #2563eb);
+    background: #9ca3af;
   }
 }
 
 @layer components {
-  /* Bright gradient buttons */
-  .bright-button-primary {
-    @apply relative bg-gradient-to-r from-bright-teal to-bright-blue text-white font-medium rounded-lg px-6 py-3 transition-all duration-300 hover:from-bright-teal-600 hover:to-bright-blue-600 hover:shadow-bright-hover transform hover:scale-105 overflow-hidden;
+  /* AgileCRM Button Styles */
+  .agile-button-primary {
+    @apply bg-agile-blue text-white font-medium rounded-md px-4 py-2 transition-all duration-200 hover:bg-agile-blue-600 hover:shadow-agile focus:outline-none focus:ring-2 focus:ring-agile-blue focus:ring-offset-2;
   }
 
-  .bright-button-secondary {
-    @apply relative bg-gradient-to-r from-bright-purple to-bright-coral text-white font-medium rounded-lg px-6 py-3 transition-all duration-300 hover:from-bright-purple-600 hover:to-bright-coral-600 hover:shadow-bright-hover transform hover:scale-105 overflow-hidden;
+  .agile-button-secondary {
+    @apply bg-white text-agile-gray-700 font-medium rounded-md px-4 py-2 border border-agile-gray-200 transition-all duration-200 hover:bg-agile-gray-50 hover:shadow-agile focus:outline-none focus:ring-2 focus:ring-agile-blue focus:ring-offset-2;
   }
 
-  .bright-button-success {
-    @apply relative bg-gradient-to-r from-bright-green to-bright-teal text-white font-medium rounded-lg px-6 py-3 transition-all duration-300 hover:from-bright-green-600 hover:to-bright-teal-600 hover:shadow-bright-hover transform hover:scale-105 overflow-hidden;
+  .agile-button-success {
+    @apply bg-agile-green text-white font-medium rounded-md px-4 py-2 transition-all duration-200 hover:bg-agile-green-600 hover:shadow-agile focus:outline-none focus:ring-2 focus:ring-agile-green focus:ring-offset-2;
+  }
+
+  .agile-button-danger {
+    @apply bg-agile-red text-white font-medium rounded-md px-4 py-2 transition-all duration-200 hover:bg-agile-red-600 hover:shadow-agile focus:outline-none focus:ring-2 focus:ring-agile-red focus:ring-offset-2;
   }
 
   /* Ripple effect */
+  .ripple {
+    @apply relative overflow-hidden;
+  }
+
   .ripple::before {
     content: '';
     position: absolute;
@@ -152,73 +160,102 @@
     height: 300px;
   }
 
-  /* Bright cards */
-  .bright-card {
-    @apply bg-white/80 backdrop-blur-sm border border-white/20 rounded-xl shadow-bright hover:shadow-bright-hover transition-all duration-300 hover:scale-105;
+  /* AgileCRM Cards */
+  .agile-card {
+    @apply bg-white rounded-lg shadow-agile-card border border-agile-gray-200 transition-all duration-200 hover:shadow-agile;
   }
 
-  .bright-card-gradient {
-    @apply bg-gradient-to-br from-white/90 to-slate-50/90 backdrop-blur-sm border border-white/30 rounded-xl shadow-bright hover:shadow-bright-hover transition-all duration-300 hover:scale-105;
+  .agile-card-hover {
+    @apply hover:shadow-agile-hover hover:-translate-y-1;
   }
 
   /* Status cards */
   .status-card-hot {
-    @apply bg-gradient-to-br from-red-500/10 to-red-600/20 border-red-200 hover:from-red-500/20 hover:to-red-600/30 hover:border-red-300;
+    @apply bg-agile-red-50 border-agile-red-200 hover:bg-agile-red-100;
   }
 
   .status-card-warm {
-    @apply bg-gradient-to-br from-amber-500/10 to-orange-600/20 border-amber-200 hover:from-amber-500/20 hover:to-orange-600/30 hover:border-amber-300;
+    @apply bg-agile-coral-50 border-agile-coral-200 hover:bg-agile-coral-100;
   }
 
   .status-card-cold {
-    @apply bg-gradient-to-br from-blue-500/10 to-blue-600/20 border-blue-200 hover:from-blue-500/20 hover:to-blue-600/30 hover:border-blue-300;
+    @apply bg-agile-blue-50 border-agile-blue-200 hover:bg-agile-blue-100;
   }
 
   .status-card-pass {
-    @apply bg-gradient-to-br from-gray-500/10 to-gray-600/20 border-gray-200 hover:from-gray-500/20 hover:to-gray-600/30 hover:border-gray-300;
+    @apply bg-agile-gray-50 border-agile-gray-200 hover:bg-agile-gray-100;
   }
 
-  /* Animated sidebar */
-  .sidebar-item {
-    @apply flex items-center gap-3 px-4 py-3 text-sm text-slate-600 hover:text-bright-blue hover:bg-gradient-to-r hover:from-bright-blue/10 hover:to-bright-teal/10 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-md cursor-pointer;
+  /* Sidebar */
+  .agile-sidebar-item {
+    @apply flex items-center gap-3 px-4 py-3 text-sm text-agile-gray-600 hover:text-agile-blue hover:bg-agile-blue-50 rounded-md transition-all duration-200 cursor-pointer;
   }
 
-  .sidebar-item.active {
-    @apply bg-gradient-to-r from-bright-blue/20 to-bright-teal/20 text-bright-blue font-medium shadow-md;
-  }
-
-  .sidebar-item-icon {
-    @apply transition-all duration-300 group-hover:scale-110 group-hover:rotate-3;
+  .agile-sidebar-item.active {
+    @apply bg-agile-blue-50 text-agile-blue font-medium shadow-sm;
   }
 
   /* Metric cards */
-  .metric-card {
-    @apply bg-gradient-to-br from-white to-slate-50/50 rounded-xl p-6 shadow-bright hover:shadow-bright-hover transition-all duration-500 hover:scale-105 border border-white/50 backdrop-blur-sm;
+  .agile-metric-card {
+    @apply bg-white rounded-lg p-6 shadow-agile-card border border-agile-gray-200 transition-all duration-300 hover:shadow-agile;
   }
 
-  .metric-card-teal {
-    @apply bg-gradient-to-br from-bright-teal/10 to-bright-teal/20 border-bright-teal/30 hover:from-bright-teal/20 hover:to-bright-teal/30;
+  .agile-metric-card-blue {
+    @apply border-l-4 border-l-agile-blue;
   }
 
-  .metric-card-blue {
-    @apply bg-gradient-to-br from-bright-blue/10 to-bright-blue/20 border-bright-blue/30 hover:from-bright-blue/20 hover:to-bright-blue/30;
+  .agile-metric-card-green {
+    @apply border-l-4 border-l-agile-green;
   }
 
-  .metric-card-coral {
-    @apply bg-gradient-to-br from-bright-coral/10 to-bright-coral/20 border-bright-coral/30 hover:from-bright-coral/20 hover:to-bright-coral/30;
+  .agile-metric-card-coral {
+    @apply border-l-4 border-l-agile-coral;
   }
 
-  .metric-card-green {
-    @apply bg-gradient-to-br from-bright-green/10 to-bright-green/20 border-bright-green/30 hover:from-bright-green/20 hover:to-bright-green/30;
+  .agile-metric-card-red {
+    @apply border-l-4 border-l-agile-red;
   }
 
-  .metric-card-purple {
-    @apply bg-gradient-to-br from-bright-purple/10 to-bright-purple/20 border-bright-purple/30 hover:from-bright-purple/20 hover:to-bright-purple/30;
+  /* Tags and chips */
+  .agile-tag {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
   }
 
-  /* Filter dropdowns */
-  .filter-dropdown {
-    @apply bg-white/90 backdrop-blur-sm border border-white/30 rounded-lg shadow-bright hover:shadow-bright-hover transition-all duration-300 hover:scale-105;
+  .agile-tag-blue {
+    @apply bg-agile-blue-50 text-agile-blue-700;
+  }
+
+  .agile-tag-green {
+    @apply bg-agile-green-50 text-agile-green-700;
+  }
+
+  .agile-tag-coral {
+    @apply bg-agile-coral-50 text-agile-coral-700;
+  }
+
+  .agile-tag-red {
+    @apply bg-agile-red-50 text-agile-red-700;
+  }
+
+  .agile-tag-gray {
+    @apply bg-agile-gray-50 text-agile-gray-700;
+  }
+
+  /* Tables */
+  .agile-table {
+    @apply w-full bg-white rounded-lg overflow-hidden shadow-agile-card border border-agile-gray-200;
+  }
+
+  .agile-table-header {
+    @apply bg-agile-gray-50 border-b border-agile-gray-200;
+  }
+
+  .agile-table-row {
+    @apply border-b border-agile-gray-100 hover:bg-agile-gray-50 transition-colors duration-150;
+  }
+
+  .agile-table-cell {
+    @apply px-6 py-4 text-sm text-agile-gray-900;
   }
 
   /* Page transitions */
@@ -227,7 +264,7 @@
   }
 
   .page-enter-active {
-    @apply opacity-100 transform translate-y-0 transition-all duration-500 ease-out;
+    @apply opacity-100 transform translate-y-0 transition-all duration-300 ease-out;
   }
 
   .page-exit {
@@ -235,33 +272,33 @@
   }
 
   .page-exit-active {
-    @apply opacity-0 transform -translate-y-4 transition-all duration-300 ease-in;
+    @apply opacity-0 transform -translate-y-4 transition-all duration-200 ease-in;
   }
 }
 
-/* Bright animations */
+/* Clean animations */
 @keyframes float {
   0%, 100% {
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-6px);
   }
 }
 
 .float-animation {
-  animation: float 3s ease-in-out infinite;
+  animation: float 2s ease-in-out infinite;
 }
 
-@keyframes glow {
+@keyframes subtle-glow {
   0%, 100% {
-    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+    box-shadow: 0 0 5px rgba(33, 132, 247, 0.2);
   }
   50% {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 30px rgba(6, 182, 212, 0.6);
+    box-shadow: 0 0 20px rgba(33, 132, 247, 0.4);
   }
 }
 
 .glow-animation {
-  animation: glow 2s ease-in-out infinite alternate;
+  animation: subtle-glow 2s ease-in-out infinite alternate;
 }
