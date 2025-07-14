@@ -3,9 +3,9 @@ export const getRoleBasedRedirect = (role: string): string => {
   switch (role) {
     case 'Admin':
       return '/dashboard';
-    case 'Member':
+    case 'Manager':
       return '/campaigns';
-    case 'Client':
+    case 'Employee':
       return '/leads';
     case 'Guest':
       return '/leads';
@@ -18,10 +18,10 @@ export const getRoleDashboardTitle = (role: string): string => {
   switch (role) {
     case 'Admin':
       return 'Admin Dashboard';
-    case 'Member':
-      return 'Member Dashboard';
-    case 'Client':
-      return 'Client Dashboard';
+    case 'Manager':
+      return 'Manager Dashboard';
+    case 'Employee':
+      return 'Employee Dashboard';
     case 'Guest':
       return 'Guest Dashboard';
     default:
@@ -36,16 +36,16 @@ export const hasPermission = (userRole: string, requiredRoles: string[]): boolea
 export const canAccessRoute = (userRole: string, route: string): boolean => {
   const routePermissions: Record<string, string[]> = {
     '/dashboard': ['Admin'],
-    '/campaigns': ['Admin', 'Member'],
-    '/leads': ['Admin', 'Member', 'Client', 'Guest'],
-    '/communication': ['Admin', 'Member', 'Client'],
+    '/campaigns': ['Admin', 'Manager'],
+    '/leads': ['Admin', 'Manager', 'Employee', 'Guest'],
+    '/communication': ['Admin', 'Manager', 'Employee'],
     '/organizations': ['Admin'],
     '/organization-management': ['Admin'],
-    '/app-builder': ['Admin', 'Member'],
+    '/app-builder': ['Admin', 'Manager'],
     '/admin-users': ['Admin'],
-    '/settings': ['Admin', 'Member', 'Client'],
-    '/notifications': ['Admin', 'Member', 'Client', 'Guest'],
-    '/calendar': ['Admin', 'Member', 'Client']
+    '/settings': ['Admin', 'Manager', 'Employee'],
+    '/notifications': ['Admin', 'Manager', 'Employee', 'Guest'],
+    '/calendar': ['Admin', 'Manager', 'Employee']
   };
 
   const allowedRoles = routePermissions[route];
@@ -55,14 +55,14 @@ export const canAccessRoute = (userRole: string, route: string): boolean => {
 export const getVisibleNavigationItems = (userRole: string) => {
   const allItems = [
     { title: "Dashboard", url: "/dashboard", requiredRoles: ['Admin'] },
-    { title: "Campaigns", url: "/campaigns", requiredRoles: ['Admin', 'Member'] },
-    { title: "Leads", url: "/leads", requiredRoles: ['Admin', 'Member', 'Client', 'Guest'] },
-    { title: "Communication", url: "/communication", requiredRoles: ['Admin', 'Member', 'Client'] },
+    { title: "Campaigns", url: "/campaigns", requiredRoles: ['Admin', 'Manager'] },
+    { title: "Leads", url: "/leads", requiredRoles: ['Admin', 'Manager', 'Employee', 'Guest'] },
+    { title: "Communication", url: "/communication", requiredRoles: ['Admin', 'Manager', 'Employee'] },
     { title: "Organizations", url: "/organizations", requiredRoles: ['Admin'] },
-    { title: "App Builder", url: "/app-builder", requiredRoles: ['Admin', 'Member'] },
-    { title: "Calendar", url: "/calendar", requiredRoles: ['Admin', 'Member', 'Client'] },
-    { title: "Notifications", url: "/notifications", requiredRoles: ['Admin', 'Member', 'Client', 'Guest'] },
-    { title: "Settings", url: "/settings", requiredRoles: ['Admin', 'Member', 'Client'] }
+    { title: "App Builder", url: "/app-builder", requiredRoles: ['Admin', 'Manager'] },
+    { title: "Calendar", url: "/calendar", requiredRoles: ['Admin', 'Manager', 'Employee'] },
+    { title: "Notifications", url: "/notifications", requiredRoles: ['Admin', 'Manager', 'Employee', 'Guest'] },
+    { title: "Settings", url: "/settings", requiredRoles: ['Admin', 'Manager', 'Employee'] }
   ];
 
   return allItems.filter(item => hasPermission(userRole, item.requiredRoles));
@@ -73,19 +73,19 @@ export const canManageUsers = (userRole: string): boolean => {
 };
 
 export const canManageTeam = (userRole: string): boolean => {
-  return ['Admin', 'Member'].includes(userRole);
+  return ['Admin', 'Manager'].includes(userRole);
 };
 
 export const canViewAllLeads = (userRole: string): boolean => {
-  return ['Admin', 'Member'].includes(userRole);
+  return ['Admin', 'Manager'].includes(userRole);
 };
 
 export const canCreateCampaigns = (userRole: string): boolean => {
-  return ['Admin', 'Member'].includes(userRole);
+  return ['Admin', 'Manager'].includes(userRole);
 };
 
 export const canViewAnalytics = (userRole: string): boolean => {
-  return ['Admin', 'Member'].includes(userRole);
+  return ['Admin', 'Manager'].includes(userRole);
 };
 
 export const canManageOrganizations = (userRole: string): boolean => {
@@ -93,5 +93,5 @@ export const canManageOrganizations = (userRole: string): boolean => {
 };
 
 export const canCreateApps = (userRole: string): boolean => {
-  return ['Admin', 'Member'].includes(userRole);
+  return ['Admin', 'Manager'].includes(userRole);
 };
