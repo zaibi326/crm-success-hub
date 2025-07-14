@@ -37,8 +37,6 @@ export function AppSidebar() {
       title: "All Seller Leads",
       url: "/leads",
       icon: Target,
-      badge: "Enhanced",
-      badgeColor: "bg-gradient-to-r from-bright-purple/20 to-bright-coral/20 text-bright-purple border border-bright-purple/20",
       gradient: "from-bright-green to-bright-teal"
     },
     
@@ -55,8 +53,6 @@ export function AppSidebar() {
       title: "Communication",
       url: "/communication-center",
       icon: Phone,
-      badge: "SmrtPhone.io",
-      badgeColor: "bg-gradient-to-r from-bright-blue/20 to-bright-teal/20 text-bright-blue border border-bright-blue/20",
       gradient: "from-bright-blue to-bright-purple"
     },
     {
@@ -106,7 +102,7 @@ export function AppSidebar() {
             </div>
             <div>
               <h2 className="font-bold text-lg bg-gradient-to-r from-bright-teal to-bright-blue bg-clip-text text-transparent">
-                Top2Quotes
+                Heirlogic
               </h2>
               <p className="text-xs text-slate-500">CRM Dashboard</p>
             </div>
@@ -192,10 +188,10 @@ export function AppSidebar() {
             </Avatar>
             <div className="flex flex-col">
               <span className="text-sm font-medium text-slate-800">Admin User</span>
-              <span className="text-xs text-slate-500">admin@top2quotes.shop</span>
+              <span className="text-xs text-slate-500">admin@heirlogic.com</span>
             </div>
           </div>
-          <a href="https://top2quotes.shop" target="_blank" rel="noreferrer">
+          <a href="https://heirlogic.com" target="_blank" rel="noreferrer">
             <Button variant="ghost" size="sm" className="bright-button-primary h-8 px-3 text-xs">
               Visit Site
             </Button>
