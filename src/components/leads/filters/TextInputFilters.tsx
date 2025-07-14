@@ -2,12 +2,9 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { FilterComponentProps } from './types';
 
-interface TextInputFiltersProps {
-  onAddFilter: (field: string, operator: string, value: string, label: string) => void;
-}
-
-export function TextInputFilters({ onAddFilter }: TextInputFiltersProps) {
+export function TextInputFilters({ onAddFilter }: FilterComponentProps) {
   return (
     <>
       {/* Tags Filter */}

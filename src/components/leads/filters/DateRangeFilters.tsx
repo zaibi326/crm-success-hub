@@ -7,12 +7,9 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { FilterComponentProps } from './types';
 
-interface DateRangeFiltersProps {
-  onAddFilter: (field: string, operator: string, value: string, label: string) => void;
-}
-
-export function DateRangeFilters({ onAddFilter }: DateRangeFiltersProps) {
+export function DateRangeFilters({ onAddFilter }: FilterComponentProps) {
   const [dateFrom, setDateFrom] = useState<Date>();
   const [dateTo, setDateTo] = useState<Date>();
 

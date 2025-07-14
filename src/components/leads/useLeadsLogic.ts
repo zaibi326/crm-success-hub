@@ -2,14 +2,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { TaxLead } from '@/types/taxLead';
 import { mockTaxLeads } from '@/data/mockTaxLeads';
-
-interface FilterCondition {
-  id: string;
-  field: string;
-  operator: string;
-  value: string;
-  label?: string;
-}
+import { FilterCondition } from './filters/types';
 
 const FILTERS_STORAGE_KEY = 'seller-leads-filters';
 

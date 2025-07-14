@@ -4,14 +4,7 @@ import { X, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-
-interface FilterCondition {
-  id: string;
-  field: string;
-  operator: string;
-  value: string;
-  label?: string;
-}
+import { FilterCondition } from './filters/types';
 
 interface FilterSidebarProps {
   isOpen: boolean;

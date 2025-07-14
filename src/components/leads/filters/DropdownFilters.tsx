@@ -2,12 +2,9 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { FilterComponentProps } from './types';
 
-interface DropdownFiltersProps {
-  onAddFilter: (field: string, operator: string, value: string, label: string) => void;
-}
-
-export function DropdownFilters({ onAddFilter }: DropdownFiltersProps) {
+export function DropdownFilters({ onAddFilter }: FilterComponentProps) {
   return (
     <>
       {/* Created By Filter */}

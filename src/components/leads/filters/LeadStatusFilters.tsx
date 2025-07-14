@@ -2,10 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-
-interface LeadStatusFiltersProps {
-  onAddFilter: (field: string, operator: string, value: string, label: string) => void;
-}
+import { FilterComponentProps } from './types';
 
 const leadStatusOptions = [
   { value: 'not_set', label: 'Not set' },
@@ -24,7 +21,7 @@ const leadStatusOptions = [
   { value: 'in_contract', label: 'In Contract - Set Manually' }
 ];
 
-export function LeadStatusFilters({ onAddFilter }: LeadStatusFiltersProps) {
+export function LeadStatusFilters({ onAddFilter }: FilterComponentProps) {
   return (
     <div className="space-y-3">
       <Label className="text-sm font-medium text-agile-gray-700">Lead Status</Label>

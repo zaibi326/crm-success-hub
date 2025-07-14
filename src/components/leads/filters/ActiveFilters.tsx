@@ -2,14 +2,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { Label } from '@/components/ui/label';
-
-interface FilterCondition {
-  id: string;
-  field: string;
-  operator: string;
-  value: string;
-  label?: string;
-}
+import { FilterCondition } from './types';
 
 interface ActiveFiltersProps {
   filters: FilterCondition[];

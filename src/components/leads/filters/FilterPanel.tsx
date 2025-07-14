@@ -2,20 +2,12 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { LeadStatusFilters } from './LeadStatusFilters';
 import { DateRangeFilters } from './DateRangeFilters';
 import { DropdownFilters } from './DropdownFilters';
 import { TextInputFilters } from './TextInputFilters';
 import { ActiveFilters } from './ActiveFilters';
-
-interface FilterCondition {
-  id: string;
-  field: string;
-  operator: string;
-  value: string;
-  label?: string;
-}
+import { FilterCondition } from './types';
 
 interface FilterPanelProps {
   isOpen: boolean;
