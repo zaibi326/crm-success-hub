@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
@@ -27,7 +28,7 @@ interface UploadedFile {
   name: string;
   type: string;
   url: string;
-  category: 'probate' | 'vesting_deed' | 'other';
+  category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities';
 }
 
 interface NoteEntry {
@@ -123,15 +124,15 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole = 'editor' }: TaxLea
     });
   };
 
-  const handleFileUpload = (uploadedFiles: File[], category: 'probate' | 'vesting_deed' | 'other') => {
-    const validTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+  const handleFileUpload = (uploadedFiles: File[], category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities') => {
+    const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png', 'image/jpg'];
     const maxSize = 10 * 1024 * 1024; // 10MB
 
     uploadedFiles.forEach(file => {
       if (!validTypes.includes(file.type)) {
         toast({
           title: "Invalid file type",
-          description: "Please upload PDF, JPG, or PNG files only.",
+          description: "Please upload PDF, DOCX, JPG, or PNG files only.",
           variant: "destructive",
         });
         return;
@@ -324,7 +325,7 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole = 'editor' }: TaxLea
           </div>
         </div>
 
-        {/* ... keep existing SaveButton and ViewOnlyMessage */}
+        {/* Save Button */}
         <SaveButton
           onSave={handleSave}
           isSaving={isSaving}

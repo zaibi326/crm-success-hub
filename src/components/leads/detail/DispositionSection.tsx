@@ -19,31 +19,63 @@ export function DispositionSection({
   onPassReasonChange, 
   canEdit 
 }: DispositionSectionProps) {
-  if (disposition) return null;
-
   return (
     <Card className="shadow-lg border-0">
       <CardHeader>
         <CardTitle>Lead Disposition</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex gap-4">
-          <Button
-            onClick={() => onDisposition('pass')}
-            variant="outline"
-            className="flex-1 h-12 text-red-600 border-red-200 hover:bg-red-50"
-            disabled={!canEdit}
-          >
-            Pass
-          </Button>
-          <Button
-            onClick={() => onDisposition('keep')}
-            className="flex-1 h-12 bg-green-600 hover:bg-green-700"
-            disabled={!canEdit}
-          >
-            Keep
-          </Button>
-        </div>
+        {!disposition ? (
+          <div className="flex gap-4">
+            <Button
+              onClick={() => onDisposition('pass')}
+              variant="outline"
+              className="flex-1 h-12 text-red-600 border-red-200 hover:bg-red-50"
+              disabled={!canEdit}
+            >
+              Pass
+            </Button>
+            <Button
+              onClick={() => onDisposition('keep')}
+              className="flex-1 h-12 bg-green-600 hover:bg-green-700"
+              disabled={!canEdit}
+            >
+              Keep
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-lg font-semibold">
+                Lead Status: <span className={disposition === 'keep' ? 'text-green-600' : 'text-red-600'}>
+                  {disposition === 'keep' ? 'Kept' : 'Passed'}
+                </span>
+              </span>
+              {canEdit && (
+                <Button
+                  onClick={() => onDisposition(null as any)}
+                  variant="outline"
+                  size="sm"
+                >
+                  Change Decision
+                </Button>
+              )}
+            </div>
+            
+            {disposition === 'pass' && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Pass Reason (Optional)</label>
+                <Textarea
+                  value={passReason}
+                  onChange={(e) => onPassReasonChange(e.target.value)}
+                  placeholder="Why are you passing on this lead?"
+                  className="min-h-[80px]"
+                  disabled={!canEdit}
+                />
+              </div>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

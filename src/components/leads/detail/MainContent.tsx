@@ -2,19 +2,19 @@
 import React from 'react';
 import { TaxLead } from '@/types/taxLead';
 import { ImportedDataSection } from './ImportedDataSection';
-import { DispositionSection, PassReasonSection } from './DispositionSection';
+import { DispositionSection } from './DispositionSection';
 import { NotesSection } from './NotesSection';
 import { EditableFieldsSection } from './EditableFieldsSection';
 import { ConditionalFieldsSection } from './ConditionalFieldsSection';
 import { OwnershipSection } from './OwnershipSection';
-import { LeadActivityTimeline } from '../LeadActivityTimeline';
+import { AdditionalInformationSection } from './AdditionalInformationSection';
 
 interface UploadedFile {
   id: string;
   name: string;
   type: string;
   url: string;
-  category: 'probate' | 'vesting_deed' | 'other';
+  category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities';
 }
 
 interface NoteEntry {
@@ -37,7 +37,7 @@ interface MainContentProps {
   onPassReasonChange: (reason: string) => void;
   onNewNoteChange: (note: string) => void;
   onAddNote: () => void;
-  onFileUpload: (files: File[], category: 'probate' | 'vesting_deed' | 'other') => void;
+  onFileUpload: (files: File[], category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities') => void;
   onRemoveFile: (fileId: string) => void;
 }
 
@@ -67,10 +67,13 @@ export function MainContent({
         canEdit={canEdit}
       />
 
-      {disposition === 'pass' && (
-        <PassReasonSection
-          passReason={passReason}
-          onPassReasonChange={onPassReasonChange}
+      {disposition === 'keep' && (
+        <AdditionalInformationSection
+          formData={formData}
+          files={files}
+          onInputChange={onInputChange}
+          onFileUpload={onFileUpload}
+          onRemoveFile={onRemoveFile}
           canEdit={canEdit}
         />
       )}
@@ -93,7 +96,7 @@ export function MainContent({
 
           <ConditionalFieldsSection
             formData={formData}
-            files={files}
+            files={files.filter(f => f.category === 'probate' || f.category === 'vesting_deed')}
             onInputChange={onInputChange}
             onFileUpload={onFileUpload}
             onRemoveFile={onRemoveFile}
@@ -103,8 +106,6 @@ export function MainContent({
           <OwnershipSection onSave={(heirs) => console.log('Heirs saved:', heirs)} />
         </>
       )}
-
-      
     </div>
   );
 }
