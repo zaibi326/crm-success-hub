@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Crown, UserPlus, Users, Settings, Shield, Search, Filter } from 'lucide-react';
+import { Crown, UserPlus, Users, Settings, Shield, Search, Filter, Activity } from 'lucide-react';
 
 const AdminUsersSection = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,17 +17,17 @@ const AdminUsersSection = () => {
     email: '',
     firstName: '',
     lastName: '',
-    role: 'Employee'
+    role: 'Guest'
   });
   
   const { toast } = useToast();
 
-  // Mock users data
+  // Updated mock users data with new role structure
   const mockUsers = [
-    { id: '1', email: 'john.doe@company.com', firstName: 'John', lastName: 'Doe', role: 'Admin', status: 'Active', lastLogin: '2024-01-10' },
-    { id: '2', email: 'jane.smith@company.com', firstName: 'Jane', lastName: 'Smith', role: 'Manager', status: 'Active', lastLogin: '2024-01-11' },
-    { id: '3', email: 'bob.wilson@company.com', firstName: 'Bob', lastName: 'Wilson', role: 'Employee', status: 'Active', lastLogin: '2024-01-09' },
-    { id: '4', email: 'alice.brown@company.com', firstName: 'Alice', lastName: 'Brown', role: 'Employee', status: 'Inactive', lastLogin: '2024-01-05' },
+    { id: '1', email: 'john.doe@company.com', firstName: 'John', lastName: 'Doe', role: 'Admin', status: 'Active', lastLogin: '2024-01-10', organization: 'Heirlogic Real Estate' },
+    { id: '2', email: 'jane.smith@company.com', firstName: 'Jane', lastName: 'Smith', role: 'Member', status: 'Active', lastLogin: '2024-01-11', organization: 'Heirlogic Real Estate' },
+    { id: '3', email: 'bob.wilson@company.com', firstName: 'Bob', lastName: 'Wilson', role: 'Client', status: 'Active', lastLogin: '2024-01-09', organization: 'Property Solutions Inc' },
+    { id: '4', email: 'alice.brown@company.com', firstName: 'Alice', lastName: 'Brown', role: 'Guest', status: 'Inactive', lastLogin: '2024-01-05', organization: 'Heirlogic Real Estate' },
   ];
 
   const filteredUsers = mockUsers.filter(user => {
@@ -53,15 +53,16 @@ const AdminUsersSection = () => {
       description: `${newUser.firstName} ${newUser.lastName} has been added successfully.`,
     });
 
-    setNewUser({ email: '', firstName: '', lastName: '', role: 'Employee' });
+    setNewUser({ email: '', firstName: '', lastName: '', role: 'Guest' });
     setIsAddingUser(false);
   };
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'Admin': return 'bg-red-100 text-red-800 border-red-200';
-      case 'Manager': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'Employee': return 'bg-green-100 text-green-800 border-green-200';
+      case 'Member': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'Client': return 'bg-green-100 text-green-800 border-green-200';
+      case 'Guest': return 'bg-gray-100 text-gray-800 border-gray-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
@@ -70,6 +71,21 @@ const AdminUsersSection = () => {
     return status === 'Active' 
       ? 'bg-green-100 text-green-800 border-green-200'
       : 'bg-gray-100 text-gray-800 border-gray-200';
+  };
+
+  const getRolePermissions = (role: string) => {
+    switch (role) {
+      case 'Admin':
+        return ['Full system access', 'User management', 'Organization management', 'App builder access'];
+      case 'Member':
+        return ['Campaign management', 'Lead management', 'App builder access', 'Team collaboration'];
+      case 'Client':
+        return ['Assigned leads only', 'Basic communication', 'Limited reporting'];
+      case 'Guest':
+        return ['View-only access', 'Limited navigation', 'No data modification'];
+      default:
+        return [];
+    }
   };
 
   return (
@@ -104,8 +120,9 @@ const AdminUsersSection = () => {
                 <SelectContent>
                   <SelectItem value="all">All Roles</SelectItem>
                   <SelectItem value="Admin">Admin</SelectItem>
-                  <SelectItem value="Manager">Manager</SelectItem>
-                  <SelectItem value="Employee">Employee</SelectItem>
+                  <SelectItem value="Member">Member</SelectItem>
+                  <SelectItem value="Client">Client</SelectItem>
+                  <SelectItem value="Guest">Guest</SelectItem>
                 </SelectContent>
               </Select>
               <Button onClick={() => setIsAddingUser(true)} className="bg-crm-primary hover:bg-blue-700">
@@ -158,8 +175,9 @@ const AdminUsersSection = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Employee">Employee</SelectItem>
-                        <SelectItem value="Manager">Manager</SelectItem>
+                        <SelectItem value="Guest">Guest</SelectItem>
+                        <SelectItem value="Client">Client</SelectItem>
+                        <SelectItem value="Member">Member</SelectItem>
                         <SelectItem value="Admin">Admin</SelectItem>
                       </SelectContent>
                     </Select>
@@ -190,19 +208,34 @@ const AdminUsersSection = () => {
                       <div>
                         <h3 className="font-semibold text-gray-900">{user.firstName} {user.lastName}</h3>
                         <p className="text-sm text-gray-600">{user.email}</p>
+                        <p className="text-xs text-gray-500">{user.organization}</p>
                         <p className="text-xs text-gray-500">Last login: {user.lastLogin}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge className={getRoleBadgeColor(user.role)}>
-                        {user.role}
-                      </Badge>
-                      <Badge className={getStatusBadgeColor(user.status)}>
-                        {user.status}
-                      </Badge>
+                      <div className="text-right">
+                        <Badge className={getRoleBadgeColor(user.role)}>
+                          {user.role}
+                        </Badge>
+                        <Badge className={getStatusBadgeColor(user.status)} variant="outline">
+                          {user.status}
+                        </Badge>
+                      </div>
                       <Button variant="outline" size="sm">
                         <Settings className="w-4 h-4" />
                       </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Role Permissions */}
+                  <div className="mt-3 pt-3 border-t">
+                    <p className="text-xs font-medium text-gray-700 mb-1">Permissions:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {getRolePermissions(user.role).map((permission, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {permission}
+                        </Badge>
+                      ))}
                     </div>
                   </div>
                 </CardContent>
@@ -219,32 +252,63 @@ const AdminUsersSection = () => {
         </CardContent>
       </Card>
 
-      {/* System Settings */}
+      {/* Role Overview */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="w-5 h-5" />
-            System Settings
+            Role Overview & Permissions
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
-              <Settings className="w-6 h-6 mb-2" />
-              System Configuration
-            </Button>
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
-              <Shield className="w-6 h-6 mb-2" />
-              Security Settings
-            </Button>
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
-              <Users className="w-6 h-6 mb-2" />
-              Role Permissions
-            </Button>
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
-              <Crown className="w-6 h-6 mb-2" />
-              Admin Tools
-            </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              {
+                role: 'Admin',
+                count: mockUsers.filter(u => u.role === 'Admin').length,
+                color: 'bg-red-100 border-red-200 text-red-800',
+                permissions: getRolePermissions('Admin')
+              },
+              {
+                role: 'Member',
+                count: mockUsers.filter(u => u.role === 'Member').length,
+                color: 'bg-blue-100 border-blue-200 text-blue-800',
+                permissions: getRolePermissions('Member')
+              },
+              {
+                role: 'Client',
+                count: mockUsers.filter(u => u.role === 'Client').length,
+                color: 'bg-green-100 border-green-200 text-green-800',
+                permissions: getRolePermissions('Client')
+              },
+              {
+                role: 'Guest',
+                count: mockUsers.filter(u => u.role === 'Guest').length,
+                color: 'bg-gray-100 border-gray-200 text-gray-800',
+                permissions: getRolePermissions('Guest')
+              }
+            ].map((roleInfo) => (
+              <Card key={roleInfo.role} className="border">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm">{roleInfo.role}</CardTitle>
+                    <Badge className={roleInfo.color}>
+                      {roleInfo.count} users
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-1">
+                    {roleInfo.permissions.map((permission, index) => (
+                      <li key={index} className="text-xs text-gray-600 flex items-center gap-1">
+                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                        {permission}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </CardContent>
       </Card>

@@ -11,13 +11,17 @@ import {
 
 export const useRoleAccess = () => {
   const { profile } = useAuth();
-  const userRole = profile?.role || 'Employee';
+  const userRole = profile?.role || 'Guest';
 
   return {
     userRole,
     isAdmin: userRole === 'Admin',
-    isManager: userRole === 'Manager',
-    isEmployee: userRole === 'Employee',
+    isMember: userRole === 'Member',
+    isClient: userRole === 'Client',
+    isGuest: userRole === 'Guest',
+    // Legacy support
+    isManager: userRole === 'Admin' || userRole === 'Member',
+    isEmployee: userRole === 'Member',
     canManageUsers: canManageUsers(userRole),
     canManageTeam: canManageTeam(userRole),
     canViewAllLeads: canViewAllLeads(userRole),
