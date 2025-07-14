@@ -1,15 +1,14 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, Users, Target, Award } from 'lucide-react';
-import { useDashboardData } from '@/hooks/useDashboardData';
+import { useDashboardDataContext } from '@/contexts/DashboardDataContext';
 
 interface DashboardStatsProps {
   userRole: string;
 }
 
 export function DashboardStats({ userRole }: DashboardStatsProps) {
-  const { stats, loading } = useDashboardData();
+  const { stats, loading } = useDashboardDataContext();
 
   const statsConfig = [
     {

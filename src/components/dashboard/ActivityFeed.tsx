@@ -1,15 +1,14 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { useDashboardData } from "@/hooks/useDashboardData";
+import { useDashboardDataContext } from "@/contexts/DashboardDataContext";
 
 interface ActivityFeedProps {
   userRole: string;
 }
 
 export function ActivityFeed({ userRole }: ActivityFeedProps) {
-  const { activities, loading } = useDashboardData();
+  const { activities, loading } = useDashboardDataContext();
 
   const getActivityBadge = (type: string) => {
     switch (type) {

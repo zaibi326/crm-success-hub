@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -6,7 +5,7 @@ import { DashboardStats } from './DashboardStats';
 import { ActivityFeed } from './ActivityFeed';
 import { LeadsPieChart } from './LeadsPieChart';
 import { BarChart3, Activity, TrendingUp, Users, Target, Award } from 'lucide-react';
-import { useDashboardData } from '@/hooks/useDashboardData';
+import { useDashboardDataContext } from '@/contexts/DashboardDataContext';
 
 interface DashboardContentProps {
   userRole: string;
@@ -15,7 +14,7 @@ interface DashboardContentProps {
 
 export function DashboardContent({ userRole, showLeadsInDashboard = false }: DashboardContentProps) {
   const [activeTab, setActiveTab] = useState('overview');
-  const { stats, loading } = useDashboardData();
+  const { stats, loading } = useDashboardDataContext();
 
   const renderTabContent = (tabType: 'hot' | 'warm' | 'cold' | 'pass') => {
     const configs = {

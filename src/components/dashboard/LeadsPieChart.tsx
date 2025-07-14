@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { TrendingUp } from 'lucide-react';
-import { useDashboardData } from '@/hooks/useDashboardData';
+import { useDashboardDataContext } from '@/contexts/DashboardDataContext';
 
 const chartConfig = {
   HOT: {
@@ -26,7 +25,7 @@ const chartConfig = {
 };
 
 export function LeadsPieChart() {
-  const { stats, loading } = useDashboardData();
+  const { stats, loading } = useDashboardDataContext();
 
   const data = React.useMemo(() => {
     if (loading || stats.totalLeads === 0) {
