@@ -57,44 +57,26 @@ export function LeadStatusButtons({ currentStatus, onStatusChange, disabled = fa
   const currentStatusInfo = statusOptions.find(option => option.value === currentStatus);
 
   return (
-    <Card className="shadow-lg border-0 bg-white/90 backdrop-blur-sm">
-      <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-100 rounded-t-lg pb-4">
-        <CardTitle className="flex items-center justify-between text-lg">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-600 rounded-lg">
-              <Activity className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h3 className="text-blue-900 font-semibold">Lead Status Classification</h3>
-              <p className="text-sm text-blue-700 font-normal mt-1">
-                Set the priority level for this lead
-              </p>
-            </div>
+    <Card className="shadow-md border bg-white">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center justify-between text-base">
+          <div className="flex items-center gap-2">
+            <Activity className="w-4 h-4 text-blue-600" />
+            <span className="text-gray-900 font-medium">Lead Status</span>
           </div>
           
           {currentStatusInfo && (
-            <Badge className={`${currentStatusInfo.badgeColor} px-3 py-1 font-medium`}>
-              <currentStatusInfo.icon className="w-4 h-4 mr-1" />
+            <Badge className={`${currentStatusInfo.badgeColor} px-2 py-1 text-xs font-medium`}>
+              <currentStatusInfo.icon className="w-3 h-3 mr-1" />
               {currentStatusInfo.label}
             </Badge>
           )}
         </CardTitle>
       </CardHeader>
       
-      <CardContent className="p-6">
-        {/* Current Status Display */}
-        {currentStatusInfo && (
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg border-l-4 border-blue-500">
-            <div className="flex items-center gap-3 mb-2">
-              <currentStatusInfo.icon className="w-5 h-5 text-blue-600" />
-              <span className="font-semibold text-gray-900">Current Status: {currentStatusInfo.label}</span>
-            </div>
-            <p className="text-sm text-gray-600 ml-8">{currentStatusInfo.description}</p>
-          </div>
-        )}
-
+      <CardContent className="pt-0">
         {/* Status Selection Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           {statusOptions.map((option) => {
             const IconComponent = option.icon;
             const isActive = currentStatus === option.value;
@@ -105,30 +87,24 @@ export function LeadStatusButtons({ currentStatus, onStatusChange, disabled = fa
                 onClick={() => onStatusChange(option.value)}
                 disabled={disabled}
                 variant={isActive ? "default" : "outline"}
+                size="sm"
                 className={`
-                  h-auto p-4 justify-start text-left transition-all duration-200
+                  h-auto p-3 justify-start text-left transition-all duration-200
                   ${isActive 
-                    ? `${option.color} shadow-lg transform scale-105` 
-                    : 'hover:shadow-md hover:scale-102 border-2 hover:border-blue-300'
+                    ? `${option.color} shadow-md` 
+                    : 'hover:shadow-sm hover:border-blue-300 border'
                   }
                 `}
               >
-                <div className="flex items-center gap-3 w-full">
-                  <div className={`p-2 rounded-lg ${isActive ? 'bg-white/20' : 'bg-gray-100'}`}>
-                    <IconComponent className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-600'}`} />
-                  </div>
-                  <div className="flex-1">
-                    <div className={`font-semibold ${isActive ? 'text-white' : 'text-gray-900'}`}>
+                <div className="flex items-center gap-2 w-full">
+                  <IconComponent className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-600'}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className={`text-xs font-medium ${isActive ? 'text-white' : 'text-gray-900'}`}>
                       {option.label}
-                    </div>
-                    <div className={`text-sm ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
-                      {option.description}
                     </div>
                   </div>
                   {isActive && (
-                    <div className="flex items-center justify-center w-6 h-6 bg-white/20 rounded-full">
-                      <TrendingUp className="w-4 h-4 text-white" />
-                    </div>
+                    <TrendingUp className="w-3 h-3 text-white" />
                   )}
                 </div>
               </Button>
@@ -136,13 +112,14 @@ export function LeadStatusButtons({ currentStatus, onStatusChange, disabled = fa
           })}
         </div>
 
-        {/* Status Change Note */}
-        <div className="mt-6 p-3 bg-blue-50 rounded-lg border border-blue-200">
-          <p className="text-sm text-blue-700 flex items-center gap-2">
-            <Activity className="w-4 h-4" />
-            Status changes are automatically saved and tracked in the activity timeline
-          </p>
-        </div>
+        {/* Current Status Info */}
+        {currentStatusInfo && (
+          <div className="mt-3 p-2 bg-blue-50 rounded border-l-2 border-blue-500">
+            <p className="text-xs text-blue-700">
+              {currentStatusInfo.description}
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
