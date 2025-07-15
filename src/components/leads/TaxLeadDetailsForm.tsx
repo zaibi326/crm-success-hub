@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +9,8 @@ import { TaxLead } from '@/types/taxLead';
 import { MainContent } from './detail/MainContent';
 import { Sidebar } from './detail/Sidebar';
 import { ViewOnlyMessage } from './detail/ViewOnlyMessage';
+import { SellerContactSection } from './detail/SellerContactSection';
+import { EnhancedLeadDetailsSection } from './detail/EnhancedLeadDetailsSection';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UploadedFile {
@@ -231,8 +232,21 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole }: TaxLeadDetailsFor
           </TabsList>
 
           <TabsContent value="details" className="space-y-6">
+            {/* NEW SECTIONS - Added at the top */}
+            <SellerContactSection 
+              lead={formData}
+              onFieldUpdate={handleInputChange}
+              canEdit={canEdit}
+            />
+            
+            <EnhancedLeadDetailsSection 
+              lead={formData}
+              onFieldUpdate={handleInputChange}
+              canEdit={canEdit}
+            />
+
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              {/* Main Content - All Sections */}
+              {/* Main Content - All existing sections */}
               <div className="lg:col-span-3">
                 <MainContent
                   formData={formData}
