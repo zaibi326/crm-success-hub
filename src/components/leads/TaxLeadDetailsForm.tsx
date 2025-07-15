@@ -11,7 +11,6 @@ import { Sidebar } from './detail/Sidebar';
 import { ViewOnlyMessage } from './detail/ViewOnlyMessage';
 import { SellerContactSection } from './detail/SellerContactSection';
 import { EnhancedLeadDetailsSection } from './detail/EnhancedLeadDetailsSection';
-import { LeadStatusButtons } from './LeadStatusButtons';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UploadedFile {
@@ -284,12 +283,6 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole }: TaxLeadDetailsFor
 
               {/* Right Column - Sidebar */}
               <div className="xl:col-span-1 space-y-6">
-                <LeadStatusButtons
-                  currentStatus={formData.status as 'HOT' | 'WARM' | 'COLD' | 'PASS'}
-                  onStatusChange={(status) => handleInputChange('status', status)}
-                  disabled={!canEdit}
-                />
-
                 <Sidebar
                   currentStatus={formData.status as 'HOT' | 'WARM' | 'COLD' | 'PASS'}
                   files={files}

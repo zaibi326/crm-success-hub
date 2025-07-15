@@ -110,18 +110,18 @@ export function LeadStatusButtons({ currentStatus, onStatusChange, disabled = fa
                       }
                     `}
                   >
-                    <div className="flex items-center gap-3 w-full">
-                      <IconComponent className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-600'}`} />
-                      <div className="flex-1 min-w-0">
-                        <div className={`text-sm font-medium ${isActive ? 'text-white' : 'text-gray-900'}`}>
+                    <div className="flex items-start gap-3 w-full">
+                      <IconComponent className={`w-5 h-5 mt-0.5 ${isActive ? 'text-white' : 'text-gray-600'}`} />
+                      <div className="flex-1 min-w-0 text-left">
+                        <div className={`text-sm font-medium leading-tight ${isActive ? 'text-white' : 'text-gray-900'}`}>
                           {option.label}
                         </div>
-                        <div className={`text-xs ${isActive ? 'text-white/80' : 'text-gray-500'} mt-1`}>
+                        <div className={`text-xs leading-relaxed mt-1 ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
                           {option.description}
                         </div>
                       </div>
                       {isActive && (
-                        <TrendingUp className="w-4 h-4 text-white" />
+                        <TrendingUp className="w-4 h-4 text-white mt-0.5" />
                       )}
                     </div>
                   </Button>

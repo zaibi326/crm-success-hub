@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -221,17 +222,6 @@ export function AttachmentsSection({
                   <p className="text-sm text-gray-500 mb-4">
                     Upload documents or add PDF links to get started
                   </p>
-                  {canEdit && (
-                    <Button
-                      variant="outline"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="border-blue-300 text-blue-700 hover:bg-blue-50"
-                      size="sm"
-                    >
-                      <Upload className="w-4 h-4 mr-2" />
-                      Upload Your First File
-                    </Button>
-                  )}
                 </div>
               ) : (
                 <div className="space-y-3">
