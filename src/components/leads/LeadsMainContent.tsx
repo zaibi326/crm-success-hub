@@ -28,6 +28,11 @@ export function LeadsMainContent({
   onDeleteSingleLead,
   onDeleteMultipleLeads
 }: LeadsMainContentProps) {
+  // Handle lead edit - for now, just open the lead for selection
+  const handleLeadEdit = (lead: TaxLead) => {
+    onLeadSelect(lead);
+  };
+
   switch (currentView) {
     case 'table':
       return (
@@ -45,6 +50,7 @@ export function LeadsMainContent({
         <LeadCardView
           leads={filteredLeads}
           onLeadSelect={onLeadSelect}
+          onLeadEdit={handleLeadEdit}
           getStatusBadge={getStatusBadge}
         />
       );
@@ -53,6 +59,7 @@ export function LeadsMainContent({
         <LeadCalendarView
           leads={filteredLeads}
           onLeadSelect={onLeadSelect}
+          getStatusBadge={getStatusBadge}
         />
       );
     case 'timeline':
