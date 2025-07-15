@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -58,9 +57,13 @@ export function AttachmentsSection({
 
     // Create a mock file object for the PDF link
     const fileName = pdfUrl.split('/').pop() || 'document.pdf';
-    const mockFile = new File([], fileName, {
-      type: 'application/pdf'
-    });
+    const mockFile = Object.create(File.prototype, {
+      name: { value: fileName, writable: false },
+      type: { value: 'application/pdf', writable: false },
+      size: { value: 0, writable: false },
+      lastModified: { value: Date.now(), writable: false },
+      webkitRelativePath: { value: pdfUrl, writable: false }
+    }) as File;
     
     if (onFileUpload) {
       onFileUpload([mockFile], 'other');
