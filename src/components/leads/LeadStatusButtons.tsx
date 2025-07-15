@@ -102,15 +102,16 @@ export function LeadStatusButtons({ currentStatus, onStatusChange, disabled = fa
                     disabled={disabled}
                     variant={isActive ? "default" : "outline"}
                     className={`
-                      h-24 w-full p-4 flex flex-col items-center justify-center text-center
-                      transition-all duration-200 border-2
+                      h-auto min-h-[100px] w-full p-4 flex flex-col items-center justify-center text-center
+                      transition-all duration-200 border-2 rounded-lg
                       ${isActive 
                         ? `${option.color} shadow-lg border-transparent` 
                         : 'hover:shadow-md hover:border-gray-300 border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
                       }
                     `}
                   >
-                    <div className="flex flex-col items-center justify-center space-y-2 w-full">
+                    <div className="flex flex-col items-center justify-center space-y-3 w-full max-w-full">
+                      {/* Icon and Title Row */}
                       <div className="flex items-center gap-2">
                         <IconComponent className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-600'}`} />
                         <span className={`text-sm font-bold ${isActive ? 'text-white' : 'text-gray-900'}`}>
@@ -121,7 +122,11 @@ export function LeadStatusButtons({ currentStatus, onStatusChange, disabled = fa
                         )}
                       </div>
                       
-                      <div className={`text-xs leading-relaxed text-center px-1 ${isActive ? 'text-white/90' : 'text-gray-500'}`}>
+                      {/* Description Text */}
+                      <div className={`
+                        text-xs leading-relaxed text-center px-2 max-w-full
+                        ${isActive ? 'text-white/90' : 'text-gray-500'}
+                      `}>
                         {option.description}
                       </div>
                     </div>
