@@ -90,7 +90,7 @@ export function LeadStatusButtons({ currentStatus, onStatusChange, disabled = fa
         <CollapsibleContent>
           <CardContent className="p-6 pt-0">
             {/* Status Selection Grid */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
               {statusOptions.map((option) => {
                 const IconComponent = option.icon;
                 const isActive = currentStatus === option.value;
@@ -103,7 +103,7 @@ export function LeadStatusButtons({ currentStatus, onStatusChange, disabled = fa
                     variant={isActive ? "default" : "outline"}
                     size="lg"
                     className={`
-                      h-auto p-4 justify-start text-left transition-all duration-200
+                      h-auto p-4 justify-start text-left transition-all duration-200 min-h-[80px]
                       ${isActive 
                         ? `${option.color} shadow-md transform scale-105` 
                         : 'hover:shadow-sm hover:border-blue-300 border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
@@ -111,17 +111,17 @@ export function LeadStatusButtons({ currentStatus, onStatusChange, disabled = fa
                     `}
                   >
                     <div className="flex items-start gap-3 w-full">
-                      <IconComponent className={`w-5 h-5 mt-0.5 ${isActive ? 'text-white' : 'text-gray-600'}`} />
+                      <IconComponent className={`w-5 h-5 mt-0.5 flex-shrink-0 ${isActive ? 'text-white' : 'text-gray-600'}`} />
                       <div className="flex-1 min-w-0 text-left">
-                        <div className={`text-sm font-medium leading-tight ${isActive ? 'text-white' : 'text-gray-900'}`}>
+                        <div className={`text-sm font-medium leading-tight mb-1 ${isActive ? 'text-white' : 'text-gray-900'}`}>
                           {option.label}
                         </div>
-                        <div className={`text-xs leading-relaxed mt-1 ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
+                        <div className={`text-xs leading-relaxed break-words ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
                           {option.description}
                         </div>
                       </div>
                       {isActive && (
-                        <TrendingUp className="w-4 h-4 text-white mt-0.5" />
+                        <TrendingUp className="w-4 h-4 text-white mt-0.5 flex-shrink-0" />
                       )}
                     </div>
                   </Button>
@@ -133,8 +133,8 @@ export function LeadStatusButtons({ currentStatus, onStatusChange, disabled = fa
             {currentStatusInfo && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-start gap-3">
-                  <currentStatusInfo.icon className="w-5 h-5 text-blue-600 mt-0.5" />
-                  <div>
+                  <currentStatusInfo.icon className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
                     <h4 className="text-sm font-medium text-blue-900 mb-1">
                       Current Status: {currentStatusInfo.label}
                     </h4>
