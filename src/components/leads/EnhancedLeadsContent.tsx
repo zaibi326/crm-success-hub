@@ -23,6 +23,7 @@ export function EnhancedLeadsContent() {
     mockLeads,
     showFilterSidebar,
     sidebarCollapsed,
+    isLoaded,
     setCurrentView,
     setSortBy,
     setFilterStatus,
@@ -36,6 +37,8 @@ export function EnhancedLeadsContent() {
     handleAddLead,
     handleLeadUpdate,
     handleBulkLeadsUpdate,
+    handleDeleteSingleLead,
+    handleDeleteMultipleLeads,
     handleFilterToggle
   } = useLeadsLogic();
 
@@ -52,6 +55,18 @@ export function EnhancedLeadsContent() {
     setFilters([]);
     setShowFilterSidebar(false);
   };
+
+  // Show loading state while data is being loaded
+  if (!isLoaded) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading leads...</p>
+        </div>
+      </div>
+    );
+  }
 
   // If a lead is selected, show the enhanced detail view
   if (selectedLead) {
@@ -132,6 +147,8 @@ export function EnhancedLeadsContent() {
                 getStatusBadge={getStatusBadge}
                 handleSort={handleSort}
                 onLeadsUpdate={handleBulkLeadsUpdate}
+                onDeleteSingleLead={handleDeleteSingleLead}
+                onDeleteMultipleLeads={handleDeleteMultipleLeads}
               />
             </div>
           </div>

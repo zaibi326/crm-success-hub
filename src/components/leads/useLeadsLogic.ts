@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from 'react';
 import { TaxLead } from '@/types/taxLead';
 import { useLeadsData } from '@/hooks/useLeadsData';
@@ -17,7 +16,15 @@ export function useLeadsLogic() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Use the persistent data hook instead of local state
-  const { mockLeads, setMockLeads, handleAddLead: addLead, handleLeadUpdate: updateLead } = useLeadsData();
+  const { 
+    mockLeads, 
+    setMockLeads, 
+    handleAddLead: addLead, 
+    handleLeadUpdate: updateLead,
+    handleDeleteLead,
+    handleBulkDeleteLeads,
+    isLoaded
+  } = useLeadsData();
 
   // Load filters from session storage on mount
   useEffect(() => {
@@ -122,6 +129,16 @@ export function useLeadsLogic() {
     console.log('Bulk updating leads:', updatedLeads);
   };
 
+  const handleDeleteSingleLead = (leadId: number) => {
+    handleDeleteLead(leadId);
+    console.log('Deleting single lead:', leadId);
+  };
+
+  const handleDeleteMultipleLeads = (leadIds: number[]) => {
+    handleBulkDeleteLeads(leadIds);
+    console.log('Deleting multiple leads:', leadIds);
+  };
+
   const handleFilterToggle = () => {
     if (filters.length > 0) {
       setShowFilterSidebar(true);
@@ -146,6 +163,7 @@ export function useLeadsLogic() {
     mockLeads,
     showFilterSidebar,
     sidebarCollapsed,
+    isLoaded,
     setCurrentView,
     setSortBy,
     setFilterStatus,
@@ -159,6 +177,8 @@ export function useLeadsLogic() {
     handleAddLead,
     handleLeadUpdate,
     handleBulkLeadsUpdate,
+    handleDeleteSingleLead,
+    handleDeleteMultipleLeads,
     handleFilterToggle,
     handleClearAllFilters
   };

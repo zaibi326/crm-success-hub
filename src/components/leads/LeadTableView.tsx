@@ -23,7 +23,8 @@ interface LeadTableViewProps {
   onLeadSelect: (lead: TaxLead) => void;
   getStatusBadge: (status: string) => string;
   handleSort: (field: string) => void;
-  onLeadsUpdate?: (leads: TaxLead[]) => void;
+  onDeleteSingleLead?: (leadId: number) => void;
+  onDeleteMultipleLeads?: (leadIds: number[]) => void;
 }
 
 export function LeadTableView({
@@ -31,7 +32,8 @@ export function LeadTableView({
   onLeadSelect,
   getStatusBadge,
   handleSort,
-  onLeadsUpdate
+  onDeleteSingleLead,
+  onDeleteMultipleLeads
 }: LeadTableViewProps) {
   const [selectedLeads, setSelectedLeads] = useState<number[]>([]);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -56,9 +58,8 @@ export function LeadTableView({
 
   const handleDeleteSelected = async () => {
     try {
-      if (onLeadsUpdate) {
-        const updatedLeads = leads.filter(lead => !selectedLeads.includes(lead.id));
-        onLeadsUpdate(updatedLeads);
+      if (onDeleteMultipleLeads) {
+        onDeleteMultipleLeads(selectedLeads);
         
         toast({
           title: "Success",
@@ -78,9 +79,8 @@ export function LeadTableView({
 
   const handleDeleteSingleLead = async (lead: TaxLead) => {
     try {
-      if (onLeadsUpdate) {
-        const updatedLeads = leads.filter(l => l.id !== lead.id);
-        onLeadsUpdate(updatedLeads);
+      if (onDeleteSingleLead) {
+        onDeleteSingleLead(lead.id);
         
         toast({
           title: "Success",

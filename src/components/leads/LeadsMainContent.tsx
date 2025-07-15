@@ -1,11 +1,11 @@
 
 import React from 'react';
+import { TaxLead } from '@/types/taxLead';
+import { LeadTableView } from './LeadTableView';
 import { LeadCardView } from './LeadCardView';
 import { LeadCalendarView } from './LeadCalendarView';
 import { LeadTimelineView } from './LeadTimelineView';
 import { LeadBadgeView } from './LeadBadgeView';
-import { LeadTableView } from './LeadTableView';
-import { TaxLead } from '@/types/taxLead';
 
 interface LeadsMainContentProps {
   currentView: 'table' | 'card' | 'calendar' | 'timeline' | 'badge';
@@ -14,6 +14,8 @@ interface LeadsMainContentProps {
   getStatusBadge: (status: string) => string;
   handleSort: (field: string) => void;
   onLeadsUpdate?: (leads: TaxLead[]) => void;
+  onDeleteSingleLead?: (leadId: number) => void;
+  onDeleteMultipleLeads?: (leadIds: number[]) => void;
 }
 
 export function LeadsMainContent({
@@ -22,52 +24,63 @@ export function LeadsMainContent({
   onLeadSelect,
   getStatusBadge,
   handleSort,
-  onLeadsUpdate
+  onLeadsUpdate,
+  onDeleteSingleLead,
+  onDeleteMultipleLeads
 }: LeadsMainContentProps) {
-  return (
-    <div className="lg:col-span-3">
-      {currentView === 'table' && (
+  switch (currentView) {
+    case 'table':
+      return (
         <LeadTableView
           leads={filteredLeads}
           onLeadSelect={onLeadSelect}
           getStatusBadge={getStatusBadge}
           handleSort={handleSort}
-          onLeadsUpdate={onLeadsUpdate}
+          onDeleteSingleLead={onDeleteSingleLead}
+          onDeleteMultipleLeads={onDeleteMultipleLeads}
         />
-      )}
-      
-      {currentView === 'card' && (
+      );
+    case 'card':
+      return (
         <LeadCardView
           leads={filteredLeads}
           onLeadSelect={onLeadSelect}
-          onLeadEdit={onLeadSelect}
           getStatusBadge={getStatusBadge}
         />
-      )}
-      
-      {currentView === 'calendar' && (
+      );
+    case 'calendar':
+      return (
         <LeadCalendarView
           leads={filteredLeads}
           onLeadSelect={onLeadSelect}
-          getStatusBadge={getStatusBadge}
         />
-      )}
-      
-      {currentView === 'timeline' && (
+      );
+    case 'timeline':
+      return (
         <LeadTimelineView
           leads={filteredLeads}
           onLeadSelect={onLeadSelect}
           getStatusBadge={getStatusBadge}
         />
-      )}
-      
-      {currentView === 'badge' && (
+      );
+    case 'badge':
+      return (
         <LeadBadgeView
           leads={filteredLeads}
           onLeadSelect={onLeadSelect}
           getStatusBadge={getStatusBadge}
         />
-      )}
-    </div>
-  );
+      );
+    default:
+      return (
+        <LeadTableView
+          leads={filteredLeads}
+          onLeadSelect={onLeadSelect}
+          getStatusBadge={getStatusBadge}
+          handleSort={handleSort}
+          onDeleteSingleLead={onDeleteSingleLead}
+          onDeleteMultipleLeads={onDeleteMultipleLeads}
+        />
+      );
+  }
 }
