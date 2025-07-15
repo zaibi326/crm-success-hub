@@ -1,7 +1,9 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { 
   Paperclip, 
@@ -12,12 +14,16 @@ import {
   Download,
   Eye,
   Plus,
-  FolderOpen
+  FolderOpen,
+  Link,
+  ChevronDown,
+  ChevronUp,
+  X
 } from 'lucide-react';
 import { AttachmentsSectionProps } from './attachments/types';
-import { PdfLinkInput } from './attachments/PdfLinkInput';
 import { FilesList } from './attachments/FilesList';
-import { UploadInstructions } from './attachments/UploadInstructions';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { toast } from 'sonner';
 
 export function AttachmentsSection({ 
   files = [], 
@@ -25,6 +31,8 @@ export function AttachmentsSection({
   onFileUpload,
   canEdit 
 }: AttachmentsSectionProps) {
+  const [isOpen, setIsOpen] = useState(true);
+  const [pdfUrl, setPdfUrl] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,10 +40,33 @@ export function AttachmentsSection({
     if (selectedFiles.length > 0 && onFileUpload) {
       onFileUpload(selectedFiles, 'other');
     }
-    // Reset input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  };
+
+  const handleAddPdfLink = () => {
+    if (!pdfUrl.trim()) {
+      toast.error('Please enter a valid PDF URL');
+      return;
+    }
+
+    if (!pdfUrl.includes('http')) {
+      toast.error('Please enter a valid URL starting with http:// or https://');
+      return;
+    }
+
+    // Create a mock file object for the PDF link
+    const mockFile = new File([''], pdfUrl.split('/').pop() || 'document.pdf', {
+      type: 'application/pdf'
+    });
+    
+    if (onFileUpload) {
+      onFileUpload([mockFile], 'other');
+    }
+    
+    setPdfUrl('');
+    toast.success('PDF link added successfully');
   };
 
   const getFileTypeStats = () => {
@@ -51,139 +82,196 @@ export function AttachmentsSection({
   const stats = getFileTypeStats();
 
   return (
-    <Card className="shadow-md border bg-white">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center justify-between text-base">
-          <div className="flex items-center gap-2">
-            <Paperclip className="w-4 h-4 text-purple-600" />
-            <span className="text-gray-900 font-medium">Attachments</span>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs">
-              {stats.total} files
-            </Badge>
-            {canEdit && (
-              <Button
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                className="bg-purple-600 hover:bg-purple-700 text-white h-7 px-2 text-xs"
-              >
-                <Plus className="w-3 h-3 mr-1" />
-                Add
-              </Button>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
+        <CollapsibleTrigger asChild>
+          <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors rounded-t-lg">
+            <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Paperclip className="w-4 h-4 text-purple-600" />
+                </div>
+                Attachments
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <Badge variant="outline" className="text-sm bg-gray-50 text-gray-700 border-gray-300">
+                  {stats.total} files
+                </Badge>
+                {isOpen ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
+              </div>
+            </CardTitle>
+          </CardHeader>
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent>
+          <CardContent className="p-6 pt-0">
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              onChange={handleFileSelect}
+              className="hidden"
+              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.gif,.bmp,.webp"
+            />
+
+            {/* File Statistics */}
+            {stats.total > 0 && (
+              <div className="grid grid-cols-3 gap-3 mb-6">
+                <div className="bg-blue-50 rounded-lg p-3 text-center border border-blue-200">
+                  <FileText className="w-5 h-5 text-blue-600 mx-auto mb-2" />
+                  <div className="text-lg font-semibold text-blue-900">{stats.documents}</div>
+                  <div className="text-xs text-blue-700">Documents</div>
+                </div>
+                <div className="bg-green-50 rounded-lg p-3 text-center border border-green-200">
+                  <Image className="w-5 h-5 text-green-600 mx-auto mb-2" />
+                  <div className="text-lg font-semibold text-green-900">{stats.images}</div>
+                  <div className="text-xs text-green-700">Images</div>
+                </div>
+                <div className="bg-orange-50 rounded-lg p-3 text-center border border-orange-200">
+                  <File className="w-5 h-5 text-orange-600 mx-auto mb-2" />
+                  <div className="text-lg font-semibold text-orange-900">{stats.other}</div>
+                  <div className="text-xs text-orange-700">Other</div>
+                </div>
+              </div>
             )}
-          </div>
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent className="pt-0">
-        {/* Hidden file input */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          onChange={handleFileSelect}
-          className="hidden"
-          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.gif,.bmp,.webp"
-        />
 
-        {/* File Statistics - Compact */}
-        {stats.total > 0 && (
-          <div className="grid grid-cols-3 gap-2 mb-4">
-            <div className="bg-blue-50 rounded p-2 text-center border">
-              <FileText className="w-4 h-4 text-blue-600 mx-auto mb-1" />
-              <div className="text-sm font-semibold text-blue-900">{stats.documents}</div>
-              <div className="text-xs text-blue-700">Docs</div>
-            </div>
-            <div className="bg-green-50 rounded p-2 text-center border">
-              <Image className="w-4 h-4 text-green-600 mx-auto mb-1" />
-              <div className="text-sm font-semibold text-green-900">{stats.images}</div>
-              <div className="text-xs text-green-700">Images</div>
-            </div>
-            <div className="bg-orange-50 rounded p-2 text-center border">
-              <File className="w-4 h-4 text-orange-600 mx-auto mb-1" />
-              <div className="text-sm font-semibold text-orange-900">{stats.other}</div>
-              <div className="text-xs text-orange-700">Other</div>
-            </div>
-          </div>
-        )}
-
-        {/* PDF Link Input - Compact */}
-        <div className="mb-4">
-          <PdfLinkInput onFileUpload={onFileUpload} canEdit={canEdit} />
-        </div>
-
-        {/* Files List */}
-        <div className="mb-4">
-          {files.length === 0 ? (
-            <div className="text-center py-6 bg-gray-50 rounded border-2 border-dashed border-gray-300">
-              <FolderOpen className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-              <h4 className="text-sm font-medium text-gray-900 mb-1">No files attached</h4>
-              <p className="text-xs text-gray-500 mb-3">
-                Upload documents or add PDF links
-              </p>
-              {canEdit && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="h-7 px-3 text-xs"
-                >
-                  <Upload className="w-3 h-3 mr-1" />
+            {/* Upload and PDF Link Panels */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              {/* Upload Files Panel */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium text-gray-900 flex items-center gap-2">
+                  <Upload className="w-4 h-4 text-gray-600" />
                   Upload Files
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-medium text-gray-900">Files ({files.length})</h4>
-                {files.length > 1 && (
+                </h3>
+                
+                <div 
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
+                  onClick={() => canEdit && fileInputRef.current?.click()}
+                >
+                  <Upload className="w-8 h-8 text-gray-400 mx-auto mb-3" />
+                  <div className="text-sm text-gray-600 mb-2">
+                    <span className="font-medium text-blue-600">Click to upload</span> or drag and drop
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    PDF, JPG, PNG, DOC (max 10MB each)
+                  </div>
+                </div>
+
+                {canEdit && (
                   <Button
-                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
                     variant="outline"
-                    className="h-6 px-2 text-xs"
-                    onClick={() => console.log('Download all files')}
+                    className="w-full border-blue-300 text-blue-700 hover:bg-blue-50"
                   >
-                    <Download className="w-3 h-3 mr-1" />
-                    All
+                    <Plus className="w-4 h-4 mr-2" />
+                    Select Files
                   </Button>
                 )}
               </div>
-              <FilesList files={files} onRemoveFile={onRemoveFile} canEdit={canEdit} />
-            </div>
-          )}
-        </div>
 
-        {/* Upload Instructions - Compact */}
-        <UploadInstructions canEdit={canEdit} />
-
-        {/* Quick Actions - Compact */}
-        {canEdit && files.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-gray-200">
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => fileInputRef.current?.click()}
-                className="h-7 px-2 text-xs flex-1"
-              >
-                <Upload className="w-3 h-3 mr-1" />
-                Upload More
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-7 px-2 text-xs"
-                onClick={() => console.log('Scan document')}
-              >
-                <Eye className="w-3 h-3" />
-              </Button>
+              {/* Add PDF Link Panel */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium text-gray-900 flex items-center gap-2">
+                  <Link className="w-4 h-4 text-gray-600" />
+                  Add PDF Link
+                </h3>
+                
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="pdfUrl" className="text-sm text-gray-700">PDF URL</Label>
+                    <Input
+                      id="pdfUrl"
+                      type="url"
+                      value={pdfUrl}
+                      onChange={(e) => setPdfUrl(e.target.value)}
+                      placeholder="https://example.com/document.pdf"
+                      className="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      disabled={!canEdit}
+                    />
+                  </div>
+                  
+                  {canEdit && (
+                    <Button
+                      onClick={handleAddPdfLink}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white"
+                      disabled={!pdfUrl.trim()}
+                    >
+                      <Link className="w-4 h-4 mr-2" />
+                      Add PDF Link
+                    </Button>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+
+            {/* Files List */}
+            <div className="space-y-4">
+              {files.length === 0 ? (
+                <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                  <FolderOpen className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                  <h4 className="text-sm font-medium text-gray-900 mb-2">No files attached</h4>
+                  <p className="text-sm text-gray-500 mb-4">
+                    Upload documents or add PDF links to get started
+                  </p>
+                  {canEdit && (
+                    <Button
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload Your First File
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-medium text-gray-900">Attached Files ({files.length})</h4>
+                    {files.length > 1 && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs border-gray-300 text-gray-700 hover:bg-gray-50"
+                        onClick={() => console.log('Download all files')}
+                      >
+                        <Download className="w-3 h-3 mr-1" />
+                        Download All
+                      </Button>
+                    )}
+                  </div>
+                  <FilesList files={files} onRemoveFile={onRemoveFile} canEdit={canEdit} />
+                </div>
+              )}
+            </div>
+
+            {/* Quick Actions */}
+            {canEdit && files.length > 0 && (
+              <div className="mt-6 pt-4 border-t border-gray-100">
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex-1 border-blue-300 text-blue-700 hover:bg-blue-50"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload More
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                    onClick={() => console.log('Preview files')}
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
   );
 }

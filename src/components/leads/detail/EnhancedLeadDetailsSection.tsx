@@ -54,7 +54,6 @@ export function EnhancedLeadDetailsSection({ lead, onFieldUpdate, canEdit = true
       return;
     }
 
-    // Update the lead with new details
     Object.entries(formData).forEach(([key, value]) => {
       onFieldUpdate(key as keyof TaxLead, value);
     });
@@ -86,7 +85,7 @@ export function EnhancedLeadDetailsSection({ lead, onFieldUpdate, canEdit = true
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'HOT': return 'bg-red-100 text-red-800 border-red-200';
-      case 'WARM': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'WARM': return 'bg-orange-100 text-orange-800 border-orange-200';
       case 'COLD': return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'PASS': return 'bg-gray-100 text-gray-800 border-gray-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -102,31 +101,33 @@ export function EnhancedLeadDetailsSection({ lead, onFieldUpdate, canEdit = true
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+      <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
         <CollapsibleTrigger asChild>
-          <CardHeader className="bg-gradient-to-r from-green-50 to-green-100 rounded-t-lg cursor-pointer hover:from-green-100 hover:to-green-150 transition-colors">
-            <CardTitle className="flex items-center justify-between text-xl">
+          <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors rounded-t-lg">
+            <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
               <div className="flex items-center gap-3">
-                <FileText className="w-6 h-6 text-green-600" />
+                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                  <FileText className="w-4 h-4 text-green-600" />
+                </div>
                 Lead Details
               </div>
-              {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+              {isOpen ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
             </CardTitle>
           </CardHeader>
         </CollapsibleTrigger>
         
         <CollapsibleContent>
-          <CardContent className="p-6 space-y-6">
+          <CardContent className="p-6 pt-0">
             {!canEdit && (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-                <p className="text-amber-700 text-sm">You don't have permission to edit lead details.</p>
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6 text-amber-700 text-sm">
+                You don't have permission to edit lead details.
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Owner Name */}
               <div className="space-y-2">
-                <Label htmlFor="ownerName">Owner Name *</Label>
+                <Label htmlFor="ownerName" className="text-sm font-medium text-gray-700">Owner Name *</Label>
                 {isEditing ? (
                   <div>
                     <Input
@@ -134,56 +135,58 @@ export function EnhancedLeadDetailsSection({ lead, onFieldUpdate, canEdit = true
                       value={formData.ownerName}
                       onChange={(e) => handleInputChange('ownerName', e.target.value)}
                       placeholder="Enter owner name"
-                      className={errors.ownerName ? 'border-red-500' : ''}
+                      className={`w-full ${errors.ownerName ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'}`}
                     />
                     {errors.ownerName && (
                       <p className="text-red-500 text-xs mt-1">{errors.ownerName}</p>
                     )}
                   </div>
                 ) : (
-                  <p className="text-gray-900 font-medium p-2 bg-gray-50 rounded border">
+                  <div className="w-full p-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900">
                     {formData.ownerName || 'Not provided'}
-                  </p>
+                  </div>
                 )}
               </div>
 
               {/* Tax ID */}
               <div className="space-y-2">
-                <Label htmlFor="taxId">Tax ID</Label>
+                <Label htmlFor="taxId" className="text-sm font-medium text-gray-700">Tax ID</Label>
                 {isEditing ? (
                   <Input
                     id="taxId"
                     value={formData.taxId}
                     onChange={(e) => handleInputChange('taxId', e.target.value)}
                     placeholder="Enter tax ID"
+                    className="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                   />
                 ) : (
-                  <p className="text-gray-900 font-medium p-2 bg-gray-50 rounded border">
+                  <div className="w-full p-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900">
                     {formData.taxId || 'Not provided'}
-                  </p>
+                  </div>
                 )}
               </div>
 
               {/* Lawsuit Number */}
               <div className="space-y-2">
-                <Label htmlFor="taxLawsuitNumber">Lawsuit Number</Label>
+                <Label htmlFor="taxLawsuitNumber" className="text-sm font-medium text-gray-700">Lawsuit Number</Label>
                 {isEditing ? (
                   <Input
                     id="taxLawsuitNumber"
                     value={formData.taxLawsuitNumber}
                     onChange={(e) => handleInputChange('taxLawsuitNumber', e.target.value)}
                     placeholder="Enter lawsuit number"
+                    className="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                   />
                 ) : (
-                  <p className="text-gray-900 font-medium p-2 bg-gray-50 rounded border">
+                  <div className="w-full p-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900">
                     {formData.taxLawsuitNumber || 'Not provided'}
-                  </p>
+                  </div>
                 )}
               </div>
 
               {/* Phone Number */}
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
+                <Label htmlFor="phone" className="text-sm font-medium text-gray-700">Phone Number</Label>
                 {isEditing ? (
                   <div>
                     <Input
@@ -192,25 +195,25 @@ export function EnhancedLeadDetailsSection({ lead, onFieldUpdate, canEdit = true
                       value={formData.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
                       placeholder="Enter phone number"
-                      className={errors.phone ? 'border-red-500' : ''}
+                      className={`w-full ${errors.phone ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'}`}
                     />
                     {errors.phone && (
                       <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
                     )}
                   </div>
                 ) : (
-                  <p className="text-gray-900 font-medium p-2 bg-gray-50 rounded border">
+                  <div className="w-full p-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900">
                     {formData.phone || 'Not provided'}
-                  </p>
+                  </div>
                 )}
               </div>
 
               {/* Status */}
               <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
+                <Label htmlFor="status" className="text-sm font-medium text-gray-700">Status</Label>
                 {isEditing ? (
                   <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -221,7 +224,7 @@ export function EnhancedLeadDetailsSection({ lead, onFieldUpdate, canEdit = true
                     </SelectContent>
                   </Select>
                 ) : (
-                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(formData.status)}`}>
+                  <span className={`inline-flex px-3 py-2 text-sm font-medium rounded-md border ${getStatusColor(formData.status)}`}>
                     {formData.status === 'HOT' && '🔥'} 
                     {formData.status === 'WARM' && '🌤️'} 
                     {formData.status === 'COLD' && '❄️'} 
@@ -233,9 +236,9 @@ export function EnhancedLeadDetailsSection({ lead, onFieldUpdate, canEdit = true
             </div>
 
             {/* Property Address Section */}
-            <div className="space-y-4 border-t pt-4">
+            <div className="mt-6 space-y-4 pt-6 border-t border-gray-100">
               <div className="space-y-2">
-                <Label htmlFor="propertyAddress" className="flex items-center gap-2">
+                <Label htmlFor="propertyAddress" className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-gray-500" />
                   Property Address *
                 </Label>
@@ -246,16 +249,16 @@ export function EnhancedLeadDetailsSection({ lead, onFieldUpdate, canEdit = true
                       value={formData.propertyAddress}
                       onChange={(e) => handleInputChange('propertyAddress', e.target.value)}
                       placeholder="Enter property address"
-                      className={errors.propertyAddress ? 'border-red-500' : ''}
+                      className={`w-full ${errors.propertyAddress ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'}`}
                     />
                     {errors.propertyAddress && (
                       <p className="text-red-500 text-xs mt-1">{errors.propertyAddress}</p>
                     )}
                   </div>
                 ) : (
-                  <p className="text-gray-900 font-medium p-2 bg-gray-50 rounded border">
+                  <div className="w-full p-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900">
                     {formData.propertyAddress || 'Not provided'}
-                  </p>
+                  </div>
                 )}
               </div>
 
@@ -263,7 +266,7 @@ export function EnhancedLeadDetailsSection({ lead, onFieldUpdate, canEdit = true
               {formData.propertyAddress && (
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200 p-6">
                   <div className="text-center">
-                    <div className="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <div className="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center mx-auto mb-4">
                       <MapPin className="w-8 h-8 text-blue-600" />
                     </div>
                     <h3 className="text-lg font-semibold text-blue-800 mb-2">Property Location</h3>
@@ -282,20 +285,31 @@ export function EnhancedLeadDetailsSection({ lead, onFieldUpdate, canEdit = true
 
             {/* Action Buttons */}
             {canEdit && (
-              <div className="flex justify-end gap-3 pt-4 border-t">
+              <div className="flex justify-end gap-3 pt-6 mt-6 border-t border-gray-100">
                 {isEditing ? (
                   <>
-                    <Button variant="outline" onClick={handleCancel} className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={handleCancel} 
+                      className="flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-50"
+                    >
                       <X className="w-4 h-4" />
                       Cancel
                     </Button>
-                    <Button onClick={handleSave} className="flex items-center gap-2 bg-green-600 hover:bg-green-700">
+                    <Button 
+                      onClick={handleSave} 
+                      className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+                    >
                       <Save className="w-4 h-4" />
                       Save Changes
                     </Button>
                   </>
                 ) : (
-                  <Button onClick={() => setIsEditing(true)} variant="outline" className="flex items-center gap-2">
+                  <Button 
+                    onClick={() => setIsEditing(true)} 
+                    variant="outline" 
+                    className="flex items-center gap-2 border-green-300 text-green-700 hover:bg-green-50"
+                  >
                     <FileText className="w-4 h-4" />
                     Edit Lead Details
                   </Button>

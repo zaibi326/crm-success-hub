@@ -9,8 +9,12 @@ import {
   Snowflake, 
   X,
   TrendingUp,
-  Activity
+  Activity,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useState } from 'react';
 
 interface LeadStatusButtonsProps {
   currentStatus: 'HOT' | 'WARM' | 'COLD' | 'PASS';
@@ -19,6 +23,8 @@ interface LeadStatusButtonsProps {
 }
 
 export function LeadStatusButtons({ currentStatus, onStatusChange, disabled = false }: LeadStatusButtonsProps) {
+  const [isOpen, setIsOpen] = useState(true);
+
   const statusOptions = [
     {
       value: 'HOT' as const,
@@ -32,8 +38,8 @@ export function LeadStatusButtons({ currentStatus, onStatusChange, disabled = fa
       value: 'WARM' as const,
       label: 'Warm Lead',
       icon: Sun,
-      color: 'bg-yellow-500 hover:bg-yellow-600 text-white',
-      badgeColor: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      color: 'bg-orange-500 hover:bg-orange-600 text-white',
+      badgeColor: 'bg-orange-100 text-orange-800 border-orange-200',
       description: 'Good potential, follow up soon'
     },
     {
@@ -57,70 +63,91 @@ export function LeadStatusButtons({ currentStatus, onStatusChange, disabled = fa
   const currentStatusInfo = statusOptions.find(option => option.value === currentStatus);
 
   return (
-    <Card className="shadow-md border bg-white">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center justify-between text-base">
-          <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4 text-blue-600" />
-            <span className="text-gray-900 font-medium">Lead Status</span>
-          </div>
-          
-          {currentStatusInfo && (
-            <Badge className={`${currentStatusInfo.badgeColor} px-2 py-1 text-xs font-medium`}>
-              <currentStatusInfo.icon className="w-3 h-3 mr-1" />
-              {currentStatusInfo.label}
-            </Badge>
-          )}
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent className="pt-0">
-        {/* Status Selection Grid */}
-        <div className="grid grid-cols-2 gap-2">
-          {statusOptions.map((option) => {
-            const IconComponent = option.icon;
-            const isActive = currentStatus === option.value;
-            
-            return (
-              <Button
-                key={option.value}
-                onClick={() => onStatusChange(option.value)}
-                disabled={disabled}
-                variant={isActive ? "default" : "outline"}
-                size="sm"
-                className={`
-                  h-auto p-3 justify-start text-left transition-all duration-200
-                  ${isActive 
-                    ? `${option.color} shadow-md` 
-                    : 'hover:shadow-sm hover:border-blue-300 border'
-                  }
-                `}
-              >
-                <div className="flex items-center gap-2 w-full">
-                  <IconComponent className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-600'}`} />
-                  <div className="flex-1 min-w-0">
-                    <div className={`text-xs font-medium ${isActive ? 'text-white' : 'text-gray-900'}`}>
-                      {option.label}
-                    </div>
-                  </div>
-                  {isActive && (
-                    <TrendingUp className="w-3 h-3 text-white" />
-                  )}
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
+        <CollapsibleTrigger asChild>
+          <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors rounded-t-lg">
+            <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Activity className="w-4 h-4 text-purple-600" />
                 </div>
-              </Button>
-            );
-          })}
-        </div>
+                Lead Status
+              </div>
+              <div className="flex items-center gap-3">
+                {currentStatusInfo && (
+                  <Badge className={`${currentStatusInfo.badgeColor} px-3 py-1 text-sm font-medium`}>
+                    <currentStatusInfo.icon className="w-4 h-4 mr-2" />
+                    {currentStatusInfo.label}
+                  </Badge>
+                )}
+                {isOpen ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
+              </div>
+            </CardTitle>
+          </CardHeader>
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent>
+          <CardContent className="p-6 pt-0">
+            {/* Status Selection Grid */}
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              {statusOptions.map((option) => {
+                const IconComponent = option.icon;
+                const isActive = currentStatus === option.value;
+                
+                return (
+                  <Button
+                    key={option.value}
+                    onClick={() => onStatusChange(option.value)}
+                    disabled={disabled}
+                    variant={isActive ? "default" : "outline"}
+                    size="lg"
+                    className={`
+                      h-auto p-4 justify-start text-left transition-all duration-200
+                      ${isActive 
+                        ? `${option.color} shadow-md transform scale-105` 
+                        : 'hover:shadow-sm hover:border-blue-300 border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                      }
+                    `}
+                  >
+                    <div className="flex items-center gap-3 w-full">
+                      <IconComponent className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-600'}`} />
+                      <div className="flex-1 min-w-0">
+                        <div className={`text-sm font-medium ${isActive ? 'text-white' : 'text-gray-900'}`}>
+                          {option.label}
+                        </div>
+                        <div className={`text-xs ${isActive ? 'text-white/80' : 'text-gray-500'} mt-1`}>
+                          {option.description}
+                        </div>
+                      </div>
+                      {isActive && (
+                        <TrendingUp className="w-4 h-4 text-white" />
+                      )}
+                    </div>
+                  </Button>
+                );
+              })}
+            </div>
 
-        {/* Current Status Info */}
-        {currentStatusInfo && (
-          <div className="mt-3 p-2 bg-blue-50 rounded border-l-2 border-blue-500">
-            <p className="text-xs text-blue-700">
-              {currentStatusInfo.description}
-            </p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+            {/* Priority Message */}
+            {currentStatusInfo && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <currentStatusInfo.icon className="w-5 h-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <h4 className="text-sm font-medium text-blue-900 mb-1">
+                      Current Status: {currentStatusInfo.label}
+                    </h4>
+                    <p className="text-sm text-blue-700">
+                      {currentStatusInfo.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
   );
 }
