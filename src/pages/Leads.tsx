@@ -9,8 +9,14 @@ const Leads = () => {
     <div className="min-h-screen bg-white">
       <SidebarProvider defaultOpen={true}>
         <div className="min-h-screen flex w-full">
-          <AppSidebar />
-          <EnhancedLeadsContent />
+          {/* Conditionally render sidebar - hide it for leads page */}
+          <div className="hidden">
+            <AppSidebar />
+          </div>
+          {/* Full width content for leads */}
+          <div className="flex-1 w-full">
+            <EnhancedLeadsContent />
+          </div>
         </div>
       </SidebarProvider>
     </div>

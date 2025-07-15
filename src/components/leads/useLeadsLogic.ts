@@ -15,6 +15,7 @@ export function useLeadsLogic() {
   const [filters, setFilters] = useState<FilterCondition[]>([]);
   const [showFilterSidebar, setShowFilterSidebar] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [leads, setLeads] = useState<TaxLead[]>(mockTaxLeads);
 
   // Load filters from session storage on mount
   useEffect(() => {
@@ -53,7 +54,7 @@ export function useLeadsLogic() {
   ];
 
   const filteredLeads = useMemo(() => {
-    let result = mockTaxLeads;
+    let result = leads;
 
     // Apply filters
     filters.forEach(filter => {
@@ -87,7 +88,7 @@ export function useLeadsLogic() {
     }
 
     return result;
-  }, [filters, filterStatus]);
+  }, [leads, filters, filterStatus]);
 
   const getStatusBadge = (status: string) => {
     const statusColors = {
@@ -104,18 +105,23 @@ export function useLeadsLogic() {
   };
 
   const handleAddLead = (lead: TaxLead) => {
-    // Implementation for adding lead
-    console.log('Adding lead:', lead);
+    const newLead = { ...lead, id: Date.now() };
+    setLeads(prevLeads => [...prevLeads, newLead]);
+    console.log('Adding lead:', newLead);
   };
 
   const handleLeadUpdate = (updatedLead: TaxLead) => {
-    // Implementation for updating lead
+    setLeads(prevLeads => 
+      prevLeads.map(lead => 
+        lead.id === updatedLead.id ? updatedLead : lead
+      )
+    );
     console.log('Updating lead:', updatedLead);
   };
 
-  const handleBulkLeadsUpdate = (leads: TaxLead[]) => {
-    // Implementation for bulk update
-    console.log('Bulk updating leads:', leads);
+  const handleBulkLeadsUpdate = (updatedLeads: TaxLead[]) => {
+    setLeads(updatedLeads);
+    console.log('Bulk updating leads:', updatedLeads);
   };
 
   const handleFilterToggle = () => {
@@ -139,7 +145,7 @@ export function useLeadsLogic() {
     filters,
     availableFields,
     filteredLeads,
-    mockLeads: mockTaxLeads,
+    mockLeads: leads,
     showFilterSidebar,
     sidebarCollapsed,
     setCurrentView,

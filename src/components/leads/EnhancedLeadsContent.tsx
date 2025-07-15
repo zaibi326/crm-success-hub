@@ -56,7 +56,7 @@ export function EnhancedLeadsContent() {
   // If a lead is selected, show the enhanced detail view
   if (selectedLead) {
     return (
-      <div className="flex-1 overflow-auto bg-white">
+      <div className="w-full min-h-screen overflow-auto bg-white">
         <div className="min-h-screen bg-gradient-to-br from-agile-gray-50 to-white">
           {/* Header with back button */}
           <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-agile-gray-200 p-6">
@@ -95,7 +95,7 @@ export function EnhancedLeadsContent() {
   return (
     <>
       <div 
-        className={`flex-1 overflow-auto bg-white transition-all duration-300 ${
+        className={`w-full overflow-auto bg-white transition-all duration-300 ${
           showFilterSidebar ? 'mr-80' : ''
         }`}
       >

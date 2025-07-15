@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowUpDown, Phone, Mail, MapPin, DollarSign, Eye, Trash2 } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
+import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,6 +35,8 @@ export function LeadTableView({
 }: LeadTableViewProps) {
   const [selectedLeads, setSelectedLeads] = useState<number[]>([]);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [leadToDelete, setLeadToDelete] = useState<TaxLead | null>(null);
+  const { toast } = useToast();
 
   const handleSelectAll = () => {
     if (selectedLeads.length === leads.length) {
@@ -51,13 +54,47 @@ export function LeadTableView({
     );
   };
 
-  const handleDeleteSelected = () => {
-    if (onLeadsUpdate) {
-      const updatedLeads = leads.filter(lead => !selectedLeads.includes(lead.id));
-      onLeadsUpdate(updatedLeads);
+  const handleDeleteSelected = async () => {
+    try {
+      if (onLeadsUpdate) {
+        const updatedLeads = leads.filter(lead => !selectedLeads.includes(lead.id));
+        onLeadsUpdate(updatedLeads);
+        
+        toast({
+          title: "Success",
+          description: `${selectedLeads.length} lead${selectedLeads.length > 1 ? 's' : ''} successfully deleted.`,
+        });
+      }
+      setSelectedLeads([]);
+      setShowDeleteDialog(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete leads. Please try again.",
+        variant: "destructive",
+      });
     }
-    setSelectedLeads([]);
-    setShowDeleteDialog(false);
+  };
+
+  const handleDeleteSingleLead = async (lead: TaxLead) => {
+    try {
+      if (onLeadsUpdate) {
+        const updatedLeads = leads.filter(l => l.id !== lead.id);
+        onLeadsUpdate(updatedLeads);
+        
+        toast({
+          title: "Success",
+          description: "Lead successfully deleted.",
+        });
+      }
+      setLeadToDelete(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete lead. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -72,7 +109,7 @@ export function LeadTableView({
 
   return (
     <div className="bg-podio-background">
-      {/* Podio-style table header with selection count */}
+      {/* Selection header */}
       {selectedLeads.length > 0 && (
         <div className="bg-podio-primary/10 border-b border-podio-border px-4 py-3">
           <div className="flex items-center justify-between">
@@ -207,14 +244,24 @@ export function LeadTableView({
                   </Badge>
                 </TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => onLeadSelect(lead)}
-                    className="h-8 px-2 text-podio-primary hover:bg-podio-primary/10"
-                  >
-                    <Eye className="w-4 h-4" />
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => onLeadSelect(lead)}
+                      className="h-8 px-2 text-podio-primary hover:bg-podio-primary/10"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setLeadToDelete(lead)}
+                      className="h-8 px-2 text-red-600 hover:bg-red-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -231,13 +278,13 @@ export function LeadTableView({
         </div>
       )}
 
-      {/* Delete Confirmation Dialog */}
+      {/* Bulk Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Leads Deletion</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {selectedLeads.length} selected lead{selectedLeads.length > 1 ? 's' : ''}? 
+              Are you sure you want to permanently delete {selectedLeads.length} selected lead{selectedLeads.length > 1 ? 's' : ''}? 
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -245,6 +292,28 @@ export function LeadTableView({
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDeleteSelected}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Single Lead Delete Confirmation Dialog */}
+      <AlertDialog open={!!leadToDelete} onOpenChange={() => setLeadToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Lead Deletion</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to permanently delete the lead for "{leadToDelete?.ownerName}"? 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => leadToDelete && handleDeleteSingleLead(leadToDelete)}
               className="bg-red-600 hover:bg-red-700"
             >
               Delete
