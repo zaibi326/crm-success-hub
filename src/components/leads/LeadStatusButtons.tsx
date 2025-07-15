@@ -89,8 +89,8 @@ export function LeadStatusButtons({ currentStatus, onStatusChange, disabled = fa
         
         <CollapsibleContent>
           <CardContent className="p-6 pt-0">
-            {/* Status Selection Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+            {/* Status Selection Grid - 2x2 on desktop, stacked on mobile */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
               {statusOptions.map((option) => {
                 const IconComponent = option.icon;
                 const isActive = currentStatus === option.value;
@@ -101,35 +101,36 @@ export function LeadStatusButtons({ currentStatus, onStatusChange, disabled = fa
                     onClick={() => onStatusChange(option.value)}
                     disabled={disabled}
                     variant={isActive ? "default" : "outline"}
-                    size="lg"
                     className={`
-                      h-auto p-4 justify-start text-left transition-all duration-200 min-h-[80px]
+                      h-24 w-full p-4 flex flex-col items-center justify-center text-center
+                      transition-all duration-200 border-2
                       ${isActive 
-                        ? `${option.color} shadow-md transform scale-105` 
-                        : 'hover:shadow-sm hover:border-blue-300 border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                        ? `${option.color} shadow-lg border-transparent` 
+                        : 'hover:shadow-md hover:border-gray-300 border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
                       }
                     `}
                   >
-                    <div className="flex items-start gap-3 w-full">
-                      <IconComponent className={`w-5 h-5 mt-0.5 flex-shrink-0 ${isActive ? 'text-white' : 'text-gray-600'}`} />
-                      <div className="flex-1 min-w-0 text-left">
-                        <div className={`text-sm font-medium leading-tight mb-1 ${isActive ? 'text-white' : 'text-gray-900'}`}>
+                    <div className="flex flex-col items-center justify-center space-y-2 w-full">
+                      <div className="flex items-center gap-2">
+                        <IconComponent className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-600'}`} />
+                        <span className={`text-sm font-bold ${isActive ? 'text-white' : 'text-gray-900'}`}>
                           {option.label}
-                        </div>
-                        <div className={`text-xs leading-relaxed break-words ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
-                          {option.description}
-                        </div>
+                        </span>
+                        {isActive && (
+                          <TrendingUp className="w-4 h-4 text-white" />
+                        )}
                       </div>
-                      {isActive && (
-                        <TrendingUp className="w-4 h-4 text-white mt-0.5 flex-shrink-0" />
-                      )}
+                      
+                      <div className={`text-xs leading-relaxed text-center px-1 ${isActive ? 'text-white/90' : 'text-gray-500'}`}>
+                        {option.description}
+                      </div>
                     </div>
                   </Button>
                 );
               })}
             </div>
 
-            {/* Priority Message */}
+            {/* Current Status Summary */}
             {currentStatusInfo && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-start gap-3">
