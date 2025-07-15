@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { SidebarInset } from '@/components/ui/sidebar';
 import { TaxLeadDetailsForm } from './TaxLeadDetailsForm';
 import { TemplateModificationDialog } from './TemplateModificationDialog';
 import { LeadsHeader } from './LeadsHeader';
@@ -57,7 +56,7 @@ export function EnhancedLeadsContent() {
   // If a lead is selected, show the enhanced detail view
   if (selectedLead) {
     return (
-      <SidebarInset className="flex-1 overflow-auto bg-white">
+      <div className="flex-1 overflow-auto bg-white">
         <div className="min-h-screen bg-gradient-to-br from-agile-gray-50 to-white">
           {/* Header with back button */}
           <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-agile-gray-200 p-6">
@@ -89,16 +88,16 @@ export function EnhancedLeadsContent() {
             />
           </div>
         </div>
-      </SidebarInset>
+      </div>
     );
   }
 
   return (
     <>
-      <SidebarInset 
+      <div 
         className={`flex-1 overflow-auto bg-white transition-all duration-300 ${
           showFilterSidebar ? 'mr-80' : ''
-        } ${sidebarCollapsed ? 'ml-0' : ''}`}
+        }`}
       >
         <LeadsHeader
           onAddLead={handleAddLead}
@@ -162,7 +161,7 @@ export function EnhancedLeadsContent() {
             }}
           />
         )}
-      </SidebarInset>
+      </div>
 
       {/* Filter Sidebar */}
       <FilterSidebar
