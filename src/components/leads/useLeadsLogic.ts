@@ -1,7 +1,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { TaxLead } from '@/types/taxLead';
-import { mockTaxLeads } from '@/data/mockTaxLeads';
+import { useLeadsData } from '@/hooks/useLeadsData';
 import { FilterCondition } from './filters/types';
 
 const FILTERS_STORAGE_KEY = 'seller-leads-filters';
@@ -15,7 +15,9 @@ export function useLeadsLogic() {
   const [filters, setFilters] = useState<FilterCondition[]>([]);
   const [showFilterSidebar, setShowFilterSidebar] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [leads, setLeads] = useState<TaxLead[]>(mockTaxLeads);
+
+  // Use the persistent data hook instead of local state
+  const { mockLeads, setMockLeads, handleAddLead: addLead, handleLeadUpdate: updateLead } = useLeadsData();
 
   // Load filters from session storage on mount
   useEffect(() => {
@@ -54,7 +56,7 @@ export function useLeadsLogic() {
   ];
 
   const filteredLeads = useMemo(() => {
-    let result = leads;
+    let result = mockLeads;
 
     // Apply filters
     filters.forEach(filter => {
@@ -88,7 +90,7 @@ export function useLeadsLogic() {
     }
 
     return result;
-  }, [leads, filters, filterStatus]);
+  }, [mockLeads, filters, filterStatus]);
 
   const getStatusBadge = (status: string) => {
     const statusColors = {
@@ -106,21 +108,17 @@ export function useLeadsLogic() {
 
   const handleAddLead = (lead: TaxLead) => {
     const newLead = { ...lead, id: Date.now() };
-    setLeads(prevLeads => [...prevLeads, newLead]);
+    addLead(newLead);
     console.log('Adding lead:', newLead);
   };
 
   const handleLeadUpdate = (updatedLead: TaxLead) => {
-    setLeads(prevLeads => 
-      prevLeads.map(lead => 
-        lead.id === updatedLead.id ? updatedLead : lead
-      )
-    );
+    updateLead(updatedLead);
     console.log('Updating lead:', updatedLead);
   };
 
   const handleBulkLeadsUpdate = (updatedLeads: TaxLead[]) => {
-    setLeads(updatedLeads);
+    setMockLeads(updatedLeads);
     console.log('Bulk updating leads:', updatedLeads);
   };
 
@@ -145,7 +143,7 @@ export function useLeadsLogic() {
     filters,
     availableFields,
     filteredLeads,
-    mockLeads: leads,
+    mockLeads,
     showFilterSidebar,
     sidebarCollapsed,
     setCurrentView,
