@@ -57,7 +57,8 @@ export function AttachmentsSection({
     }
 
     // Create a mock file object for the PDF link
-    const mockFile = new File([''], pdfUrl.split('/').pop() || 'document.pdf', {
+    const fileName = pdfUrl.split('/').pop() || 'document.pdf';
+    const mockFile = new File([], fileName, {
       type: 'application/pdf'
     });
     
@@ -85,7 +86,7 @@ export function AttachmentsSection({
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
         <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors rounded-t-lg">
+          <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors rounded-t-lg pb-4">
             <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -138,7 +139,7 @@ export function AttachmentsSection({
             )}
 
             {/* Upload and PDF Link Panels */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
               {/* Upload Files Panel */}
               <div className="space-y-4">
                 <h3 className="text-sm font-medium text-gray-900 flex items-center gap-2">
@@ -147,11 +148,11 @@ export function AttachmentsSection({
                 </h3>
                 
                 <div 
-                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors cursor-pointer"
                   onClick={() => canEdit && fileInputRef.current?.click()}
                 >
-                  <Upload className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-                  <div className="text-sm text-gray-600 mb-2">
+                  <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                  <div className="text-sm text-gray-600 mb-1">
                     <span className="font-medium text-blue-600">Click to upload</span> or drag and drop
                   </div>
                   <div className="text-xs text-gray-500">
@@ -164,6 +165,7 @@ export function AttachmentsSection({
                     onClick={() => fileInputRef.current?.click()}
                     variant="outline"
                     className="w-full border-blue-300 text-blue-700 hover:bg-blue-50"
+                    size="sm"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Select Files
@@ -197,6 +199,7 @@ export function AttachmentsSection({
                       onClick={handleAddPdfLink}
                       className="w-full bg-green-600 hover:bg-green-700 text-white"
                       disabled={!pdfUrl.trim()}
+                      size="sm"
                     >
                       <Link className="w-4 h-4 mr-2" />
                       Add PDF Link
@@ -209,8 +212,8 @@ export function AttachmentsSection({
             {/* Files List */}
             <div className="space-y-4">
               {files.length === 0 ? (
-                <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                  <FolderOpen className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                <div className="text-center py-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                  <FolderOpen className="w-10 h-10 text-gray-400 mx-auto mb-3" />
                   <h4 className="text-sm font-medium text-gray-900 mb-2">No files attached</h4>
                   <p className="text-sm text-gray-500 mb-4">
                     Upload documents or add PDF links to get started
@@ -220,6 +223,7 @@ export function AttachmentsSection({
                       variant="outline"
                       onClick={() => fileInputRef.current?.click()}
                       className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                      size="sm"
                     >
                       <Upload className="w-4 h-4 mr-2" />
                       Upload Your First File
@@ -255,6 +259,7 @@ export function AttachmentsSection({
                     variant="outline"
                     onClick={() => fileInputRef.current?.click()}
                     className="flex-1 border-blue-300 text-blue-700 hover:bg-blue-50"
+                    size="sm"
                   >
                     <Upload className="w-4 h-4 mr-2" />
                     Upload More
@@ -263,6 +268,7 @@ export function AttachmentsSection({
                     variant="outline"
                     className="border-gray-300 text-gray-700 hover:bg-gray-50"
                     onClick={() => console.log('Preview files')}
+                    size="sm"
                   >
                     <Eye className="w-4 h-4" />
                   </Button>
