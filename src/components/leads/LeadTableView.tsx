@@ -1,22 +1,13 @@
 
 import React, { useState } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowUpDown, Phone, Mail, MapPin, DollarSign, Eye, Trash2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { LeadTableRow } from './LeadTableRow';
 import { TaxLead } from '@/types/taxLead';
-import { useToast } from '@/hooks/use-toast';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { Trash2, ArrowUpDown } from 'lucide-react';
 
 interface LeadTableViewProps {
   leads: TaxLead[];
@@ -36,291 +27,160 @@ export function LeadTableView({
   onDeleteMultipleLeads
 }: LeadTableViewProps) {
   const [selectedLeads, setSelectedLeads] = useState<number[]>([]);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [leadToDelete, setLeadToDelete] = useState<TaxLead | null>(null);
-  const { toast } = useToast();
 
-  const handleSelectAll = () => {
-    if (selectedLeads.length === leads.length) {
-      setSelectedLeads([]);
-    } else {
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
       setSelectedLeads(leads.map(lead => lead.id));
-    }
-  };
-
-  const handleSelectLead = (leadId: number) => {
-    setSelectedLeads(prev => 
-      prev.includes(leadId) 
-        ? prev.filter(id => id !== leadId)
-        : [...prev, leadId]
-    );
-  };
-
-  const handleDeleteSelected = async () => {
-    try {
-      if (onDeleteMultipleLeads) {
-        onDeleteMultipleLeads(selectedLeads);
-        
-        toast({
-          title: "Success",
-          description: `${selectedLeads.length} lead${selectedLeads.length > 1 ? 's' : ''} successfully deleted.`,
-        });
-      }
+    } else {
       setSelectedLeads([]);
-      setShowDeleteDialog(false);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete leads. Please try again.",
-        variant: "destructive",
-      });
     }
   };
 
-  const handleDeleteSingleLead = async (lead: TaxLead) => {
-    try {
-      if (onDeleteSingleLead) {
-        onDeleteSingleLead(lead.id);
-        
-        toast({
-          title: "Success",
-          description: "Lead successfully deleted.",
-        });
-      }
-      setLeadToDelete(null);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete lead. Please try again.",
-        variant: "destructive",
-      });
+  const handleSelectLead = (leadId: number, checked: boolean) => {
+    if (checked) {
+      setSelectedLeads(prev => [...prev, leadId]);
+    } else {
+      setSelectedLeads(prev => prev.filter(id => id !== leadId));
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'HOT': return 'text-red-600 bg-red-50';
-      case 'WARM': return 'text-yellow-600 bg-yellow-50';
-      case 'COLD': return 'text-blue-600 bg-blue-50';
-      case 'PASS': return 'text-gray-600 bg-gray-50';
-      default: return 'text-gray-600 bg-gray-50';
+  const handleDeleteSingle = (lead: TaxLead) => {
+    setLeadToDelete(lead);
+  };
+
+  const confirmDeleteSingle = () => {
+    if (leadToDelete && onDeleteSingleLead) {
+      onDeleteSingleLead(leadToDelete.id);
+    }
+    setLeadToDelete(null);
+  };
+
+  const handleDeleteMultiple = () => {
+    if (onDeleteMultipleLeads && selectedLeads.length > 0) {
+      onDeleteMultipleLeads(selectedLeads);
+      setSelectedLeads([]);
     }
   };
+
+  const isAllSelected = leads.length > 0 && selectedLeads.length === leads.length;
+  const isSomeSelected = selectedLeads.length > 0 && selectedLeads.length < leads.length;
 
   return (
-    <div className="bg-podio-background">
-      {/* Selection header */}
+    <div className="space-y-4">
+      {/* Bulk Actions */}
       {selectedLeads.length > 0 && (
-        <div className="bg-podio-primary/10 border-b border-podio-border px-4 py-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-podio-primary">
-              {selectedLeads.length} lead{selectedLeads.length > 1 ? 's' : ''} selected
-            </span>
-            <div className="flex gap-2">
-              <Button 
-                size="sm" 
-                variant="destructive"
-                onClick={() => setShowDeleteDialog(true)}
-                className="flex items-center gap-2"
-              >
-                <Trash2 className="w-4 h-4" />
+        <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <span className="text-sm font-medium text-blue-800">
+            {selectedLeads.length} lead{selectedLeads.length > 1 ? 's' : ''} selected
+          </span>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm">
+                <Trash2 className="w-4 h-4 mr-2" />
                 Delete Selected
               </Button>
-            </div>
-          </div>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to permanently delete {selectedLeads.length} lead{selectedLeads.length > 1 ? 's' : ''}? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteMultiple} className="bg-red-600 hover:bg-red-700">
+                  Delete Permanently
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       )}
 
-      <div className="overflow-x-auto">
+      {/* Table */}
+      <div className="rounded-md border">
         <Table>
           <TableHeader>
-            <TableRow className="border-b border-podio-border bg-podio-surface/50">
-              <TableHead className="w-12">
+            <TableRow>
+              <TableHead className="w-[50px]">
                 <Checkbox
-                  checked={selectedLeads.length === leads.length && leads.length > 0}
+                  checked={isAllSelected}
+                  ref={(el) => {
+                    if (el) el.indeterminate = isSomeSelected;
+                  }}
                   onCheckedChange={handleSelectAll}
                 />
               </TableHead>
-              <TableHead 
-                className="cursor-pointer hover:bg-podio-hover text-podio-text font-medium"
-                onClick={() => handleSort('ownerName')}
-              >
-                <div className="flex items-center gap-2">
-                  Seller Name
-                  <ArrowUpDown className="w-4 h-4" />
-                </div>
+              <TableHead>
+                <Button variant="ghost" onClick={() => handleSort('ownerName')} className="p-0 h-auto font-semibold">
+                  Owner Name
+                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
               </TableHead>
-              <TableHead 
-                className="cursor-pointer hover:bg-podio-hover text-podio-text font-medium"
-                onClick={() => handleSort('propertyAddress')}
-              >
-                <div className="flex items-center gap-2">
+              <TableHead>
+                <Button variant="ghost" onClick={() => handleSort('propertyAddress')} className="p-0 h-auto font-semibold">
                   Property Address
-                  <ArrowUpDown className="w-4 h-4" />
-                </div>
+                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
               </TableHead>
-              <TableHead className="text-podio-text font-medium">Contact</TableHead>
-              <TableHead 
-                className="cursor-pointer hover:bg-podio-hover text-podio-text font-medium"
-                onClick={() => handleSort('currentArrears')}
-              >
-                <div className="flex items-center gap-2">
-                  Arrears
-                  <ArrowUpDown className="w-4 h-4" />
-                </div>
-              </TableHead>
-              <TableHead 
-                className="cursor-pointer hover:bg-podio-hover text-podio-text font-medium"
-                onClick={() => handleSort('status')}
-              >
-                <div className="flex items-center gap-2">
+              <TableHead>
+                <Button variant="ghost" onClick={() => handleSort('status')} className="p-0 h-auto font-semibold">
                   Status
-                  <ArrowUpDown className="w-4 h-4" />
-                </div>
+                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
               </TableHead>
-              <TableHead className="text-podio-text font-medium">Actions</TableHead>
+              <TableHead>
+                <Button variant="ghost" onClick={() => handleSort('currentArrears')} className="p-0 h-auto font-semibold">
+                  Arrears
+                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+              </TableHead>
+              <TableHead>Contact</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {leads.map((lead, index) => (
-              <TableRow 
-                key={lead.id} 
-                className={`podio-table-row cursor-pointer ${index % 2 === 0 ? 'bg-white' : 'bg-podio-surface/30'}`}
-                onClick={() => onLeadSelect(lead)}
-              >
-                <TableCell onClick={(e) => e.stopPropagation()}>
-                  <Checkbox
-                    checked={selectedLeads.includes(lead.id)}
-                    onCheckedChange={() => handleSelectLead(lead.id)}
-                  />
-                </TableCell>
-                <TableCell className="font-medium text-podio-text">
-                  <div>
-                    <div className="font-semibold">{lead.ownerName}</div>
-                    {lead.taxId && (
-                      <div className="text-xs text-podio-text-muted font-mono">
-                        Tax ID: {lead.taxId}
-                      </div>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-start gap-2">
-                    <MapPin className="w-4 h-4 text-podio-text-muted mt-0.5" />
-                    <span className="text-sm text-podio-text">{lead.propertyAddress}</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex flex-col gap-1">
-                    {lead.phone && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Phone className="w-3 h-3 text-podio-text-muted" />
-                        <span className="text-podio-text">{lead.phone}</span>
-                      </div>
-                    )}
-                    {lead.email && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Mail className="w-3 h-3 text-podio-text-muted" />
-                        <span className="text-podio-text">{lead.email}</span>
-                      </div>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  {lead.currentArrears ? (
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="w-4 h-4 text-green-600" />
-                      <span className="font-semibold text-green-600">
-                        ${lead.currentArrears.toLocaleString()}
-                      </span>
-                    </div>
-                  ) : (
-                    <span className="text-podio-text-muted">N/A</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <Badge className={`${getStatusColor(lead.status)} border-0 font-medium`}>
-                    {lead.status}
-                  </Badge>
-                </TableCell>
-                <TableCell onClick={(e) => e.stopPropagation()}>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => onLeadSelect(lead)}
-                      className="h-8 px-2 text-podio-primary hover:bg-podio-primary/10"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setLeadToDelete(lead)}
-                      className="h-8 px-2 text-red-600 hover:bg-red-50"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
+            {leads.map((lead) => (
+              <LeadTableRow
+                key={lead.id}
+                lead={lead}
+                isSelected={selectedLeads.includes(lead.id)}
+                onSelect={(checked) => handleSelectLead(lead.id, checked)}
+                onLeadSelect={onLeadSelect}
+                onDelete={() => handleDeleteSingle(lead)}
+                getStatusBadge={getStatusBadge}
+              />
             ))}
           </TableBody>
         </Table>
       </div>
 
-      {leads.length === 0 && (
-        <div className="text-center py-12">
-          <div className="text-podio-text-muted mb-2">No seller leads found</div>
-          <div className="text-sm text-podio-text-muted">
-            Try adjusting your search or filter criteria
-          </div>
-        </div>
-      )}
-
-      {/* Bulk Delete Confirmation Dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Leads Deletion</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to permanently delete {selectedLeads.length} selected lead{selectedLeads.length > 1 ? 's' : ''}? 
-              This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteSelected}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Single Lead Delete Confirmation Dialog */}
+      {/* Single Delete Confirmation Dialog */}
       <AlertDialog open={!!leadToDelete} onOpenChange={() => setLeadToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Lead Deletion</AlertDialogTitle>
+            <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to permanently delete the lead for "{leadToDelete?.ownerName}"? 
-              This action cannot be undone.
+              Are you sure you want to permanently delete the lead for "{leadToDelete?.ownerName}"? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={() => leadToDelete && handleDeleteSingleLead(leadToDelete)}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Delete
+            <AlertDialogAction onClick={confirmDeleteSingle} className="bg-red-600 hover:bg-red-700">
+              Delete Permanently
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {leads.length === 0 && (
+        <div className="text-center py-12 text-gray-500">
+          <p className="text-lg font-medium">No leads found</p>
+          <p className="text-sm">Add some leads to get started</p>
+        </div>
+      )}
     </div>
   );
 }

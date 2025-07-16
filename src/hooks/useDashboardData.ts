@@ -34,6 +34,7 @@ export function useDashboardData() {
 
   const fetchLeads = async () => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('campaign_leads')
         .select('*')
@@ -66,7 +67,8 @@ export function useDashboardData() {
           temperature: (lead.status || 'COLD') as 'HOT' | 'WARM' | 'COLD',
           occupancyStatus: 'VACANT' as const,
           createdAt: lead.created_at,
-          updatedAt: lead.updated_at
+          updatedAt: lead.updated_at,
+          supabaseId: lead.id
         } as TaxLead;
       }) || [];
 
@@ -114,7 +116,11 @@ export function useDashboardData() {
       let description = '';
       let type: ActivityItem['type'] = 'lead_updated';
       
-      if (createdAt.getTime() === updatedAt.getTime()) {
+      // Check if this is a newly created lead (within last hour)
+      const timeDiff = Math.abs(updatedAt.getTime() - createdAt.getTime());
+      const isNewLead = timeDiff < 3600000; // 1 hour in milliseconds
+      
+      if (isNewLead) {
         description = `New lead created for ${lead.ownerName}`;
         type = 'lead_created';
       } else {
@@ -138,9 +144,9 @@ export function useDashboardData() {
   useEffect(() => {
     fetchLeads();
 
-    // Create a unique channel name with timestamp to avoid conflicts
-    const channelName = `dashboard-changes-${Date.now()}`;
-    console.log('Creating Supabase channel:', channelName);
+    // Set up real-time subscription for campaign_leads changes
+    const channelName = `dashboard-leads-${Date.now()}`;
+    console.log('Creating Dashboard Supabase channel:', channelName);
 
     const channel = supabase
       .channel(channelName)
@@ -152,16 +158,17 @@ export function useDashboardData() {
           table: 'campaign_leads'
         },
         (payload) => {
-          console.log('Received realtime update:', payload);
+          console.log('Dashboard received realtime update:', payload);
+          // Refetch data when any change occurs
           fetchLeads();
         }
       )
       .subscribe((status) => {
-        console.log('Channel subscription status:', status);
+        console.log('Dashboard channel subscription status:', status);
       });
 
     return () => {
-      console.log('Cleaning up channel:', channelName);
+      console.log('Cleaning up dashboard channel:', channelName);
       supabase.removeChannel(channel);
     };
   }, []); // Empty dependency array to ensure this only runs once
