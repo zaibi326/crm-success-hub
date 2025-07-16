@@ -35,7 +35,7 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
       <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
         <CardTitle className="flex items-center gap-3 text-xl">
           <User className="w-6 h-6 text-blue-600" />
-          Seller Contact Details
+          Lead Details
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
@@ -110,7 +110,7 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
             required
           />
           
-          {/* Zillow Map Widget */}
+          {/* Google Map Widget */}
           {lead.propertyAddress && (
             <div className="bg-gray-50 rounded-lg p-4 border">
               <div className="flex items-center gap-2 mb-3">

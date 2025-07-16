@@ -7,7 +7,7 @@ import { EditableFieldsSection } from './EditableFieldsSection';
 import { ConditionalFieldsSection } from './ConditionalFieldsSection';
 import { EnhancedSellerContactSection } from './EnhancedSellerContactSection';
 import { EnhancedAdditionalInfoSection } from './EnhancedAdditionalInfoSection';
-import { EnhancedOwnershipSection } from './EnhancedOwnershipSection';
+import { SimplifiedOwnershipSection } from './SimplifiedOwnershipSection';
 
 interface UploadedFile {
   id: string;
@@ -104,8 +104,9 @@ export function MainContent({
             canEdit={canEdit}
           />
 
-          <EnhancedOwnershipSection 
-            onSave={(heirs) => console.log('Saving heirs:', heirs)}
+          <SimplifiedOwnershipSection 
+            lead={formData}
+            onFieldUpdate={onInputChange}
             canEdit={canEdit}
           />
         </>
