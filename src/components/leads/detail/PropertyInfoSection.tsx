@@ -14,7 +14,8 @@ interface PropertyInfoSectionProps {
 const occupancyOptions = [
   { value: 'OWNER_OCCUPIED', label: 'Owner Occupied' },
   { value: 'TENANT_OCCUPIED', label: 'Tenant Occupied' },
-  { value: 'VACANT', label: 'Vacant' }
+  { value: 'VACANT', label: 'Vacant' },
+  { value: 'UNKNOWN', label: 'Unknown' }
 ];
 
 export function PropertyInfoSection({ leadData, onFieldUpdate }: PropertyInfoSectionProps) {
