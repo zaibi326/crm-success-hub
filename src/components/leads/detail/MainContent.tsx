@@ -5,8 +5,9 @@ import { DispositionSection } from './DispositionSection';
 import { NotesSection } from './NotesSection';
 import { EditableFieldsSection } from './EditableFieldsSection';
 import { ConditionalFieldsSection } from './ConditionalFieldsSection';
-import { OwnershipSection } from './OwnershipSection';
-import { AdditionalInformationSection } from './AdditionalInformationSection';
+import { EnhancedSellerContactSection } from './EnhancedSellerContactSection';
+import { EnhancedAdditionalInfoSection } from './EnhancedAdditionalInfoSection';
+import { EnhancedOwnershipSection } from './EnhancedOwnershipSection';
 
 interface UploadedFile {
   id: string;
@@ -67,26 +68,27 @@ export function MainContent({
       />
 
       {disposition === 'keep' && (
-        <AdditionalInformationSection
-          formData={formData}
-          files={files}
-          onInputChange={onInputChange}
-          onFileUpload={onFileUpload}
-          onRemoveFile={onRemoveFile}
-          canEdit={canEdit}
-        />
-      )}
-
-      <NotesSection
-        notes={notes}
-        newNote={newNote}
-        onNewNoteChange={onNewNoteChange}
-        onAddNote={onAddNote}
-        canEdit={canEdit}
-      />
-
-      {disposition === 'keep' && (
         <>
+          <EnhancedSellerContactSection
+            lead={formData}
+            onFieldUpdate={onInputChange}
+            canEdit={canEdit}
+          />
+
+          <EnhancedAdditionalInfoSection
+            formData={formData}
+            onInputChange={onInputChange}
+            canEdit={canEdit}
+          />
+
+          <NotesSection
+            notes={notes}
+            newNote={newNote}
+            onNewNoteChange={onNewNoteChange}
+            onAddNote={onAddNote}
+            canEdit={canEdit}
+          />
+
           <EditableFieldsSection
             formData={formData}
             onInputChange={onInputChange}
@@ -102,7 +104,7 @@ export function MainContent({
             canEdit={canEdit}
           />
 
-          <OwnershipSection 
+          <EnhancedOwnershipSection 
             onSave={(heirs) => console.log('Saving heirs:', heirs)}
             canEdit={canEdit}
           />
