@@ -81,8 +81,8 @@ export function AttachmentsSection({
     return <File className="w-4 h-4 text-gray-600" />;
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return 'N/A';
+  const formatFileSize = (bytes: number | undefined) => {
+    if (!bytes || bytes === 0) return 'N/A';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));

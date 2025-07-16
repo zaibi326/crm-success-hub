@@ -33,7 +33,8 @@ export function LeadTableRow({
 
   const handleRowClick = (e: React.MouseEvent) => {
     // Don't trigger row click if clicking on checkbox
-    if ((e.target as HTMLElement).type === 'checkbox') {
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'INPUT' && (target as HTMLInputElement).type === 'checkbox') {
       return;
     }
     onLeadSelect();

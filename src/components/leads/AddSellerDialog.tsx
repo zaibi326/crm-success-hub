@@ -99,6 +99,10 @@ export function AddSellerDialog({ onAddSeller }: AddSellerDialogProps) {
     }
   };
 
+  const handleFieldChange = (field: string, value: string | File[]) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -145,7 +149,7 @@ export function AddSellerDialog({ onAddSeller }: AddSellerDialogProps) {
             <AddSellerForm
               formData={formData}
               errors={errors}
-              onFieldChange={(field, value) => setFormData(prev => ({ ...prev, [field]: value }))}
+              onFieldChange={handleFieldChange}
             />
             
             <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">

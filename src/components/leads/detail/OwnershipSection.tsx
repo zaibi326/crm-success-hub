@@ -6,9 +6,10 @@ import { OwnershipBreakdownChart } from '../OwnershipBreakdownChart';
 
 interface OwnershipSectionProps {
   onSave: (heirs: any[]) => void;
+  canEdit?: boolean;
 }
 
-export function OwnershipSection({ onSave }: OwnershipSectionProps) {
+export function OwnershipSection({ onSave, canEdit = true }: OwnershipSectionProps) {
   return (
     <Card className="shadow-lg border-0">
       <CardHeader>

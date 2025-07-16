@@ -43,5 +43,7 @@ export interface TaxLead {
   hasAdditionalTaxingEntities?: boolean;
   additionalTaxingNotes?: string;
   vestingDeedNotes?: string;
+  vestingDeedDate?: string;
+  grantorGranteeName?: string;
   disposition?: 'KEEP' | 'PASS' | 'UNDECIDED';
 }
