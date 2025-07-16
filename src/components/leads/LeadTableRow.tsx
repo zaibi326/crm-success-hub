@@ -46,9 +46,7 @@ export function LeadTableRow({
         </div>
       </TableCell>
       <TableCell>
-        <Badge className={getStatusBadge(lead.status)}>
-          {lead.status}
-        </Badge>
+        <div className="font-mono text-sm">{lead.taxId || '-'}</div>
       </TableCell>
       <TableCell>
         {lead.currentArrears ? (
@@ -58,6 +56,11 @@ export function LeadTableRow({
         ) : (
           <span className="text-gray-400">-</span>
         )}
+      </TableCell>
+      <TableCell>
+        <Badge className={getStatusBadge(lead.status)}>
+          {lead.status}
+        </Badge>
       </TableCell>
       <TableCell>
         <div className="space-y-1">
@@ -73,6 +76,11 @@ export function LeadTableRow({
               {lead.email}
             </div>
           )}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="text-sm text-gray-500">
+          {lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : '-'}
         </div>
       </TableCell>
       <TableCell className="text-right">

@@ -15,10 +15,7 @@ import {
   Search, 
   Filter, 
   Download, 
-  Trash2,
-  Eye,
-  UserPlus,
-  MoreHorizontal
+  Trash2
 } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
 import { LeadTableRow } from './LeadTableRow';
@@ -26,30 +23,47 @@ import { toast } from 'sonner';
 
 interface LeadTableViewProps {
   leads: TaxLead[];
-  searchTerm: string;
-  onSearchChange: (value: string) => void;
-  onLeadClick: (lead: TaxLead) => void;
-  onDeleteLead: (leadId: number) => void;
+  searchTerm?: string;
+  onSearchChange?: (value: string) => void;
+  onLeadClick?: (lead: TaxLead) => void;
+  onLeadSelect?: (lead: TaxLead) => void;
+  onDeleteLead?: (leadId: number) => void;
   onBulkDelete?: (leadIds: number[]) => void;
+  onDeleteSingleLead?: (leadId: number) => void;
+  onDeleteMultipleLeads?: (leadIds: number[]) => void;
+  getStatusBadge?: (status: string) => string;
+  handleSort?: (field: string) => void;
 }
 
 export function LeadTableView({ 
   leads, 
-  searchTerm, 
-  onSearchChange, 
+  searchTerm = '',
+  onSearchChange,
   onLeadClick,
+  onLeadSelect,
   onDeleteLead,
-  onBulkDelete
+  onBulkDelete,
+  onDeleteSingleLead,
+  onDeleteMultipleLeads,
+  getStatusBadge,
+  handleSort
 }: LeadTableViewProps) {
   const [selectedLeads, setSelectedLeads] = useState<number[]>([]);
   const [showBulkActions, setShowBulkActions] = useState(false);
+  const [internalSearchTerm, setInternalSearchTerm] = useState(searchTerm);
   const checkboxRef = useRef<HTMLInputElement>(null);
 
-  const filteredLeads = leads.filter(lead =>
-    lead.ownerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead.propertyAddress.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead.taxId.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const effectiveSearchTerm = onSearchChange ? searchTerm : internalSearchTerm;
+
+  const filteredLeads = leads.filter(lead => {
+    const searchTermLower = effectiveSearchTerm.toLowerCase();
+    return (
+      (lead.ownerName || '').toLowerCase().includes(searchTermLower) ||
+      (lead.propertyAddress || '').toLowerCase().includes(searchTermLower) ||
+      (lead.taxId || '').toLowerCase().includes(searchTermLower) ||
+      (lead.email || '').toLowerCase().includes(searchTermLower)
+    );
+  });
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -74,10 +88,30 @@ export function LeadTableView({
       `Are you sure you want to permanently delete ${selectedLeads.length} selected lead(s)?`
     );
     
-    if (confirmed && onBulkDelete) {
-      onBulkDelete(selectedLeads);
+    if (confirmed) {
+      if (onBulkDelete) {
+        onBulkDelete(selectedLeads);
+      } else if (onDeleteMultipleLeads) {
+        onDeleteMultipleLeads(selectedLeads);
+      }
       setSelectedLeads([]);
       toast.success(`${selectedLeads.length} leads deleted successfully`);
+    }
+  };
+
+  const handleLeadClick = (lead: TaxLead) => {
+    if (onLeadClick) {
+      onLeadClick(lead);
+    } else if (onLeadSelect) {
+      onLeadSelect(lead);
+    }
+  };
+
+  const handleDeleteSingle = (leadId: number) => {
+    if (onDeleteLead) {
+      onDeleteLead(leadId);
+    } else if (onDeleteSingleLead) {
+      onDeleteSingleLead(leadId);
     }
   };
 
@@ -95,13 +129,21 @@ export function LeadTableView({
     setShowBulkActions(selectedLeads.length > 0);
   }, [selectedLeads]);
 
-  const getStatusColor = (status: string) => {
+  const defaultGetStatusBadge = (status: string) => {
     switch (status) {
       case 'HOT': return 'bg-red-100 text-red-800 border-red-200';
       case 'WARM': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'COLD': return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'PASS': return 'bg-gray-100 text-gray-800 border-gray-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const handleSearchChange = (value: string) => {
+    if (onSearchChange) {
+      onSearchChange(value);
+    } else {
+      setInternalSearchTerm(value);
     }
   };
 
@@ -113,8 +155,8 @@ export function LeadTableView({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
             placeholder="Search leads..."
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
+            value={effectiveSearchTerm}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-10"
           />
         </div>
@@ -186,8 +228,9 @@ export function LeadTableView({
                   lead={lead}
                   isSelected={selectedLeads.includes(lead.id)}
                   onSelect={(checked) => handleSelectLead(lead.id, checked)}
-                  onClick={() => onLeadClick(lead)}
-                  onDelete={() => onDeleteLead(lead.id)}
+                  onLeadSelect={() => handleLeadClick(lead)}
+                  onDelete={() => handleDeleteSingle(lead.id)}
+                  getStatusBadge={getStatusBadge || defaultGetStatusBadge}
                 />
               ))
             )}
