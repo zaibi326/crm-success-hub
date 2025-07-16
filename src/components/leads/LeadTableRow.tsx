@@ -1,107 +1,106 @@
 
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
 import { TaxLead } from '@/types/taxLead';
-import { Eye, Trash2, Phone, Mail } from 'lucide-react';
 
 interface LeadTableRowProps {
   lead: TaxLead;
   isSelected: boolean;
   onSelect: (checked: boolean) => void;
-  onLeadSelect: (lead: TaxLead) => void;
-  onDelete: () => void;
+  onLeadSelect: () => void;
+  onDelete?: (leadId: number) => void;
   getStatusBadge: (status: string) => string;
 }
 
-export function LeadTableRow({
-  lead,
-  isSelected,
-  onSelect,
+export function LeadTableRow({ 
+  lead, 
+  isSelected, 
+  onSelect, 
   onLeadSelect,
-  onDelete,
-  getStatusBadge
+  getStatusBadge 
 }: LeadTableRowProps) {
+  
+  const formatCurrency = (amount: number | undefined) => {
+    if (!amount) return 'N/A';
+    return `$${amount.toLocaleString()}`;
+  };
+
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const handleRowClick = (e: React.MouseEvent) => {
+    // Don't trigger row click if clicking on checkbox
+    if ((e.target as HTMLElement).type === 'checkbox') {
+      return;
+    }
+    onLeadSelect();
+  };
+
   return (
-    <TableRow className="hover:bg-gray-50">
-      <TableCell>
-        <Checkbox
+    <TableRow 
+      className="hover:bg-gray-50 cursor-pointer transition-colors"
+      onClick={handleRowClick}
+    >
+      <TableCell onClick={(e) => e.stopPropagation()}>
+        <input
+          type="checkbox"
           checked={isSelected}
-          onCheckedChange={onSelect}
+          onChange={(e) => onSelect(e.target.checked)}
+          className="rounded border-gray-300"
         />
       </TableCell>
       <TableCell className="font-medium">
         <div>
-          <div className="font-semibold">{lead.ownerName}</div>
-          {lead.taxId && (
-            <div className="text-xs text-gray-500 font-mono">Tax ID: {lead.taxId}</div>
+          <div className="font-semibold text-gray-900">{lead.ownerName || 'N/A'}</div>
+          {lead.firstName && lead.lastName && (
+            <div className="text-sm text-gray-500">
+              {lead.firstName} {lead.lastName}
+            </div>
           )}
         </div>
       </TableCell>
       <TableCell>
-        <div className="max-w-xs truncate" title={lead.propertyAddress}>
-          {lead.propertyAddress}
+        <div className="max-w-xs">
+          <div className="truncate font-medium text-gray-900">
+            {lead.propertyAddress || 'N/A'}
+          </div>
         </div>
       </TableCell>
       <TableCell>
-        <div className="font-mono text-sm">{lead.taxId || '-'}</div>
+        <div className="font-mono text-sm text-gray-700">
+          {lead.taxId || 'N/A'}
+        </div>
       </TableCell>
       <TableCell>
-        {lead.currentArrears ? (
-          <span className="font-semibold text-red-600">
-            ${lead.currentArrears.toLocaleString()}
-          </span>
-        ) : (
-          <span className="text-gray-400">-</span>
-        )}
+        <div className="font-semibold text-gray-900">
+          {formatCurrency(lead.currentArrears)}
+        </div>
       </TableCell>
       <TableCell>
-        <Badge className={getStatusBadge(lead.status)}>
-          {lead.status}
+        <Badge className={getStatusBadge(lead.status || 'COLD')}>
+          {lead.status || 'COLD'}
         </Badge>
       </TableCell>
       <TableCell>
         <div className="space-y-1">
           {lead.phone && (
-            <div className="flex items-center gap-1 text-xs text-gray-600">
-              <Phone className="w-3 h-3" />
-              {lead.phone}
-            </div>
+            <div className="text-sm text-gray-600">{lead.phone}</div>
           )}
           {lead.email && (
-            <div className="flex items-center gap-1 text-xs text-gray-600">
-              <Mail className="w-3 h-3" />
-              {lead.email}
-            </div>
+            <div className="text-sm text-gray-500 truncate max-w-xs">{lead.email}</div>
           )}
         </div>
       </TableCell>
       <TableCell>
         <div className="text-sm text-gray-500">
-          {lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : '-'}
+          {formatDate(lead.createdAt)}
         </div>
       </TableCell>
-      <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onLeadSelect(lead)}
-            className="hover:bg-blue-50"
-          >
-            <Eye className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onDelete}
-            className="hover:bg-red-50 text-red-600 hover:text-red-700"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </div>
+      <TableCell>
+        {/* Removed action buttons - entire row is now clickable */}
       </TableCell>
     </TableRow>
   );

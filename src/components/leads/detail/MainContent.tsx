@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { TaxLead } from '@/types/taxLead';
-import { ImportedDataSection } from './ImportedDataSection';
 import { DispositionSection } from './DispositionSection';
 import { NotesSection } from './NotesSection';
 import { EditableFieldsSection } from './EditableFieldsSection';
@@ -96,14 +95,17 @@ export function MainContent({
 
           <ConditionalFieldsSection
             formData={formData}
-            files={files.filter(f => f.category === 'probate' || f.category === 'vesting_deed')}
+            files={files.filter(f => f.category === 'vesting_deed')}
             onInputChange={onInputChange}
             onFileUpload={onFileUpload}
             onRemoveFile={onRemoveFile}
             canEdit={canEdit}
           />
 
-          <OwnershipSection onSave={(heirs) => console.log('Heirs saved:', heirs)} />
+          <OwnershipSection 
+            onSave={(heirs) => console.log('Saving heirs:', heirs)}
+            canEdit={canEdit}
+          />
         </>
       )}
     </div>

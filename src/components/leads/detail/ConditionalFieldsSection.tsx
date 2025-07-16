@@ -1,10 +1,11 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FileUploadSection } from '../FileUploadSection';
+import { FileUp, AlertTriangle } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
+import { AttachmentsSection } from './AttachmentsSection';
 
 interface UploadedFile {
   id: string;
@@ -25,65 +26,60 @@ interface ConditionalFieldsSectionProps {
 
 export function ConditionalFieldsSection({ 
   formData, 
-  files, 
+  files,
   onInputChange, 
-  onFileUpload, 
-  onRemoveFile, 
+  onFileUpload,
+  onRemoveFile,
   canEdit 
 }: ConditionalFieldsSectionProps) {
   return (
     <Card className="shadow-lg border-0">
       <CardHeader>
-        <CardTitle>Conditional Fields</CardTitle>
+        <CardTitle className="flex items-center gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-500" />
+          Conditional Fields
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Probate Documents */}
+        {/* Vesting Deed Information */}
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="probateNotes">Probate Notes</Label>
-            <Textarea
-              id="probateNotes"
-              value={formData.probateNotes || ''}
-              onChange={(e) => onInputChange('probateNotes', e.target.value)}
-              placeholder="Enter probate information..."
-              className="min-h-[100px]"
-              disabled={!canEdit}
-            />
-          </div>
+          <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+            <FileUp className="w-4 h-4 text-blue-500" />
+            Vesting Deed Information
+          </h4>
           
-          <FileUploadSection
-            title="Probate Documents"
-            category="probate"
-            files={files.filter(f => f.category === 'probate')}
-            onFileUpload={(files) => onFileUpload(files, 'probate')}
-            onRemoveFile={onRemoveFile}
-            acceptedTypes=".pdf,.docx,.png,.jpg,.jpeg"
-            disabled={!canEdit}
-          />
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="vestingDeedDate">Vesting Deed Date</Label>
+              <Input
+                id="vestingDeedDate"
+                type="date"
+                value={formData.vestingDeedDate || ''}
+                onChange={(e) => onInputChange('vestingDeedDate', e.target.value)}
+                disabled={!canEdit}
+              />
+            </div>
 
-        {/* Vesting Deed Documents */}
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="vestingDeedNotes">Vesting Deed Notes</Label>
-            <Textarea
-              id="vestingDeedNotes"
-              value={formData.vestingDeedNotes || ''}
-              onChange={(e) => onInputChange('vestingDeedNotes', e.target.value)}
-              placeholder="Enter vesting deed information..."
-              className="min-h-[100px]"
-              disabled={!canEdit}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="grantorGranteeName">Grantor/Grantee Name</Label>
+              <Input
+                id="grantorGranteeName"
+                value={formData.grantorGranteeName || ''}
+                onChange={(e) => onInputChange('grantorGranteeName', e.target.value)}
+                placeholder="Enter grantor/grantee name"
+                disabled={!canEdit}
+              />
+            </div>
           </div>
-          
-          <FileUploadSection
-            title="Vesting Deed Documents"
-            category="vesting_deed"
-            files={files.filter(f => f.category === 'vesting_deed')}
-            onFileUpload={(files) => onFileUpload(files, 'vesting_deed')}
+
+          {/* Vesting Deed File Upload */}
+          <AttachmentsSection
+            files={files}
             onRemoveFile={onRemoveFile}
-            acceptedTypes=".pdf,.docx,.png,.jpg,.jpeg"
-            disabled={!canEdit}
+            onFileUpload={(uploadedFiles) => onFileUpload(uploadedFiles, 'vesting_deed')}
+            canEdit={canEdit}
+            title="Vesting Deed Documents"
+            description="Upload vesting deed related documents"
           />
         </div>
       </CardContent>

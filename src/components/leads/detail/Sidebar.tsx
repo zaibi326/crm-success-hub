@@ -1,10 +1,8 @@
 
 import React from 'react';
-import { LeadStatusButtons } from '../LeadStatusButtons';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { FileText } from 'lucide-react';
 import { AttachmentsSection } from './AttachmentsSection';
-import { TaxLead } from '@/types/taxLead';
-import { Button } from '@/components/ui/button';
-import { Save } from 'lucide-react';
 
 interface UploadedFile {
   id: string;
@@ -20,25 +18,44 @@ interface SidebarProps {
   canEdit: boolean;
   onStatusChange: (status: 'HOT' | 'WARM' | 'COLD' | 'PASS') => void;
   onRemoveFile: (fileId: string) => void;
-  onFileUpload?: (files: File[], category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities') => void;
+  onFileUpload: (files: File[], category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities') => void;
 }
 
 export function Sidebar({
-  currentStatus,
-  files = [], // Default to empty array
+  files,
   canEdit,
-  onStatusChange,
   onRemoveFile,
   onFileUpload
 }: SidebarProps) {
   return (
     <div className="space-y-6">
-      <LeadStatusButtons
-        currentStatus={currentStatus}
-        onStatusChange={onStatusChange}
-        disabled={!canEdit}
-      />
+      {/* Lead Summary Card */}
+      <Card className="shadow-lg border-0">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="w-5 h-5 text-crm-primary" />
+            Lead Summary
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-600">Created:</span>
+              <span className="font-medium">Today</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Last Updated:</span>
+              <span className="font-medium">2 hours ago</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Files:</span>
+              <span className="font-medium">{files.length}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
+      {/* Attachments */}
       <AttachmentsSection
         files={files}
         onRemoveFile={onRemoveFile}

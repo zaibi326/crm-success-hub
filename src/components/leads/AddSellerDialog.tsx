@@ -2,210 +2,170 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, User } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Plus, CheckCircle, ExternalLink } from 'lucide-react';
+import { useAddSellerForm } from './dialog/useAddSellerForm';
+import { AddSellerForm } from './dialog/AddSellerForm';
+import { TaxLead } from '@/types/taxLead';
+import { toast } from 'sonner';
 
 interface AddSellerDialogProps {
-  onAddSeller: (seller: any) => void;
+  onAddSeller: (seller: TaxLead) => void;
 }
 
 export function AddSellerDialog({ onAddSeller }: AddSellerDialogProps) {
-  const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    ownerName: '',
-    propertyAddress: '',
-    phone: '',
-    email: '',
-    taxId: '',
-    currentArrears: '',
-    status: 'COLD',
-    notes: '',
-    ownerOfRecord: '',
-  });
+  const [isOpen, setIsOpen] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [addedLead, setAddedLead] = useState<TaxLead | null>(null);
+  
+  const { formData, errors, setFormData, validateForm, resetForm } = useAddSellerForm();
 
-  const { toast } = useToast();
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.ownerName || !formData.propertyAddress) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
+    if (!validateForm()) {
+      toast.error('Please fix the validation errors');
       return;
     }
 
-    const newSeller = {
-      id: Date.now(),
-      ...formData,
-      currentArrears: formData.currentArrears ? parseFloat(formData.currentArrears) : 0,
-      taxLawsuitNumber: `TL-${new Date().getFullYear()}-${String(Date.now()).slice(-3)}`
-    };
+    try {
+      // Convert File[] to the expected format
+      const formattedFiles = formData.attachedFiles.map((file, index) => ({
+        id: `${Date.now()}-${index}`,
+        name: file.name,
+        url: URL.createObjectURL(file),
+        type: file.type,
+        size: file.size,
+        uploadedAt: new Date().toISOString(),
+      }));
 
-    onAddSeller(newSeller);
-    setOpen(false);
-    setFormData({
-      ownerName: '',
-      propertyAddress: '',
-      phone: '',
-      email: '',
-      taxId: '',
-      currentArrears: '',
-      status: 'COLD',
-      notes: '',
-      ownerOfRecord: '',
-    });
+      const newSeller: TaxLead = {
+        id: Date.now(),
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        ownerName: `${formData.firstName} ${formData.lastName}`.trim(),
+        propertyAddress: formData.propertyAddress,
+        phone: formData.phone,
+        email: formData.email,
+        leadSource: formData.leadSource,
+        temperature: formData.temperature,
+        occupancyStatus: formData.occupancyStatus as 'OWNER_OCCUPIED' | 'TENANT_OCCUPIED' | 'VACANT',
+        agentName: formData.agentName,
+        notes: formData.notes,
+        askingPrice: formData.askingPrice ? parseFloat(formData.askingPrice) : undefined,
+        mortgagePrice: formData.mortgagePrice ? parseFloat(formData.mortgagePrice) : undefined,
+        currentArrears: formData.currentArrears ? parseFloat(formData.currentArrears) : undefined,
+        taxId: formData.taxId,
+        campaignId: formData.campaignId,
+        status: formData.temperature,
+        taxLawsuitNumber: `TL-${new Date().getFullYear()}-${String(Date.now()).slice(-3)}`,
+        attachedFiles: formattedFiles,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        disposition: 'UNDECIDED' as const,
+      };
 
-    toast({
-      title: "Success",
-      description: "Seller lead added successfully",
-    });
+      onAddSeller(newSeller);
+      setAddedLead(newSeller);
+      setShowSuccess(true);
+      
+      toast.success('Seller Lead successfully added');
+      
+      // Auto-hide success message after 3 seconds
+      setTimeout(() => {
+        setShowSuccess(false);
+        setIsOpen(false);
+        resetForm();
+        setAddedLead(null);
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error adding seller:', error);
+      toast.error('Failed to add seller lead');
+    }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleClose = () => {
+    setIsOpen(false);
+    setShowSuccess(false);
+    resetForm();
+    setAddedLead(null);
+  };
+
+  const handleViewLead = () => {
+    if (addedLead) {
+      // This would typically navigate to the lead details page
+      // You can implement navigation logic here if needed
+      window.open(`/leads/${addedLead.id}`, '_blank');
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+        <Button className="bg-crm-primary hover:bg-crm-primary/90 text-white">
           <Plus className="w-4 h-4 mr-2" />
           Add Seller
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <User className="w-5 h-5" />
-            Add New Seller Lead
+          <DialogTitle className="text-xl font-semibold text-gray-900">
+            {showSuccess ? 'Success!' : 'Add New Seller Lead'}
           </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="ownerName">Seller Name *</Label>
-              <Input
-                id="ownerName"
-                value={formData.ownerName}
-                onChange={(e) => handleInputChange('ownerName', e.target.value)}
-                placeholder="Enter seller name"
-                required
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="ownerOfRecord">Owner of Record</Label>
-              <Input
-                id="ownerOfRecord"
-                value={formData.ownerOfRecord}
-                onChange={(e) => handleInputChange('ownerOfRecord', e.target.value)}
-                placeholder="Enter owner of record"
-              />
+        {showSuccess ? (
+          <div className="flex flex-col items-center justify-center py-8 space-y-4">
+            <CheckCircle className="w-16 h-16 text-green-500" />
+            <h3 className="text-lg font-semibold text-gray-900">
+              Seller Lead successfully added
+            </h3>
+            <p className="text-gray-600 text-center">
+              Your new seller lead has been created and added to the system.
+            </p>
+            <div className="flex gap-3 mt-6">
+              <Button
+                onClick={handleViewLead}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <ExternalLink className="w-4 h-4" />
+                View Lead Details
+              </Button>
+              <Button
+                onClick={handleClose}
+                variant="outline"
+                className="border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                Stay on Leads Page
+              </Button>
             </div>
           </div>
-
-          <div>
-            <Label htmlFor="propertyAddress">Property Address *</Label>
-            <Input
-              id="propertyAddress"
-              value={formData.propertyAddress}
-              onChange={(e) => handleInputChange('propertyAddress', e.target.value)}
-              placeholder="Enter full property address"
-              required
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <AddSellerForm
+              formData={formData}
+              errors={errors}
+              onFieldChange={(field, value) => setFormData(prev => ({ ...prev, [field]: value }))}
             />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                placeholder="(555) 123-4567"
-              />
-            </div>
             
-            <div>
-              <Label htmlFor="email">Email Address</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                placeholder="seller@email.com"
-              />
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                className="border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="bg-crm-primary hover:bg-crm-primary/90 text-white"
+              >
+                Add Seller Lead
+              </Button>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="taxId">Tax ID</Label>
-              <Input
-                id="taxId"
-                value={formData.taxId}
-                onChange={(e) => handleInputChange('taxId', e.target.value)}
-                placeholder="TX123456789"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="currentArrears">Current Arrears ($)</Label>
-              <Input
-                id="currentArrears"
-                type="number"
-                step="0.01"
-                value={formData.currentArrears}
-                onChange={(e) => handleInputChange('currentArrears', e.target.value)}
-                placeholder="0.00"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="status">Lead Status</Label>
-            <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="HOT">Hot</SelectItem>
-                <SelectItem value="WARM">Warm</SelectItem>
-                <SelectItem value="COLD">Cold</SelectItem>
-                <SelectItem value="PASS">Pass</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="notes">Notes</Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => handleInputChange('notes', e.target.value)}
-              placeholder="Add any additional notes about this lead..."
-              rows={3}
-            />
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-              Add Seller
-            </Button>
-          </div>
-        </form>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
