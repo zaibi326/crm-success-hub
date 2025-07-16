@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { TaxLead } from '@/types/taxLead';
@@ -74,7 +75,7 @@ export function useDashboardData() {
           createdAt: lead.created_at,
           updatedAt: lead.updated_at,
           supabaseId: lead.id,
-          disposition: lead.disposition || 'UNDECIDED' // Add disposition field
+          disposition: 'UNDECIDED' as const // Default since it's not in the database yet
         } as TaxLead;
       }) || [];
 

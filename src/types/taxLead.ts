@@ -1,5 +1,6 @@
+
 export type TaxLeadStatus = 'HOT' | 'WARM' | 'COLD' | 'PASS';
-export type OccupancyStatus = 'VACANT' | 'OCCUPIED' | 'UNKNOWN';
+export type OccupancyStatus = 'VACANT' | 'OCCUPIED' | 'UNKNOWN' | 'OWNER_OCCUPIED' | 'TENANT_OCCUPIED';
 
 export interface TaxLead {
   id: number;

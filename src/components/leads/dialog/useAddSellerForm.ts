@@ -74,6 +74,16 @@ export function useAddSellerForm(
     
     if (!validateForm()) return;
 
+    // Convert File[] to the expected format
+    const formattedFiles = attachedFiles.map((file, index) => ({
+      id: `${Date.now()}-${index}`,
+      name: file.name,
+      url: URL.createObjectURL(file),
+      type: file.type,
+      size: file.size,
+      uploadedAt: new Date().toISOString(),
+    }));
+
     const newSeller: TaxLead = {
       id: Date.now(),
       firstName: formData.firstName,
@@ -84,7 +94,7 @@ export function useAddSellerForm(
       email: formData.email,
       leadSource: formData.leadSource,
       temperature: formData.temperature,
-      occupancyStatus: formData.occupancyStatus,
+      occupancyStatus: formData.occupancyStatus as 'OWNER_OCCUPIED' | 'TENANT_OCCUPIED' | 'VACANT',
       agentName: formData.agentName,
       notes: formData.notes,
       askingPrice: formData.askingPrice ? parseFloat(formData.askingPrice) : undefined,
@@ -94,7 +104,7 @@ export function useAddSellerForm(
       campaignId: formData.campaignId,
       status: formData.temperature,
       taxLawsuitNumber: `TL-${new Date().getFullYear()}-${String(Date.now()).slice(-3)}`,
-      attachedFiles: attachedFiles,
+      attachedFiles: formattedFiles,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
