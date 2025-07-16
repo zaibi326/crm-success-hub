@@ -1,33 +1,38 @@
+export type TaxLeadStatus = 'HOT' | 'WARM' | 'COLD' | 'PASS';
+export type OccupancyStatus = 'VACANT' | 'OCCUPIED' | 'UNKNOWN';
 
 export interface TaxLead {
   id: number;
   taxId: string;
   ownerName: string;
-  firstName: string;
-  lastName: string;
   propertyAddress: string;
   taxLawsuitNumber: string;
   currentArrears: number;
-  status: 'HOT' | 'WARM' | 'COLD' | 'PASS';
-  temperature: 'HOT' | 'WARM' | 'COLD';
-  occupancyStatus: 'VACANT' | 'OWNER_OCCUPIED' | 'TENANT_OCCUPIED' | 'UNKNOWN';
+  status: TaxLeadStatus;
   notes: string;
   phone: string;
   email: string;
+  firstName: string;
+  lastName: string;
+  temperature: 'HOT' | 'WARM' | 'COLD';
+  occupancyStatus: OccupancyStatus;
   createdAt?: string;
   updatedAt?: string;
-  supabaseId?: string; // For database operations
-  
-  // Additional properties used throughout the app
+  supabaseId?: string;
   leadSource?: string;
+  campaignId?: string;
   agentName?: string;
   askingPrice?: number;
   mortgagePrice?: number;
-  campaignId?: string;
   ownerOfRecord?: string;
-  attachedFiles?: File[];
-  
-  // Conditional fields for additional information
+  attachedFiles?: Array<{
+    id: string;
+    name: string;
+    url: string;
+    type: string;
+    size: number;
+    uploadedAt: string;
+  }>;
   hasDeath?: boolean;
   deathNotes?: string;
   hasProbate?: boolean;
@@ -37,4 +42,5 @@ export interface TaxLead {
   hasAdditionalTaxingEntities?: boolean;
   additionalTaxingNotes?: string;
   vestingDeedNotes?: string;
+  disposition?: 'KEEP' | 'PASS' | 'UNDECIDED';
 }

@@ -1,11 +1,9 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DashboardStats } from './DashboardStats';
 import { ActivityFeed } from './ActivityFeed';
 import { LeadsPieChart } from './LeadsPieChart';
-import { BarChart3, Activity } from 'lucide-react';
 import { useDashboardDataContext } from '@/contexts/DashboardDataContext';
 
 interface DashboardContentProps {
@@ -14,7 +12,6 @@ interface DashboardContentProps {
 }
 
 export function DashboardContent({ userRole, showLeadsInDashboard = false }: DashboardContentProps) {
-  const [activeTab, setActiveTab] = useState('overview');
   const { stats, loading } = useDashboardDataContext();
 
   return (
@@ -31,31 +28,15 @@ export function DashboardContent({ userRole, showLeadsInDashboard = false }: Das
         </div>
       </header>
 
-      <main className="p-6 bg-gradient-to-br from-gray-50/30 to-white">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="activity" className="flex items-center gap-2">
-              <Activity className="w-4 h-4" />
-              Activity
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-6">
-            <DashboardStats userRole={userRole} />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <LeadsPieChart />
-              <ActivityFeed userRole={userRole} />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="activity" className="space-y-6">
-            <ActivityFeed userRole={userRole} />
-          </TabsContent>
-        </Tabs>
+      <main className="p-6 bg-gradient-to-br from-gray-50/30 to-white space-y-6">
+        {/* Stats Cards */}
+        <DashboardStats userRole={userRole} />
+        
+        {/* Charts and Activity Feed */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <LeadsPieChart />
+          <ActivityFeed userRole={userRole} />
+        </div>
       </main>
     </SidebarInset>
   );

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
@@ -21,6 +22,10 @@ const chartConfig = {
   PASS: {
     label: "Passed Leads",
     color: "#6B7280"
+  },
+  KEEP: {
+    label: "Keep Leads",
+    color: "#059669"
   }
 };
 
@@ -29,12 +34,7 @@ export function LeadsPieChart() {
 
   const data = React.useMemo(() => {
     if (loading || stats.totalLeads === 0) {
-      return [
-        { name: 'HOT', value: 0, color: '#DC2626', count: 0 },
-        { name: 'WARM', value: 0, color: '#F97316', count: 0 },
-        { name: 'COLD', value: 0, color: '#2563EB', count: 0 },
-        { name: 'PASS', value: 0, color: '#6B7280', count: 0 },
-      ];
+      return [];
     }
 
     const total = stats.totalLeads;
@@ -61,7 +61,13 @@ export function LeadsPieChart() {
         name: 'PASS', 
         value: stats.passRate, 
         color: '#6B7280', 
-        count: Math.round((stats.passRate / 100) * total)
+        count: stats.passDeals || 0
+      },
+      { 
+        name: 'KEEP', 
+        value: stats.keepRate || 0, 
+        color: '#059669', 
+        count: stats.keepDeals || 0
       },
     ].filter(item => item.count > 0);
   }, [stats, loading]);
@@ -122,7 +128,21 @@ export function LeadsPieChart() {
                       />
                     ))}
                   </Pie>
-                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <ChartTooltip 
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        return (
+                          <div className="bg-white p-3 border rounded-lg shadow-lg">
+                            <p className="font-semibold text-gray-800">{data.name} Leads</p>
+                            <p className="text-sm text-gray-600">Count: {data.count}</p>
+                            <p className="text-sm text-gray-600">Percentage: {data.value}%</p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </ChartContainer>
@@ -145,27 +165,6 @@ export function LeadsPieChart() {
                     <div className="text-xs text-gray-500">
                       <span className="font-medium">{item.count}</span> leads ({item.value}%)
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-6 space-y-3">
-              {data.map((item, index) => (
-                <div key={item.name} className="space-y-2">
-                  <div className="flex justify-between text-xs">
-                    <span className="font-medium text-gray-600">{item.name} Leads</span>
-                    <span className="font-semibold text-gray-800">{item.value}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                    <div 
-                      className="h-2 rounded-full transition-all duration-1000 ease-out"
-                      style={{ 
-                        width: `${item.value}%`,
-                        backgroundColor: item.color,
-                        animationDelay: `${index * 0.3}s`
-                      }}
-                    />
                   </div>
                 </div>
               ))}

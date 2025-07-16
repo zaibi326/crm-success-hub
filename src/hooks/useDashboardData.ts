@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { TaxLead } from '@/types/taxLead';
@@ -9,6 +8,9 @@ interface DashboardStats {
   coldDeals: number;
   passRate: number;
   totalLeads: number;
+  keepRate: number;
+  passDeals: number;
+  keepDeals: number;
 }
 
 interface ActivityItem {
@@ -27,7 +29,10 @@ export function useDashboardData() {
     warmDeals: 0,
     coldDeals: 0,
     passRate: 0,
-    totalLeads: 0
+    totalLeads: 0,
+    keepRate: 0,
+    passDeals: 0,
+    keepDeals: 0
   });
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,7 +73,8 @@ export function useDashboardData() {
           occupancyStatus: 'VACANT' as const,
           createdAt: lead.created_at,
           updatedAt: lead.updated_at,
-          supabaseId: lead.id
+          supabaseId: lead.id,
+          disposition: lead.disposition || 'UNDECIDED' // Add disposition field
         } as TaxLead;
       }) || [];
 
@@ -87,16 +93,21 @@ export function useDashboardData() {
     const warmCount = leadsData.filter(lead => lead.status === 'WARM').length;
     const coldCount = leadsData.filter(lead => lead.status === 'COLD').length;
     const passCount = leadsData.filter(lead => lead.status === 'PASS').length;
+    const keepCount = leadsData.filter(lead => lead.disposition === 'KEEP').length;
     const totalCount = leadsData.length;
     
     const passRate = totalCount > 0 ? Math.round((passCount / totalCount) * 100) : 0;
+    const keepRate = totalCount > 0 ? Math.round((keepCount / totalCount) * 100) : 0;
 
     setStats({
       hotDeals: hotCount,
       warmDeals: warmCount,
       coldDeals: coldCount,
       passRate,
-      totalLeads: totalCount
+      totalLeads: totalCount,
+      keepRate,
+      passDeals: passCount,
+      keepDeals: keepCount
     });
   };
 
