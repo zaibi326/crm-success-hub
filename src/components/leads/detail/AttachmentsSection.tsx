@@ -130,38 +130,7 @@ export function AttachmentsSection({
             />
 
             {canEdit && (
-              <>
-                {/* Upload Files Section */}
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <Upload className="w-4 h-4 text-blue-600" />
-                    Upload Files
-                  </h4>
-                  
-                  <div 
-                    className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer bg-white"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <Upload className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-                    <div className="text-sm text-gray-600 mb-2">
-                      <span className="font-medium text-blue-600">Click to upload</span> or drag and drop
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      PDF, JPG, PNG, DOC (max 10MB each)
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={() => fileInputRef.current?.click()}
-                    variant="outline"
-                    className="w-full mt-3 border-blue-300 text-blue-700 hover:bg-blue-50"
-                    size="sm"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Select Files
-                  </Button>
-                </div>
-
+              <div className="space-y-6">
                 {/* Add PDF Link Section */}
                 <div className="bg-green-50 rounded-lg p-4 border border-green-200">
                   <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
@@ -193,7 +162,38 @@ export function AttachmentsSection({
                     </Button>
                   </div>
                 </div>
-              </>
+
+                {/* Upload Files Section */}
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <Upload className="w-4 h-4 text-blue-600" />
+                    Upload Files
+                  </h4>
+                  
+                  <div 
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer bg-white"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload className="w-8 h-8 text-gray-400 mx-auto mb-3" />
+                    <div className="text-sm text-gray-600 mb-2">
+                      <span className="font-medium text-blue-600">Click to upload</span> or drag and drop
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      PDF, JPG, PNG, DOC (max 10MB each)
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={() => fileInputRef.current?.click()}
+                    variant="outline"
+                    className="w-full mt-3 border-blue-300 text-blue-700 hover:bg-blue-50"
+                    size="sm"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Select Files
+                  </Button>
+                </div>
+              </div>
             )}
 
             {/* Files List */}

@@ -4,6 +4,7 @@ export interface UploadedFile {
   name: string;
   type: string;
   url: string;
+  size?: number;
   category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities';
 }
 
