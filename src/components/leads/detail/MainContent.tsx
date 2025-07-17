@@ -64,6 +64,13 @@ export function MainContent({
 
   return (
     <div className="space-y-6">
+      {/* Lead Details Section - moved above disposition */}
+      <EnhancedSellerContactSection
+        lead={formData}
+        onFieldUpdate={onInputChange}
+        canEdit={canEdit}
+      />
+
       <DispositionSection
         disposition={disposition}
         passReason={passReason}
@@ -74,12 +81,6 @@ export function MainContent({
 
       {disposition === 'keep' && (
         <>
-          <EnhancedSellerContactSection
-            lead={formData}
-            onFieldUpdate={onInputChange}
-            canEdit={canEdit}
-          />
-
           <EnhancedAdditionalInfoSection
             formData={formData}
             onInputChange={onInputChange}

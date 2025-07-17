@@ -1,9 +1,10 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, MapPin } from 'lucide-react';
+import { User, ExternalLink } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
 import { InlineEditField } from './InlineEditField';
+import { Button } from '@/components/ui/button';
 
 interface EnhancedSellerContactSectionProps {
   lead: TaxLead;
@@ -28,6 +29,19 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
     if (canEdit) {
       onFieldUpdate('status', status);
     }
+  };
+
+  const openZillow = () => {
+    if (lead.propertyAddress) {
+      const encodedAddress = encodeURIComponent(lead.propertyAddress);
+      window.open(`https://www.zillow.com/homes/${encodedAddress}/`, '_blank');
+    }
+  };
+
+  const formatZillowUrl = (address: string) => {
+    if (!address) return '';
+    const encodedAddress = encodeURIComponent(address);
+    return `https://www.zillow.com/homes/${encodedAddress}/`;
   };
 
   return (
@@ -100,7 +114,7 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
           </div>
         </div>
 
-        {/* Property Address with Map */}
+        {/* Property Address with Zillow Integration */}
         <div className="space-y-4">
           <InlineEditField
             label="Property Address"
@@ -110,27 +124,29 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
             required
           />
           
-          {/* Google Map Widget */}
+          {/* Zillow Integration */}
           {lead.propertyAddress && (
             <div className="bg-gray-50 rounded-lg p-4 border">
-              <div className="flex items-center gap-2 mb-3">
-                <MapPin className="w-4 h-4 text-blue-600" />
-                <span className="text-sm font-medium text-gray-700">Property Location</span>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-gray-700">Property Preview</span>
+                <Button
+                  onClick={openZillow}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  View on Zillow
+                </Button>
               </div>
-              <div className="bg-white rounded border h-64 flex items-center justify-center">
-                <iframe
-                  src={`https://www.google.com/maps/embed/v1/place?key=YOUR_GOOGLE_MAPS_API_KEY&q=${encodeURIComponent(lead.propertyAddress)}`}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0, borderRadius: '4px' }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="Property Location"
-                />
-              </div>
-              <div className="mt-2 text-xs text-gray-500 text-center">
-                Map preview for: {lead.propertyAddress}
+              
+              <div className="bg-white rounded border p-4 space-y-2">
+                <div className="text-sm text-gray-600">
+                  Map preview for: <span className="font-medium text-gray-900">{lead.propertyAddress}</span>
+                </div>
+                <div className="text-xs text-blue-600 break-all">
+                  {formatZillowUrl(lead.propertyAddress)}
+                </div>
               </div>
             </div>
           )}
