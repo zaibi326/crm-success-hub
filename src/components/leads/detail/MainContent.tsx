@@ -7,7 +7,7 @@ import { EditableFieldsSection } from './EditableFieldsSection';
 import { ConditionalFieldsSection } from './ConditionalFieldsSection';
 import { EnhancedSellerContactSection } from './EnhancedSellerContactSection';
 import { EnhancedAdditionalInfoSection } from './EnhancedAdditionalInfoSection';
-import { EnhancedOwnershipSection } from './EnhancedOwnershipSection';
+import { SimplifiedOwnershipSection } from './SimplifiedOwnershipSection';
 
 interface UploadedFile {
   id: string;
@@ -57,11 +57,6 @@ export function MainContent({
   onFileUpload,
   onRemoveFile
 }: MainContentProps) {
-  const handleOwnershipSave = (heirs: any[]) => {
-    console.log('Saved heirs:', heirs);
-    // Here you would typically save to your backend
-  };
-
   return (
     <div className="space-y-6">
       {/* Lead Details Section */}
@@ -81,12 +76,6 @@ export function MainContent({
 
       {disposition === 'keep' && (
         <>
-          <EnhancedAdditionalInfoSection
-            formData={formData}
-            onInputChange={onInputChange}
-            canEdit={canEdit}
-          />
-
           <NotesSection
             notes={notes}
             newNote={newNote}
@@ -110,9 +99,9 @@ export function MainContent({
             canEdit={canEdit}
           />
 
-          <EnhancedOwnershipSection 
+          <SimplifiedOwnershipSection 
             lead={formData}
-            onSave={handleOwnershipSave}
+            onFieldUpdate={onInputChange}
             canEdit={canEdit}
           />
         </>
