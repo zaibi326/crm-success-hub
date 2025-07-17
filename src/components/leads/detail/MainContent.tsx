@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { TaxLead } from '@/types/taxLead';
+import { DispositionSection } from './DispositionSection';
 import { NotesSection } from './NotesSection';
 import { EditableFieldsSection } from './EditableFieldsSection';
 import { ConditionalFieldsSection } from './ConditionalFieldsSection';
@@ -70,39 +71,52 @@ export function MainContent({
         canEdit={canEdit}
       />
 
-      <EnhancedAdditionalInfoSection
-        formData={formData}
-        onInputChange={onInputChange}
+      <DispositionSection
+        disposition={disposition}
+        passReason={passReason}
+        onDisposition={onDisposition}
+        onPassReasonChange={onPassReasonChange}
         canEdit={canEdit}
       />
 
-      <NotesSection
-        notes={notes}
-        newNote={newNote}
-        onNewNoteChange={onNewNoteChange}
-        onAddNote={onAddNote}
-        canEdit={canEdit}
-      />
+      {disposition === 'keep' && (
+        <>
+          <EnhancedAdditionalInfoSection
+            formData={formData}
+            onInputChange={onInputChange}
+            canEdit={canEdit}
+          />
 
-      <EditableFieldsSection
-        formData={formData}
-        onInputChange={onInputChange}
-        canEdit={canEdit}
-      />
+          <NotesSection
+            notes={notes}
+            newNote={newNote}
+            onNewNoteChange={onNewNoteChange}
+            onAddNote={onAddNote}
+            canEdit={canEdit}
+          />
 
-      <ConditionalFieldsSection
-        formData={formData}
-        files={files.filter(f => f.category === 'vesting_deed')}
-        onInputChange={onInputChange}
-        onFileUpload={onFileUpload}
-        onRemoveFile={onRemoveFile}
-        canEdit={canEdit}
-      />
+          <EditableFieldsSection
+            formData={formData}
+            onInputChange={onInputChange}
+            canEdit={canEdit}
+          />
 
-      <EnhancedOwnershipSection 
-        onSave={handleOwnershipSave}
-        canEdit={canEdit}
-      />
+          <ConditionalFieldsSection
+            formData={formData}
+            files={files.filter(f => f.category === 'vesting_deed')}
+            onInputChange={onInputChange}
+            onFileUpload={onFileUpload}
+            onRemoveFile={onRemoveFile}
+            canEdit={canEdit}
+          />
+
+          <EnhancedOwnershipSection 
+            lead={formData}
+            onSave={handleOwnershipSave}
+            canEdit={canEdit}
+          />
+        </>
+      )}
     </div>
   );
 }
