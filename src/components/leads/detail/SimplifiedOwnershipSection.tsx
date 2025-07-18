@@ -1,14 +1,13 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Users, Plus, Trash2, Phone, Mail, MapPin, AlertTriangle } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
 import { useToast } from '@/hooks/use-toast';
+import { InlineEditField } from './InlineEditField';
 
 interface Heir {
   id: string;
@@ -27,40 +26,27 @@ interface SimplifiedOwnershipSectionProps {
 }
 
 const RELATIONSHIP_OPTIONS = [
-  'Mother', 'Father', 'Son', 'Daughter', 'Brother', 'Sister',
-  'Husband', 'Wife', 'Grandfather', 'Grandmother', 'Uncle',
-  'Aunt', 'Cousin', 'Other'
+  { value: 'Mother', label: 'Mother' },
+  { value: 'Father', label: 'Father' },
+  { value: 'Son', label: 'Son' },
+  { value: 'Daughter', label: 'Daughter' },
+  { value: 'Brother', label: 'Brother' },
+  { value: 'Sister', label: 'Sister' },
+  { value: 'Husband', label: 'Husband' },
+  { value: 'Wife', label: 'Wife' },
+  { value: 'Grandfather', label: 'Grandfather' },
+  { value: 'Grandmother', label: 'Grandmother' },
+  { value: 'Uncle', label: 'Uncle' },
+  { value: 'Aunt', label: 'Aunt' },
+  { value: 'Cousin', label: 'Cousin' },
+  { value: 'Other', label: 'Other' }
 ];
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
 
 export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true }: SimplifiedOwnershipSectionProps) {
   const [heirs, setHeirs] = useState<Heir[]>([]);
-  const [editingField, setEditingField] = useState<{ heirId: string; field: string } | null>(null);
-  const [tempValue, setTempValue] = useState<string>('');
-  const [newHeirId, setNewHeirId] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-
-  // Focus the input when editing field changes
-  useEffect(() => {
-    if (editingField && inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
-    }
-  }, [editingField]);
-
-  // Auto-focus new heir name field
-  useEffect(() => {
-    if (newHeirId) {
-      const timer = setTimeout(() => {
-        setEditingField({ heirId: newHeirId, field: 'name' });
-        setTempValue('');
-        setNewHeirId(null);
-      }, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [newHeirId]);
 
   const addHeir = () => {
     const newHeir: Heir = {
@@ -73,58 +59,16 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
       email: ''
     };
     setHeirs(prev => [...prev, newHeir]);
-    setNewHeirId(newHeir.id);
   };
 
   const removeHeir = (id: string) => {
     setHeirs(prev => prev.filter(heir => heir.id !== id));
-    if (editingField?.heirId === id) {
-      setEditingField(null);
-      setTempValue('');
-    }
   };
 
-  const startEditing = (heirId: string, field: keyof Heir) => {
-    if (!canEdit) return;
-    
-    const heir = heirs.find(h => h.id === heirId);
-    if (heir) {
-      setTempValue(String(heir[field]));
-      setEditingField({ heirId, field });
-    }
-  };
-
-  const saveEdit = (heirId: string, field: keyof Heir, value: string | number) => {
+  const updateHeir = (id: string, field: keyof Heir, value: string | number) => {
     setHeirs(prev => prev.map(heir => 
-      heir.id === heirId ? { ...heir, [field]: value } : heir
+      heir.id === id ? { ...heir, [field]: value } : heir
     ));
-    setEditingField(null);
-    setTempValue('');
-  };
-
-  const cancelEdit = () => {
-    setEditingField(null);
-    setTempValue('');
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent, heirId: string, field: keyof Heir) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const finalValue = field === 'percentage' ? parseFloat(tempValue) || 0 : tempValue;
-      saveEdit(heirId, field, finalValue);
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      cancelEdit();
-    } else if (e.key === 'Tab') {
-      // Let tab work naturally for navigation
-      const finalValue = field === 'percentage' ? parseFloat(tempValue) || 0 : tempValue;
-      saveEdit(heirId, field, finalValue);
-    }
-  };
-
-  const handleBlur = (heirId: string, field: keyof Heir) => {
-    const finalValue = field === 'percentage' ? parseFloat(tempValue) || 0 : tempValue;
-    saveEdit(heirId, field, finalValue);
   };
 
   const getTotalHeirsPercentage = () => {
@@ -189,76 +133,6 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
       );
     }
     return null;
-  };
-
-  const EditableField = ({ 
-    heir, 
-    field, 
-    type = 'text', 
-    placeholder,
-    className = ""
-  }: {
-    heir: Heir;
-    field: keyof Heir;
-    type?: string;
-    placeholder?: string;
-    className?: string;
-  }) => {
-    const isEditing = editingField?.heirId === heir.id && editingField?.field === field;
-    const value = heir[field];
-
-    if (field === 'relationship') {
-      return (
-        <Select
-          value={value as string}
-          onValueChange={(newValue) => saveEdit(heir.id, field, newValue)}
-          disabled={!canEdit}
-        >
-          <SelectTrigger className="w-full border-none bg-transparent p-0 h-auto text-sm">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {RELATIONSHIP_OPTIONS.map(option => (
-              <SelectItem key={option} value={option}>
-                {option}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      );
-    }
-
-    if (isEditing) {
-      return (
-        <Input
-          ref={inputRef}
-          type={type}
-          value={tempValue}
-          onChange={(e) => setTempValue(e.target.value)}
-          onBlur={() => handleBlur(heir.id, field)}
-          onKeyDown={(e) => handleKeyDown(e, heir.id, field)}
-          className="border-none bg-transparent p-0 h-auto text-sm focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-          placeholder={placeholder}
-          autoComplete="off"
-        />
-      );
-    }
-
-    return (
-      <div
-        onClick={() => startEditing(heir.id, field)}
-        className={`cursor-pointer hover:bg-gray-50 rounded px-1 py-0.5 transition-colors min-h-[20px] ${className} ${!value && 'text-gray-400 italic'}`}
-        tabIndex={canEdit ? 0 : -1}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            startEditing(heir.id, field);
-          }
-        }}
-      >
-        {value || placeholder || 'Click to edit'}
-      </div>
-    );
   };
 
   return (
@@ -341,89 +215,106 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {heirs.map((heir) => (
                   <Card key={heir.id} className="shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                    <CardContent className="p-4 space-y-3">
+                    <CardContent className="p-4 space-y-4">
                       {/* Header with Avatar and Actions */}
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                             {getInitials(heir.name)}
                           </div>
-                          <div className="flex-1">
-                            <div className="text-sm font-semibold text-gray-900 min-h-[20px]">
-                              <EditableField 
-                                heir={heir} 
-                                field="name" 
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm">
+                              <InlineEditField 
+                                label=""
+                                value={heir.name}
+                                onSave={(value) => updateHeir(heir.id, 'name', value)}
                                 placeholder="Enter name"
-                                className="font-semibold"
+                                className="font-semibold text-gray-900"
                               />
                             </div>
-                            <div className="text-xs text-gray-600 min-h-[16px]">
-                              <EditableField 
-                                heir={heir} 
-                                field="relationship" 
+                            <div className="text-xs text-gray-600 mt-1">
+                              <InlineEditField 
+                                label=""
+                                value={heir.relationship}
+                                onSave={(value) => updateHeir(heir.id, 'relationship', value)}
+                                type="select"
+                                options={RELATIONSHIP_OPTIONS}
                                 placeholder="Select relationship"
                               />
                             </div>
                           </div>
                         </div>
                         
-                        {/* Percentage Badge and Delete */}
-                        <div className="flex items-center gap-2">
-                          <Badge className={`${getPercentageColor(heir.percentage)} text-white px-1`}>
-                            <EditableField 
-                              heir={heir} 
-                              field="percentage" 
-                              type="number"
-                              placeholder="0"
-                              className="bg-transparent text-white font-semibold min-w-[20px]"
-                            />%
-                          </Badge>
-                          {canEdit && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeHeir(heir.id)}
-                              className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 h-auto"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          )}
+                        {/* Delete Button */}
+                        {canEdit && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeHeir(heir.id)}
+                            className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 h-auto"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        )}
+                      </div>
+
+                      {/* Percentage Field */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-600">Ownership %:</span>
+                        <div className="flex-1">
+                          <InlineEditField 
+                            label=""
+                            value={heir.percentage.toString()}
+                            onSave={(value) => updateHeir(heir.id, 'percentage', parseFloat(value) || 0)}
+                            type="number"
+                            placeholder="0"
+                            className="text-sm"
+                          />
                         </div>
+                        <Badge className={`${getPercentageColor(heir.percentage)} text-white text-xs`}>
+                          {heir.percentage}%
+                        </Badge>
                       </div>
 
                       {/* Contact Details */}
-                      <div className="space-y-2 text-xs">
+                      <div className="space-y-3 text-xs">
                         <div className="flex items-center gap-2 text-gray-600">
                           <MapPin className="w-3 h-3 flex-shrink-0" />
-                          <div className="flex-1 min-h-[16px]">
-                            <EditableField 
-                              heir={heir} 
-                              field="propertyAddress" 
+                          <div className="flex-1 min-w-0">
+                            <InlineEditField 
+                              label=""
+                              value={heir.propertyAddress}
+                              onSave={(value) => updateHeir(heir.id, 'propertyAddress', value)}
                               placeholder="Property address"
+                              className="text-xs"
                             />
                           </div>
                         </div>
                         
                         <div className="flex items-center gap-2 text-gray-600">
                           <Phone className="w-3 h-3 flex-shrink-0" />
-                          <div className="flex-1 min-h-[16px]">
-                            <EditableField 
-                              heir={heir} 
-                              field="phoneNumber" 
+                          <div className="flex-1 min-w-0">
+                            <InlineEditField 
+                              label=""
+                              value={heir.phoneNumber}
+                              onSave={(value) => updateHeir(heir.id, 'phoneNumber', value)}
                               type="tel"
                               placeholder="Phone number"
+                              className="text-xs"
                             />
                           </div>
                         </div>
                         
                         <div className="flex items-center gap-2 text-gray-600">
                           <Mail className="w-3 h-3 flex-shrink-0" />
-                          <div className="flex-1 min-h-[16px]">
-                            <EditableField 
-                              heir={heir} 
-                              field="email" 
+                          <div className="flex-1 min-w-0">
+                            <InlineEditField 
+                              label=""
+                              value={heir.email}
+                              onSave={(value) => updateHeir(heir.id, 'email', value)}
                               type="email"
                               placeholder="Email address"
+                              className="text-xs"
                             />
                           </div>
                         </div>
