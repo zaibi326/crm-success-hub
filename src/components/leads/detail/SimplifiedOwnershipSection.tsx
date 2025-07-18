@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,7 +37,17 @@ const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'
 export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true }: SimplifiedOwnershipSectionProps) {
   const [heirs, setHeirs] = useState<Heir[]>([]);
   const [editingField, setEditingField] = useState<{ heirId: string; field: string } | null>(null);
+  const [tempValue, setTempValue] = useState<string>('');
+  const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Focus the input when editing field changes
+  useEffect(() => {
+    if (editingField && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [editingField]);
 
   const addHeir = () => {
     const newHeir: Heir = {
@@ -56,11 +66,47 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
     setHeirs(prev => prev.filter(heir => heir.id !== id));
   };
 
-  const updateHeir = (id: string, field: keyof Heir, value: string | number) => {
+  const startEditing = (heirId: string, field: keyof Heir) => {
+    if (!canEdit) return;
+    
+    const heir = heirs.find(h => h.id === heirId);
+    if (heir) {
+      setTempValue(String(heir[field]));
+      setEditingField({ heirId, field });
+    }
+  };
+
+  const saveEdit = (heirId: string, field: keyof Heir, value: string | number) => {
     setHeirs(prev => prev.map(heir => 
-      heir.id === id ? { ...heir, [field]: value } : heir
+      heir.id === heirId ? { ...heir, [field]: value } : heir
     ));
     setEditingField(null);
+    setTempValue('');
+  };
+
+  const cancelEdit = () => {
+    setEditingField(null);
+    setTempValue('');
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, heirId: string, field: keyof Heir) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const finalValue = field === 'percentage' ? parseFloat(tempValue) || 0 : tempValue;
+      saveEdit(heirId, field, finalValue);
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      cancelEdit();
+    } else if (e.key === 'Tab') {
+      // Let tab work naturally for navigation
+      const finalValue = field === 'percentage' ? parseFloat(tempValue) || 0 : tempValue;
+      saveEdit(heirId, field, finalValue);
+    }
+  };
+
+  const handleBlur = (heirId: string, field: keyof Heir) => {
+    const finalValue = field === 'percentage' ? parseFloat(tempValue) || 0 : tempValue;
+    saveEdit(heirId, field, finalValue);
   };
 
   const getTotalHeirsPercentage = () => {
@@ -147,7 +193,7 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
       return (
         <Select
           value={value as string}
-          onValueChange={(newValue) => updateHeir(heir.id, field, newValue)}
+          onValueChange={(newValue) => saveEdit(heir.id, field, newValue)}
           disabled={!canEdit}
         >
           <SelectTrigger className="w-full border-none bg-transparent p-0 h-auto text-sm">
@@ -167,28 +213,30 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
     if (isEditing) {
       return (
         <Input
+          ref={inputRef}
           type={type}
-          value={value}
-          onChange={(e) => {
-            const newValue = type === 'number' ? parseFloat(e.target.value) || 0 : e.target.value;
-            updateHeir(heir.id, field, newValue);
-          }}
-          onBlur={() => setEditingField(null)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') setEditingField(null);
-            if (e.key === 'Escape') setEditingField(null);
-          }}
-          className="border-none bg-transparent p-0 h-auto text-sm focus:ring-0"
+          value={tempValue}
+          onChange={(e) => setTempValue(e.target.value)}
+          onBlur={() => handleBlur(heir.id, field)}
+          onKeyDown={(e) => handleKeyDown(e, heir.id, field)}
+          className="border-none bg-transparent p-0 h-auto text-sm focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           placeholder={placeholder}
-          autoFocus
+          autoComplete="off"
         />
       );
     }
 
     return (
       <div
-        onClick={() => canEdit && setEditingField({ heirId: heir.id, field })}
-        className={`cursor-pointer hover:bg-gray-50 rounded px-1 py-0.5 transition-colors ${className} ${!value && 'text-gray-400 italic'}`}
+        onClick={() => startEditing(heir.id, field)}
+        className={`cursor-pointer hover:bg-gray-50 rounded px-1 py-0.5 transition-colors min-h-[20px] ${className} ${!value && 'text-gray-400 italic'}`}
+        tabIndex={canEdit ? 0 : -1}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            startEditing(heir.id, field);
+          }
+        }}
       >
         {value || placeholder || 'Click to edit'}
       </div>
@@ -303,13 +351,13 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
                         
                         {/* Percentage Badge and Delete */}
                         <div className="flex items-center gap-2">
-                          <Badge className={`${getPercentageColor(heir.percentage)} text-white`}>
+                          <Badge className={`${getPercentageColor(heir.percentage)} text-white px-1`}>
                             <InlineEditField 
                               heir={heir} 
                               field="percentage" 
                               type="number"
                               placeholder="0"
-                              className="bg-transparent text-white font-semibold"
+                              className="bg-transparent text-white font-semibold min-w-[20px]"
                             />%
                           </Badge>
                           {canEdit && (
