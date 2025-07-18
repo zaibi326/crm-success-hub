@@ -18,7 +18,6 @@ interface Heir {
   propertyAddress: string;
   phoneNumber: string;
   email: string;
-  isNew?: boolean; // Track if this is a newly added heir
 }
 
 interface SimplifiedOwnershipSectionProps {
@@ -39,6 +38,7 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
   const [heirs, setHeirs] = useState<Heir[]>([]);
   const [editingField, setEditingField] = useState<{ heirId: string; field: string } | null>(null);
   const [tempValue, setTempValue] = useState<string>('');
+  const [newHeirId, setNewHeirId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -50,6 +50,18 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
     }
   }, [editingField]);
 
+  // Auto-focus new heir name field
+  useEffect(() => {
+    if (newHeirId) {
+      const timer = setTimeout(() => {
+        setEditingField({ heirId: newHeirId, field: 'name' });
+        setTempValue('');
+        setNewHeirId(null);
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [newHeirId]);
+
   const addHeir = () => {
     const newHeir: Heir = {
       id: Date.now().toString(),
@@ -58,20 +70,18 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
       percentage: 0,
       propertyAddress: '',
       phoneNumber: '',
-      email: '',
-      isNew: true // Mark as new for immediate edit mode
+      email: ''
     };
     setHeirs(prev => [...prev, newHeir]);
-    
-    // Auto-focus the name field of the new heir
-    setTimeout(() => {
-      setEditingField({ heirId: newHeir.id, field: 'name' });
-      setTempValue('');
-    }, 100);
+    setNewHeirId(newHeir.id);
   };
 
   const removeHeir = (id: string) => {
     setHeirs(prev => prev.filter(heir => heir.id !== id));
+    if (editingField?.heirId === id) {
+      setEditingField(null);
+      setTempValue('');
+    }
   };
 
   const startEditing = (heirId: string, field: keyof Heir) => {
@@ -86,7 +96,7 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
 
   const saveEdit = (heirId: string, field: keyof Heir, value: string | number) => {
     setHeirs(prev => prev.map(heir => 
-      heir.id === heirId ? { ...heir, [field]: value, isNew: false } : heir
+      heir.id === heirId ? { ...heir, [field]: value } : heir
     ));
     setEditingField(null);
     setTempValue('');
@@ -181,24 +191,20 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
     return null;
   };
 
-  const InlineEditField = ({ 
+  const EditableField = ({ 
     heir, 
     field, 
     type = 'text', 
     placeholder,
-    className = "",
-    autoFocus = false
+    className = ""
   }: {
     heir: Heir;
     field: keyof Heir;
     type?: string;
     placeholder?: string;
     className?: string;
-    autoFocus?: boolean;
   }) => {
     const isEditing = editingField?.heirId === heir.id && editingField?.field === field;
-    const isNewHeir = heir.isNew && field === 'name'; // Auto-edit name for new heirs
-    const shouldShowInput = isEditing || isNewHeir;
     const value = heir[field];
 
     if (field === 'relationship') {
@@ -222,46 +228,18 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
       );
     }
 
-    if (shouldShowInput) {
+    if (isEditing) {
       return (
         <Input
-          ref={isEditing ? inputRef : undefined}
+          ref={inputRef}
           type={type}
-          value={isNewHeir ? '' : tempValue}
-          onChange={(e) => {
-            if (isNewHeir) {
-              // Direct update for new heirs
-              setHeirs(prev => prev.map(h => 
-                h.id === heir.id ? { ...h, [field]: e.target.value } : h
-              ));
-            } else {
-              setTempValue(e.target.value);
-            }
-          }}
-          onBlur={() => {
-            if (!isNewHeir) {
-              handleBlur(heir.id, field);
-            } else {
-              // Mark as no longer new when user finishes editing
-              setHeirs(prev => prev.map(h => 
-                h.id === heir.id ? { ...h, isNew: false } : h
-              ));
-            }
-          }}
-          onKeyDown={(e) => {
-            if (!isNewHeir) {
-              handleKeyDown(e, heir.id, field);
-            } else if (e.key === 'Enter' || e.key === 'Tab') {
-              // Move to next field or mark as complete
-              setHeirs(prev => prev.map(h => 
-                h.id === heir.id ? { ...h, isNew: false } : h
-              ));
-            }
-          }}
+          value={tempValue}
+          onChange={(e) => setTempValue(e.target.value)}
+          onBlur={() => handleBlur(heir.id, field)}
+          onKeyDown={(e) => handleKeyDown(e, heir.id, field)}
           className="border-none bg-transparent p-0 h-auto text-sm focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           placeholder={placeholder}
           autoComplete="off"
-          autoFocus={autoFocus || isNewHeir}
         />
       );
     }
@@ -372,16 +350,15 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
                           </div>
                           <div className="flex-1">
                             <div className="text-sm font-semibold text-gray-900 min-h-[20px]">
-                              <InlineEditField 
+                              <EditableField 
                                 heir={heir} 
                                 field="name" 
                                 placeholder="Enter name"
                                 className="font-semibold"
-                                autoFocus={heir.isNew}
                               />
                             </div>
                             <div className="text-xs text-gray-600 min-h-[16px]">
-                              <InlineEditField 
+                              <EditableField 
                                 heir={heir} 
                                 field="relationship" 
                                 placeholder="Select relationship"
@@ -393,7 +370,7 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
                         {/* Percentage Badge and Delete */}
                         <div className="flex items-center gap-2">
                           <Badge className={`${getPercentageColor(heir.percentage)} text-white px-1`}>
-                            <InlineEditField 
+                            <EditableField 
                               heir={heir} 
                               field="percentage" 
                               type="number"
@@ -419,7 +396,7 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
                         <div className="flex items-center gap-2 text-gray-600">
                           <MapPin className="w-3 h-3 flex-shrink-0" />
                           <div className="flex-1 min-h-[16px]">
-                            <InlineEditField 
+                            <EditableField 
                               heir={heir} 
                               field="propertyAddress" 
                               placeholder="Property address"
@@ -430,7 +407,7 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
                         <div className="flex items-center gap-2 text-gray-600">
                           <Phone className="w-3 h-3 flex-shrink-0" />
                           <div className="flex-1 min-h-[16px]">
-                            <InlineEditField 
+                            <EditableField 
                               heir={heir} 
                               field="phoneNumber" 
                               type="tel"
@@ -442,7 +419,7 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
                         <div className="flex items-center gap-2 text-gray-600">
                           <Mail className="w-3 h-3 flex-shrink-0" />
                           <div className="flex-1 min-h-[16px]">
-                            <InlineEditField 
+                            <EditableField 
                               heir={heir} 
                               field="email" 
                               type="email"
