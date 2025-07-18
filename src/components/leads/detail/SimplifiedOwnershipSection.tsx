@@ -18,6 +18,7 @@ interface Heir {
   propertyAddress: string;
   phoneNumber: string;
   email: string;
+  isNew?: boolean; // Track if this is a newly added heir
 }
 
 interface SimplifiedOwnershipSectionProps {
@@ -57,9 +58,16 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
       percentage: 0,
       propertyAddress: '',
       phoneNumber: '',
-      email: ''
+      email: '',
+      isNew: true // Mark as new for immediate edit mode
     };
     setHeirs(prev => [...prev, newHeir]);
+    
+    // Auto-focus the name field of the new heir
+    setTimeout(() => {
+      setEditingField({ heirId: newHeir.id, field: 'name' });
+      setTempValue('');
+    }, 100);
   };
 
   const removeHeir = (id: string) => {
@@ -78,7 +86,7 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
 
   const saveEdit = (heirId: string, field: keyof Heir, value: string | number) => {
     setHeirs(prev => prev.map(heir => 
-      heir.id === heirId ? { ...heir, [field]: value } : heir
+      heir.id === heirId ? { ...heir, [field]: value, isNew: false } : heir
     ));
     setEditingField(null);
     setTempValue('');
@@ -178,15 +186,19 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
     field, 
     type = 'text', 
     placeholder,
-    className = ""
+    className = "",
+    autoFocus = false
   }: {
     heir: Heir;
     field: keyof Heir;
     type?: string;
     placeholder?: string;
     className?: string;
+    autoFocus?: boolean;
   }) => {
     const isEditing = editingField?.heirId === heir.id && editingField?.field === field;
+    const isNewHeir = heir.isNew && field === 'name'; // Auto-edit name for new heirs
+    const shouldShowInput = isEditing || isNewHeir;
     const value = heir[field];
 
     if (field === 'relationship') {
@@ -210,18 +222,46 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
       );
     }
 
-    if (isEditing) {
+    if (shouldShowInput) {
       return (
         <Input
-          ref={inputRef}
+          ref={isEditing ? inputRef : undefined}
           type={type}
-          value={tempValue}
-          onChange={(e) => setTempValue(e.target.value)}
-          onBlur={() => handleBlur(heir.id, field)}
-          onKeyDown={(e) => handleKeyDown(e, heir.id, field)}
+          value={isNewHeir ? '' : tempValue}
+          onChange={(e) => {
+            if (isNewHeir) {
+              // Direct update for new heirs
+              setHeirs(prev => prev.map(h => 
+                h.id === heir.id ? { ...h, [field]: e.target.value } : h
+              ));
+            } else {
+              setTempValue(e.target.value);
+            }
+          }}
+          onBlur={() => {
+            if (!isNewHeir) {
+              handleBlur(heir.id, field);
+            } else {
+              // Mark as no longer new when user finishes editing
+              setHeirs(prev => prev.map(h => 
+                h.id === heir.id ? { ...h, isNew: false } : h
+              ));
+            }
+          }}
+          onKeyDown={(e) => {
+            if (!isNewHeir) {
+              handleKeyDown(e, heir.id, field);
+            } else if (e.key === 'Enter' || e.key === 'Tab') {
+              // Move to next field or mark as complete
+              setHeirs(prev => prev.map(h => 
+                h.id === heir.id ? { ...h, isNew: false } : h
+              ));
+            }
+          }}
           className="border-none bg-transparent p-0 h-auto text-sm focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           placeholder={placeholder}
           autoComplete="off"
+          autoFocus={autoFocus || isNewHeir}
         />
       );
     }
@@ -337,6 +377,7 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
                                 field="name" 
                                 placeholder="Enter name"
                                 className="font-semibold"
+                                autoFocus={heir.isNew}
                               />
                             </div>
                             <div className="text-xs text-gray-600 min-h-[16px]">
