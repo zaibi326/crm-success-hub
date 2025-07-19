@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { X, Filter, ChevronDown, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -219,9 +220,9 @@ export function PodioFilterPanel({
   );
 
   return (
-    <div className="fixed right-0 top-0 h-full w-96 bg-white border-l border-gray-200 shadow-xl z-50 animate-slide-in-right">
+    <div className="fixed right-0 top-0 h-full w-96 bg-white border-l border-gray-200 shadow-xl z-50 flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
         <div className="flex items-center gap-2">
           <Filter className="w-5 h-5 text-blue-600" />
           <h3 className="text-lg font-semibold text-gray-900">
@@ -252,7 +253,7 @@ export function PodioFilterPanel({
 
       {/* Results Summary */}
       {!showSavedFilters && filteredResults !== undefined && totalResults !== undefined && (
-        <div className="p-4 bg-blue-50 border-b border-blue-200">
+        <div className="p-4 bg-blue-50 border-b border-blue-200 flex-shrink-0">
           <div className="text-sm">
             <span className="font-semibold text-blue-900">{filteredResults}</span>
             <span className="text-blue-700"> of </span>
@@ -316,7 +317,7 @@ export function PodioFilterPanel({
         <>
           {/* Active Filters */}
           {filters.length > 0 && (
-            <div className="p-4 border-b border-gray-200 bg-gray-50">
+            <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
                   Active Filters ({filters.length})
@@ -348,7 +349,7 @@ export function PodioFilterPanel({
             </div>
           )}
 
-          {/* Filter Sections */}
+          {/* Scrollable Filter Sections */}
           <ScrollArea className="flex-1">
             <div className="divide-y divide-gray-100">
               <FilterSection
@@ -411,7 +412,7 @@ export function PodioFilterPanel({
                                 }
                               }}
                               initialFocus
-                              className="p-3 pointer-events-auto"
+                              className="p-3"
                             />
                           </PopoverContent>
                         </Popover>
@@ -443,7 +444,7 @@ export function PodioFilterPanel({
                                 }
                               }}
                               initialFocus
-                              className="p-3 pointer-events-auto"
+                              className="p-3"
                             />
                           </PopoverContent>
                         </Popover>
@@ -529,9 +530,9 @@ export function PodioFilterPanel({
         </>
       )}
 
-      {/* Footer */}
+      {/* Sticky Footer */}
       {!showSavedFilters && (
-        <div className="p-4 border-t border-gray-200 bg-gray-50 space-y-3">
+        <div className="p-4 border-t border-gray-200 bg-gray-50 space-y-3 flex-shrink-0">
           {/* Save Filter Input */}
           <div className="flex gap-2">
             <Input
@@ -550,7 +551,7 @@ export function PodioFilterPanel({
               size="sm"
               onClick={handleSaveFilter}
               disabled={!filterName.trim() || filters.length === 0}
-              className="text-gray-700 border-gray-300 hover:bg-gray-50"
+              className="text-gray-700 border-gray-300 hover:bg-gray-50 whitespace-nowrap"
             >
               Save
             </Button>

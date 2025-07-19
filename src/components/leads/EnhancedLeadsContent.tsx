@@ -1,4 +1,6 @@
-import React from 'react';
+
+import React, { useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { TaxLeadDetailsForm } from './TaxLeadDetailsForm';
 import { TemplateModificationDialog } from './TemplateModificationDialog';
 import { LeadsHeader } from './LeadsHeader';
@@ -10,6 +12,10 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
 export function EnhancedLeadsContent() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const selectedLeadId = searchParams.get('leadId');
+  
   const {
     currentView,
     sortBy,
@@ -41,8 +47,31 @@ export function EnhancedLeadsContent() {
     handleFilterToggle
   } = useLeadsLogic();
 
+  // Handle URL-based lead selection
+  useEffect(() => {
+    if (selectedLeadId && mockLeads.length > 0) {
+      const lead = mockLeads.find(l => l.id.toString() === selectedLeadId);
+      if (lead && lead !== selectedLead) {
+        setSelectedLead(lead);
+      }
+    } else if (!selectedLeadId && selectedLead) {
+      setSelectedLead(null);
+    }
+  }, [selectedLeadId, mockLeads, selectedLead, setSelectedLead]);
+
   const handleSellerAdded = (seller: any) => {
     setSelectedLead(seller);
+    setSearchParams({ leadId: seller.id.toString() });
+  };
+
+  const handleLeadSelect = (lead: any) => {
+    setSelectedLead(lead);
+    setSearchParams({ leadId: lead.id.toString() });
+  };
+
+  const handleBackToLeads = () => {
+    setSelectedLead(null);
+    setSearchParams({});
   };
 
   const handleRemoveFilter = (filterId: string) => {
@@ -77,7 +106,7 @@ export function EnhancedLeadsContent() {
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
-                onClick={() => setSelectedLead(null)}
+                onClick={handleBackToLeads}
                 className="flex items-center gap-2 text-agile-blue-600 hover:text-agile-blue-700 hover:bg-agile-blue-50"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -142,7 +171,7 @@ export function EnhancedLeadsContent() {
               <LeadsMainContent
                 currentView={currentView}
                 filteredLeads={filteredLeads}
-                onLeadSelect={setSelectedLead}
+                onLeadSelect={handleLeadSelect}
                 getStatusBadge={getStatusBadge}
                 handleSort={handleSort}
                 onLeadsUpdate={handleBulkLeadsUpdate}
