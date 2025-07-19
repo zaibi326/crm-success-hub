@@ -7,9 +7,11 @@ import { LeadsHeader } from './LeadsHeader';
 import { LeadsMainContent } from './LeadsMainContent';
 import { FilterChips } from './FilterChips';
 import { FilterSidebar } from './FilterSidebar';
+import { PodioFilterPanel } from './PodioFilterPanel';
 import { useLeadsLogic } from './useLeadsLogic';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Filter } from 'lucide-react';
+import { FilterCondition } from './filters/types';
 
 export function EnhancedLeadsContent() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -208,13 +210,12 @@ export function EnhancedLeadsContent() {
         )}
       </div>
 
-      {/* Filter Sidebar */}
-      <FilterSidebar
+      {/* Podio Filter Panel */}
+      <PodioFilterPanel
         isOpen={showFilterSidebar}
         onClose={() => setShowFilterSidebar(false)}
         filters={filters}
-        onRemoveFilter={handleRemoveFilter}
-        onClearAll={handleClearAllFilters}
+        onFiltersChange={setFilters}
         totalResults={mockLeads.length}
         filteredResults={filteredLeads.length}
       />

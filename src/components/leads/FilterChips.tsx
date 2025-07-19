@@ -3,14 +3,7 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-interface FilterCondition {
-  id: string;
-  field: string;
-  operator: string;
-  value: string;
-  label: string;
-}
+import { FilterCondition } from './filters/types';
 
 interface FilterChipsProps {
   filters: FilterCondition[];

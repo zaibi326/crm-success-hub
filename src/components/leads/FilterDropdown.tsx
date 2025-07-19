@@ -1,14 +1,7 @@
 
 import React, { useState } from 'react';
 import { FilterPanel } from './filters/FilterPanel';
-
-interface FilterCondition {
-  id: string;
-  field: string;
-  operator: string;
-  value: string;
-  label?: string;
-}
+import { FilterCondition } from './filters/types';
 
 interface FilterDropdownProps {
   isOpen: boolean;

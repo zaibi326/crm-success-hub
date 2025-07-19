@@ -4,7 +4,7 @@ export interface FilterCondition {
   field: string;
   operator: string;
   value: string;
-  label?: string;
+  label: string; // Made required to match usage in other files
 }
 
 export interface FilterComponentProps {
