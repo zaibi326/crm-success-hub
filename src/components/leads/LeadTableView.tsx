@@ -11,13 +11,6 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer';
 import { 
   Search, 
   Filter, 
@@ -27,9 +20,16 @@ import {
 } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
 import { LeadTableRow } from './LeadTableRow';
-import { FilterPanel } from './filters/FilterPanel';
-import { FilterCondition } from './filters/types';
+import { PodioFilterPanel } from './PodioFilterPanel';
 import { toast } from 'sonner';
+
+interface FilterCondition {
+  id: string;
+  field: string;
+  operator: string;
+  value: string;
+  label: string;
+}
 
 interface LeadTableViewProps {
   leads: TaxLead[];
@@ -60,7 +60,7 @@ export function LeadTableView({
 }: LeadTableViewProps) {
   const [selectedLeads, setSelectedLeads] = useState<number[]>([]);
   const [internalSearchTerm, setInternalSearchTerm] = useState(searchTerm);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [filters, setFilters] = useState<FilterCondition[]>([]);
   const checkboxRef = useRef<HTMLInputElement>(null);
 
@@ -71,14 +71,21 @@ export function LeadTableView({
     return leadsToFilter.filter(lead => {
       return filters.every(filter => {
         switch (filter.field) {
-          case 'status':
+          case 'leadStatus':
             return lead.status === filter.value;
-          case 'ownerName':
+          case 'createdBy':
             return lead.ownerName.toLowerCase().includes(filter.value.toLowerCase());
           case 'email':
             return lead.email?.toLowerCase().includes(filter.value.toLowerCase());
           case 'phone':
             return lead.phone?.includes(filter.value);
+          case 'createdOn':
+            if (filter.operator === 'gte') {
+              return new Date(lead.createdAt || '') >= new Date(filter.value);
+            } else if (filter.operator === 'lte') {
+              return new Date(lead.createdAt || '') <= new Date(filter.value);
+            }
+            return true;
           default:
             return true;
         }
@@ -235,7 +242,7 @@ export function LeadTableView({
                 className="flex items-center gap-2 text-green-600 border-green-200 hover:bg-green-50"
               >
                 <Download className="w-4 h-4" />
-                Export Selected
+                Export
               </Button>
               <Button
                 variant="destructive"
@@ -244,55 +251,31 @@ export function LeadTableView({
                 className="flex items-center gap-2"
               >
                 <Trash2 className="w-4 h-4" />
-                Delete Selected
+                Delete
               </Button>
             </>
           )}
           
-          {/* Filter Button */}
-          <Drawer open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-            <DrawerTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="flex items-center gap-2 relative"
-              >
-                <Filter className="w-4 h-4" />
-                Filter
-                {filters.length > 0 && (
-                  <Badge 
-                    variant="secondary" 
-                    className="ml-1 bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5 min-w-[18px] h-[18px] flex items-center justify-center"
-                  >
-                    {filters.length}
-                  </Badge>
-                )}
-              </Button>
-            </DrawerTrigger>
-            <DrawerContent className="h-[80vh]">
-              <DrawerHeader>
-                <DrawerTitle className="flex items-center justify-between">
-                  <span>Filter Leads</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setIsFilterOpen(false)}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </DrawerTitle>
-              </DrawerHeader>
-              <FilterPanel
-                isOpen={isFilterOpen}
-                onClose={() => setIsFilterOpen(false)}
-                filters={filters}
-                onFiltersChange={setFilters}
-                onApplyFilters={() => {}}
-                onSaveView={() => toast.success('Filter view saved')}
-                onClearAll={handleClearAllFilters}
-              />
-            </DrawerContent>
-          </Drawer>
+          {/* Filter Button - Always visible */}
+          {selectedLeads.length === 0 && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setIsFilterPanelOpen(true)}
+              className="flex items-center gap-2 relative"
+            >
+              <Filter className="w-4 h-4" />
+              Filter
+              {filters.length > 0 && (
+                <Badge 
+                  variant="secondary" 
+                  className="ml-1 bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5 min-w-[18px] h-[18px] flex items-center justify-center"
+                >
+                  {filters.length}
+                </Badge>
+              )}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -306,7 +289,7 @@ export function LeadTableView({
               variant="secondary" 
               className="flex items-center gap-1 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
             >
-              {filter.label || `${filter.field}: ${filter.value}`}
+              {filter.label}
               <X 
                 className="w-3 h-3 cursor-pointer hover:text-blue-900" 
                 onClick={() => handleRemoveFilter(filter.id)}
@@ -400,6 +383,16 @@ export function LeadTableView({
           </div>
         </div>
       </div>
+
+      {/* Podio Filter Panel */}
+      <PodioFilterPanel
+        isOpen={isFilterPanelOpen}
+        onClose={() => setIsFilterPanelOpen(false)}
+        filters={filters}
+        onFiltersChange={setFilters}
+        totalResults={leads.length}
+        filteredResults={filteredLeads.length}
+      />
     </div>
   );
 }

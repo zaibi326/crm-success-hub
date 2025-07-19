@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Plus, Grid, List, Calendar, Activity, Badge, Filter } from 'lucide-react';
+import { Plus, Grid, List, Calendar, Activity, Badge } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -10,7 +10,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ComprehensiveAddSellerDialog } from './ComprehensiveAddSellerDialog';
-import { FilterDropdown } from './FilterDropdown';
 import { TaxLead } from '@/types/taxLead';
 
 interface FilterCondition {
@@ -39,15 +38,8 @@ export function LeadsHeader({
   onSellerAdded, 
   currentView = 'table', 
   onViewChange,
-  filters = [],
-  onFiltersChange,
-  availableFields = [],
-  onFilterToggle,
-  showFilterSidebar = false,
   sidebarCollapsed = false
 }: LeadsHeaderProps) {
-  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
-
   const getViewIcon = (view: string) => {
     switch (view) {
       case 'table': return Grid;
@@ -60,19 +52,6 @@ export function LeadsHeader({
   };
 
   const CurrentViewIcon = getViewIcon(currentView);
-
-  const handleApplyFilters = () => {
-    onFilterToggle?.();
-  };
-
-  const handleSaveView = () => {
-    // TODO: Implement save view functionality
-    console.log('Save view functionality to be implemented');
-  };
-
-  const handleClearAllFilters = () => {
-    onFiltersChange?.([]);
-  };
 
   return (
     <header className="sticky top-0 z-10 bg-white border-b border-agile-gray-200 px-6 py-4 shadow-sm">
@@ -128,39 +107,6 @@ export function LeadsHeader({
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-
-          {/* Filter Button with Dropdown */}
-          <div className="relative">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
-              className={`h-8 px-3 border-agile-gray-300 text-sm flex items-center gap-2 transition-all duration-200 ${
-                isFilterDropdownOpen || showFilterSidebar
-                  ? 'bg-agile-blue-50 border-agile-blue-300 text-agile-blue-700' 
-                  : 'bg-white hover:bg-agile-gray-50'
-              }`}
-            >
-              <Filter className="w-4 h-4" />
-              <span>Filter</span>
-              {filters.length > 0 && (
-                <span className="bg-agile-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[18px] h-[18px] flex items-center justify-center">
-                  {filters.length}
-                </span>
-              )}
-            </Button>
-
-            {/* Filter Dropdown */}
-            <FilterDropdown
-              isOpen={isFilterDropdownOpen}
-              onClose={() => setIsFilterDropdownOpen(false)}
-              filters={filters}
-              onFiltersChange={onFiltersChange || (() => {})}
-              onApplyFilters={handleApplyFilters}
-              onSaveView={handleSaveView}
-              onClearAll={handleClearAllFilters}
-            />
-          </div>
 
           {/* Add Seller Button */}
           <ComprehensiveAddSellerDialog 

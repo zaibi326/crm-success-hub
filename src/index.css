@@ -3,87 +3,60 @@
 @tailwind components;
 @tailwind utilities;
 
-/* AgileCRM Design System */
-
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 20%;
-
+    --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 20%;
-
+    --card-foreground: 0 0% 3.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 20%;
-
-    --primary: 216 91% 55%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 220 9% 46%;
-
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
-
-    --accent: 220 14% 96%;
-    --accent-foreground: 220 9% 46%;
-
-    --destructive: 0 65% 51%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 216 91% 55%;
-
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
     --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 33%;
-    --sidebar-primary: 216 91% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 14% 96%;
-    --sidebar-accent-foreground: 0 0% 33%;
-    --sidebar-border: 0 0% 90%;
-    --sidebar-ring: 216 91% 55%;
   }
 
   .dark {
-    --background: 0 0% 4%;
-    --foreground: 0 0% 95%;
-
-    --card: 0 0% 4%;
-    --card-foreground: 0 0% 95%;
-
-    --popover: 0 0% 4%;
-    --popover-foreground: 0 0% 95%;
-
-    --primary: 216 91% 55%;
-    --primary-foreground: 0 0% 4%;
-
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 0 0% 95%;
-
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-
-    --accent: 217 33% 17%;
-    --accent-foreground: 0 0% 95%;
-
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 0 0% 95%;
-
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 216 91% 55%;
-
-    --sidebar-background: 0 0% 4%;
-    --sidebar-foreground: 0 0% 65%;
-    --sidebar-primary: 216 91% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 17%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 217 33% 17%;
-    --sidebar-ring: 216 91% 55%;
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
   }
 }
 
@@ -91,214 +64,101 @@
   * {
     @apply border-border;
   }
-
   body {
-    @apply bg-white text-agile-gray-800 font-sans;
-    font-feature-settings: "rlig" 1, "calt" 1;
-    min-height: 100vh;
-  }
-
-  /* Clean scrollbars */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: #f3f4f6;
-    border-radius: 3px;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: #d1d5db;
-    border-radius: 3px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af;
+    @apply bg-background text-foreground;
   }
 }
 
-@layer components {
-  /* AgileCRM Button Styles */
-  .agile-button-primary {
-    @apply bg-agile-blue text-white font-medium rounded-md px-4 py-2 transition-all duration-200 hover:bg-agile-blue-600 hover:shadow-agile focus:outline-none focus:ring-2 focus:ring-agile-blue focus:ring-offset-2;
+/* Custom animation for the filter panel */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
   }
-
-  .agile-button-secondary {
-    @apply bg-white text-agile-gray-700 font-medium rounded-md px-4 py-2 border border-agile-gray-200 transition-all duration-200 hover:bg-agile-gray-50 hover:shadow-agile focus:outline-none focus:ring-2 focus:ring-agile-blue focus:ring-offset-2;
-  }
-
-  .agile-button-success {
-    @apply bg-agile-green text-white font-medium rounded-md px-4 py-2 transition-all duration-200 hover:bg-agile-green-600 hover:shadow-agile focus:outline-none focus:ring-2 focus:ring-agile-green focus:ring-offset-2;
-  }
-
-  .agile-button-danger {
-    @apply bg-agile-red text-white font-medium rounded-md px-4 py-2 transition-all duration-200 hover:bg-agile-red-600 hover:shadow-agile focus:outline-none focus:ring-2 focus:ring-agile-red focus:ring-offset-2;
-  }
-
-  /* Ripple effect */
-  .ripple {
-    @apply relative overflow-hidden;
-  }
-
-  .ripple::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
-  }
-
-  .ripple:active::before {
-    width: 300px;
-    height: 300px;
-  }
-
-  /* AgileCRM Cards */
-  .agile-card {
-    @apply bg-white rounded-lg shadow-agile-card border border-agile-gray-200 transition-all duration-200 hover:shadow-agile;
-  }
-
-  .agile-card-hover {
-    @apply hover:shadow-agile-hover hover:-translate-y-1;
-  }
-
-  /* Status cards */
-  .status-card-hot {
-    @apply bg-agile-red-50 border-agile-red-200 hover:bg-agile-red-100;
-  }
-
-  .status-card-warm {
-    @apply bg-agile-coral-50 border-agile-coral-200 hover:bg-agile-coral-100;
-  }
-
-  .status-card-cold {
-    @apply bg-agile-blue-50 border-agile-blue-200 hover:bg-agile-blue-100;
-  }
-
-  .status-card-pass {
-    @apply bg-agile-gray-50 border-agile-gray-200 hover:bg-agile-gray-100;
-  }
-
-  /* Sidebar */
-  .agile-sidebar-item {
-    @apply flex items-center gap-3 px-4 py-3 text-sm text-agile-gray-600 hover:text-agile-blue hover:bg-agile-blue-50 rounded-md transition-all duration-200 cursor-pointer;
-  }
-
-  .agile-sidebar-item.active {
-    @apply bg-agile-blue-50 text-agile-blue font-medium shadow-sm;
-  }
-
-  /* Metric cards */
-  .agile-metric-card {
-    @apply bg-white rounded-lg p-6 shadow-agile-card border border-agile-gray-200 transition-all duration-300 hover:shadow-agile;
-  }
-
-  .agile-metric-card-blue {
-    @apply border-l-4 border-l-agile-blue;
-  }
-
-  .agile-metric-card-green {
-    @apply border-l-4 border-l-agile-green;
-  }
-
-  .agile-metric-card-coral {
-    @apply border-l-4 border-l-agile-coral;
-  }
-
-  .agile-metric-card-red {
-    @apply border-l-4 border-l-agile-red;
-  }
-
-  /* Tags and chips */
-  .agile-tag {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
-  }
-
-  .agile-tag-blue {
-    @apply bg-agile-blue-50 text-agile-blue-700;
-  }
-
-  .agile-tag-green {
-    @apply bg-agile-green-50 text-agile-green-700;
-  }
-
-  .agile-tag-coral {
-    @apply bg-agile-coral-50 text-agile-coral-700;
-  }
-
-  .agile-tag-red {
-    @apply bg-agile-red-50 text-agile-red-700;
-  }
-
-  .agile-tag-gray {
-    @apply bg-agile-gray-50 text-agile-gray-700;
-  }
-
-  /* Tables */
-  .agile-table {
-    @apply w-full bg-white rounded-lg overflow-hidden shadow-agile-card border border-agile-gray-200;
-  }
-
-  .agile-table-header {
-    @apply bg-agile-gray-50 border-b border-agile-gray-200;
-  }
-
-  .agile-table-row {
-    @apply border-b border-agile-gray-100 hover:bg-agile-gray-50 transition-colors duration-150;
-  }
-
-  .agile-table-cell {
-    @apply px-6 py-4 text-sm text-agile-gray-900;
-  }
-
-  /* Page transitions */
-  .page-enter {
-    @apply opacity-0 transform translate-y-4;
-  }
-
-  .page-enter-active {
-    @apply opacity-100 transform translate-y-0 transition-all duration-300 ease-out;
-  }
-
-  .page-exit {
-    @apply opacity-100 transform translate-y-0;
-  }
-
-  .page-exit-active {
-    @apply opacity-0 transform -translate-y-4 transition-all duration-200 ease-in;
+  to {
+    transform: translateX(0);
   }
 }
 
-/* Clean animations */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
 }
 
-.float-animation {
-  animation: float 2s ease-in-out infinite;
-}
+/* Agile colors */
+:root {
+  --agile-blue-50: 239 246 255;
+  --agile-blue-100: 219 234 254;
+  --agile-blue-200: 191 219 254;
+  --agile-blue-300: 147 197 253;
+  --agile-blue-400: 96 165 250;
+  --agile-blue-500: 59 130 246;
+  --agile-blue-600: 37 99 235;
+  --agile-blue-700: 29 78 216;
+  --agile-blue-800: 30 64 175;
+  --agile-blue-900: 30 58 138;
 
-@keyframes subtle-glow {
-  0%, 100% {
-    box-shadow: 0 0 5px rgba(33, 132, 247, 0.2);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(33, 132, 247, 0.4);
-  }
-}
+  --agile-gray-50: 249 250 251;
+  --agile-gray-100: 243 244 246;
+  --agile-gray-200: 229 231 235;
+  --agile-gray-300: 209 213 219;
+  --agile-gray-400: 156 163 175;
+  --agile-gray-500: 107 114 128;
+  --agile-gray-600: 75 85 99;
+  --agile-gray-700: 55 65 81;
+  --agile-gray-800: 31 41 55;
+  --agile-gray-900: 17 24 39;
 
-.glow-animation {
-  animation: subtle-glow 2s ease-in-out infinite alternate;
+  --agile-red-50: 254 242 242;
+  --agile-red-100: 254 226 226;
+  --agile-red-200: 254 202 202;
+  --agile-red-300: 252 165 165;
+  --agile-red-400: 248 113 113;
+  --agile-red-500: 239 68 68;
+  --agile-red-600: 220 38 38;
+  --agile-red-700: 185 28 28;
+  --agile-red-800: 153 27 27;
+  --agile-red-900: 127 29 29;
+
+  --agile-green-50: 240 253 244;
+  --agile-green-100: 220 252 231;
+  --agile-green-200: 187 247 208;
+  --agile-green-300: 134 239 172;
+  --agile-green-400: 74 222 128;
+  --agile-green-500: 34 197 94;
+  --agile-green-600: 22 163 74;
+  --agile-green-700: 21 128 61;
+  --agile-green-800: 22 101 52;
+  --agile-green-900: 20 83 45;
+
+  --agile-coral-50: 255 247 237;
+  --agile-coral-100: 255 237 213;
+  --agile-coral-200: 254 215 170;
+  --agile-coral-300: 253 186 116;
+  --agile-coral-400: 251 146 60;
+  --agile-coral-500: 249 115 22;
+  --agile-coral-600: 234 88 12;
+  --agile-coral-700: 194 65 12;
+  --agile-coral-800: 154 52 18;
+  --agile-coral-900: 124 45 18;
+
+  --agile-purple-50: 250 245 255;
+  --agile-purple-100: 243 232 255;
+  --agile-purple-200: 233 213 255;
+  --agile-purple-300: 196 181 253;
+  --agile-purple-400: 167 139 250;
+  --agile-purple-500: 139 92 246;
+  --agile-purple-600: 124 58 237;
+  --agile-purple-700: 109 40 217;
+  --agile-purple-800: 91 33 182;
+  --agile-purple-900: 76 29 149;
+
+  --agile-yellow-50: 255 251 235;
+  --agile-yellow-100: 254 243 199;
+  --agile-yellow-200: 253 230 138;
+  --agile-yellow-300: 252 211 77;
+  --agile-yellow-400: 251 191 36;
+  --agile-yellow-500: 245 158 11;
+  --agile-yellow-600: 217 119 6;
+  --agile-yellow-700: 180 83 9;
+  --agile-yellow-800: 146 64 14;
+  --agile-yellow-900: 120 53 15;
 }
