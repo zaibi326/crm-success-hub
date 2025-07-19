@@ -1,9 +1,7 @@
-
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { TaxLead } from '@/types/taxLead';
-
 interface LeadTableRowProps {
   lead: TaxLead;
   isSelected: boolean;
@@ -12,25 +10,21 @@ interface LeadTableRowProps {
   onDelete?: (leadId: number) => void;
   getStatusBadge: (status: string) => string;
 }
-
-export function LeadTableRow({ 
-  lead, 
-  isSelected, 
-  onSelect, 
+export function LeadTableRow({
+  lead,
+  isSelected,
+  onSelect,
   onLeadSelect,
-  getStatusBadge 
+  getStatusBadge
 }: LeadTableRowProps) {
-  
   const formatCurrency = (amount: number | undefined) => {
     if (!amount) return 'N/A';
     return `$${amount.toLocaleString()}`;
   };
-
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString();
   };
-
   const handleRowClick = (e: React.MouseEvent) => {
     // Don't trigger row click if clicking on checkbox
     const target = e.target as HTMLElement;
@@ -39,28 +33,14 @@ export function LeadTableRow({
     }
     onLeadSelect();
   };
-
-  return (
-    <TableRow 
-      className="hover:bg-gray-50 cursor-pointer transition-colors"
-      onClick={handleRowClick}
-    >
-      <TableCell onClick={(e) => e.stopPropagation()}>
-        <input
-          type="checkbox"
-          checked={isSelected}
-          onChange={(e) => onSelect(e.target.checked)}
-          className="rounded border-gray-300"
-        />
+  return <TableRow className="hover:bg-gray-50 cursor-pointer transition-colors" onClick={handleRowClick}>
+      <TableCell onClick={e => e.stopPropagation()}>
+        <input type="checkbox" checked={isSelected} onChange={e => onSelect(e.target.checked)} className="rounded border-gray-300" />
       </TableCell>
       <TableCell className="font-medium">
         <div>
           <div className="font-semibold text-gray-900">{lead.ownerName || 'N/A'}</div>
-          {lead.firstName && lead.lastName && (
-            <div className="text-sm text-gray-500">
-              {lead.firstName} {lead.lastName}
-            </div>
-          )}
+          {lead.firstName && lead.lastName}
         </div>
       </TableCell>
       <TableCell>
@@ -87,12 +67,8 @@ export function LeadTableRow({
       </TableCell>
       <TableCell>
         <div className="space-y-1">
-          {lead.phone && (
-            <div className="text-sm text-gray-600">{lead.phone}</div>
-          )}
-          {lead.email && (
-            <div className="text-sm text-gray-500 truncate max-w-xs">{lead.email}</div>
-          )}
+          {lead.phone && <div className="text-sm text-gray-600">{lead.phone}</div>}
+          {lead.email && <div className="text-sm text-gray-500 truncate max-w-xs">{lead.email}</div>}
         </div>
       </TableCell>
       <TableCell>
@@ -100,9 +76,6 @@ export function LeadTableRow({
           {formatDate(lead.createdAt)}
         </div>
       </TableCell>
-      <TableCell>
-        {/* Removed action buttons - entire row is now clickable */}
-      </TableCell>
-    </TableRow>
-  );
+      
+    </TableRow>;
 }
