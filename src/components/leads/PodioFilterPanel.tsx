@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { X, Filter, ChevronDown, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,14 +12,7 @@ import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-
-interface FilterCondition {
-  id: string;
-  field: string;
-  operator: string;
-  value: string;
-  label: string;
-}
+import { FilterCondition } from './filters/types';
 
 interface SavedFilter {
   id: string;
