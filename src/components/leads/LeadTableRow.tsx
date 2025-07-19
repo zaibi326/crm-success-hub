@@ -1,81 +1,142 @@
+
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Eye, Trash2, Phone, Mail } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
+
 interface LeadTableRowProps {
   lead: TaxLead;
   isSelected: boolean;
   onSelect: (checked: boolean) => void;
   onLeadSelect: () => void;
-  onDelete?: (leadId: number) => void;
+  onDelete: () => void;
   getStatusBadge: (status: string) => string;
 }
+
 export function LeadTableRow({
   lead,
   isSelected,
   onSelect,
   onLeadSelect,
+  onDelete,
   getStatusBadge
 }: LeadTableRowProps) {
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const confirmed = window.confirm(`Are you sure you want to delete the lead for ${lead.ownerName}?`);
+    if (confirmed) {
+      onDelete();
+    }
+  };
+
   const formatCurrency = (amount: number | undefined) => {
     if (!amount) return 'N/A';
     return `$${amount.toLocaleString()}`;
   };
+
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString();
   };
-  const handleRowClick = (e: React.MouseEvent) => {
-    // Don't trigger row click if clicking on checkbox
-    const target = e.target as HTMLElement;
-    if (target.tagName === 'INPUT' && (target as HTMLInputElement).type === 'checkbox') {
-      return;
-    }
-    onLeadSelect();
-  };
-  return <TableRow className="hover:bg-gray-50 cursor-pointer transition-colors" onClick={handleRowClick}>
-      <TableCell onClick={e => e.stopPropagation()}>
-        <input type="checkbox" checked={isSelected} onChange={e => onSelect(e.target.checked)} className="rounded border-gray-300" />
+
+  return (
+    <TableRow 
+      className="hover:bg-gray-50 cursor-pointer transition-colors"
+      onClick={onLeadSelect}
+    >
+      <TableCell onClick={(e) => e.stopPropagation()}>
+        <Checkbox
+          checked={isSelected}
+          onCheckedChange={onSelect}
+        />
       </TableCell>
-      <TableCell className="font-medium">
-        <div>
-          <div className="font-semibold text-gray-900">{lead.ownerName || 'N/A'}</div>
-          {lead.firstName && lead.lastName}
-        </div>
-      </TableCell>
+      
+      {/* Owner */}
       <TableCell>
-        <div className="max-w-xs">
-          <div className="truncate font-medium text-gray-900">
-            {lead.propertyAddress || 'N/A'}
-          </div>
-        </div>
-      </TableCell>
-      <TableCell>
-        <div className="font-mono text-sm text-gray-700">
-          {lead.taxId || 'N/A'}
-        </div>
-      </TableCell>
-      <TableCell>
-        <div className="font-semibold text-gray-900">
-          {formatCurrency(lead.currentArrears)}
-        </div>
-      </TableCell>
-      <TableCell>
-        <Badge className={getStatusBadge(lead.status || 'COLD')}>
-          {lead.status || 'COLD'}
-        </Badge>
-      </TableCell>
-      <TableCell>
-        <div className="space-y-1">
-          {lead.phone && <div className="text-sm text-gray-600">{lead.phone}</div>}
-          {lead.email && <div className="text-sm text-gray-500 truncate max-w-xs">{lead.email}</div>}
-        </div>
-      </TableCell>
-      <TableCell>
-        <div className="text-sm text-gray-500">
-          {formatDate(lead.createdAt)}
+        <div className="font-medium text-gray-900">
+          {lead.ownerName}
         </div>
       </TableCell>
       
-    </TableRow>;
+      {/* Property Address */}
+      <TableCell>
+        <div className="max-w-xs">
+          <p className="text-sm text-gray-700 truncate" title={lead.propertyAddress}>
+            {lead.propertyAddress}
+          </p>
+        </div>
+      </TableCell>
+      
+      {/* Email Address - New separate column */}
+      <TableCell>
+        <div className="flex items-center gap-2">
+          {lead.email ? (
+            <>
+              <Mail className="w-4 h-4 text-gray-400" />
+              <span className="text-sm text-gray-700 truncate max-w-[200px]" title={lead.email}>
+                {lead.email}
+              </span>
+            </>
+          ) : (
+            <span className="text-sm text-gray-400">No email</span>
+          )}
+        </div>
+      </TableCell>
+      
+      {/* Tax ID */}
+      <TableCell>
+        <span className="font-mono text-sm text-gray-700">
+          {lead.taxId}
+        </span>
+      </TableCell>
+      
+      {/* Arrears */}
+      <TableCell>
+        <span className={`font-semibold ${lead.currentArrears ? 'text-red-600' : 'text-gray-400'}`}>
+          {formatCurrency(lead.currentArrears)}
+        </span>
+      </TableCell>
+      
+      {/* Lead Status */}
+      <TableCell>
+        <Badge className={`${getStatusBadge(lead.status)} border`}>
+          {lead.status}
+        </Badge>
+      </TableCell>
+      
+      {/* Created On */}
+      <TableCell>
+        <span className="text-sm text-gray-600">
+          {formatDate(lead.createdAt)}
+        </span>
+      </TableCell>
+      
+      {/* Actions */}
+      <TableCell onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onLeadSelect}
+            className="h-8 w-8 p-0"
+            title="View Details"
+          >
+            <Eye className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleDeleteClick}
+            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+            title="Delete Lead"
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
 }

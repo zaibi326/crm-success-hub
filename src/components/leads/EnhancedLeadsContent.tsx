@@ -10,7 +10,7 @@ import { FilterSidebar } from './FilterSidebar';
 import { PodioFilterPanel } from './PodioFilterPanel';
 import { useLeadsLogic } from './useLeadsLogic';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Filter } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { FilterCondition } from './filters/types';
 
 export function EnhancedLeadsContent() {
@@ -210,7 +210,7 @@ export function EnhancedLeadsContent() {
         )}
       </div>
 
-      {/* Podio Filter Panel */}
+      {/* Enhanced Podio Filter Panel with Saved Filters */}
       <PodioFilterPanel
         isOpen={showFilterSidebar}
         onClose={() => setShowFilterSidebar(false)}

@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,13 +10,8 @@ import { TaxLead } from '@/types/taxLead';
 import { LeadTableRow } from './LeadTableRow';
 import { PodioFilterPanel } from './PodioFilterPanel';
 import { toast } from 'sonner';
-interface FilterCondition {
-  id: string;
-  field: string;
-  operator: string;
-  value: string;
-  label: string;
-}
+import { FilterCondition } from './filters/types';
+
 interface LeadTableViewProps {
   leads: TaxLead[];
   searchTerm?: string;
@@ -29,6 +25,7 @@ interface LeadTableViewProps {
   getStatusBadge?: (status: string) => string;
   handleSort?: (field: string) => void;
 }
+
 export function LeadTableView({
   leads,
   searchTerm = '',
@@ -75,11 +72,19 @@ export function LeadTableView({
       });
     });
   };
+
   const searchFilteredLeads = leads.filter(lead => {
     const searchTermLower = effectiveSearchTerm.toLowerCase();
-    return (lead.ownerName || '').toLowerCase().includes(searchTermLower) || (lead.propertyAddress || '').toLowerCase().includes(searchTermLower) || (lead.taxId || '').toLowerCase().includes(searchTermLower) || (lead.email || '').toLowerCase().includes(searchTermLower);
+    return (
+      (lead.ownerName || '').toLowerCase().includes(searchTermLower) ||
+      (lead.propertyAddress || '').toLowerCase().includes(searchTermLower) ||
+      (lead.taxId || '').toLowerCase().includes(searchTermLower) ||
+      (lead.email || '').toLowerCase().includes(searchTermLower)
+    );
   });
+
   const filteredLeads = applyFilters(searchFilteredLeads);
+
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
       setSelectedLeads(filteredLeads.map(lead => lead.id));
@@ -87,6 +92,7 @@ export function LeadTableView({
       setSelectedLeads([]);
     }
   };
+
   const handleSelectLead = (leadId: number, checked: boolean) => {
     if (checked) {
       setSelectedLeads(prev => [...prev, leadId]);
@@ -94,8 +100,10 @@ export function LeadTableView({
       setSelectedLeads(prev => prev.filter(id => id !== leadId));
     }
   };
+
   const handleBulkDelete = () => {
     if (selectedLeads.length === 0) return;
+
     const confirmed = window.confirm(`Are you sure you want to permanently delete ${selectedLeads.length} selected lead(s)?`);
     if (confirmed) {
       if (onBulkDelete) {
@@ -107,15 +115,20 @@ export function LeadTableView({
       toast.success(`${selectedLeads.length} leads deleted successfully`);
     }
   };
+
   const handleBulkExport = () => {
     if (selectedLeads.length === 0) return;
 
     // Create CSV data for selected leads
     const selectedLeadsData = filteredLeads.filter(lead => selectedLeads.includes(lead.id));
-    const csvContent = ['Owner Name,Property Address,Tax ID,Email,Phone,Status,Current Arrears', ...selectedLeadsData.map(lead => `"${lead.ownerName}","${lead.propertyAddress}","${lead.taxId}","${lead.email || ''}","${lead.phone || ''}","${lead.status}","${lead.currentArrears || 0}"`)].join('\n');
-    const blob = new Blob([csvContent], {
-      type: 'text/csv'
-    });
+    const csvContent = [
+      'Owner Name,Property Address,Email Address,Tax ID,Current Arrears,Status,Created On',
+      ...selectedLeadsData.map(lead => 
+        `"${lead.ownerName}","${lead.propertyAddress}","${lead.email || ''}","${lead.taxId}","${lead.currentArrears || 0}","${lead.status}","${lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : ''}"`
+      )
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -124,6 +137,7 @@ export function LeadTableView({
     window.URL.revokeObjectURL(url);
     toast.success(`${selectedLeads.length} leads exported successfully`);
   };
+
   const handleLeadClick = (lead: TaxLead) => {
     if (onLeadClick) {
       onLeadClick(lead);
@@ -131,6 +145,7 @@ export function LeadTableView({
       onLeadSelect(lead);
     }
   };
+
   const handleDeleteSingle = (leadId: number) => {
     if (onDeleteLead) {
       onDeleteLead(leadId);
@@ -138,12 +153,15 @@ export function LeadTableView({
       onDeleteSingleLead(leadId);
     }
   };
+
   const handleRemoveFilter = (filterId: string) => {
     setFilters(prev => prev.filter(f => f.id !== filterId));
   };
+
   const handleClearAllFilters = () => {
     setFilters([]);
   };
+
   const isAllSelected = selectedLeads.length === filteredLeads.length && filteredLeads.length > 0;
   const isPartiallySelected = selectedLeads.length > 0 && selectedLeads.length < filteredLeads.length;
 
@@ -153,12 +171,13 @@ export function LeadTableView({
       checkboxRef.current.indeterminate = isPartiallySelected;
     }
   }, [isPartiallySelected]);
+
   const defaultGetStatusBadge = (status: string) => {
     switch (status) {
       case 'HOT':
         return 'bg-red-100 text-red-800 border-red-200';
       case 'WARM':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-orange-100 text-orange-800 border-orange-200';
       case 'COLD':
         return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'PASS':
@@ -167,6 +186,7 @@ export function LeadTableView({
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
+
   const handleSearchChange = (value: string) => {
     if (onSearchChange) {
       onSearchChange(value);
@@ -174,77 +194,144 @@ export function LeadTableView({
       setInternalSearchTerm(value);
     }
   };
-  return <div className="space-y-4">
+
+  return (
+    <div className="space-y-4">
       {/* Search and Action Header */}
       <div className="flex items-center justify-between gap-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input placeholder="Search leads..." value={effectiveSearchTerm} onChange={e => handleSearchChange(e.target.value)} className="pl-10" />
+          <Input
+            placeholder="Search leads..."
+            value={effectiveSearchTerm}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="pl-10"
+          />
         </div>
         
         <div className="flex items-center gap-2">
           {/* Conditional Action Buttons - Only show when leads are selected */}
-          {selectedLeads.length > 0 && <>
+          {selectedLeads.length > 0 && (
+            <>
               <Badge variant="secondary" className="text-sm bg-blue-50 text-blue-700 border-blue-200">
                 {selectedLeads.length} selected
               </Badge>
-              <Button variant="outline" size="sm" onClick={handleBulkExport} className="flex items-center gap-2 text-green-600 border-green-200 hover:bg-green-50">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBulkExport}
+                className="flex items-center gap-2 text-green-600 border-green-200 hover:bg-green-50"
+              >
                 <Download className="w-4 h-4" />
                 Export
               </Button>
-              <Button variant="destructive" size="sm" onClick={handleBulkDelete} className="flex items-center gap-2">
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleBulkDelete}
+                className="flex items-center gap-2"
+              >
                 <Trash2 className="w-4 h-4" />
                 Delete
               </Button>
-            </>}
+            </>
+          )}
           
           {/* Filter Button - Always visible */}
-          {selectedLeads.length === 0 && <Button variant="outline" size="sm" onClick={() => setIsFilterPanelOpen(true)} className="flex items-center gap-2 relative">
+          {selectedLeads.length === 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsFilterPanelOpen(true)}
+              className="flex items-center gap-2 relative"
+            >
               <Filter className="w-4 h-4" />
               Filter
-              {filters.length > 0 && <Badge variant="secondary" className="ml-1 bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5 min-w-[18px] h-[18px] flex items-center justify-center">
+              {filters.length > 0 && (
+                <Badge variant="secondary" className="ml-1 bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5 min-w-[18px] h-[18px] flex items-center justify-center">
                   {filters.length}
-                </Badge>}
-            </Button>}
+                </Badge>
+              )}
+            </Button>
+          )}
         </div>
       </div>
 
       {/* Active Filters Display */}
-      {filters.length > 0 && <div className="flex flex-wrap items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+      {filters.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 p-3 bg-gray-50 rounded-lg border">
           <span className="text-sm text-gray-600 font-medium">Active filters:</span>
-          {filters.map(filter => <Badge key={filter.id} variant="secondary" className="flex items-center gap-1 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100">
+          {filters.map((filter) => (
+            <Badge
+              key={filter.id}
+              variant="secondary"
+              className="flex items-center gap-1 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+            >
               {filter.label}
-              <X className="w-3 h-3 cursor-pointer hover:text-blue-900" onClick={() => handleRemoveFilter(filter.id)} />
-            </Badge>)}
-          <Button variant="ghost" size="sm" onClick={handleClearAllFilters} className="text-xs text-gray-600 hover:text-gray-800 px-2 py-1 h-auto">
+              <X
+                className="w-3 h-3 cursor-pointer hover:text-blue-900"
+                onClick={() => handleRemoveFilter(filter.id)}
+              />
+            </Badge>
+          ))}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClearAllFilters}
+            className="text-xs text-gray-600 hover:text-gray-800 px-2 py-1 h-auto"
+          >
             Clear All
           </Button>
-        </div>}
+        </div>
+      )}
 
-      {/* Table */}
+      {/* Updated Table with Email as separate column */}
       <div className="border rounded-lg overflow-hidden bg-white">
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-50">
               <TableHead className="w-12">
-                <input ref={checkboxRef} type="checkbox" checked={isAllSelected} onChange={e => handleSelectAll(e.target.checked)} className="rounded border-gray-300" />
+                <input
+                  ref={checkboxRef}
+                  type="checkbox"
+                  checked={isAllSelected}
+                  onChange={(e) => handleSelectAll(e.target.checked)}
+                  className="rounded border-gray-300"
+                />
               </TableHead>
               <TableHead>Owner</TableHead>
               <TableHead>Property Address</TableHead>
+              <TableHead>Email Address</TableHead>
               <TableHead>Tax ID</TableHead>
               <TableHead>Arrears</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Contact</TableHead>
-              <TableHead>Created</TableHead>
-              
+              <TableHead>Lead Status</TableHead>
+              <TableHead>Created On</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredLeads.length === 0 ? <TableRow>
+            {filteredLeads.length === 0 ? (
+              <TableRow>
                 <td colSpan={9} className="text-center py-8 text-gray-500">
-                  {filters.length > 0 ? "No leads found matching your search criteria and filters" : "No leads found matching your search criteria"}
+                  {filters.length > 0 
+                    ? "No leads found matching your search criteria and filters"
+                    : "No leads found matching your search criteria"
+                  }
                 </td>
-              </TableRow> : filteredLeads.map(lead => <LeadTableRow key={lead.id} lead={lead} isSelected={selectedLeads.includes(lead.id)} onSelect={checked => handleSelectLead(lead.id, checked)} onLeadSelect={() => handleLeadClick(lead)} onDelete={() => handleDeleteSingle(lead.id)} getStatusBadge={getStatusBadge || defaultGetStatusBadge} />)}
+              </TableRow>
+            ) : (
+              filteredLeads.map((lead) => (
+                <LeadTableRow
+                  key={lead.id}
+                  lead={lead}
+                  isSelected={selectedLeads.includes(lead.id)}
+                  onSelect={(checked) => handleSelectLead(lead.id, checked)}
+                  onLeadSelect={() => handleLeadClick(lead)}
+                  onDelete={() => handleDeleteSingle(lead.id)}
+                  getStatusBadge={getStatusBadge || defaultGetStatusBadge}
+                />
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
@@ -253,9 +340,11 @@ export function LeadTableView({
       <div className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded-lg">
         <div>
           Showing {filteredLeads.length} of {leads.length} leads
-          {filters.length > 0 && <span className="ml-2 text-blue-600">
+          {filters.length > 0 && (
+            <span className="ml-2 text-blue-600">
               ({filters.length} filter{filters.length !== 1 ? 's' : ''} applied)
-            </span>}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
@@ -263,7 +352,7 @@ export function LeadTableView({
             <span>Hot: {leads.filter(l => l.status === 'HOT').length}</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-yellow-100 border border-yellow-200 rounded"></div>
+            <div className="w-3 h-3 bg-orange-100 border border-orange-200 rounded"></div>
             <span>Warm: {leads.filter(l => l.status === 'WARM').length}</span>
           </div>
           <div className="flex items-center gap-2">
@@ -274,6 +363,14 @@ export function LeadTableView({
       </div>
 
       {/* Podio Filter Panel */}
-      <PodioFilterPanel isOpen={isFilterPanelOpen} onClose={() => setIsFilterPanelOpen(false)} filters={filters} onFiltersChange={setFilters} totalResults={leads.length} filteredResults={filteredLeads.length} />
-    </div>;
+      <PodioFilterPanel
+        isOpen={isFilterPanelOpen}
+        onClose={() => setIsFilterPanelOpen(false)}
+        filters={filters}
+        onFiltersChange={setFilters}
+        totalResults={leads.length}
+        filteredResults={filteredLeads.length}
+      />
+    </div>
+  );
 }
