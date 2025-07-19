@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TaxLeadDetailsForm } from './TaxLeadDetailsForm';
 import { TemplateModificationDialog } from './TemplateModificationDialog';
