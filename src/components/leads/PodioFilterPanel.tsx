@@ -168,7 +168,7 @@ export function PodioFilterPanel({
                     }
                   }}
                 >
-                  <Checkbox checked={isActive} readOnly />
+                  <Checkbox checked={isActive} />
                   <span className="text-sm text-gray-700">{optionLabel}</span>
                 </div>
               );
