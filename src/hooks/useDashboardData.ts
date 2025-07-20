@@ -32,7 +32,7 @@ export interface DashboardDataContextType {
   activities: ActivityItem[];
   loading: boolean;
   error: string | null;
-  refetch: () => void;
+  refetch: () => Promise<void>;
 }
 
 export function useDashboardData(): DashboardDataContextType {
@@ -105,6 +105,8 @@ export function useDashboardData(): DashboardDataContextType {
     activities,
     loading: isLoading,
     error: error?.message || null,
-    refetch
+    refetch: async () => {
+      await refetch();
+    }
   };
 }
