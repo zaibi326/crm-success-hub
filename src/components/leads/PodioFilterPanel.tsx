@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { X, Filter, ChevronDown, Check, Save, Trash2, Edit, Star, Calendar, User, Tag, Phone, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -61,19 +60,10 @@ export function PodioFilterPanel({
   // Filter options
   const leadStatusOptions = [
     { value: 'not_set', label: 'Not set' },
-    { value: 'new_untouched', label: '#New Untouched#' },
-    { value: 'discovery', label: 'Discovery' },
-    { value: 'already_listed', label: 'Already Listed' },
-    { value: 'price_too_high', label: 'Price Too High' },
-    { value: 'low_motivation', label: 'Low Motivation' },
-    { value: 'add_to_follow_up', label: 'Add to Follow up' },
-    { value: 'inquiry', label: 'Inquiry' },
-    { value: 'interested_listing', label: 'Interested - Listing' },
-    { value: 'appointment_completed', label: 'Appointment Completed' },
-    { value: 'interested_follow_up', label: 'Interested - Add to Follow up' },
-    { value: 'interested_offer_status', label: 'Interested - Set Offer Status' },
-    { value: 'contract_sent_out', label: 'Contract Sent Out - Set Contract Status' },
-    { value: 'in_contract', label: 'In Contract - Set Manually' }
+    { value: 'HOT', label: 'Hot' },
+    { value: 'WARM', label: 'Warm' },
+    { value: 'COLD', label: 'Cold' },
+    { value: 'PASS', label: 'Pass' }
   ];
 
   const createdByOptions = [
@@ -242,9 +232,9 @@ export function PodioFilterPanel({
     toast.success(`Filter "${savedFilter.name}" applied`);
   };
 
-  const handleDeleteSavedFilter = (id: string, name: string) => {
+  const handleDeleteSavedFilter = (filterId: string, name: string) => {
     if (window.confirm(`Are you sure you want to delete the filter "${name}"?`)) {
-      if (deleteFilter(id)) {
+      if (deleteFilter(filterId)) {
         toast.success(`Filter "${name}" deleted`);
       } else {
         toast.error('Failed to delete filter');
