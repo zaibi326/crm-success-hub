@@ -55,7 +55,13 @@ export function PodioFilterPanel({
   }, [filters]);
 
   const handleFilterChange = (key: keyof FilterState, value: any) => {
-    const newFilters = { ...localFilters, [key]: value };
+    // Convert placeholder values back to empty strings for filtering logic
+    let filterValue = value;
+    if (value === 'all' || value === 'none' || value === 'any') {
+      filterValue = '';
+    }
+    
+    const newFilters = { ...localFilters, [key]: filterValue };
     setLocalFilters(newFilters);
     onFiltersChange(newFilters);
   };
@@ -188,14 +194,14 @@ export function PodioFilterPanel({
                   Created By
                 </Label>
                 <Select 
-                  value={localFilters.createdBy} 
+                  value={localFilters.createdBy || "all"} 
                   onValueChange={(value) => handleFilterChange('createdBy', value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select creator" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All</SelectItem>
+                    <SelectItem value="all">All</SelectItem>
                     {getUniqueStringValues('createdVia').map((creator) => (
                       <SelectItem key={creator} value={creator}>
                         {creator}
@@ -238,14 +244,14 @@ export function PodioFilterPanel({
                   Created Via
                 </Label>
                 <Select 
-                  value={localFilters.createdVia} 
+                  value={localFilters.createdVia || "all"} 
                   onValueChange={(value) => handleFilterChange('createdVia', value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select source" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All</SelectItem>
+                    <SelectItem value="all">All</SelectItem>
                     {getUniqueStringValues('createdVia').map((source) => (
                       <SelectItem key={source} value={source}>
                         {source}
@@ -261,14 +267,14 @@ export function PodioFilterPanel({
                   Lead Status
                 </Label>
                 <Select 
-                  value={localFilters.leadStatus} 
+                  value={localFilters.leadStatus || "all"} 
                   onValueChange={(value) => handleFilterChange('leadStatus', value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All</SelectItem>
+                    <SelectItem value="all">All</SelectItem>
                     <SelectItem value="HOT">🔥 Hot</SelectItem>
                     <SelectItem value="WARM">🌤️ Warm</SelectItem>
                     <SelectItem value="COLD">❄️ Cold</SelectItem>
@@ -322,14 +328,14 @@ export function PodioFilterPanel({
                   Lead Manager
                 </Label>
                 <Select 
-                  value={localFilters.leadManager} 
+                  value={localFilters.leadManager || "all"} 
                   onValueChange={(value) => handleFilterChange('leadManager', value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select manager" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All</SelectItem>
+                    <SelectItem value="all">All</SelectItem>
                     {getUniqueStringValues('leadManager').map((manager) => (
                       <SelectItem key={manager} value={manager}>
                         {manager}
@@ -374,14 +380,14 @@ export function PodioFilterPanel({
                   Move To
                 </Label>
                 <Select 
-                  value={localFilters.moveTo} 
+                  value={localFilters.moveTo || "none"} 
                   onValueChange={(value) => handleFilterChange('moveTo', value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select destination" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     <SelectItem value="qualified">Qualified Leads</SelectItem>
                     <SelectItem value="followup">Follow Up</SelectItem>
                     <SelectItem value="archive">Archive</SelectItem>
