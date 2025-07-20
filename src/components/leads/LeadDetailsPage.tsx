@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TaxLead } from '@/types/taxLead';
+import { ActivityItem } from '@/types/activity';
 import { TemplateModificationDialog } from './TemplateModificationDialog';
 import { ContactSection } from './detail/ContactSection';
 import { PropertyDetailsSection } from './detail/PropertyDetailsSection';
@@ -48,14 +49,15 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
     }
   };
 
-  const activities = [
+  const activities: ActivityItem[] = [
     {
       id: 1,
       type: 'created',
       title: 'Lead Created',
       description: `Lead for ${leadData.ownerName} was created`,
       timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-      user: 'System'
+      user: 'System',
+      userInitials: 'SY'
     },
     {
       id: 2,
@@ -63,7 +65,8 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
       title: 'Note Added',
       description: leadData.notes || 'Initial contact attempted',
       timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-      user: 'John Doe'
+      user: 'John Doe',
+      userInitials: 'JD'
     },
     {
       id: 3,
@@ -71,7 +74,8 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
       title: 'Status Updated',
       description: `Status changed to ${leadData.status}`,
       timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000),
-      user: 'Jane Smith'
+      user: 'Jane Smith',
+      userInitials: 'JS'
     }
   ];
 
