@@ -99,6 +99,12 @@ export function MainContent({
             canEdit={canEdit}
           />
 
+          <EnhancedAdditionalInfoSection
+            lead={formData}
+            onFieldUpdate={onInputChange}
+            canEdit={canEdit}
+          />
+
           <SimplifiedOwnershipSection 
             lead={formData}
             onFieldUpdate={onInputChange}

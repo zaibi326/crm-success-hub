@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { X, Save, Filter } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
 import { FilterState, createEmptyFilterState } from './filters/FilterState';
+import { toast } from 'sonner';
 
 interface SavedView {
   id: string;
@@ -83,6 +84,9 @@ export function PodioFilterPanel({
       onSaveView(saveViewName.trim(), localFilters);
       setSaveViewName('');
       setShowSaveInput(false);
+      toast.success(`View "${saveViewName.trim()}" saved successfully!`);
+    } else {
+      toast.error('Please enter a name for the view');
     }
   };
 
@@ -114,6 +118,24 @@ export function PodioFilterPanel({
   const getUniqueStringValues = (field: keyof TaxLead) => {
     const values = leads.map(lead => lead[field]).filter(Boolean);
     return [...new Set(values)].filter(v => typeof v === 'string') as string[];
+  };
+
+  // Get unique team members from leads
+  const getTeamMembers = () => {
+    const createdByValues = leads.map(lead => lead.createdBy).filter(Boolean);
+    return [...new Set(createdByValues)].filter(v => typeof v === 'string') as string[];
+  };
+
+  // Get unique creation sources
+  const getCreationSources = () => {
+    const sources = ['Import', 'Manual Entry', 'API', 'Webhook', 'CSV Upload', 'Form Submission'];
+    return sources;
+  };
+
+  // Get unique lead managers
+  const getLeadManagers = () => {
+    const managers = leads.map(lead => lead.leadManager).filter(Boolean);
+    return [...new Set(managers)].filter(v => typeof v === 'string') as string[];
   };
 
   if (!isOpen) {
@@ -202,9 +224,9 @@ export function PodioFilterPanel({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All</SelectItem>
-                    {getUniqueStringValues('createdVia').map((creator) => (
-                      <SelectItem key={creator} value={creator}>
-                        {creator}
+                    {getTeamMembers().map((member) => (
+                      <SelectItem key={member} value={member}>
+                        {member}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -252,7 +274,7 @@ export function PodioFilterPanel({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All</SelectItem>
-                    {getUniqueStringValues('createdVia').map((source) => (
+                    {getCreationSources().map((source) => (
                       <SelectItem key={source} value={source}>
                         {source}
                       </SelectItem>
@@ -336,7 +358,7 @@ export function PodioFilterPanel({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All</SelectItem>
-                    {getUniqueStringValues('leadManager').map((manager) => (
+                    {getLeadManagers().map((manager) => (
                       <SelectItem key={manager} value={manager}>
                         {manager}
                       </SelectItem>
@@ -409,6 +431,11 @@ export function PodioFilterPanel({
                         onChange={(e) => setSaveViewName(e.target.value)}
                         placeholder="Enter view name"
                         className="text-sm flex-1"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleSaveView();
+                          }
+                        }}
                       />
                       <Button size="sm" onClick={handleSaveView} disabled={!saveViewName.trim()}>
                         <Save className="w-3 h-3" />
