@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { TaxLead } from '@/types/taxLead';
@@ -11,6 +12,9 @@ interface DashboardStats {
   keepRate: number;
   passDeals: number;
   keepDeals: number;
+  thisWeekLeads: number;
+  thisMonthLeads: number;
+  avgResponseTime: string;
 }
 
 interface ActivityItem {

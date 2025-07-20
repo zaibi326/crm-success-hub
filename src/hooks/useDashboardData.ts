@@ -2,7 +2,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { TaxLead } from '@/types/taxLead';
-import { Activity } from '@/types/activity';
 
 export interface DashboardStats {
   totalLeads: number;
@@ -11,50 +10,79 @@ export interface DashboardStats {
   coldDeals: number;
   passRate: number;
   keepRate: number;
+  passDeals: number;
+  keepDeals: number;
   thisWeekLeads: number;
   thisMonthLeads: number;
   avgResponseTime: string;
 }
 
+interface ActivityItem {
+  id: string;
+  type: 'lead_created' | 'lead_updated' | 'note_added' | 'status_changed';
+  description: string;
+  userName: string;
+  timestamp: Date;
+  leadId: string;
+}
+
 export interface DashboardDataContextType {
   leads: TaxLead[];
   stats: DashboardStats;
-  activities: Activity[];
+  activities: ActivityItem[];
   loading: boolean;
   error: string | null;
   refetch: () => void;
 }
 
 export function useDashboardData(): DashboardDataContextType {
-  const { data: leads = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['leads'],
+  const { data: campaignLeads = [], isLoading, error, refetch } = useQuery({
+    queryKey: ['campaign-leads'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('leads')
+        .from('campaign_leads')
         .select('*')
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      console.log('Loaded leads from database:', data?.length || 0, 'leads');
+      console.log('Loaded campaign leads from database:', data?.length || 0, 'leads');
       return data || [];
     },
   });
+
+  // Transform campaign_leads to TaxLead format
+  const leads: TaxLead[] = campaignLeads.map(lead => ({
+    id: parseInt(lead.id) || 0,
+    taxId: lead.tax_id || '',
+    ownerName: lead.owner_name,
+    propertyAddress: lead.property_address,
+    currentArrears: lead.current_arrears || undefined,
+    status: (lead.status as 'HOT' | 'WARM' | 'COLD' | 'PASS') || 'COLD',
+    email: lead.email || undefined,
+    phone: lead.phone || undefined,
+    taxLawsuitNumber: lead.tax_lawsuit_number || undefined,
+    notes: lead.notes || undefined,
+    createdAt: lead.created_at,
+    updatedAt: lead.updated_at,
+  }));
 
   const stats: DashboardStats = {
     totalLeads: leads.length,
     hotDeals: leads.filter(lead => lead.status === 'HOT').length,
     warmDeals: leads.filter(lead => lead.status === 'WARM').length,
     coldDeals: leads.filter(lead => lead.status === 'COLD').length,
-    passRate: leads.filter(lead => lead.disposition === 'DISQUALIFIED').length,
-    keepRate: leads.filter(lead => lead.disposition === 'QUALIFIED').length,
+    passRate: leads.length > 0 ? Math.round((leads.filter(lead => lead.status === 'PASS').length / leads.length) * 100) : 0,
+    keepRate: leads.length > 0 ? Math.round((leads.filter(lead => lead.status !== 'PASS').length / leads.length) * 100) : 0,
+    passDeals: leads.filter(lead => lead.status === 'PASS').length,
+    keepDeals: leads.filter(lead => lead.status !== 'PASS').length,
     thisWeekLeads: leads.filter(lead => {
-      const leadDate = new Date(lead.created_at);
+      const leadDate = new Date(lead.createdAt || '');
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
       return leadDate >= weekAgo;
     }).length,
     thisMonthLeads: leads.filter(lead => {
-      const leadDate = new Date(lead.created_at);
+      const leadDate = new Date(lead.createdAt || '');
       const monthAgo = new Date();
       monthAgo.setMonth(monthAgo.getMonth() - 1);
       return leadDate >= monthAgo;
@@ -62,13 +90,13 @@ export function useDashboardData(): DashboardDataContextType {
     avgResponseTime: '2.5 hrs'
   };
 
-  const activities: Activity[] = leads.slice(0, 5).map((lead, index) => ({
+  const activities: ActivityItem[] = leads.slice(0, 5).map((lead, index) => ({
     id: `activity-${index}`,
     type: 'lead_created',
-    title: `New lead: ${lead.ownerName}`,
-    description: `Lead created for ${lead.propertyAddress}`,
-    timestamp: lead.created_at,
-    user: 'System'
+    description: `New lead: ${lead.ownerName}`,
+    userName: 'System',
+    timestamp: new Date(lead.createdAt || new Date()),
+    leadId: lead.id.toString()
   }));
 
   return {
