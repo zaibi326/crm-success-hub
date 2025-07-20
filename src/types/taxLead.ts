@@ -20,6 +20,12 @@ export interface TaxLead {
   tags?: string[];
   occupancyStatus?: string;
   
+  // Lead Information
+  leadSource?: string;
+  campaignId?: string;
+  agentName?: string;
+  disposition?: 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED';
+  
   // Financial Information
   askingPrice?: number;
   mortgagePrice?: number;

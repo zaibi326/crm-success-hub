@@ -1,30 +1,43 @@
-import React, { useState } from 'react';
-import { X, Filter, ChevronDown, Check, Save, Trash2, Edit, Star, Calendar, User, Tag, Phone, Mail } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { CalendarIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
-import { format, addDays } from 'date-fns';
-import { FilterCondition } from './filters/types';
-import { useSavedFilters } from '@/hooks/useSavedFilters';
+import { Badge } from '@/components/ui/badge';
+import { X, Save, Filter, ChevronDown } from 'lucide-react';
+import { TaxLead } from '@/types/taxLead';
+
+interface FilterState {
+  createdBy: string;
+  createdOnStart: string;
+  createdOnEnd: string;
+  createdVia: string;
+  leadStatus: string;
+  tags: string[];
+  sellerContact: string;
+  leadManager: string;
+  moveTo: string;
+  minArrears: number | undefined;
+  maxArrears: number | undefined;
+}
+
+interface SavedView {
+  id: string;
+  name: string;
+  filters: FilterState;
+}
 
 interface PodioFilterPanelProps {
   isOpen: boolean;
   onClose: () => void;
-  filters: FilterCondition[];
-  onFiltersChange: (filters: FilterCondition[]) => void;
-  totalResults: number;
-  filteredResults: number;
+  filters: FilterState;
+  onFiltersChange: (filters: FilterState) => void;
+  onSaveView: (name: string, filters: FilterState) => void;
+  savedViews: SavedView[];
+  onLoadView: (view: SavedView) => void;
+  onDeleteView: (viewId: string) => void;
+  leads: TaxLead[];
 }
 
 export function PodioFilterPanel({
@@ -32,615 +45,466 @@ export function PodioFilterPanel({
   onClose,
   filters,
   onFiltersChange,
-  totalResults,
-  filteredResults
+  onSaveView,
+  savedViews,
+  onLoadView,
+  onDeleteView,
+  leads
 }: PodioFilterPanelProps) {
+  const [localFilters, setLocalFilters] = useState<FilterState>(filters);
   const [activeTab, setActiveTab] = useState<'filters' | 'saved'>('filters');
-  const [saveFilterName, setSaveFilterName] = useState('');
-  const [showSaveDialog, setShowSaveDialog] = useState(false);
-  
-  // Filter state
-  const [selectedLeadStatuses, setSelectedLeadStatuses] = useState<string[]>([]);
-  const [selectedCreatedBy, setSelectedCreatedBy] = useState<string[]>([]);
-  const [selectedCreatedVia, setSelectedCreatedVia] = useState<string[]>([]);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [selectedLeadManager, setSelectedLeadManager] = useState<string[]>([]);
-  const [createdDateFrom, setCreatedDateFrom] = useState<Date>();
-  const [createdDateTo, setCreatedDateTo] = useState<Date>();
-  const [emailFilter, setEmailFilter] = useState('');
-  const [phoneFilter, setPhoneFilter] = useState('');
-  
-  const {
-    savedFilters,
-    saveFilter,
-    updateFilter,
-    deleteFilter
-  } = useSavedFilters();
+  const [saveViewName, setSaveViewName] = useState('');
+  const [showSaveInput, setShowSaveInput] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState<FilterState>(filters);
 
-  // Filter options
-  const leadStatusOptions = [
-    { value: 'not_set', label: 'Not set' },
-    { value: 'HOT', label: 'Hot' },
-    { value: 'WARM', label: 'Warm' },
-    { value: 'COLD', label: 'Cold' },
-    { value: 'PASS', label: 'Pass' }
-  ];
+  useEffect(() => {
+    setLocalFilters(filters);
+    setAppliedFilters(filters);
+  }, [filters]);
 
-  const createdByOptions = [
-    'John Doe', 'Jane Smith', 'Mike Johnson', 'Sarah Wilson', 'David Chen', 'System Import'
-  ];
-
-  const createdViaOptions = [
-    'Manual Entry', 'Facebook Lead Ads', 'Google Ads', 'Website Form', 'Cold Calling', 'Referral', 'Email Campaign', 'Direct Mail'
-  ];
-
-  const tagOptions = [
-    'High Priority', 'Follow Up', 'Hot Lead', 'Qualified', 'Unqualified', 'Callback Required', 'Email Sent', 'Appointment Set'
-  ];
-
-  const leadManagerOptions = [
-    'John Doe', 'Jane Smith', 'Mike Johnson', 'Sarah Wilson', 'David Chen', 'Unassigned'
-  ];
-
-  const applyFilters = () => {
-    const newFilters: FilterCondition[] = [];
-
-    // Lead Status filters
-    selectedLeadStatuses.forEach(status => {
-      const option = leadStatusOptions.find(opt => opt.value === status);
-      newFilters.push({
-        id: `leadStatus-${status}`,
-        field: 'leadStatus',
-        operator: 'equals',
-        value: status,
-        label: `Status: ${option?.label || status}`
-      });
-    });
-
-    // Created By filters
-    selectedCreatedBy.forEach(person => {
-      newFilters.push({
-        id: `createdBy-${person}`,
-        field: 'createdBy',
-        operator: 'equals',
-        value: person,
-        label: `Created by: ${person}`
-      });
-    });
-
-    // Created Via filters
-    selectedCreatedVia.forEach(via => {
-      newFilters.push({
-        id: `createdVia-${via}`,
-        field: 'createdVia',
-        operator: 'equals',
-        value: via,
-        label: `Created via: ${via}`
-      });
-    });
-
-    // Tags filters
-    selectedTags.forEach(tag => {
-      newFilters.push({
-        id: `tags-${tag}`,
-        field: 'tags',
-        operator: 'contains',
-        value: tag,
-        label: `Tag: ${tag}`
-      });
-    });
-
-    // Lead Manager filters
-    selectedLeadManager.forEach(manager => {
-      newFilters.push({
-        id: `leadManager-${manager}`,
-        field: 'leadManager',
-        operator: 'equals',
-        value: manager,
-        label: `Manager: ${manager}`
-      });
-    });
-
-    // Date filters
-    if (createdDateFrom) {
-      newFilters.push({
-        id: 'createdDateFrom',
-        field: 'createdOn',
-        operator: 'gte',
-        value: createdDateFrom.toISOString(),
-        label: `From: ${format(createdDateFrom, 'MMM d, yyyy')}`
-      });
-    }
-
-    if (createdDateTo) {
-      newFilters.push({
-        id: 'createdDateTo',
-        field: 'createdOn',
-        operator: 'lte',
-        value: createdDateTo.toISOString(),
-        label: `To: ${format(createdDateTo, 'MMM d, yyyy')}`
-      });
-    }
-
-    // Contact filters
-    if (emailFilter.trim()) {
-      newFilters.push({
-        id: 'email',
-        field: 'email',
-        operator: 'contains',
-        value: emailFilter.trim(),
-        label: `Email: ${emailFilter.trim()}`
-      });
-    }
-
-    if (phoneFilter.trim()) {
-      newFilters.push({
-        id: 'phone',
-        field: 'phone',
-        operator: 'contains',
-        value: phoneFilter.trim(),
-        label: `Phone: ${phoneFilter.trim()}`
-      });
-    }
-
+  const handleFilterChange = (key: keyof FilterState, value: any) => {
+    const newFilters = { ...localFilters, [key]: value };
+    setLocalFilters(newFilters);
     onFiltersChange(newFilters);
   };
 
-  const clearAllFilters = () => {
-    setSelectedLeadStatuses([]);
-    setSelectedCreatedBy([]);
-    setSelectedCreatedVia([]);
-    setSelectedTags([]);
-    setSelectedLeadManager([]);
-    setCreatedDateFrom(undefined);
-    setCreatedDateTo(undefined);
-    setEmailFilter('');
-    setPhoneFilter('');
-    onFiltersChange([]);
+  const handleClearAll = () => {
+    const clearedFilters: FilterState = {
+      createdBy: '',
+      createdOnStart: '',
+      createdOnEnd: '',
+      createdVia: '',
+      leadStatus: '',
+      tags: [],
+      sellerContact: '',
+      leadManager: '',
+      moveTo: '',
+      minArrears: undefined,
+      maxArrears: undefined,
+    };
+    setLocalFilters(clearedFilters);
+    onFiltersChange(clearedFilters);
+    setAppliedFilters(clearedFilters);
   };
 
-  const handleSaveCurrentFilters = () => {
-    if (!saveFilterName.trim()) {
-      toast.error('Please enter a name for the filter');
-      return;
-    }
+  const handleDone = () => {
+    setAppliedFilters(localFilters);
+    onClose();
+  };
 
-    if (filters.length === 0) {
-      toast.error('No filters to save');
-      return;
-    }
-
-    // Check for duplicate names
-    const existingFilter = savedFilters.find(f => f.name.toLowerCase() === saveFilterName.trim().toLowerCase());
-    if (existingFilter) {
-      toast.error('A filter with this name already exists');
-      return;
-    }
-
-    try {
-      saveFilter(saveFilterName.trim(), filters);
-      setSaveFilterName('');
-      setShowSaveDialog(false);
-      toast.success(`Filter "${saveFilterName}" saved successfully`);
-    } catch (error) {
-      toast.error('Failed to save filter');
+  const handleSaveView = () => {
+    if (saveViewName.trim()) {
+      onSaveView(saveViewName.trim(), localFilters);
+      setSaveViewName('');
+      setShowSaveInput(false);
     }
   };
 
-  const handleLoadSavedFilter = (savedFilter: any) => {
-    onFiltersChange(savedFilter.filters);
-    toast.success(`Filter "${savedFilter.name}" applied`);
+  const getAppliedFiltersCount = () => {
+    return Object.entries(appliedFilters).filter(([key, value]) => {
+      if (Array.isArray(value)) return value.length > 0;
+      return value && value !== '';
+    }).length;
   };
 
-  const handleDeleteSavedFilter = (filterId: string, name: string) => {
-    if (window.confirm(`Are you sure you want to delete the filter "${name}"?`)) {
-      if (deleteFilter(filterId)) {
-        toast.success(`Filter "${name}" deleted`);
-      } else {
-        toast.error('Failed to delete filter');
-      }
+  const getAppliedFiltersDisplay = () => {
+    const applied = [];
+    if (appliedFilters.createdBy) applied.push(`Created By: ${appliedFilters.createdBy}`);
+    if (appliedFilters.createdOnStart) applied.push(`From: ${appliedFilters.createdOnStart}`);
+    if (appliedFilters.createdOnEnd) applied.push(`To: ${appliedFilters.createdOnEnd}`);
+    if (appliedFilters.createdVia) applied.push(`Via: ${appliedFilters.createdVia}`);
+    if (appliedFilters.leadStatus) applied.push(`Status: ${appliedFilters.leadStatus}`);
+    if (appliedFilters.tags && appliedFilters.tags.length > 0) {
+      applied.push(`Tags: ${appliedFilters.tags.join(', ')}`);
     }
+    if (appliedFilters.sellerContact) applied.push(`Contact: ${appliedFilters.sellerContact}`);
+    if (appliedFilters.leadManager) applied.push(`Manager: ${appliedFilters.leadManager}`);
+    if (appliedFilters.minArrears !== undefined) applied.push(`Min Arrears: $${appliedFilters.minArrears}`);
+    if (appliedFilters.maxArrears !== undefined) applied.push(`Max Arrears: $${appliedFilters.maxArrears}`);
+    return applied;
   };
 
-  const MultiSelectSection = ({ 
-    title, 
-    options, 
-    selected, 
-    onSelectionChange, 
-    icon: Icon 
-  }: {
-    title: string;
-    options: string[] | { value: string; label: string }[];
-    selected: string[];
-    onSelectionChange: (selected: string[]) => void;
-    icon: React.ComponentType<{ className?: string }>;
-  }) => (
-    <Card className="border-gray-200">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm flex items-center gap-2">
-          <Icon className="w-4 h-4" />
-          {title}
-          {selected.length > 0 && (
-            <Badge variant="secondary" className="ml-auto">
-              {selected.length}
+  // Get unique values from leads for filter options
+  const getUniqueValues = (field: keyof TaxLead) => {
+    return [...new Set(leads.map(lead => lead[field]).filter(Boolean))];
+  };
+
+  if (!isOpen) {
+    const appliedCount = getAppliedFiltersCount();
+    if (appliedCount === 0) return null;
+
+    return (
+      <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="flex items-center justify-between mb-2">
+          <h4 className="font-medium text-blue-800">Applied Filters ({appliedCount})</h4>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClearAll}
+            className="text-blue-600 hover:text-blue-800"
+          >
+            Clear All
+          </Button>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {getAppliedFiltersDisplay().map((filter, index) => (
+            <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800">
+              {filter}
             </Badge>
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-2 max-h-48 overflow-y-auto">
-        {options.map((option) => {
-          const value = typeof option === 'string' ? option : option.value;
-          const label = typeof option === 'string' ? option : option.label;
-          const isSelected = selected.includes(value);
-          
-          return (
-            <div key={value} className="flex items-center space-x-2">
-              <Checkbox
-                id={`${title}-${value}`}
-                checked={isSelected}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    onSelectionChange([...selected, value]);
-                  } else {
-                    onSelectionChange(selected.filter(s => s !== value));
-                  }
-                }}
-              />
-              <Label
-                htmlFor={`${title}-${value}`}
-                className="text-sm cursor-pointer flex-1"
-              >
-                {label}
-              </Label>
-            </div>
-          );
-        })}
-      </CardContent>
-    </Card>
-  );
-
-  if (!isOpen) return null;
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 w-80 bg-white border-l border-gray-200 shadow-xl overflow-hidden flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b bg-gray-50">
-        <h2 className="text-lg font-semibold text-gray-900">Filters & Views</h2>
-        <Button variant="ghost" size="sm" onClick={onClose}>
-          <X className="w-4 h-4" />
-        </Button>
-      </div>
+    <div className="fixed inset-0 z-50 flex">
+      <div className="w-80 bg-white shadow-xl border-r border-gray-200 flex flex-col">
+        {/* Header */}
+        <div className="p-4 border-b border-gray-200">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <Filter className="w-5 h-5" />
+              Filters
+            </h3>
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
 
-      {/* Tabs */}
-      <div className="flex border-b">
-        <button
-          onClick={() => setActiveTab('filters')}
-          className={`flex-1 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === 'filters'
-              ? 'border-blue-500 text-blue-600 bg-blue-50'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          <Filter className="w-4 h-4 inline mr-2" />
-          Filters
-        </button>
-        <button
-          onClick={() => setActiveTab('saved')}
-          className={`flex-1 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === 'saved'
-              ? 'border-blue-500 text-blue-600 bg-blue-50'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          <Star className="w-4 h-4 inline mr-2" />
-          Saved ({savedFilters.length})
-        </button>
-      </div>
+          {/* Tabs */}
+          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+            <button
+              onClick={() => setActiveTab('filters')}
+              className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                activeTab === 'filters'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Filters
+            </button>
+            <button
+              onClick={() => setActiveTab('saved')}
+              className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                activeTab === 'saved'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Saved ({savedViews.length})
+            </button>
+          </div>
+        </div>
 
-      {/* Content */}
-      <ScrollArea className="flex-1">
-        {activeTab === 'filters' ? (
-          <div className="p-4 space-y-4">
-            {/* Active Filters */}
-            {filters.length > 0 && (
-              <Card className="border-blue-200 bg-blue-50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm text-blue-800">Active Filters ({filters.length})</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {filters.map((filter) => (
-                    <div key={filter.id} className="flex items-center justify-between p-2 bg-white rounded border">
-                      <span className="text-sm text-blue-800">{filter.label}</span>
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-4">
+          {activeTab === 'filters' ? (
+            <div className="space-y-6">
+              {/* Created By */}
+              <div className="space-y-2">
+                <Label htmlFor="createdBy" className="text-sm font-medium text-gray-700">
+                  Created By
+                </Label>
+                <Select 
+                  value={localFilters.createdBy} 
+                  onValueChange={(value) => handleFilterChange('createdBy', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select creator" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All</SelectItem>
+                    {getUniqueValues('createdVia').map((creator) => (
+                      <SelectItem key={creator} value={creator as string}>
+                        {creator}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Created On */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Created On</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label htmlFor="createdOnStart" className="text-xs text-gray-500">From</Label>
+                    <Input
+                      id="createdOnStart"
+                      type="date"
+                      value={localFilters.createdOnStart}
+                      onChange={(e) => handleFilterChange('createdOnStart', e.target.value)}
+                      className="text-sm"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="createdOnEnd" className="text-xs text-gray-500">To</Label>
+                    <Input
+                      id="createdOnEnd"
+                      type="date"
+                      value={localFilters.createdOnEnd}
+                      onChange={(e) => handleFilterChange('createdOnEnd', e.target.value)}
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Created Via */}
+              <div className="space-y-2">
+                <Label htmlFor="createdVia" className="text-sm font-medium text-gray-700">
+                  Created Via
+                </Label>
+                <Select 
+                  value={localFilters.createdVia} 
+                  onValueChange={(value) => handleFilterChange('createdVia', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select source" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All</SelectItem>
+                    {getUniqueValues('createdVia').map((source) => (
+                      <SelectItem key={source} value={source as string}>
+                        {source}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Lead Status */}
+              <div className="space-y-2">
+                <Label htmlFor="leadStatus" className="text-sm font-medium text-gray-700">
+                  Lead Status
+                </Label>
+                <Select 
+                  value={localFilters.leadStatus} 
+                  onValueChange={(value) => handleFilterChange('leadStatus', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All</SelectItem>
+                    <SelectItem value="HOT">🔥 Hot</SelectItem>
+                    <SelectItem value="WARM">🌤️ Warm</SelectItem>
+                    <SelectItem value="COLD">❄️ Cold</SelectItem>
+                    <SelectItem value="PASS">⏭️ Pass</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Tags */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Tags</Label>
+                <div className="space-y-2">
+                  {['High Priority', 'Hot Lead', 'Follow Up', 'Qualified', 'Inherited Property', 'Out of State', 'Divorce Sale', 'Quick Sale Needed', 'Investment Property', 'Portfolio Sale', 'Not Interested', 'Working with Attorney'].map((tag) => (
+                    <div key={tag} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`tag-${tag}`}
+                        checked={localFilters.tags?.includes(tag) || false}
+                        onCheckedChange={(checked) => {
+                          const currentTags = localFilters.tags || [];
+                          const newTags = checked
+                            ? [...currentTags, tag]
+                            : currentTags.filter(t => t !== tag);
+                          handleFilterChange('tags', newTags);
+                        }}
+                      />
+                      <Label htmlFor={`tag-${tag}`} className="text-sm text-gray-600">
+                        {tag}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Seller Contact */}
+              <div className="space-y-2">
+                <Label htmlFor="sellerContact" className="text-sm font-medium text-gray-700">
+                  Seller Contact
+                </Label>
+                <Input
+                  id="sellerContact"
+                  value={localFilters.sellerContact}
+                  onChange={(e) => handleFilterChange('sellerContact', e.target.value)}
+                  placeholder="Search by name, email, or phone"
+                  className="text-sm"
+                />
+              </div>
+
+              {/* Lead Manager */}
+              <div className="space-y-2">
+                <Label htmlFor="leadManager" className="text-sm font-medium text-gray-700">
+                  Lead Manager
+                </Label>
+                <Select 
+                  value={localFilters.leadManager} 
+                  onValueChange={(value) => handleFilterChange('leadManager', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select manager" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All</SelectItem>
+                    {getUniqueValues('leadManager').map((manager) => (
+                      <SelectItem key={manager} value={manager as string}>
+                        {manager}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Arrears Range */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Current Arrears</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label htmlFor="minArrears" className="text-xs text-gray-500">Min ($)</Label>
+                    <Input
+                      id="minArrears"
+                      type="number"
+                      value={localFilters.minArrears || ''}
+                      onChange={(e) => handleFilterChange('minArrears', e.target.value ? parseInt(e.target.value) : undefined)}
+                      placeholder="0"
+                      className="text-sm"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="maxArrears" className="text-xs text-gray-500">Max ($)</Label>
+                    <Input
+                      id="maxArrears"
+                      type="number"
+                      value={localFilters.maxArrears || ''}
+                      onChange={(e) => handleFilterChange('maxArrears', e.target.value ? parseInt(e.target.value) : undefined)}
+                      placeholder="999999"
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Move To */}
+              <div className="space-y-2">
+                <Label htmlFor="moveTo" className="text-sm font-medium text-gray-700">
+                  Move To
+                </Label>
+                <Select 
+                  value={localFilters.moveTo} 
+                  onValueChange={(value) => handleFilterChange('moveTo', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select destination" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="qualified">Qualified Leads</SelectItem>
+                    <SelectItem value="followup">Follow Up</SelectItem>
+                    <SelectItem value="archive">Archive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Save View */}
+              <div className="pt-4 border-t border-gray-200">
+                {showSaveInput ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="saveViewName" className="text-sm font-medium text-gray-700">
+                      Save Current View
+                    </Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="saveViewName"
+                        value={saveViewName}
+                        onChange={(e) => setSaveViewName(e.target.value)}
+                        placeholder="Enter view name"
+                        className="text-sm flex-1"
+                      />
+                      <Button size="sm" onClick={handleSaveView} disabled={!saveViewName.trim()}>
+                        <Save className="w-3 h-3" />
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => setShowSaveInput(false)}>
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowSaveInput(true)}
+                    className="w-full"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Current View
+                  </Button>
+                )}
+              </div>
+            </div>
+          ) : (
+            // Saved Views Tab
+            <div className="space-y-3">
+              {savedViews.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500 text-sm">No saved filters yet</p>
+                  <p className="text-gray-400 text-xs mt-1">
+                    Apply filters and save them to create quick views
+                  </p>
+                </div>
+              ) : (
+                savedViews.map((view) => (
+                  <div
+                    key={view.id}
+                    className="p-3 bg-gray-50 rounded-lg border hover:bg-gray-100 transition-colors cursor-pointer group"
+                    onClick={() => onLoadView(view)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900 text-sm">{view.name}</h4>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {Object.entries(view.filters).filter(([, value]) => {
+                            if (Array.isArray(value)) return value.length > 0;
+                            return value && value !== '';
+                          }).length} filters applied
+                        </p>
+                      </div>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => {
-                          const updatedFilters = filters.filter(f => f.id !== filter.id);
-                          onFiltersChange(updatedFilters);
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteView(view.id);
                         }}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-800"
                       >
                         <X className="w-3 h-3" />
                       </Button>
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Filter Controls */}
-            <MultiSelectSection
-              title="Lead Status"
-              options={leadStatusOptions}
-              selected={selectedLeadStatuses}
-              onSelectionChange={setSelectedLeadStatuses}
-              icon={Filter}
-            />
-
-            <MultiSelectSection
-              title="Created By"
-              options={createdByOptions}
-              selected={selectedCreatedBy}
-              onSelectionChange={setSelectedCreatedBy}
-              icon={User}
-            />
-
-            <MultiSelectSection
-              title="Created Via"
-              options={createdViaOptions}
-              selected={selectedCreatedVia}
-              onSelectionChange={setSelectedCreatedVia}
-              icon={Tag}
-            />
-
-            <MultiSelectSection
-              title="Tags"
-              options={tagOptions}
-              selected={selectedTags}
-              onSelectionChange={setSelectedTags}
-              icon={Tag}
-            />
-
-            <MultiSelectSection
-              title="Lead Manager"
-              options={leadManagerOptions}
-              selected={selectedLeadManager}
-              onSelectionChange={setSelectedLeadManager}
-              icon={User}
-            />
-
-            {/* Date Range */}
-            <Card className="border-gray-200">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  Created On
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid grid-cols-2 gap-2">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "justify-start text-left font-normal text-xs",
-                          !createdDateFrom && "text-muted-foreground"
-                        )}
-                        size="sm"
-                      >
-                        <CalendarIcon className="mr-2 h-3 w-3" />
-                        {createdDateFrom ? format(createdDateFrom, "MMM d") : "From"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
-                        mode="single"
-                        selected={createdDateFrom}
-                        onSelect={setCreatedDateFrom}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "justify-start text-left font-normal text-xs",
-                          !createdDateTo && "text-muted-foreground"
-                        )}
-                        size="sm"
-                      >
-                        <CalendarIcon className="mr-2 h-3 w-3" />
-                        {createdDateTo ? format(createdDateTo, "MMM d") : "To"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
-                        mode="single"
-                        selected={createdDateTo}
-                        onSelect={setCreatedDateTo}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Seller Contact */}
-            <Card className="border-gray-200">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Phone className="w-4 h-4" />
-                  Seller Contact
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="space-y-2">
-                  <Label htmlFor="email-filter" className="text-xs">Email</Label>
-                  <Input
-                    id="email-filter"
-                    placeholder="Enter email..."
-                    value={emailFilter}
-                    onChange={(e) => setEmailFilter(e.target.value)}
-                    size="sm"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone-filter" className="text-xs">Phone</Label>
-                  <Input
-                    id="phone-filter"
-                    placeholder="Enter phone..."
-                    value={phoneFilter}
-                    onChange={(e) => setPhoneFilter(e.target.value)}
-                    size="sm"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Save Current Filters */}
-            {(selectedLeadStatuses.length > 0 || selectedCreatedBy.length > 0 || selectedCreatedVia.length > 0 || 
-              selectedTags.length > 0 || selectedLeadManager.length > 0 || createdDateFrom || createdDateTo || 
-              emailFilter.trim() || phoneFilter.trim()) && (
-              <Card className="border-green-200 bg-green-50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm text-green-800">Save Current View</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {showSaveDialog ? (
-                    <div className="space-y-3">
-                      <Input
-                        placeholder="Enter filter name..."
-                        value={saveFilterName}
-                        onChange={(e) => setSaveFilterName(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSaveCurrentFilters()}
-                      />
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={handleSaveCurrentFilters}>
-                          <Save className="w-3 h-3 mr-1" />
-                          Save
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => {
-                            setShowSaveDialog(false);
-                            setSaveFilterName('');
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <Button
-                      onClick={() => setShowSaveDialog(true)}
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                    >
-                      <Save className="w-4 h-4 mr-2" />
-                      Save Current View
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        ) : (
-          <div className="p-4 space-y-4">
-            {/* Saved Filters */}
-            {savedFilters.length === 0 ? (
-              <div className="text-center py-8">
-                <Star className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500 text-sm">No saved filters yet</p>
-                <p className="text-gray-400 text-xs mt-1">
-                  Create and save filters to quickly access them later
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {savedFilters.map((savedFilter) => (
-                  <Card key={savedFilter.id} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium text-gray-900">{savedFilter.name}</h4>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleLoadSavedFilter(savedFilter)}
-                            className="text-blue-600 hover:text-blue-700"
-                          >
-                            Apply
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteSavedFilter(savedFilter.id, savedFilter.name)}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-1 mb-2">
-                        {savedFilter.filters.map((filter, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {filter.label}
-                          </Badge>
-                        ))}
-                      </div>
-                      <p className="text-xs text-gray-500">
-                        Created: {savedFilter.createdAt.toLocaleDateString()}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </ScrollArea>
-
-      {/* Footer */}
-      <div className="border-t bg-gray-50 p-4">
-        <div className="text-sm text-gray-600 mb-3">
-          Showing {filteredResults} of {totalResults} leads
-          {filters.length > 0 && (
-            <span className="text-blue-600 ml-1">
-              ({filters.length} filter{filters.length !== 1 ? 's' : ''} active)
-            </span>
+                  </div>
+                ))
+              )}
+            </div>
           )}
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              clearAllFilters();
-              toast.success('All filters cleared');
-            }}
-            className="flex-1"
-          >
-            Clear All
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => {
-              applyFilters();
-              onClose();
-              toast.success('Filters applied');
-            }}
-            className="flex-1"
-          >
-            Done
-          </Button>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleClearAll} className="flex-1">
+              Clear All
+            </Button>
+            <Button onClick={handleDone} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
+              Done
+            </Button>
+          </div>
         </div>
       </div>
+
+      {/* Overlay */}
+      <div className="flex-1 bg-black bg-opacity-25" onClick={onClose} />
     </div>
   );
 }
