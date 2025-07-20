@@ -32,7 +32,7 @@ export function LeadSearchFilters({
       </div>
       <div className="flex gap-2 items-center">
         <Filter className="w-4 h-4 text-gray-500" />
-        <Select value={statusFilter} onValueChange={onStatusFilterChange}>
+        <Select value={statusFilter || "all"} onValueChange={onStatusFilterChange}>
           <SelectTrigger className="w-32">
             <SelectValue />
           </SelectTrigger>

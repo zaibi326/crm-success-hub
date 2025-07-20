@@ -190,7 +190,7 @@ export function TaxLeadOverview({
                 />
               </div>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter || "ALL"} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-40">
                 <Filter className="w-4 h-4 mr-2" />
                 <SelectValue placeholder="Filter by status" />

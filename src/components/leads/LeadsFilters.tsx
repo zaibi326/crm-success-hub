@@ -38,7 +38,7 @@ export function LeadsFilters({
             />
           </div>
 
-          <Select value={filterStatus} onValueChange={onFilterStatusChange}>
+          <Select value={filterStatus || "all"} onValueChange={onFilterStatusChange}>
             <SelectTrigger className="w-40 bg-white shadow-sm border-gray-200">
               <Filter className="w-4 h-4 mr-2 text-gray-400" />
               <SelectValue placeholder="Filter by status" />
@@ -52,7 +52,7 @@ export function LeadsFilters({
             </SelectContent>
           </Select>
 
-          <Select value={sortBy} onValueChange={onSortByChange}>
+          <Select value={sortBy || "ownerName"} onValueChange={onSortByChange}>
             <SelectTrigger className="w-40 bg-white shadow-sm border-gray-200">
               <ChevronDown className="w-4 h-4 mr-2 text-gray-400" />
               <SelectValue placeholder="Sort by" />

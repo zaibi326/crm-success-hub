@@ -27,7 +27,7 @@ export function LeadSearchControls({ searchTerm, setSearchTerm, sortBy, setSortB
           />
         </div>
       </div>
-      <Select value={sortBy} onValueChange={setSortBy}>
+      <Select value={sortBy || "ownerName"} onValueChange={setSortBy}>
         <SelectTrigger className="w-48">
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
