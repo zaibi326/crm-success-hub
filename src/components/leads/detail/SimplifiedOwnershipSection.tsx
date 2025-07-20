@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { Users, Plus, Trash2, Phone, Mail, MapPin, AlertTriangle } from 'lucide-react';
+import { Users, Plus, Trash2, Phone, Mail, MapPin, AlertTriangle, Save } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
 import { useToast } from '@/hooks/use-toast';
 import { InlineEditField } from './InlineEditField';
@@ -17,6 +17,7 @@ interface Heir {
   propertyAddress: string;
   phoneNumber: string;
   email: string;
+  saved?: boolean;
 }
 
 interface SimplifiedOwnershipSectionProps {
@@ -56,7 +57,8 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
       percentage: 0,
       propertyAddress: '',
       phoneNumber: '',
-      email: ''
+      email: '',
+      saved: false
     };
     setHeirs(prev => [...prev, newHeir]);
   };
@@ -67,12 +69,33 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
 
   const updateHeir = (id: string, field: keyof Heir, value: string | number) => {
     setHeirs(prev => prev.map(heir => 
-      heir.id === id ? { ...heir, [field]: value } : heir
+      heir.id === id ? { ...heir, [field]: value, saved: false } : heir
     ));
   };
 
+  const saveHeir = (id: string) => {
+    const heir = heirs.find(h => h.id === id);
+    if (!heir || !heir.name || heir.percentage <= 0) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter heir name and percentage before saving",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setHeirs(prev => prev.map(h => 
+      h.id === id ? { ...h, saved: true } : h
+    ));
+
+    toast({
+      title: "Heir Saved",
+      description: `${heir.name} has been saved successfully`,
+    });
+  };
+
   const getTotalHeirsPercentage = () => {
-    return heirs.reduce((sum, heir) => sum + heir.percentage, 0);
+    return heirs.filter(h => h.saved).reduce((sum, heir) => sum + heir.percentage, 0);
   };
 
   const getOwnerPercentage = () => {
@@ -103,7 +126,11 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
     return 'bg-gray-500';
   };
 
-  // Create chart data with owner and heirs
+  const hasUnsavedChanges = () => {
+    return heirs.some(h => !h.saved && (h.name || h.percentage > 0));
+  };
+
+  // Create chart data with owner and saved heirs
   const chartData = [
     // Owner data (only if they have ownership)
     ...(getOwnerPercentage() > 0 ? [{
@@ -111,9 +138,9 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
       value: getOwnerPercentage(),
       relationship: 'Primary Owner'
     }] : []),
-    // Heirs data (only those with percentage > 0)
+    // Saved heirs data (only those with percentage > 0)
     ...heirs
-      .filter(heir => heir.percentage > 0 && heir.name.trim())
+      .filter(heir => heir.saved && heir.percentage > 0 && heir.name.trim())
       .map(heir => ({
         name: heir.name,
         value: heir.percentage,
@@ -181,7 +208,7 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
             </div>
           </div>
 
-          {/* Owner Card (always show if they have ownership) */}
+          {/* Primary Owner Card (always show if they have ownership) */}
           {getOwnerPercentage() > 0 && (
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-3 text-gray-900">Primary Owner</h3>
@@ -208,12 +235,79 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
             </div>
           )}
 
-          {/* Heirs Cards */}
-          {heirs.length > 0 && (
-            <div>
+          {/* Saved Heirs Display (Vertical format like Primary Owner) */}
+          {heirs.filter(h => h.saved).length > 0 && (
+            <div className="mb-6">
               <h3 className="text-lg font-semibold mb-3 text-gray-900">Heirs</h3>
+              <div className="space-y-3">
+                {heirs.filter(h => h.saved).map((heir) => (
+                  <Card key={heir.id} className="shadow-sm border border-gray-200">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                            {getInitials(heir.name)}
+                          </div>
+                          <div>
+                            <div className="text-lg font-semibold text-gray-900">
+                              {heir.name}
+                            </div>
+                            <div className="text-sm text-gray-600">{heir.relationship}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={`${getPercentageColor(heir.percentage)} text-white`}>
+                            {heir.percentage}%
+                          </Badge>
+                          {canEdit && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeHeir(heir.id)}
+                              className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 h-auto"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Contact Details */}
+                      {(heir.propertyAddress || heir.phoneNumber || heir.email) && (
+                        <div className="space-y-2 text-sm text-gray-600 pl-15">
+                          {heir.propertyAddress && (
+                            <div className="flex items-center gap-2">
+                              <MapPin className="w-4 h-4" />
+                              <span>{heir.propertyAddress}</span>
+                            </div>
+                          )}
+                          {heir.phoneNumber && (
+                            <div className="flex items-center gap-2">
+                              <Phone className="w-4 h-4" />
+                              <span>{heir.phoneNumber}</span>
+                            </div>
+                          )}
+                          {heir.email && (
+                            <div className="flex items-center gap-2">
+                              <Mail className="w-4 h-4" />
+                              <span>{heir.email}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Editable Heirs Cards (Unsaved) */}
+          {heirs.filter(h => !h.saved).length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-3 text-gray-900">Add New Heirs</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {heirs.map((heir) => (
+                {heirs.filter(h => !h.saved).map((heir) => (
                   <Card key={heir.id} className="shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                     <CardContent className="p-4 space-y-4">
                       {/* Header with Avatar and Actions */}
@@ -319,6 +413,18 @@ export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true
                           </div>
                         </div>
                       </div>
+
+                      {/* Save Button */}
+                      {canEdit && (heir.name || heir.percentage > 0) && (
+                        <Button 
+                          onClick={() => saveHeir(heir.id)}
+                          size="sm"
+                          className="w-full bg-green-600 hover:bg-green-700"
+                        >
+                          <Save className="w-4 h-4 mr-2" />
+                          Save Heir
+                        </Button>
+                      )}
                     </CardContent>
                   </Card>
                 ))}

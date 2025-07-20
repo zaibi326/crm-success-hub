@@ -76,14 +76,6 @@ export function MainContent({
 
       {disposition === 'keep' && (
         <>
-          <NotesSection
-            notes={notes}
-            newNote={newNote}
-            onNewNoteChange={onNewNoteChange}
-            onAddNote={onAddNote}
-            canEdit={canEdit}
-          />
-
           <EditableFieldsSection
             formData={formData}
             onInputChange={onInputChange}
@@ -102,6 +94,14 @@ export function MainContent({
           <EnhancedAdditionalInfoSection
             formData={formData}
             onInputChange={onInputChange}
+            canEdit={canEdit}
+          />
+
+          <NotesSection
+            notes={notes}
+            newNote={newNote}
+            onNewNoteChange={onNewNoteChange}
+            onAddNote={onAddNote}
             canEdit={canEdit}
           />
 
