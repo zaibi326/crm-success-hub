@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { X, Filter, ChevronDown, Check, Save, Trash2, Edit, Star } from 'lucide-react';
+import { X, Filter, ChevronDown, Check, Save, Trash2, Edit, Star, Calendar, User, Tag, Phone, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,10 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { format, addDays } from 'date-fns';
 import { FilterCondition } from './filters/types';
 import { useSavedFilters } from '@/hooks/useSavedFilters';
 
@@ -35,12 +40,174 @@ export function PodioFilterPanel({
   const [saveFilterName, setSaveFilterName] = useState('');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   
+  // Filter state
+  const [selectedLeadStatuses, setSelectedLeadStatuses] = useState<string[]>([]);
+  const [selectedCreatedBy, setSelectedCreatedBy] = useState<string[]>([]);
+  const [selectedCreatedVia, setSelectedCreatedVia] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedLeadManager, setSelectedLeadManager] = useState<string[]>([]);
+  const [createdDateFrom, setCreatedDateFrom] = useState<Date>();
+  const [createdDateTo, setCreatedDateTo] = useState<Date>();
+  const [emailFilter, setEmailFilter] = useState('');
+  const [phoneFilter, setPhoneFilter] = useState('');
+  
   const {
     savedFilters,
     saveFilter,
     updateFilter,
     deleteFilter
   } = useSavedFilters();
+
+  // Filter options
+  const leadStatusOptions = [
+    { value: 'not_set', label: 'Not set' },
+    { value: 'new_untouched', label: '#New Untouched#' },
+    { value: 'discovery', label: 'Discovery' },
+    { value: 'already_listed', label: 'Already Listed' },
+    { value: 'price_too_high', label: 'Price Too High' },
+    { value: 'low_motivation', label: 'Low Motivation' },
+    { value: 'add_to_follow_up', label: 'Add to Follow up' },
+    { value: 'inquiry', label: 'Inquiry' },
+    { value: 'interested_listing', label: 'Interested - Listing' },
+    { value: 'appointment_completed', label: 'Appointment Completed' },
+    { value: 'interested_follow_up', label: 'Interested - Add to Follow up' },
+    { value: 'interested_offer_status', label: 'Interested - Set Offer Status' },
+    { value: 'contract_sent_out', label: 'Contract Sent Out - Set Contract Status' },
+    { value: 'in_contract', label: 'In Contract - Set Manually' }
+  ];
+
+  const createdByOptions = [
+    'John Doe', 'Jane Smith', 'Mike Johnson', 'Sarah Wilson', 'David Chen', 'System Import'
+  ];
+
+  const createdViaOptions = [
+    'Manual Entry', 'Facebook Lead Ads', 'Google Ads', 'Website Form', 'Cold Calling', 'Referral', 'Email Campaign', 'Direct Mail'
+  ];
+
+  const tagOptions = [
+    'High Priority', 'Follow Up', 'Hot Lead', 'Qualified', 'Unqualified', 'Callback Required', 'Email Sent', 'Appointment Set'
+  ];
+
+  const leadManagerOptions = [
+    'John Doe', 'Jane Smith', 'Mike Johnson', 'Sarah Wilson', 'David Chen', 'Unassigned'
+  ];
+
+  const applyFilters = () => {
+    const newFilters: FilterCondition[] = [];
+
+    // Lead Status filters
+    selectedLeadStatuses.forEach(status => {
+      const option = leadStatusOptions.find(opt => opt.value === status);
+      newFilters.push({
+        id: `leadStatus-${status}`,
+        field: 'leadStatus',
+        operator: 'equals',
+        value: status,
+        label: `Status: ${option?.label || status}`
+      });
+    });
+
+    // Created By filters
+    selectedCreatedBy.forEach(person => {
+      newFilters.push({
+        id: `createdBy-${person}`,
+        field: 'createdBy',
+        operator: 'equals',
+        value: person,
+        label: `Created by: ${person}`
+      });
+    });
+
+    // Created Via filters
+    selectedCreatedVia.forEach(via => {
+      newFilters.push({
+        id: `createdVia-${via}`,
+        field: 'createdVia',
+        operator: 'equals',
+        value: via,
+        label: `Created via: ${via}`
+      });
+    });
+
+    // Tags filters
+    selectedTags.forEach(tag => {
+      newFilters.push({
+        id: `tags-${tag}`,
+        field: 'tags',
+        operator: 'contains',
+        value: tag,
+        label: `Tag: ${tag}`
+      });
+    });
+
+    // Lead Manager filters
+    selectedLeadManager.forEach(manager => {
+      newFilters.push({
+        id: `leadManager-${manager}`,
+        field: 'leadManager',
+        operator: 'equals',
+        value: manager,
+        label: `Manager: ${manager}`
+      });
+    });
+
+    // Date filters
+    if (createdDateFrom) {
+      newFilters.push({
+        id: 'createdDateFrom',
+        field: 'createdOn',
+        operator: 'gte',
+        value: createdDateFrom.toISOString(),
+        label: `From: ${format(createdDateFrom, 'MMM d, yyyy')}`
+      });
+    }
+
+    if (createdDateTo) {
+      newFilters.push({
+        id: 'createdDateTo',
+        field: 'createdOn',
+        operator: 'lte',
+        value: createdDateTo.toISOString(),
+        label: `To: ${format(createdDateTo, 'MMM d, yyyy')}`
+      });
+    }
+
+    // Contact filters
+    if (emailFilter.trim()) {
+      newFilters.push({
+        id: 'email',
+        field: 'email',
+        operator: 'contains',
+        value: emailFilter.trim(),
+        label: `Email: ${emailFilter.trim()}`
+      });
+    }
+
+    if (phoneFilter.trim()) {
+      newFilters.push({
+        id: 'phone',
+        field: 'phone',
+        operator: 'contains',
+        value: phoneFilter.trim(),
+        label: `Phone: ${phoneFilter.trim()}`
+      });
+    }
+
+    onFiltersChange(newFilters);
+  };
+
+  const clearAllFilters = () => {
+    setSelectedLeadStatuses([]);
+    setSelectedCreatedBy([]);
+    setSelectedCreatedVia([]);
+    setSelectedTags([]);
+    setSelectedLeadManager([]);
+    setCreatedDateFrom(undefined);
+    setCreatedDateTo(undefined);
+    setEmailFilter('');
+    setPhoneFilter('');
+    onFiltersChange([]);
+  };
 
   const handleSaveCurrentFilters = () => {
     if (!saveFilterName.trim()) {
@@ -50,6 +217,13 @@ export function PodioFilterPanel({
 
     if (filters.length === 0) {
       toast.error('No filters to save');
+      return;
+    }
+
+    // Check for duplicate names
+    const existingFilter = savedFilters.find(f => f.name.toLowerCase() === saveFilterName.trim().toLowerCase());
+    if (existingFilter) {
+      toast.error('A filter with this name already exists');
       return;
     }
 
@@ -77,6 +251,63 @@ export function PodioFilterPanel({
       }
     }
   };
+
+  const MultiSelectSection = ({ 
+    title, 
+    options, 
+    selected, 
+    onSelectionChange, 
+    icon: Icon 
+  }: {
+    title: string;
+    options: string[] | { value: string; label: string }[];
+    selected: string[];
+    onSelectionChange: (selected: string[]) => void;
+    icon: React.ComponentType<{ className?: string }>;
+  }) => (
+    <Card className="border-gray-200">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm flex items-center gap-2">
+          <Icon className="w-4 h-4" />
+          {title}
+          {selected.length > 0 && (
+            <Badge variant="secondary" className="ml-auto">
+              {selected.length}
+            </Badge>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2 max-h-48 overflow-y-auto">
+        {options.map((option) => {
+          const value = typeof option === 'string' ? option : option.value;
+          const label = typeof option === 'string' ? option : option.label;
+          const isSelected = selected.includes(value);
+          
+          return (
+            <div key={value} className="flex items-center space-x-2">
+              <Checkbox
+                id={`${title}-${value}`}
+                checked={isSelected}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    onSelectionChange([...selected, value]);
+                  } else {
+                    onSelectionChange(selected.filter(s => s !== value));
+                  }
+                }}
+              />
+              <Label
+                htmlFor={`${title}-${value}`}
+                className="text-sm cursor-pointer flex-1"
+              >
+                {label}
+              </Label>
+            </div>
+          );
+        })}
+      </CardContent>
+    </Card>
+  );
 
   if (!isOpen) return null;
 
@@ -117,18 +348,18 @@ export function PodioFilterPanel({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto">
+      <ScrollArea className="flex-1">
         {activeTab === 'filters' ? (
-          <div className="p-4 space-y-6">
+          <div className="p-4 space-y-4">
             {/* Active Filters */}
             {filters.length > 0 && (
-              <Card>
+              <Card className="border-blue-200 bg-blue-50">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Active Filters ({filters.length})</CardTitle>
+                  <CardTitle className="text-sm text-blue-800">Active Filters ({filters.length})</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {filters.map((filter) => (
-                    <div key={filter.id} className="flex items-center justify-between p-2 bg-blue-50 rounded">
+                    <div key={filter.id} className="flex items-center justify-between p-2 bg-white rounded border">
                       <span className="text-sm text-blue-800">{filter.label}</span>
                       <Button
                         variant="ghost"
@@ -146,11 +377,147 @@ export function PodioFilterPanel({
               </Card>
             )}
 
+            {/* Filter Controls */}
+            <MultiSelectSection
+              title="Lead Status"
+              options={leadStatusOptions}
+              selected={selectedLeadStatuses}
+              onSelectionChange={setSelectedLeadStatuses}
+              icon={Filter}
+            />
+
+            <MultiSelectSection
+              title="Created By"
+              options={createdByOptions}
+              selected={selectedCreatedBy}
+              onSelectionChange={setSelectedCreatedBy}
+              icon={User}
+            />
+
+            <MultiSelectSection
+              title="Created Via"
+              options={createdViaOptions}
+              selected={selectedCreatedVia}
+              onSelectionChange={setSelectedCreatedVia}
+              icon={Tag}
+            />
+
+            <MultiSelectSection
+              title="Tags"
+              options={tagOptions}
+              selected={selectedTags}
+              onSelectionChange={setSelectedTags}
+              icon={Tag}
+            />
+
+            <MultiSelectSection
+              title="Lead Manager"
+              options={leadManagerOptions}
+              selected={selectedLeadManager}
+              onSelectionChange={setSelectedLeadManager}
+              icon={User}
+            />
+
+            {/* Date Range */}
+            <Card className="border-gray-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Created On
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "justify-start text-left font-normal text-xs",
+                          !createdDateFrom && "text-muted-foreground"
+                        )}
+                        size="sm"
+                      >
+                        <CalendarIcon className="mr-2 h-3 w-3" />
+                        {createdDateFrom ? format(createdDateFrom, "MMM d") : "From"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        mode="single"
+                        selected={createdDateFrom}
+                        onSelect={setCreatedDateFrom}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "justify-start text-left font-normal text-xs",
+                          !createdDateTo && "text-muted-foreground"
+                        )}
+                        size="sm"
+                      >
+                        <CalendarIcon className="mr-2 h-3 w-3" />
+                        {createdDateTo ? format(createdDateTo, "MMM d") : "To"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        mode="single"
+                        selected={createdDateTo}
+                        onSelect={setCreatedDateTo}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Seller Contact */}
+            <Card className="border-gray-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Phone className="w-4 h-4" />
+                  Seller Contact
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="email-filter" className="text-xs">Email</Label>
+                  <Input
+                    id="email-filter"
+                    placeholder="Enter email..."
+                    value={emailFilter}
+                    onChange={(e) => setEmailFilter(e.target.value)}
+                    size="sm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone-filter" className="text-xs">Phone</Label>
+                  <Input
+                    id="phone-filter"
+                    placeholder="Enter phone..."
+                    value={phoneFilter}
+                    onChange={(e) => setPhoneFilter(e.target.value)}
+                    size="sm"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Save Current Filters */}
-            {filters.length > 0 && (
-              <Card>
+            {(selectedLeadStatuses.length > 0 || selectedCreatedBy.length > 0 || selectedCreatedVia.length > 0 || 
+              selectedTags.length > 0 || selectedLeadManager.length > 0 || createdDateFrom || createdDateTo || 
+              emailFilter.trim() || phoneFilter.trim()) && (
+              <Card className="border-green-200 bg-green-50">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Save Current View</CardTitle>
+                  <CardTitle className="text-sm text-green-800">Save Current View</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {showSaveDialog ? (
@@ -192,8 +559,6 @@ export function PodioFilterPanel({
                 </CardContent>
               </Card>
             )}
-
-            {/* Filter Controls - Add your existing filter controls here */}
           </div>
         ) : (
           <div className="p-4 space-y-4">
@@ -249,7 +614,7 @@ export function PodioFilterPanel({
             )}
           </div>
         )}
-      </div>
+      </ScrollArea>
 
       {/* Footer */}
       <div className="border-t bg-gray-50 p-4">
@@ -266,17 +631,20 @@ export function PodioFilterPanel({
             variant="outline"
             size="sm"
             onClick={() => {
-              onFiltersChange([]);
+              clearAllFilters();
               toast.success('All filters cleared');
             }}
-            disabled={filters.length === 0}
             className="flex-1"
           >
             Clear All
           </Button>
           <Button
             size="sm"
-            onClick={onClose}
+            onClick={() => {
+              applyFilters();
+              onClose();
+              toast.success('Filters applied');
+            }}
             className="flex-1"
           >
             Done

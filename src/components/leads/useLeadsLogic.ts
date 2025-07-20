@@ -69,7 +69,38 @@ export function useLeadsLogic() {
     // Apply filters
     filters.forEach(filter => {
       result = result.filter(lead => {
-        const fieldValue = lead[filter.field as keyof TaxLead];
+        let fieldValue: any;
+        
+        // Map filter fields to actual lead properties
+        switch (filter.field) {
+          case 'leadStatus':
+            fieldValue = lead.status;
+            break;
+          case 'createdBy':
+            fieldValue = lead.ownerName; // Using ownerName as proxy for createdBy
+            break;
+          case 'createdVia':
+            fieldValue = lead.createdVia || 'Manual Entry';
+            break;
+          case 'createdOn':
+            fieldValue = lead.createdAt;
+            break;
+          case 'tags':
+            fieldValue = lead.tags || [];
+            break;
+          case 'leadManager':
+            fieldValue = lead.leadManager || 'Unassigned';
+            break;
+          case 'email':
+            fieldValue = lead.email;
+            break;
+          case 'phone':
+            fieldValue = lead.phone;
+            break;
+          default:
+            fieldValue = lead[filter.field as keyof TaxLead];
+        }
+
         if (!fieldValue && filter.value !== 'not_set') return false;
         
         switch (filter.operator) {
@@ -79,6 +110,11 @@ export function useLeadsLogic() {
             }
             return String(fieldValue).toLowerCase() === filter.value.toLowerCase();
           case 'contains':
+            if (Array.isArray(fieldValue)) {
+              return fieldValue.some(item => 
+                String(item).toLowerCase().includes(filter.value.toLowerCase())
+              );
+            }
             return String(fieldValue).toLowerCase().includes(filter.value.toLowerCase());
           case 'starts_with':
             return String(fieldValue).toLowerCase().startsWith(filter.value.toLowerCase());
@@ -141,9 +177,7 @@ export function useLeadsLogic() {
   };
 
   const handleFilterToggle = () => {
-    if (filters.length > 0) {
-      setShowFilterSidebar(true);
-    }
+    setShowFilterSidebar(!showFilterSidebar);
   };
 
   const handleClearAllFilters = () => {
