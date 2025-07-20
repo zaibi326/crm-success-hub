@@ -15,10 +15,10 @@ export function DropdownFilters({ onAddFilter }: FilterComponentProps) {
             <SelectValue placeholder="Select creator..." />
           </SelectTrigger>
           <SelectContent className="bg-white border-agile-gray-200 z-50">
-            <SelectItem value="John Doe">John Doe</SelectItem>
-            <SelectItem value="Jane Smith">Jane Smith</SelectItem>
-            <SelectItem value="Admin User">Admin User</SelectItem>
-            <SelectItem value="Lead Manager">Lead Manager</SelectItem>
+            <SelectItem value="john_doe">John Doe</SelectItem>
+            <SelectItem value="jane_smith">Jane Smith</SelectItem>
+            <SelectItem value="admin_user">Admin User</SelectItem>
+            <SelectItem value="lead_manager">Lead Manager</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -31,10 +31,10 @@ export function DropdownFilters({ onAddFilter }: FilterComponentProps) {
             <SelectValue placeholder="Select source..." />
           </SelectTrigger>
           <SelectContent className="bg-white border-agile-gray-200 z-50">
-            <SelectItem value="API">🔗 API</SelectItem>
-            <SelectItem value="Manual">✋ Manual</SelectItem>
-            <SelectItem value="Webform">🌐 Webform</SelectItem>
-            <SelectItem value="Import">📊 Import</SelectItem>
+            <SelectItem value="api">🔗 API</SelectItem>
+            <SelectItem value="manual">✋ Manual</SelectItem>
+            <SelectItem value="webform">🌐 Webform</SelectItem>
+            <SelectItem value="import">📊 Import</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -79,10 +79,10 @@ export function DropdownFilters({ onAddFilter }: FilterComponentProps) {
             <SelectValue placeholder="Select manager..." />
           </SelectTrigger>
           <SelectContent className="bg-white border-agile-gray-200 z-50">
-            <SelectItem value="Sarah Johnson">Sarah Johnson</SelectItem>
-            <SelectItem value="Mike Davis">Mike Davis</SelectItem>
-            <SelectItem value="Lisa Chen">Lisa Chen</SelectItem>
-            <SelectItem value="David Wilson">David Wilson</SelectItem>
+            <SelectItem value="sarah_johnson">Sarah Johnson</SelectItem>
+            <SelectItem value="mike_davis">Mike Davis</SelectItem>
+            <SelectItem value="lisa_chen">Lisa Chen</SelectItem>
+            <SelectItem value="david_wilson">David Wilson</SelectItem>
           </SelectContent>
         </Select>
       </div>
