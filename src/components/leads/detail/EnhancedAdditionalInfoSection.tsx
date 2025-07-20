@@ -65,6 +65,23 @@ export function EnhancedAdditionalInfoSection({
   const [files, setFiles] = useState<Record<string, UploadedFile[]>>({});
   const [hasChanges, setHasChanges] = useState(false);
 
+  // Early return if formData is not available
+  if (!formData) {
+    return (
+      <Card className="shadow-lg border-0 bg-white">
+        <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-t-lg">
+          <CardTitle className="flex items-center gap-3 text-xl">
+            <FileText className="w-6 h-6 text-green-600" />
+            Additional Information
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="text-center text-gray-500">Loading...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const handleToggle = (key: keyof TaxLead, value: boolean) => {
     onInputChange(key, value);
     setHasChanges(true);
@@ -133,8 +150,8 @@ export function EnhancedAdditionalInfoSection({
       </CardHeader>
       <CardContent className="p-6 space-y-6">
         {infoSections.map((section) => {
-          const isEnabled = formData[section.key] as boolean;
-          const notesValue = formData[section.notesKey] as string || '';
+          const isEnabled = Boolean(formData[section.key]);
+          const notesValue = (formData[section.notesKey] as string) || '';
           const sectionFiles = files[section.key] || [];
 
           return (
