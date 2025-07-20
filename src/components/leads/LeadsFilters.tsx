@@ -45,7 +45,7 @@ export function LeadsFilters({
               <SelectItem value="hot">Hot</SelectItem>
               <SelectItem value="warm">Warm</SelectItem>
               <SelectItem value="cold">Cold</SelectItem>
-              <SelectItem value="pass">Pass</SelectItem>
+              <SelectItem value="disqualified">Disqualified</SelectItem>
             </SelectContent>
           </Select>
 
@@ -55,8 +55,9 @@ export function LeadsFilters({
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent className="bg-white border border-gray-200 shadow-lg">
-              <SelectItem value="name">Name</SelectItem>
-              <SelectItem value="score">Score</SelectItem>
+              <SelectItem value="ownerName">Name</SelectItem>
+              <SelectItem value="currentArrears">Score</SelectItem>
+              <SelectItem value="createdAt">Date Created</SelectItem>
             </SelectContent>
           </Select>
         </div>
