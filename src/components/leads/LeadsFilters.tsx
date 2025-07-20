@@ -21,6 +21,9 @@ export function LeadsFilters({
   sortBy,
   onSortByChange
 }: LeadsFiltersProps) {
+  console.log('LeadsFilters filterStatus value:', filterStatus);
+  console.log('LeadsFilters sortBy value:', sortBy);
+  
   return (
     <div className="px-6 py-4 bg-gray-50/50 border-b border-gray-200/60">
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">

@@ -17,6 +17,8 @@ export function LeadSearchFilters({
   statusFilter,
   onStatusFilterChange
 }: LeadSearchFiltersProps) {
+  console.log('LeadSearchFilters statusFilter value:', statusFilter);
+  
   return (
     <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
       <div className="relative flex-1 max-w-md">

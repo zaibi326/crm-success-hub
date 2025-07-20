@@ -12,6 +12,8 @@ interface LeadSearchControlsProps {
 }
 
 export function LeadSearchControls({ searchTerm, setSearchTerm, sortBy, setSortBy }: LeadSearchControlsProps) {
+  console.log('LeadSearchControls sortBy value:', sortBy);
+  
   return (
     <div className="flex flex-col sm:flex-row gap-4">
       <div className="flex-1">

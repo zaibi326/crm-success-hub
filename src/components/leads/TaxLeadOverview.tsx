@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,6 +39,8 @@ export function TaxLeadOverview({
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [selectedLeads, setSelectedLeads] = useState<number[]>([]);
+
+  console.log('TaxLeadOverview statusFilter value:', statusFilter);
 
   // Filter leads based on search and status
   const filteredLeads = leads.filter(lead => {
