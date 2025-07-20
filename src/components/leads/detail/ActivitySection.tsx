@@ -2,15 +2,7 @@
 import React from 'react';
 import { EnhancedActivityTimeline } from '../EnhancedActivityTimeline';
 import { TaxLead } from '@/types/taxLead';
-
-interface ActivityItem {
-  id: number;
-  type: string;
-  title: string;
-  description: string;
-  timestamp: Date;
-  user: string;
-}
+import { ActivityItem } from '@/types/activity';
 
 interface ActivitySectionProps {
   lead: TaxLead;

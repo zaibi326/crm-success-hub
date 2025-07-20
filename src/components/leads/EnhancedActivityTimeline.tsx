@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,20 +21,7 @@ import {
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { TaxLead } from '@/types/taxLead';
-
-interface ActivityItem {
-  id: number;
-  type: 'created' | 'note' | 'status_change' | 'field_update' | 'file_upload' | 'comment' | 'call' | 'email' | 'sms';
-  title: string;
-  description: string;
-  timestamp: Date;
-  user: string;
-  userInitials?: string;
-  mentions?: string[];
-  oldValue?: string;
-  newValue?: string;
-  fieldName?: string;
-}
+import { ActivityItem } from '@/types/activity';
 
 interface EnhancedActivityTimelineProps {
   lead: TaxLead;

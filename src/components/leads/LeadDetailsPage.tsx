@@ -130,7 +130,10 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
             </TabsContent>
 
             <TabsContent value="activity" className="space-y-6 mt-6">
-              <ActivitySection activities={activities} />
+              <ActivitySection 
+                lead={leadData}
+                activities={activities} 
+              />
             </TabsContent>
           </Tabs>
         </div>

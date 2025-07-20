@@ -86,6 +86,11 @@ export function EnhancedLeadsContent() {
     setShowFilterSidebar(false);
   };
 
+  // Wrapper function to handle filter changes with proper typing
+  const handleFiltersChange = (newFilters: FilterCondition[]) => {
+    setFilters(newFilters);
+  };
+
   // Show loading state while data is being loaded
   if (!isLoaded) {
     return (
@@ -150,7 +155,7 @@ export function EnhancedLeadsContent() {
           currentView={currentView}
           onViewChange={setCurrentView}
           filters={filters}
-          onFiltersChange={setFilters}
+          onFiltersChange={handleFiltersChange}
           availableFields={availableFields}
           onFilterToggle={handleFilterToggle}
           showFilterSidebar={showFilterSidebar}
@@ -215,7 +220,7 @@ export function EnhancedLeadsContent() {
         isOpen={showFilterSidebar}
         onClose={() => setShowFilterSidebar(false)}
         filters={filters}
-        onFiltersChange={setFilters}
+        onFiltersChange={handleFiltersChange}
         totalResults={mockLeads.length}
         filteredResults={filteredLeads.length}
       />
