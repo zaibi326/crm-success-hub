@@ -3,27 +3,32 @@ import { useMemo } from 'react';
 import { TaxLead } from '@/types/taxLead';
 import { mockTaxLeads } from '@/data/mockTaxLeads';
 
+interface DashboardStats {
+  hotDeals: number;
+  warmDeals: number;
+  coldDeals: number;
+  passRate: number;
+  totalLeads: number;
+  keepRate: number;
+  passDeals: number;
+  keepDeals: number;
+}
+
+interface ActivityItem {
+  id: string;
+  type: 'lead_created' | 'lead_updated' | 'note_added' | 'status_changed';
+  description: string;
+  userName: string;
+  timestamp: Date;
+  leadId: string;
+}
+
 export interface DashboardDataContextType {
   leads: TaxLead[];
-  stats: {
-    totalLeads: number;
-    hotLeads: number;
-    warmLeads: number;
-    coldLeads: number;
-    qualifiedLeads: number;
-    thisWeekLeads: number;
-    thisMonthLeads: number;
-    avgResponseTime: string;
-  };
-  activities: Array<{
-    id: string;
-    type: string;
-    message: string;
-    timestamp: string;
-    leadId?: number;
-  }>;
+  stats: DashboardStats;
+  activities: ActivityItem[];
   loading: boolean;
-  refetch: () => void;
+  refetch: () => Promise<void>;
 }
 
 export function useDashboardData(): DashboardDataContextType {
@@ -31,100 +36,111 @@ export function useDashboardData(): DashboardDataContextType {
   
   const stats = useMemo(() => {
     const totalLeads = leads.length;
-    const hotLeads = leads.filter(lead => lead.status === 'HOT').length;
-    const warmLeads = leads.filter(lead => lead.status === 'WARM').length;
-    const coldLeads = leads.filter(lead => lead.status === 'COLD').length;
-    const qualifiedLeads = leads.filter(lead => lead.disposition === 'QUALIFIED').length;
+    const hotDeals = leads.filter(lead => lead.status === 'HOT').length;
+    const warmDeals = leads.filter(lead => lead.status === 'WARM').length;
+    const coldDeals = leads.filter(lead => lead.status === 'COLD').length;
+    const passDeals = leads.filter(lead => lead.disposition === 'PASS').length;
+    const keepDeals = leads.filter(lead => lead.disposition === 'KEEP').length;
     
-    // Calculate leads from this week and month
-    const now = new Date();
-    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    
-    const thisWeekLeads = leads.filter(lead => 
-      new Date(lead.createdAt) >= oneWeekAgo
-    ).length;
-    
-    const thisMonthLeads = leads.filter(lead => 
-      new Date(lead.createdAt) >= oneMonthAgo
-    ).length;
+    const passRate = totalLeads > 0 ? Math.round((passDeals / totalLeads) * 100) : 0;
+    const keepRate = totalLeads > 0 ? Math.round((keepDeals / totalLeads) * 100) : 0;
 
     return {
       totalLeads,
-      hotLeads,
-      warmLeads,
-      coldLeads,
-      qualifiedLeads,
-      thisWeekLeads,
-      thisMonthLeads,
-      avgResponseTime: '2.4 hours'
+      hotDeals,
+      warmDeals,
+      coldDeals,
+      passDeals,
+      keepDeals,
+      passRate,
+      keepRate
     };
   }, [leads]);
 
   const activities = useMemo(() => [
     {
       id: '1',
-      type: 'HOT',
-      message: 'New hot lead added',
-      timestamp: new Date().toISOString(),
+      type: 'lead_created' as const,
+      description: 'New hot lead added - John Smith property on Main St',
+      userName: 'Sarah Johnson',
+      timestamp: new Date(),
+      leadId: '1'
     },
     {
       id: '2',
-      type: 'WARM',
-      message: 'Lead temperature updated',
-      timestamp: new Date(Date.now() - 3600000).toISOString(),
+      type: 'status_changed' as const,
+      description: 'Lead temperature updated from COLD to WARM',
+      userName: 'Mike Davis',
+      timestamp: new Date(Date.now() - 3600000),
+      leadId: '2'
     },
     {
       id: '3',
-      type: 'COLD',
-      message: 'Follow-up scheduled',
-      timestamp: new Date(Date.now() - 7200000).toISOString(),
+      type: 'note_added' as const,
+      description: 'Follow-up call scheduled for tomorrow',
+      userName: 'Emma Wilson',
+      timestamp: new Date(Date.now() - 7200000),
+      leadId: '3'
     },
     {
       id: '4',
-      type: 'PASS',
-      message: 'Lead marked as pass',
-      timestamp: new Date(Date.now() - 10800000).toISOString(),
+      type: 'lead_updated' as const,
+      description: 'Contact information verified and updated',
+      userName: 'Alex Thompson',
+      timestamp: new Date(Date.now() - 10800000),
+      leadId: '4'
     },
     {
       id: '5',
-      type: 'HOT',
-      message: 'Property details updated',
-      timestamp: new Date(Date.now() - 14400000).toISOString(),
+      type: 'lead_created' as const,
+      description: 'Property details updated with latest tax records',
+      userName: 'Sarah Johnson',
+      timestamp: new Date(Date.now() - 14400000),
+      leadId: '5'
     },
     {
       id: '6',
-      type: 'WARM',
-      message: 'Contact information verified',
-      timestamp: new Date(Date.now() - 18000000).toISOString(),
+      type: 'status_changed' as const,
+      description: 'Lead marked as qualified after assessment',
+      userName: 'Mike Davis',
+      timestamp: new Date(Date.now() - 18000000),
+      leadId: '6'
     },
     {
       id: '7',
-      type: 'COLD',
-      message: 'Email campaign sent',
-      timestamp: new Date(Date.now() - 21600000).toISOString(),
+      type: 'note_added' as const,
+      description: 'Email campaign response received',
+      userName: 'Emma Wilson',
+      timestamp: new Date(Date.now() - 21600000),
+      leadId: '7'
     },
     {
       id: '8',
-      type: 'PASS',
-      message: 'Lead qualification completed',
-      timestamp: new Date(Date.now() - 25200000).toISOString(),
+      type: 'lead_updated' as const,
+      description: 'Lead qualification process completed',
+      userName: 'Alex Thompson',
+      timestamp: new Date(Date.now() - 25200000),
+      leadId: '8'
     },
     {
       id: '9',
-      type: 'HOT',
-      message: 'Appointment scheduled',
-      timestamp: new Date(Date.now() - 28800000).toISOString(),
+      type: 'lead_created' as const,
+      description: 'Appointment scheduled with property owner',
+      userName: 'Sarah Johnson',
+      timestamp: new Date(Date.now() - 28800000),
+      leadId: '9'
     },
     {
       id: '10',
-      type: 'WARM',
-      message: 'Document uploaded',
-      timestamp: new Date(Date.now() - 32400000).toISOString(),
+      type: 'note_added' as const,
+      description: 'Document uploaded to lead profile',
+      userName: 'Mike Davis',
+      timestamp: new Date(Date.now() - 32400000),
+      leadId: '10'
     }
   ], []);
 
-  const refetch = () => {
+  const refetch = async () => {
     // In a real app, this would refetch data from the API
     console.log('Refetching dashboard data...');
   };
