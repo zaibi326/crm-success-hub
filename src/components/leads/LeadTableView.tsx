@@ -10,7 +10,7 @@ import { TaxLead } from '@/types/taxLead';
 import { LeadTableRow } from './LeadTableRow';
 import { PodioFilterPanel } from './PodioFilterPanel';
 import { toast } from 'sonner';
-import { FilterCondition } from './filters/types';
+import { FilterState, createEmptyFilterState } from './filters/FilterState';
 
 interface LeadTableViewProps {
   leads: TaxLead[];
@@ -42,34 +42,58 @@ export function LeadTableView({
   const [selectedLeads, setSelectedLeads] = useState<number[]>([]);
   const [internalSearchTerm, setInternalSearchTerm] = useState(searchTerm);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
-  const [filters, setFilters] = useState<FilterCondition[]>([]);
+  const [filters, setFilters] = useState<FilterState>(createEmptyFilterState());
   const checkboxRef = useRef<HTMLInputElement>(null);
   const effectiveSearchTerm = onSearchChange ? searchTerm : internalSearchTerm;
 
   // Apply filters to leads
   const applyFilters = (leadsToFilter: TaxLead[]) => {
     return leadsToFilter.filter(lead => {
-      return filters.every(filter => {
-        switch (filter.field) {
-          case 'leadStatus':
-            return lead.status === filter.value;
-          case 'createdBy':
-            return lead.ownerName.toLowerCase().includes(filter.value.toLowerCase());
-          case 'email':
-            return lead.email?.toLowerCase().includes(filter.value.toLowerCase());
-          case 'phone':
-            return lead.phone?.includes(filter.value);
-          case 'createdOn':
-            if (filter.operator === 'gte') {
-              return new Date(lead.createdAt || '') >= new Date(filter.value);
-            } else if (filter.operator === 'lte') {
-              return new Date(lead.createdAt || '') <= new Date(filter.value);
-            }
-            return true;
-          default:
-            return true;
+      let passesFilter = true;
+      
+      if (filters.leadStatus && lead.status !== filters.leadStatus) {
+        passesFilter = false;
+      }
+      
+      if (filters.createdBy && !lead.ownerName.toLowerCase().includes(filters.createdBy.toLowerCase())) {
+        passesFilter = false;
+      }
+      
+      if (filters.sellerContact) {
+        const contactSearch = filters.sellerContact.toLowerCase();
+        const matchesContact = (lead.email && lead.email.toLowerCase().includes(contactSearch)) ||
+                              (lead.phone && lead.phone.includes(filters.sellerContact)) ||
+                              (lead.ownerName && lead.ownerName.toLowerCase().includes(contactSearch));
+        if (!matchesContact) {
+          passesFilter = false;
         }
-      });
+      }
+      
+      if (filters.createdOnStart) {
+        const leadDate = new Date(lead.createdAt || '');
+        const startDate = new Date(filters.createdOnStart);
+        if (leadDate < startDate) {
+          passesFilter = false;
+        }
+      }
+      
+      if (filters.createdOnEnd) {
+        const leadDate = new Date(lead.createdAt || '');
+        const endDate = new Date(filters.createdOnEnd);
+        if (leadDate > endDate) {
+          passesFilter = false;
+        }
+      }
+      
+      if (filters.minArrears !== undefined && (lead.currentArrears || 0) < filters.minArrears) {
+        passesFilter = false;
+      }
+      
+      if (filters.maxArrears !== undefined && (lead.currentArrears || 0) > filters.maxArrears) {
+        passesFilter = false;
+      }
+      
+      return passesFilter;
     });
   };
 
@@ -154,12 +178,8 @@ export function LeadTableView({
     }
   };
 
-  const handleRemoveFilter = (filterId: string) => {
-    setFilters(prev => prev.filter(f => f.id !== filterId));
-  };
-
   const handleClearAllFilters = () => {
-    setFilters([]);
+    setFilters(createEmptyFilterState());
   };
 
   const isAllSelected = selectedLeads.length === filteredLeads.length && filteredLeads.length > 0;
@@ -193,6 +213,13 @@ export function LeadTableView({
     } else {
       setInternalSearchTerm(value);
     }
+  };
+
+  const getActiveFiltersCount = () => {
+    return Object.entries(filters).filter(([key, value]) => {
+      if (Array.isArray(value)) return value.length > 0;
+      return value && value !== '';
+    }).length;
   };
 
   return (
@@ -247,9 +274,9 @@ export function LeadTableView({
             >
               <Filter className="w-4 h-4" />
               Filter
-              {filters.length > 0 && (
+              {getActiveFiltersCount() > 0 && (
                 <Badge variant="secondary" className="ml-1 bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5 min-w-[18px] h-[18px] flex items-center justify-center">
-                  {filters.length}
+                  {getActiveFiltersCount()}
                 </Badge>
               )}
             </Button>
@@ -258,22 +285,27 @@ export function LeadTableView({
       </div>
 
       {/* Active Filters Display */}
-      {filters.length > 0 && (
+      {getActiveFiltersCount() > 0 && (
         <div className="flex flex-wrap items-center gap-2 p-3 bg-gray-50 rounded-lg border">
           <span className="text-sm text-gray-600 font-medium">Active filters:</span>
-          {filters.map((filter) => (
-            <Badge
-              key={filter.id}
-              variant="secondary"
-              className="flex items-center gap-1 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
-            >
-              {filter.label}
-              <X
-                className="w-3 h-3 cursor-pointer hover:text-blue-900"
-                onClick={() => handleRemoveFilter(filter.id)}
-              />
-            </Badge>
-          ))}
+          {Object.entries(filters).map(([key, value]) => {
+            if (Array.isArray(value) && value.length > 0) {
+              return (
+                <Badge key={key} variant="secondary" className="flex items-center gap-1 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100">
+                  {key}: {value.join(', ')}
+                  <X className="w-3 h-3 cursor-pointer hover:text-blue-900" onClick={() => setFilters({...filters, [key]: []})} />
+                </Badge>
+              );
+            } else if (value && value !== '') {
+              return (
+                <Badge key={key} variant="secondary" className="flex items-center gap-1 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100">
+                  {key}: {value}
+                  <X className="w-3 h-3 cursor-pointer hover:text-blue-900" onClick={() => setFilters({...filters, [key]: Array.isArray(value) ? [] : ''})} />
+                </Badge>
+              );
+            }
+            return null;
+          })}
           <Button
             variant="ghost"
             size="sm"
@@ -313,7 +345,7 @@ export function LeadTableView({
             {filteredLeads.length === 0 ? (
               <TableRow>
                 <td colSpan={9} className="text-center py-8 text-gray-500">
-                  {filters.length > 0 
+                  {getActiveFiltersCount() > 0 
                     ? "No leads found matching your search criteria and filters"
                     : "No leads found matching your search criteria"
                   }
@@ -340,9 +372,9 @@ export function LeadTableView({
       <div className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded-lg">
         <div>
           Showing {filteredLeads.length} of {leads.length} leads
-          {filters.length > 0 && (
+          {getActiveFiltersCount() > 0 && (
             <span className="ml-2 text-blue-600">
-              ({filters.length} filter{filters.length !== 1 ? 's' : ''} applied)
+              ({getActiveFiltersCount()} filter{getActiveFiltersCount() !== 1 ? 's' : ''} applied)
             </span>
           )}
         </div>
@@ -370,6 +402,7 @@ export function LeadTableView({
         onFiltersChange={setFilters}
         totalResults={leads.length}
         filteredResults={filteredLeads.length}
+        leads={leads}
       />
     </div>
   );

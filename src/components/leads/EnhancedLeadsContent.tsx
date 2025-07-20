@@ -12,6 +12,7 @@ import { useLeadsLogic } from './useLeadsLogic';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { FilterCondition } from './filters/types';
+import { FilterState, createEmptyFilterState } from './filters/FilterState';
 
 export function EnhancedLeadsContent() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -89,6 +90,13 @@ export function EnhancedLeadsContent() {
   // Wrapper function to handle filter changes with proper typing
   const handleFiltersChange = (newFilters: FilterCondition[]) => {
     setFilters(newFilters);
+  };
+
+  // Create FilterState for PodioFilterPanel
+  const [podioFilters, setPodioFilters] = React.useState<FilterState>(createEmptyFilterState());
+
+  const handlePodioFiltersChange = (newFilters: FilterState) => {
+    setPodioFilters(newFilters);
   };
 
   // Show loading state while data is being loaded
@@ -219,10 +227,11 @@ export function EnhancedLeadsContent() {
       <PodioFilterPanel
         isOpen={showFilterSidebar}
         onClose={() => setShowFilterSidebar(false)}
-        filters={filters}
-        onFiltersChange={handleFiltersChange}
+        filters={podioFilters}
+        onFiltersChange={handlePodioFiltersChange}
         totalResults={mockLeads.length}
         filteredResults={filteredLeads.length}
+        leads={mockLeads}
       />
     </>
   );

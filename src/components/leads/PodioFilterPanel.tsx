@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -5,22 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { X, Save, Filter, ChevronDown } from 'lucide-react';
+import { X, Save, Filter } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
-
-interface FilterState {
-  createdBy: string;
-  createdOnStart: string;
-  createdOnEnd: string;
-  createdVia: string;
-  leadStatus: string;
-  tags: string[];
-  sellerContact: string;
-  leadManager: string;
-  moveTo: string;
-  minArrears: number | undefined;
-  maxArrears: number | undefined;
-}
+import { FilterState, createEmptyFilterState } from './filters/FilterState';
 
 interface SavedView {
   id: string;
@@ -33,11 +21,13 @@ interface PodioFilterPanelProps {
   onClose: () => void;
   filters: FilterState;
   onFiltersChange: (filters: FilterState) => void;
-  onSaveView: (name: string, filters: FilterState) => void;
-  savedViews: SavedView[];
-  onLoadView: (view: SavedView) => void;
-  onDeleteView: (viewId: string) => void;
-  leads: TaxLead[];
+  totalResults: number;
+  filteredResults: number;
+  onSaveView?: (name: string, filters: FilterState) => void;
+  savedViews?: SavedView[];
+  onLoadView?: (view: SavedView) => void;
+  onDeleteView?: (viewId: string) => void;
+  leads?: TaxLead[];
 }
 
 export function PodioFilterPanel({
@@ -45,11 +35,13 @@ export function PodioFilterPanel({
   onClose,
   filters,
   onFiltersChange,
+  totalResults,
+  filteredResults,
   onSaveView,
-  savedViews,
+  savedViews = [],
   onLoadView,
   onDeleteView,
-  leads
+  leads = []
 }: PodioFilterPanelProps) {
   const [localFilters, setLocalFilters] = useState<FilterState>(filters);
   const [activeTab, setActiveTab] = useState<'filters' | 'saved'>('filters');
@@ -69,19 +61,7 @@ export function PodioFilterPanel({
   };
 
   const handleClearAll = () => {
-    const clearedFilters: FilterState = {
-      createdBy: '',
-      createdOnStart: '',
-      createdOnEnd: '',
-      createdVia: '',
-      leadStatus: '',
-      tags: [],
-      sellerContact: '',
-      leadManager: '',
-      moveTo: '',
-      minArrears: undefined,
-      maxArrears: undefined,
-    };
+    const clearedFilters = createEmptyFilterState();
     setLocalFilters(clearedFilters);
     onFiltersChange(clearedFilters);
     setAppliedFilters(clearedFilters);
@@ -93,7 +73,7 @@ export function PodioFilterPanel({
   };
 
   const handleSaveView = () => {
-    if (saveViewName.trim()) {
+    if (saveViewName.trim() && onSaveView) {
       onSaveView(saveViewName.trim(), localFilters);
       setSaveViewName('');
       setShowSaveInput(false);
@@ -125,8 +105,9 @@ export function PodioFilterPanel({
   };
 
   // Get unique values from leads for filter options
-  const getUniqueValues = (field: keyof TaxLead) => {
-    return [...new Set(leads.map(lead => lead[field]).filter(Boolean))];
+  const getUniqueStringValues = (field: keyof TaxLead) => {
+    const values = leads.map(lead => lead[field]).filter(Boolean);
+    return [...new Set(values)].filter(v => typeof v === 'string') as string[];
   };
 
   if (!isOpen) {
@@ -215,8 +196,8 @@ export function PodioFilterPanel({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">All</SelectItem>
-                    {getUniqueValues('createdVia').map((creator) => (
-                      <SelectItem key={creator} value={creator as string}>
+                    {getUniqueStringValues('createdVia').map((creator) => (
+                      <SelectItem key={creator} value={creator}>
                         {creator}
                       </SelectItem>
                     ))}
@@ -265,8 +246,8 @@ export function PodioFilterPanel({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">All</SelectItem>
-                    {getUniqueValues('createdVia').map((source) => (
-                      <SelectItem key={source} value={source as string}>
+                    {getUniqueStringValues('createdVia').map((source) => (
+                      <SelectItem key={source} value={source}>
                         {source}
                       </SelectItem>
                     ))}
@@ -349,8 +330,8 @@ export function PodioFilterPanel({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">All</SelectItem>
-                    {getUniqueValues('leadManager').map((manager) => (
-                      <SelectItem key={manager} value={manager as string}>
+                    {getUniqueStringValues('leadManager').map((manager) => (
+                      <SelectItem key={manager} value={manager}>
                         {manager}
                       </SelectItem>
                     ))}
@@ -459,7 +440,7 @@ export function PodioFilterPanel({
                   <div
                     key={view.id}
                     className="p-3 bg-gray-50 rounded-lg border hover:bg-gray-100 transition-colors cursor-pointer group"
-                    onClick={() => onLoadView(view)}
+                    onClick={() => onLoadView?.(view)}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
@@ -476,7 +457,7 @@ export function PodioFilterPanel({
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          onDeleteView(view.id);
+                          onDeleteView?.(view.id);
                         }}
                         className="opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-800"
                       >
