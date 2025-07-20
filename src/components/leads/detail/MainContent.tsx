@@ -100,8 +100,8 @@ export function MainContent({
           />
 
           <EnhancedAdditionalInfoSection
-            lead={formData}
-            onFieldUpdate={onInputChange}
+            formData={formData}
+            onInputChange={onInputChange}
             canEdit={canEdit}
           />
 

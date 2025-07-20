@@ -120,22 +120,26 @@ export function PodioFilterPanel({
     return [...new Set(values)].filter(v => typeof v === 'string') as string[];
   };
 
-  // Get unique team members from leads
+  // Get unique team members from leads - using available TaxLead properties
   const getTeamMembers = () => {
-    const createdByValues = leads.map(lead => lead.createdBy).filter(Boolean);
-    return [...new Set(createdByValues)].filter(v => typeof v === 'string') as string[];
+    // Use agentName and leadManager as available team member fields
+    const agentNames = leads.map(lead => lead.agentName).filter(Boolean);
+    const leadManagers = leads.map(lead => lead.leadManager).filter(Boolean);
+    const allMembers = [...agentNames, ...leadManagers];
+    return [...new Set(allMembers)].filter(v => typeof v === 'string') as string[];
   };
 
   // Get unique creation sources
   const getCreationSources = () => {
-    const sources = ['Import', 'Manual Entry', 'API', 'Webhook', 'CSV Upload', 'Form Submission'];
-    return sources;
+    // Use the createdVia field from TaxLead or provide default sources
+    const existingSources = getUniqueStringValues('createdVia');
+    const defaultSources = ['Import', 'Manual Entry', 'API', 'Webhook', 'CSV Upload', 'Form Submission'];
+    return existingSources.length > 0 ? existingSources : defaultSources;
   };
 
   // Get unique lead managers
   const getLeadManagers = () => {
-    const managers = leads.map(lead => lead.leadManager).filter(Boolean);
-    return [...new Set(managers)].filter(v => typeof v === 'string') as string[];
+    return getUniqueStringValues('leadManager');
   };
 
   if (!isOpen) {
