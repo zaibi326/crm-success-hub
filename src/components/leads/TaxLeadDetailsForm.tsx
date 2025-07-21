@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +13,7 @@ import { ViewOnlyMessage } from './detail/ViewOnlyMessage';
 import { SellerContactSection } from './detail/SellerContactSection';
 import { EnhancedLeadDetailsSection } from './detail/EnhancedLeadDetailsSection';
 import { useAuth } from '@/contexts/AuthContext';
+
 interface UploadedFile {
   id: string;
   name: string;
@@ -19,12 +21,14 @@ interface UploadedFile {
   url: string;
   category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities';
 }
+
 interface NoteEntry {
   id: string;
   text: string;
   timestamp: Date;
   userName: string;
 }
+
 interface ActivityItem {
   id: number;
   type: 'created' | 'note' | 'status_change' | 'field_update' | 'file_upload' | 'comment';
@@ -35,21 +39,24 @@ interface ActivityItem {
   userInitials: string;
   mentions?: string[];
 }
+
 interface TaxLeadDetailsFormProps {
   lead: TaxLead;
   onSave: (updatedLead: TaxLead) => void;
   userRole: 'admin' | 'editor' | 'viewer';
 }
+
 export function TaxLeadDetailsForm({
   lead,
   onSave,
   userRole
 }: TaxLeadDetailsFormProps) {
-  const {
-    user
-  } = useAuth();
+  const { user } = useAuth();
   const [formData, setFormData] = useState<TaxLead>(lead);
-  const [disposition, setDisposition] = useState<'keep' | 'pass' | null>(null);
+  const [disposition, setDisposition] = useState<'keep' | 'pass' | null>(
+    lead.disposition === 'QUALIFIED' ? 'keep' : 
+    lead.disposition === 'DISQUALIFIED' ? 'pass' : null
+  );
   const [passReason, setPassReason] = useState('');
   const [notes, setNotes] = useState<NoteEntry[]>([]);
   const [newNote, setNewNote] = useState('');
@@ -59,37 +66,46 @@ export function TaxLeadDetailsForm({
   const [activeTab, setActiveTab] = useState('details');
 
   // Mock activity data
-  const [activities, setActivities] = useState<ActivityItem[]>([{
-    id: 1,
-    type: 'created',
-    title: 'Lead Created',
-    description: `Lead for ${formData.ownerName} was created`,
-    timestamp: new Date(formData.createdAt || Date.now() - 2 * 24 * 60 * 60 * 1000),
-    user: 'System',
-    userInitials: 'SY'
-  }, {
-    id: 2,
-    type: 'field_update',
-    title: 'Status Updated',
-    description: `Status set to ${formData.status}`,
-    timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-    user: 'John Doe',
-    userInitials: 'JD'
-  }, {
-    id: 3,
-    type: 'note',
-    title: 'Note Added',
-    description: formData.notes || 'Initial assessment completed',
-    timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000),
-    user: 'Jane Smith',
-    userInitials: 'JS'
-  }]);
+  const [activities, setActivities] = useState<ActivityItem[]>([
+    {
+      id: 1,
+      type: 'created',
+      title: 'Lead Created',
+      description: `Lead for ${formData.ownerName} was created`,
+      timestamp: new Date(formData.createdAt || Date.now() - 2 * 24 * 60 * 60 * 1000),
+      user: 'System',
+      userInitials: 'SY'
+    },
+    {
+      id: 2,
+      type: 'field_update',
+      title: 'Status Updated',
+      description: `Status set to ${formData.status}`,
+      timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      user: 'John Doe',
+      userInitials: 'JD'
+    },
+    {
+      id: 3,
+      type: 'note',
+      title: 'Note Added',
+      description: formData.notes || 'Initial assessment completed',
+      timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000),
+      user: 'Jane Smith',
+      userInitials: 'JS'
+    }
+  ]);
 
-  // User role and permissions
   const canEdit = ['admin', 'editor'].includes(userRole);
+
   useEffect(() => {
     setFormData(lead);
+    setDisposition(
+      lead.disposition === 'QUALIFIED' ? 'keep' : 
+      lead.disposition === 'DISQUALIFIED' ? 'pass' : null
+    );
   }, [lead]);
+
   const handleInputChange = (field: keyof TaxLead, value: any) => {
     setFormData(prev => ({
       ...prev,
@@ -97,17 +113,31 @@ export function TaxLeadDetailsForm({
     }));
     setHasUnsavedChanges(true);
   };
+
   const handleDisposition = (disp: 'keep' | 'pass') => {
     setDisposition(disp);
+    
+    // Update the lead's disposition and status
+    const newDisposition = disp === 'keep' ? 'QUALIFIED' : 'DISQUALIFIED';
+    const newStatus = disp === 'keep' ? 'KEEP' : 'PASS';
+    
+    setFormData(prev => ({
+      ...prev,
+      disposition: newDisposition,
+      status: newStatus
+    }));
     setHasUnsavedChanges(true);
   };
+
   const handlePassReasonChange = (reason: string) => {
     setPassReason(reason);
     setHasUnsavedChanges(true);
   };
+
   const handleNewNoteChange = (note: string) => {
     setNewNote(note);
   };
+
   const handleAddNote = () => {
     if (newNote.trim()) {
       const note: NoteEntry = {
@@ -121,6 +151,7 @@ export function TaxLeadDetailsForm({
       setHasUnsavedChanges(true);
     }
   };
+
   const handleAddComment = (comment: string) => {
     const newActivity: ActivityItem = {
       id: activities.length + 1,
@@ -134,6 +165,7 @@ export function TaxLeadDetailsForm({
     };
     setActivities(prev => [newActivity, ...prev]);
   };
+
   const handleFileUpload = (newFiles: File[], category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities') => {
     const uploadedFiles: UploadedFile[] = newFiles.map(file => ({
       id: `${Date.now()}-${Math.random()}`,
@@ -145,26 +177,44 @@ export function TaxLeadDetailsForm({
     setFiles(prev => [...prev, ...uploadedFiles]);
     setHasUnsavedChanges(true);
   };
+
   const handleRemoveFile = (fileId: string) => {
     setFiles(prev => prev.filter(file => file.id !== fileId));
     setHasUnsavedChanges(true);
   };
+
   const handleSave = async () => {
+    if (!canEdit) return;
+    
     setLoading(true);
     try {
-      // Save logic here - API call to update lead
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Mock delay
+      console.log('Saving lead with data:', formData);
+      
+      // Combine notes into the main notes field
+      const combinedNotes = notes.length > 0 
+        ? notes.map(note => `${note.userName} (${note.timestamp.toLocaleDateString()}): ${note.text}`).join('\n\n')
+        : formData.notes || '';
 
-      onSave(formData);
+      const updatedLead = {
+        ...formData,
+        notes: combinedNotes,
+        updatedAt: new Date().toISOString()
+      };
+
+      onSave(updatedLead);
       toast.success('Lead details saved successfully');
       setHasUnsavedChanges(false);
+      setNotes([]); // Clear notes after saving
     } catch (error) {
+      console.error('Error saving lead:', error);
       toast.error('Failed to save lead details');
     } finally {
       setLoading(false);
     }
   };
-  return <div className="min-h-screen bg-gray-50">
+
+  return (
+    <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -178,15 +228,23 @@ export function TaxLeadDetailsForm({
           </div>
           
           <div className="flex items-center gap-3">
-            {!canEdit && <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-4 py-2 rounded-lg border border-amber-200">
+            {!canEdit && (
+              <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-4 py-2 rounded-lg border border-amber-200">
                 <Eye className="w-4 h-4" />
                 <span className="text-sm font-medium">View Only</span>
-              </div>}
+              </div>
+            )}
             
-            {canEdit && hasUnsavedChanges && <Button onClick={handleSave} disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2">
+            {canEdit && hasUnsavedChanges && (
+              <Button
+                onClick={handleSave}
+                disabled={loading}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
+              >
                 <Save className="w-4 h-4 mr-2" />
                 {loading ? 'Saving...' : 'Save Changes'}
-              </Button>}
+              </Button>
+            )}
           </div>
         </div>
 
@@ -217,16 +275,37 @@ export function TaxLeadDetailsForm({
 
                 {/* Existing Main Content - Lead Disposition */}
                 <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
-                  
                   <CardContent>
-                    <MainContent formData={formData} disposition={disposition} passReason={passReason} notes={notes} newNote={newNote} files={files} canEdit={canEdit} onInputChange={handleInputChange} onDisposition={handleDisposition} onPassReasonChange={handlePassReasonChange} onNewNoteChange={handleNewNoteChange} onAddNote={handleAddNote} onFileUpload={handleFileUpload} onRemoveFile={handleRemoveFile} />
+                    <MainContent
+                      formData={formData}
+                      disposition={disposition}
+                      passReason={passReason}
+                      notes={notes}
+                      newNote={newNote}
+                      files={files}
+                      canEdit={canEdit}
+                      onInputChange={handleInputChange}
+                      onDisposition={handleDisposition}
+                      onPassReasonChange={handlePassReasonChange}
+                      onNewNoteChange={handleNewNoteChange}
+                      onAddNote={handleAddNote}
+                      onFileUpload={handleFileUpload}
+                      onRemoveFile={handleRemoveFile}
+                    />
                   </CardContent>
                 </Card>
               </div>
 
               {/* Right Column - Sidebar */}
               <div className="xl:col-span-1 space-y-6">
-                <Sidebar currentStatus={formData.status as 'HOT' | 'WARM' | 'COLD' | 'PASS'} files={files} canEdit={canEdit} onStatusChange={status => handleInputChange('status', status)} onRemoveFile={handleRemoveFile} onFileUpload={handleFileUpload} />
+                <Sidebar
+                  currentStatus={formData.status as 'HOT' | 'WARM' | 'COLD' | 'PASS'}
+                  files={files}
+                  canEdit={canEdit}
+                  onStatusChange={status => handleInputChange('status', status)}
+                  onRemoveFile={handleRemoveFile}
+                  onFileUpload={handleFileUpload}
+                />
               </div>
             </div>
           </TabsContent>
@@ -243,7 +322,8 @@ export function TaxLeadDetailsForm({
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {activities.map(activity => <div key={activity.id} className="flex gap-4 pb-4 border-b border-gray-200 last:border-b-0">
+                  {activities.map(activity => (
+                    <div key={activity.id} className="flex gap-4 pb-4 border-b border-gray-200 last:border-b-0">
                       <div className="w-8 h-8 rounded-full bg-crm-primary/10 flex items-center justify-center flex-shrink-0">
                         <span className="text-xs font-medium text-crm-primary">
                           {activity.userInitials}
@@ -258,51 +338,67 @@ export function TaxLeadDetailsForm({
                         </div>
                         <p className="text-sm text-gray-600 mb-1">{activity.description}</p>
                         <p className="text-xs text-gray-500">by {activity.user}</p>
-                        {activity.mentions && activity.mentions.length > 0 && <div className="mt-2">
-                            {activity.mentions.map((mention, index) => <span key={index} className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-1">
+                        {activity.mentions && activity.mentions.length > 0 && (
+                          <div className="mt-2">
+                            {activity.mentions.map((mention, index) => (
+                              <span key={index} className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-1">
                                 {mention}
-                              </span>)}
-                          </div>}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    </div>)}
+                    </div>
+                  ))}
                 </div>
 
                 {/* Add Comment Section */}
-                {canEdit && <div className="mt-6 pt-4 border-t border-gray-200">
+                {canEdit && (
+                  <div className="mt-6 pt-4 border-t border-gray-200">
                     <div className="flex gap-3">
                       <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
                         <span className="text-xs font-medium text-gray-600">CU</span>
                       </div>
                       <div className="flex-1">
-                        <textarea placeholder="Add a comment..." className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-crm-primary focus:border-transparent" rows={3} onKeyDown={e => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        const comment = e.currentTarget.value.trim();
-                        if (comment) {
-                          handleAddComment(comment);
-                          e.currentTarget.value = '';
-                        }
-                      }
-                    }} />
+                        <textarea
+                          placeholder="Add a comment..."
+                          className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-crm-primary focus:border-transparent"
+                          rows={3}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              const comment = e.currentTarget.value.trim();
+                              if (comment) {
+                                handleAddComment(comment);
+                                e.currentTarget.value = '';
+                              }
+                            }
+                          }}
+                        />
                         <div className="flex justify-end mt-2">
-                          <Button size="sm" onClick={e => {
-                        const textarea = e.currentTarget.parentElement?.parentElement?.querySelector('textarea');
-                        const comment = textarea?.value.trim();
-                        if (comment) {
-                          handleAddComment(comment);
-                          textarea.value = '';
-                        }
-                      }}>
+                          <Button
+                            size="sm"
+                            onClick={(e) => {
+                              const textarea = e.currentTarget.parentElement?.parentElement?.querySelector('textarea');
+                              const comment = textarea?.value.trim();
+                              if (comment) {
+                                handleAddComment(comment);
+                                textarea.value = '';
+                              }
+                            }}
+                          >
                             Add Comment
                           </Button>
                         </div>
                       </div>
                     </div>
-                  </div>}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </div>
-    </div>;
+    </div>
+  );
 }

@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { TaxLead } from '@/types/taxLead';
@@ -101,24 +100,26 @@ export function useDashboardData(): DashboardDataContextType {
     ownerName: lead.owner_name,
     propertyAddress: lead.property_address,
     currentArrears: lead.current_arrears || undefined,
-    status: (lead.status as 'HOT' | 'WARM' | 'COLD' | 'PASS') || 'COLD',
+    status: (lead.status as 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP') || 'COLD',
     email: lead.email || undefined,
     phone: lead.phone || undefined,
     taxLawsuitNumber: lead.tax_lawsuit_number || undefined,
     notes: lead.notes || undefined,
     createdAt: lead.created_at,
     updatedAt: lead.updated_at,
+    disposition: lead.disposition || 'UNDECIDED',
   }));
 
+  // Fixed stats calculation - KEEP and PASS are mutually exclusive
   const stats: DashboardStats = {
     totalLeads: leads.length,
     hotDeals: leads.filter(lead => lead.status === 'HOT').length,
     warmDeals: leads.filter(lead => lead.status === 'WARM').length,
     coldDeals: leads.filter(lead => lead.status === 'COLD').length,
-    passRate: leads.length > 0 ? Math.round((leads.filter(lead => lead.status === 'PASS').length / leads.length) * 100) : 0,
-    keepRate: leads.length > 0 ? Math.round((leads.filter(lead => lead.status !== 'PASS').length / leads.length) * 100) : 0,
-    passDeals: leads.filter(lead => lead.status === 'PASS').length,
-    keepDeals: leads.filter(lead => lead.status !== 'PASS').length,
+    passDeals: leads.filter(lead => lead.status === 'PASS' || lead.disposition === 'DISQUALIFIED').length,
+    keepDeals: leads.filter(lead => lead.status === 'KEEP' || lead.disposition === 'QUALIFIED').length,
+    passRate: leads.length > 0 ? Math.round((leads.filter(lead => lead.status === 'PASS' || lead.disposition === 'DISQUALIFIED').length / leads.length) * 100) : 0,
+    keepRate: leads.length > 0 ? Math.round((leads.filter(lead => lead.status === 'KEEP' || lead.disposition === 'QUALIFIED').length / leads.length) * 100) : 0,
     thisWeekLeads: leads.filter(lead => {
       const leadDate = new Date(lead.createdAt || '');
       const weekAgo = new Date();

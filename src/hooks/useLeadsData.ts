@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { TaxLead } from '@/types/taxLead';
 import { supabase } from '@/integrations/supabase/client';
@@ -44,7 +43,7 @@ export function useLeadsData() {
           propertyAddress: lead.property_address,
           taxLawsuitNumber: lead.tax_lawsuit_number || '',
           currentArrears: lead.current_arrears || 0,
-          status: lead.status || 'COLD',
+          status: (lead.status || 'COLD') as 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP',
           notes: lead.notes || '',
           phone: lead.phone || '',
           email: lead.email || '',
@@ -52,6 +51,7 @@ export function useLeadsData() {
           lastName,
           temperature: (lead.status || 'COLD') as 'HOT' | 'WARM' | 'COLD',
           occupancyStatus: 'VACANT' as const,
+          disposition: (lead.disposition || 'UNDECIDED') as 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED',
           createdAt: lead.created_at,
           updatedAt: lead.updated_at,
           supabaseId: lead.id // Store the actual Supabase ID for operations
@@ -134,7 +134,8 @@ export function useLeadsData() {
           status: newLead.status,
           notes: newLead.notes,
           phone: newLead.phone,
-          email: newLead.email
+          email: newLead.email,
+          disposition: newLead.disposition || 'UNDECIDED'
         })
         .select()
         .single();
@@ -180,6 +181,15 @@ export function useLeadsData() {
         return;
       }
 
+      console.log('Updating lead with data:', {
+        id: leadWithSupabaseId.supabaseId,
+        status: updatedLead.status,
+        disposition: updatedLead.disposition,
+        notes: updatedLead.notes,
+        phone: updatedLead.phone,
+        email: updatedLead.email
+      });
+
       const { error } = await supabase
         .from('campaign_leads')
         .update({
@@ -192,6 +202,7 @@ export function useLeadsData() {
           notes: updatedLead.notes,
           phone: updatedLead.phone,
           email: updatedLead.email,
+          disposition: updatedLead.disposition || 'UNDECIDED',
           updated_at: new Date().toISOString()
         })
         .eq('id', leadWithSupabaseId.supabaseId);
