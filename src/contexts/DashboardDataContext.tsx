@@ -19,11 +19,16 @@ interface DashboardStats {
 
 interface ActivityItem {
   id: string;
-  type: 'lead_created' | 'lead_updated' | 'note_added' | 'status_changed';
+  type: string;
   description: string;
   userName: string;
   timestamp: Date;
   leadId: string;
+  module: string;
+  actionType: string;
+  referenceId?: string;
+  referenceType?: string;
+  metadata?: any;
 }
 
 interface DashboardDataContextType {

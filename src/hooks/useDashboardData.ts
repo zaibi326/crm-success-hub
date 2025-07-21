@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { TaxLead } from '@/types/taxLead';
+import { useEffect } from 'react';
 
 export interface DashboardStats {
   totalLeads: number;
@@ -19,11 +20,16 @@ export interface DashboardStats {
 
 interface ActivityItem {
   id: string;
-  type: 'lead_created' | 'lead_updated' | 'note_added' | 'status_changed';
+  type: string;
   description: string;
   userName: string;
   timestamp: Date;
   leadId: string;
+  module: string;
+  actionType: string;
+  referenceId?: string;
+  referenceType?: string;
+  metadata?: any;
 }
 
 export interface DashboardDataContextType {
@@ -36,7 +42,7 @@ export interface DashboardDataContextType {
 }
 
 export function useDashboardData(): DashboardDataContextType {
-  const { data: campaignLeads = [], isLoading, error, refetch } = useQuery({
+  const { data: campaignLeads = [], isLoading: leadsLoading, error: leadsError, refetch: refetchLeads } = useQuery({
     queryKey: ['campaign-leads'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -49,6 +55,44 @@ export function useDashboardData(): DashboardDataContextType {
       return data || [];
     },
   });
+
+  const { data: activitiesData = [], isLoading: activitiesLoading, error: activitiesError, refetch: refetchActivities } = useQuery({
+    queryKey: ['activities'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('activities')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+      
+      if (error) throw error;
+      console.log('Loaded activities from database:', data?.length || 0, 'activities');
+      return data || [];
+    },
+  });
+
+  // Set up real-time subscription for activities
+  useEffect(() => {
+    const channel = supabase
+      .channel('activities-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'activities'
+        },
+        (payload) => {
+          console.log('Real-time activity update:', payload);
+          refetchActivities();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetchActivities]);
 
   // Transform campaign_leads to TaxLead format
   const leads: TaxLead[] = campaignLeads.map(lead => ({
@@ -90,23 +134,30 @@ export function useDashboardData(): DashboardDataContextType {
     avgResponseTime: '2.5 hrs'
   };
 
-  const activities: ActivityItem[] = leads.slice(0, 5).map((lead, index) => ({
-    id: `activity-${index}`,
-    type: 'lead_created',
-    description: `New lead: ${lead.ownerName}`,
-    userName: 'System',
-    timestamp: new Date(lead.createdAt || new Date()),
-    leadId: lead.id.toString()
+  // Transform activities data
+  const activities: ActivityItem[] = activitiesData.map(activity => ({
+    id: activity.id,
+    type: activity.action_type,
+    description: activity.description,
+    userName: activity.user_name,
+    timestamp: new Date(activity.created_at),
+    leadId: activity.reference_id || '',
+    module: activity.module,
+    actionType: activity.action_type,
+    referenceId: activity.reference_id,
+    referenceType: activity.reference_type,
+    metadata: activity.metadata
   }));
 
   return {
     leads,
     stats,
     activities,
-    loading: isLoading,
-    error: error?.message || null,
+    loading: leadsLoading || activitiesLoading,
+    error: leadsError?.message || activitiesError?.message || null,
     refetch: async () => {
-      await refetch();
+      await refetchLeads();
+      await refetchActivities();
     }
   };
 }

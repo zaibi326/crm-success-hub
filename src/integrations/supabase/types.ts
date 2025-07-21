@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      activities: {
+        Row: {
+          action_type: string
+          created_at: string
+          description: string
+          id: string
+          metadata: Json | null
+          module: string
+          reference_id: string | null
+          reference_type: string | null
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          description: string
+          id?: string
+          metadata?: Json | null
+          module: string
+          reference_id?: string | null
+          reference_type?: string | null
+          user_id: string
+          user_name: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          description?: string
+          id?: string
+          metadata?: Json | null
+          module?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: []
+      }
       campaign_leads: {
         Row: {
           campaign_id: string

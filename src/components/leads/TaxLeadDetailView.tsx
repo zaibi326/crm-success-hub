@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { TaxLead } from '@/types/taxLead';
 import { TaxLeadDetailsForm } from './TaxLeadDetailsForm';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { useActivityLogger } from '@/hooks/useActivityLogger';
 
 interface TaxLeadDetailViewProps {
   selectedLead: TaxLead;
@@ -11,9 +12,41 @@ interface TaxLeadDetailViewProps {
 }
 
 export function TaxLeadDetailView({ selectedLead, onBack }: TaxLeadDetailViewProps) {
+  const { logActivity } = useActivityLogger();
+
+  // Log when user views a lead
+  useEffect(() => {
+    logActivity({
+      module: 'leads',
+      actionType: 'viewed',
+      description: `Viewed lead details for ${selectedLead.ownerName}`,
+      referenceId: selectedLead.id.toString(),
+      referenceType: 'lead',
+      metadata: {
+        leadId: selectedLead.id,
+        ownerName: selectedLead.ownerName,
+        status: selectedLead.status
+      }
+    });
+  }, [selectedLead.id, selectedLead.ownerName, selectedLead.status, logActivity]);
+
   const handleSave = (updatedLead: TaxLead) => {
     console.log('Lead updated:', updatedLead);
-    // Here you would typically update the lead in your state management system
+    
+    // Log the lead update activity
+    logActivity({
+      module: 'leads',
+      actionType: 'updated',
+      description: `Updated lead information for ${updatedLead.ownerName}`,
+      referenceId: updatedLead.id.toString(),
+      referenceType: 'lead',
+      metadata: {
+        leadId: updatedLead.id,
+        ownerName: updatedLead.ownerName,
+        status: updatedLead.status,
+        previousStatus: selectedLead.status
+      }
+    });
   };
 
   return (
