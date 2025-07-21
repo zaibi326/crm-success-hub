@@ -32,10 +32,10 @@ export function LeadProcessingWorkflow({ leads, onLeadUpdate, onComplete }: Lead
     try {
       if (action === 'pass') {
         // Mark lead as passed and retain notes
-        const updatedLead = {
+        const updatedLead: TaxLead = {
           ...currentLead,
-          status: 'PASS' as const,
-          disposition: 'DISQUALIFIED' as const
+          status: 'PASS',
+          disposition: 'DISQUALIFIED'
         };
         
         onLeadUpdate(updatedLead);
@@ -69,10 +69,10 @@ export function LeadProcessingWorkflow({ leads, onLeadUpdate, onComplete }: Lead
   };
 
   const handleDetailedFormSave = async (updatedLead: TaxLead) => {
-    const finalLead = {
+    const finalLead: TaxLead = {
       ...updatedLead,
-      status: 'KEEP' as const,
-      disposition: 'QUALIFIED' as const
+      status: 'KEEP',
+      disposition: 'QUALIFIED'
     };
     
     onLeadUpdate(finalLead);
