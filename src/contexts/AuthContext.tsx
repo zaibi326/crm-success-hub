@@ -71,9 +71,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!isMounted) return;
+
         console.log('Auth state changed:', event, session?.user?.email);
         
         setSession(session);
@@ -82,39 +86,74 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
           // Fetch profile with a small delay to avoid recursion issues
           setTimeout(async () => {
+            if (!isMounted) return;
+            
             try {
               const profileData = await fetchUserProfile(session.user.id);
-              setProfile(profileData);
+              if (isMounted) {
+                setProfile(profileData);
+              }
             } catch (error) {
               console.error('Profile fetch error:', error);
             } finally {
-              setIsLoading(false);
+              if (isMounted) {
+                setIsLoading(false);
+              }
             }
           }, 100);
         } else {
-          setProfile(null);
-          setIsLoading(false);
+          if (isMounted) {
+            setProfile(null);
+            setIsLoading(false);
+          }
         }
       }
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session check:', session?.user?.email);
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        fetchUserProfile(session.user.id).then(profileData => {
-          setProfile(profileData);
-          setIsLoading(false);
-        });
-      } else {
-        setIsLoading(false);
-      }
-    });
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+          if (isMounted) {
+            setIsLoading(false);
+          }
+          return;
+        }
 
-    return () => subscription.unsubscribe();
+        console.log('Initial session check:', session?.user?.email);
+        
+        if (isMounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+        }
+        
+        if (session?.user && isMounted) {
+          const profileData = await fetchUserProfile(session.user.id);
+          if (isMounted) {
+            setProfile(profileData);
+          }
+        }
+        
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    initializeAuth();
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
@@ -202,17 +241,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSession(null);
   };
 
+  const value = {
+    user,
+    profile,
+    session,
+    login,
+    signup,
+    logout,
+    resetPassword,
+    isLoading
+  };
+
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      profile, 
-      session, 
-      login, 
-      signup, 
-      logout, 
-      resetPassword, 
-      isLoading 
-    }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
