@@ -13,7 +13,7 @@ interface LogActivityParams {
 }
 
 export function useActivityLogger() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const queryClient = useQueryClient();
 
   const logActivity = useMutation({
@@ -22,11 +22,16 @@ export function useActivityLogger() {
         throw new Error('User not authenticated');
       }
 
+      // Get user name from profile or fallback to email
+      const userName = profile 
+        ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email || 'Unknown User'
+        : user.email || 'Unknown User';
+
       const { data, error } = await supabase
         .from('activities')
         .insert({
           user_id: user.id,
-          user_name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email || 'Unknown User',
+          user_name: userName,
           module: params.module,
           action_type: params.actionType,
           description: params.description,
