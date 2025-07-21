@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,7 +34,8 @@ export function LeadProcessingWorkflow({ leads, onLeadUpdate, onComplete }: Lead
         // Mark lead as passed and retain notes
         const updatedLead = {
           ...currentLead,
-          status: 'PASS' as const
+          status: 'PASS' as const,
+          disposition: 'DISQUALIFIED' as const
         };
         
         onLeadUpdate(updatedLead);
@@ -67,12 +69,18 @@ export function LeadProcessingWorkflow({ leads, onLeadUpdate, onComplete }: Lead
   };
 
   const handleDetailedFormSave = async (updatedLead: TaxLead) => {
-    onLeadUpdate(updatedLead);
+    const finalLead = {
+      ...updatedLead,
+      status: 'KEEP' as const,
+      disposition: 'QUALIFIED' as const
+    };
+    
+    onLeadUpdate(finalLead);
     setShowDetailedForm(false);
     
     toast({
       title: "Lead Information Saved! ✅",
-      description: `Detailed information for ${updatedLead.ownerName} has been saved.`,
+      description: `Detailed information for ${finalLead.ownerName} has been saved.`,
     });
 
     // Auto-load next lead

@@ -16,6 +16,17 @@ interface LeadsListProps {
 export function LeadsList({ leads, onLeadSelect, onLeadUpdate }: LeadsListProps) {
   const totalArrears = leads.reduce((sum, lead) => sum + (lead.currentArrears || 0), 0);
 
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case 'HOT': return 'bg-red-100 text-red-800 border-red-200';
+      case 'WARM': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'COLD': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'KEEP': return 'bg-green-100 text-green-800 border-green-200';
+      case 'PASS': return 'bg-gray-100 text-gray-800 border-gray-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Summary Card */}

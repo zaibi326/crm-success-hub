@@ -58,6 +58,7 @@ export type Database = {
           campaign_id: string
           created_at: string
           current_arrears: number | null
+          disposition: string | null
           email: string | null
           id: string
           notes: string | null
@@ -73,6 +74,7 @@ export type Database = {
           campaign_id: string
           created_at?: string
           current_arrears?: number | null
+          disposition?: string | null
           email?: string | null
           id?: string
           notes?: string | null
@@ -88,6 +90,7 @@ export type Database = {
           campaign_id?: string
           created_at?: string
           current_arrears?: number | null
+          disposition?: string | null
           email?: string | null
           id?: string
           notes?: string | null

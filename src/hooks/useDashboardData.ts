@@ -107,7 +107,7 @@ export function useDashboardData(): DashboardDataContextType {
     notes: lead.notes || undefined,
     createdAt: lead.created_at,
     updatedAt: lead.updated_at,
-    disposition: lead.disposition || 'UNDECIDED',
+    disposition: (lead.disposition as 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED') || 'UNDECIDED',
   }));
 
   // Fixed stats calculation - KEEP and PASS are mutually exclusive

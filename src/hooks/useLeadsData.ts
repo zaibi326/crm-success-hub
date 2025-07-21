@@ -51,7 +51,7 @@ export function useLeadsData() {
           lastName,
           temperature: (lead.status || 'COLD') as 'HOT' | 'WARM' | 'COLD',
           occupancyStatus: 'VACANT' as const,
-          disposition: (lead.disposition || 'UNDECIDED') as 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED',
+          disposition: (lead.disposition as 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED') || 'UNDECIDED',
           createdAt: lead.created_at,
           updatedAt: lead.updated_at,
           supabaseId: lead.id // Store the actual Supabase ID for operations
