@@ -72,7 +72,10 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
 
   const updateHeir = (id: string, field: keyof Heir, value: string | number) => {
     setHeirs(prev => prev.map(heir => 
-      heir.id === id ? { ...heir, [field]: value } : heir
+      heir.id === id ? { 
+        ...heir, 
+        [field]: field === 'percentage' ? parseFloat(value.toString()) || 0 : value 
+      } : heir
     ));
     validateOwnership();
   };
@@ -256,12 +259,15 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
 
                     {/* Heir Details using EditableField */}
                     <div className="space-y-3">
-                      <EditableField
-                        label=""
-                        value={heir.name}
-                        onSave={(value) => updateHeir(heir.id, 'name', value)}
-                        className="font-semibold text-gray-900"
-                      />
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium text-gray-600">Name</label>
+                        <EditableField
+                          label=""
+                          value={heir.name}
+                          onSave={(value) => updateHeir(heir.id, 'name', value)}
+                          className="font-semibold text-gray-900"
+                        />
+                      </div>
 
                       <div className="space-y-1">
                         <label className="text-xs font-medium text-gray-600">Relationship</label>
@@ -284,16 +290,17 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <div className="flex-1">
+                        <div className="flex-1 space-y-1">
+                          <label className="text-xs font-medium text-gray-600">Ownership %</label>
                           <EditableField
                             label=""
                             value={heir.percentage.toString()}
                             onSave={(value) => updateHeir(heir.id, 'percentage', parseFloat(value) || 0)}
-                            type="number"
+                            type="text"
                             className="text-sm"
                           />
                         </div>
-                        <Badge className={`${getPercentageColor(heir.percentage)} text-white text-xs`}>
+                        <Badge className={`${getPercentageColor(heir.percentage)} text-white text-xs mt-5`}>
                           {heir.percentage}%
                         </Badge>
                       </div>
@@ -304,6 +311,7 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
                       <div className="flex items-start gap-2">
                         <MapPin className="w-3 h-3 text-gray-500 mt-1 flex-shrink-0" />
                         <div className="flex-1">
+                          <label className="text-xs font-medium text-gray-600 block mb-1">Address</label>
                           <EditableField
                             label=""
                             value={heir.propertyAddress}
@@ -316,6 +324,7 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
                       <div className="flex items-start gap-2">
                         <Phone className="w-3 h-3 text-gray-500 mt-1 flex-shrink-0" />
                         <div className="flex-1">
+                          <label className="text-xs font-medium text-gray-600 block mb-1">Phone</label>
                           <EditableField
                             label=""
                             value={heir.phoneNumber}
@@ -329,6 +338,7 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
                       <div className="flex items-start gap-2">
                         <Mail className="w-3 h-3 text-gray-500 mt-1 flex-shrink-0" />
                         <div className="flex-1">
+                          <label className="text-xs font-medium text-gray-600 block mb-1">Email</label>
                           <EditableField
                             label=""
                             value={heir.email}
