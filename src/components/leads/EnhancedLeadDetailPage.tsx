@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +19,7 @@ import { PropertyInfoSection } from './detail/PropertyInfoSection';
 import { FinancialInfoSection } from './detail/FinancialInfoSection';
 import { LeadInfoSection } from './detail/LeadInfoSection';
 import { ActivityTimelineSection } from './detail/ActivityTimelineSection';
+import { EnhancedOwnershipSection } from './detail/EnhancedOwnershipSection';
 
 interface EnhancedLeadDetailPageProps {
   lead: TaxLead;
@@ -106,6 +106,14 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
     setActivities(prev => [newActivity, ...prev]);
   };
 
+  const handleOwnershipSave = (heirs: any[]) => {
+    console.log('Heirs saved:', heirs);
+    toast({
+      title: "Ownership Saved",
+      description: "Heirs and ownership details have been saved successfully",
+    });
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'HOT': return 'bg-red-100 text-red-800 border-red-200';
@@ -161,10 +169,11 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
           </div>
         </div>
 
-        {/* Tabs for Details and Activity only */}
+        {/* Tabs for Details, Ownership, and Activity */}
         <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="ownership">Ownership & Heirs</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
 
@@ -247,6 +256,14 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
                 )}
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="ownership" className="space-y-6 mt-6">
+            <EnhancedOwnershipSection 
+              lead={leadData}
+              onSave={handleOwnershipSave}
+              canEdit={true}
+            />
           </TabsContent>
 
           <TabsContent value="activity" className="space-y-6 mt-6">
