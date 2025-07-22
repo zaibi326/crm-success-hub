@@ -2,19 +2,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Edit3 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Check, X, Edit3 } from 'lucide-react';
 
 interface InlineEditFieldProps {
   label: string;
-  value: string | number | undefined;
+  value: string;
   onSave: (value: string) => void;
-  type?: 'text' | 'email' | 'tel' | 'number' | 'textarea' | 'select';
+  type?: 'text' | 'email' | 'tel' | 'number';
   placeholder?: string;
-  options?: { value: string; label: string }[];
-  className?: string;
   required?: boolean;
+  multiline?: boolean;
+  canEdit?: boolean;
+  className?: string;
 }
 
 export function InlineEditField({
@@ -23,37 +23,42 @@ export function InlineEditField({
   onSave,
   type = 'text',
   placeholder,
-  options,
-  className = '',
-  required = false
+  required = false,
+  multiline = false,
+  canEdit = true,
+  className = ''
 }: InlineEditFieldProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(String(value || ''));
+  const [editValue, setEditValue] = useState(value || '');
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    setEditValue(value || '');
+  }, [value]);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
-      if (type !== 'textarea') {
-        (inputRef.current as HTMLInputElement).select();
+      if (inputRef.current instanceof HTMLInputElement || inputRef.current instanceof HTMLTextAreaElement) {
+        inputRef.current.select();
       }
     }
-  }, [isEditing, type]);
+  }, [isEditing]);
 
   const handleSave = () => {
-    if (editValue !== String(value || '')) {
-      onSave(editValue);
+    if (editValue.trim() !== value) {
+      onSave(editValue.trim());
     }
     setIsEditing(false);
   };
 
   const handleCancel = () => {
-    setEditValue(String(value || ''));
+    setEditValue(value || '');
     setIsEditing(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && type !== 'textarea') {
+    if (e.key === 'Enter' && !multiline) {
       e.preventDefault();
       handleSave();
     } else if (e.key === 'Escape') {
@@ -61,104 +66,80 @@ export function InlineEditField({
     }
   };
 
-  const handleBlur = () => {
-    handleSave();
-  };
-
-  const displayValue = value || placeholder || 'Click to add...';
-  const isEmpty = !value;
-
-  if (type === 'select' && options) {
-    if (isEditing) {
-      return (
-        <div className={`space-y-2 ${className}`}>
-          <Label className="text-sm font-medium text-gray-700">{label}</Label>
-          <Select
-            value={editValue}
-            onValueChange={(newValue) => {
-              setEditValue(newValue);
-              onSave(newValue);
-              setIsEditing(false);
-            }}
-            onOpenChange={(open) => {
-              if (!open) {
-                setIsEditing(false);
-              }
-            }}
-          >
-            <SelectTrigger className="w-full border-blue-500 focus:border-blue-500 focus:ring-blue-500">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {options.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      );
+  const handleClick = () => {
+    if (canEdit && !isEditing) {
+      setIsEditing(true);
     }
-
-    return (
-      <div className={`space-y-2 ${className}`}>
-        <Label className="text-sm font-medium text-gray-700">{label}</Label>
-        <div
-          onClick={() => setIsEditing(true)}
-          className={`
-            p-3 border border-gray-200 rounded-md cursor-pointer transition-colors
-            hover:border-blue-300 hover:bg-blue-50/50 group
-            ${isEmpty ? 'text-gray-500 italic' : 'text-gray-900'}
-          `}
-        >
-          <div className="flex items-center justify-between">
-            <span>{options.find(opt => opt.value === value)?.label || displayValue}</span>
-            <Edit3 className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (isEditing) {
-    const InputComponent = type === 'textarea' ? Textarea : Input;
-    
-    return (
-      <div className={`space-y-2 ${className}`}>
-        <Label className="text-sm font-medium text-gray-700">{label}</Label>
-        <InputComponent
-          ref={inputRef as any}
-          type={type === 'textarea' ? undefined : type}
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onBlur={handleBlur}
-          placeholder={placeholder}
-          className="border-blue-500 focus:border-blue-500 focus:ring-blue-500"
-          rows={type === 'textarea' ? 3 : undefined}
-        />
-      </div>
-    );
-  }
+  };
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <Label className="text-sm font-medium text-gray-700">{label}</Label>
-      <div
-        onClick={() => setIsEditing(true)}
-        className={`
-          p-3 border border-gray-200 rounded-md cursor-pointer transition-colors
-          hover:border-blue-300 hover:bg-blue-50/50 group min-h-[44px] flex items-center
-          ${isEmpty ? 'text-gray-500 italic' : 'text-gray-900'}
-        `}
-      >
-        <div className="flex items-center justify-between w-full">
-          <span className={type === 'textarea' ? 'whitespace-pre-wrap' : ''}>
-            {displayValue}
-          </span>
-          <Edit3 className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2" />
-        </div>
+      <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+        {label}
+        {required && <span className="text-red-500">*</span>}
+        {canEdit && !isEditing && (
+          <Edit3 className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+        )}
+      </label>
+      
+      <div className="group relative">
+        {isEditing ? (
+          <div className="flex items-center gap-2">
+            {multiline ? (
+              <Textarea
+                ref={inputRef as React.RefObject<HTMLTextAreaElement>}
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
+                className="flex-1 min-h-[80px] resize-none border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                rows={3}
+              />
+            ) : (
+              <Input
+                ref={inputRef as React.RefObject<HTMLInputElement>}
+                type={type}
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
+                className="flex-1 border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+              />
+            )}
+            
+            <div className="flex items-center gap-1">
+              <Button
+                size="sm"
+                onClick={handleSave}
+                className="h-8 w-8 p-0 bg-green-600 hover:bg-green-700"
+              >
+                <Check className="w-4 h-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleCancel}
+                className="h-8 w-8 p-0 border-gray-300 hover:bg-gray-50"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div 
+            onClick={handleClick}
+            className={`
+              p-3 rounded-lg border bg-gray-50 min-h-[44px] flex items-center
+              ${canEdit ? 'cursor-pointer hover:bg-gray-100 hover:border-blue-300 transition-colors' : 'cursor-default'}
+              ${!value ? 'text-gray-400 italic' : 'text-gray-900'}
+            `}
+          >
+            {value || placeholder || `Enter ${label.toLowerCase()}`}
+            {canEdit && (
+              <Edit3 className="w-4 h-4 text-gray-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

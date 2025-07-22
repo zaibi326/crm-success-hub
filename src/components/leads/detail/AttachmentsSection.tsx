@@ -17,11 +17,12 @@ import {
   FolderOpen,
   Link,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Save
 } from 'lucide-react';
 import { AttachmentsSectionProps } from './attachments/types';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 export function AttachmentsSection({ 
   files = [], 
@@ -33,13 +34,16 @@ export function AttachmentsSection({
 }: AttachmentsSectionProps & { title?: string; description?: string }) {
   const [isOpen, setIsOpen] = useState(true);
   const [pdfUrl, setPdfUrl] = useState('');
+  const [hasChanges, setHasChanges] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(event.target.files || []);
-    if (selectedFiles.length > 0 && onFileUpload) {
-      onFileUpload(selectedFiles, 'other');
-      toast.success(`${selectedFiles.length} file(s) uploaded successfully`);
+    if (selectedFiles.length > 0) {
+      setPendingFiles(prev => [...prev, ...selectedFiles]);
+      setHasChanges(true);
     }
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -57,7 +61,6 @@ export function AttachmentsSection({
       return;
     }
 
-    // Create a mock file object for the PDF link
     const fileName = pdfUrl.split('/').pop() || 'document.pdf';
     const mockFile = Object.create(File.prototype, {
       name: { value: fileName, writable: false },
@@ -67,12 +70,27 @@ export function AttachmentsSection({
       webkitRelativePath: { value: pdfUrl, writable: false }
     }) as File;
     
-    if (onFileUpload) {
-      onFileUpload([mockFile], 'other');
-    }
-    
+    setPendingFiles(prev => [...prev, mockFile]);
     setPdfUrl('');
-    toast.success('PDF link added successfully');
+    setHasChanges(true);
+  };
+
+  const handleSaveAttachments = () => {
+    if (!hasChanges || !onFileUpload) return;
+
+    if (pendingFiles.length > 0) {
+      onFileUpload(pendingFiles, 'other');
+      setPendingFiles([]);
+      setHasChanges(false);
+      toast.success(`${pendingFiles.length} file(s) uploaded successfully`);
+    }
+  };
+
+  const removePendingFile = (index: number) => {
+    setPendingFiles(prev => prev.filter((_, i) => i !== index));
+    if (pendingFiles.length === 1) {
+      setHasChanges(false);
+    }
   };
 
   const getFileIcon = (type: string) => {
@@ -105,11 +123,16 @@ export function AttachmentsSection({
                     <p className="text-sm text-gray-500 font-normal mt-1">{description}</p>
                   )}
                 </div>
+                {hasChanges && (
+                  <span className="text-sm text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
+                    {pendingFiles.length} pending
+                  </span>
+                )}
               </div>
               
               <div className="flex items-center gap-3">
                 <Badge variant="outline" className="text-sm bg-gray-50 text-gray-700 border-gray-300">
-                  {files.length} files
+                  {files.length + pendingFiles.length} files
                 </Badge>
                 {isOpen ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
               </div>
@@ -196,9 +219,44 @@ export function AttachmentsSection({
               </div>
             )}
 
+            {/* Pending Files Preview */}
+            {pendingFiles.length > 0 && (
+              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <h4 className="text-sm font-semibold text-blue-900 mb-3">
+                  Files Ready to Upload ({pendingFiles.length})
+                </h4>
+                <div className="space-y-2 mb-4">
+                  {pendingFiles.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-white border border-blue-200 rounded">
+                      <div className="flex items-center gap-2">
+                        {getFileIcon(file.type)}
+                        <span className="text-sm text-gray-700">{file.name}</span>
+                        <span className="text-xs text-gray-500">({formatFileSize(file.size)})</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removePendingFile(index)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 p-1 h-6 w-6"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  onClick={handleSaveAttachments}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Attachments ({pendingFiles.length})
+                </Button>
+              </div>
+            )}
+
             {/* Files List */}
             <div className="space-y-4">
-              {files.length === 0 ? (
+              {files.length === 0 && pendingFiles.length === 0 ? (
                 <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                   <FolderOpen className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                   <h4 className="text-sm font-medium text-gray-900 mb-2">No files attached</h4>
@@ -206,11 +264,11 @@ export function AttachmentsSection({
                     Upload documents or add PDF links to get started
                   </p>
                 </div>
-              ) : (
+              ) : files.length > 0 && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <h4 className="text-sm font-semibold text-gray-900">
-                      Attached Files ({files.length})
+                      Saved Files ({files.length})
                     </h4>
                   </div>
                   

@@ -1,17 +1,17 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Save, Eye, Activity, FileText } from 'lucide-react';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 import { TaxLead } from '@/types/taxLead';
 import { MainContent } from './detail/MainContent';
 import { Sidebar } from './detail/Sidebar';
 import { ViewOnlyMessage } from './detail/ViewOnlyMessage';
 import { SellerContactSection } from './detail/SellerContactSection';
 import { EnhancedLeadDetailsSection } from './detail/EnhancedLeadDetailsSection';
+import { AttachmentsSection } from './detail/AttachmentsSection';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UploadedFile {
@@ -19,6 +19,7 @@ interface UploadedFile {
   name: string;
   type: string;
   url: string;
+  size?: number;
   category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities';
 }
 
@@ -64,6 +65,7 @@ export function TaxLeadDetailsForm({
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
+  const { toast } = useToast();
 
   // Mock activity data
   const [activities, setActivities] = useState<ActivityItem[]>([
@@ -104,6 +106,19 @@ export function TaxLeadDetailsForm({
       lead.disposition === 'QUALIFIED' ? 'keep' : 
       lead.disposition === 'DISQUALIFIED' ? 'pass' : null
     );
+    
+    // Initialize files from lead data if available
+    if (lead.attachedFiles) {
+      const convertedFiles: UploadedFile[] = lead.attachedFiles.map((file, index) => ({
+        id: `existing-${index}`,
+        name: file.name,
+        type: file.type || 'application/octet-stream',
+        url: file.url,
+        size: file.size,
+        category: 'other' as const
+      }));
+      setFiles(convertedFiles);
+    }
   }, [lead]);
 
   const handleInputChange = (field: keyof TaxLead, value: any) => {
@@ -172,15 +187,26 @@ export function TaxLeadDetailsForm({
       name: file.name,
       type: file.type,
       url: URL.createObjectURL(file),
+      size: file.size,
       category
     }));
     setFiles(prev => [...prev, ...uploadedFiles]);
     setHasUnsavedChanges(true);
+    
+    toast({
+      title: "Files uploaded",
+      description: `${newFiles.length} file(s) added successfully`,
+    });
   };
 
   const handleRemoveFile = (fileId: string) => {
     setFiles(prev => prev.filter(file => file.id !== fileId));
     setHasUnsavedChanges(true);
+    
+    toast({
+      title: "File removed",
+      description: "File has been removed successfully",
+    });
   };
 
   const handleSave = async () => {
@@ -195,19 +221,37 @@ export function TaxLeadDetailsForm({
         ? notes.map(note => `${note.userName} (${note.timestamp.toLocaleDateString()}): ${note.text}`).join('\n\n')
         : formData.notes || '';
 
+      // Convert files back to the expected format
+      const attachedFiles = files.map(file => ({
+        id: file.id,
+        name: file.name,
+        url: file.url,
+        type: file.type,
+        size: file.size,
+        uploadedAt: new Date().toISOString()
+      }));
+
       const updatedLead = {
         ...formData,
         notes: combinedNotes,
+        attachedFiles,
         updatedAt: new Date().toISOString()
       };
 
       onSave(updatedLead);
-      toast.success('Lead details saved successfully');
+      toast({
+        title: "Success",
+        description: "✅ Lead details saved successfully",
+      });
       setHasUnsavedChanges(false);
       setNotes([]); // Clear notes after saving
     } catch (error) {
       console.error('Error saving lead:', error);
-      toast.error('Failed to save lead details');
+      toast({
+        title: "Error",
+        description: "Failed to save lead details",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -268,10 +312,29 @@ export function TaxLeadDetailsForm({
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
               {/* Left Column - Main Content */}
               <div className="xl:col-span-2 space-y-6">
-                {/* NEW SECTIONS - Enhanced with modern design */}
-                <SellerContactSection lead={formData} onFieldUpdate={handleInputChange} canEdit={canEdit} />
+                {/* Seller Contact Section - Enhanced with save functionality */}
+                <SellerContactSection 
+                  lead={formData} 
+                  onFieldUpdate={handleInputChange} 
+                  canEdit={canEdit} 
+                />
                 
-                <EnhancedLeadDetailsSection lead={formData} onFieldUpdate={handleInputChange} canEdit={canEdit} />
+                {/* Lead Details Section */}
+                <EnhancedLeadDetailsSection 
+                  lead={formData} 
+                  onFieldUpdate={handleInputChange} 
+                  canEdit={canEdit} 
+                />
+
+                {/* Attachments Section - Enhanced with proper upload/save flow */}
+                <AttachmentsSection
+                  files={files}
+                  onRemoveFile={handleRemoveFile}
+                  onFileUpload={handleFileUpload}
+                  canEdit={canEdit}
+                  title="Lead Attachments"
+                  description="Upload documents related to this lead"
+                />
 
                 {/* Existing Main Content - Lead Disposition */}
                 <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
