@@ -32,14 +32,16 @@ export function SimplifiedOwnershipSection({
   const [isOpen, setIsOpen] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   
-  // Add null check for leadData
-  const safeLeadData = leadData || {};
+  // Early return if leadData is not provided
+  if (!leadData) {
+    return null;
+  }
   
   const [localData, setLocalData] = useState({
-    ownerOfRecord: safeLeadData.ownerOfRecord || '',
-    vestingDeedDate: safeLeadData.vestingDeedDate || '',
-    grantorGranteeName: safeLeadData.grantorGranteeName || '',
-    occupancyStatus: safeLeadData.occupancyStatus || 'UNKNOWN'
+    ownerOfRecord: leadData.ownerOfRecord || '',
+    vestingDeedDate: leadData.vestingDeedDate || '',
+    grantorGranteeName: leadData.grantorGranteeName || '',
+    occupancyStatus: leadData.occupancyStatus || 'UNKNOWN'
   });
   const { toast } = useToast();
 
@@ -213,7 +215,7 @@ export function SimplifiedOwnershipSection({
                 <div>
                   <span className="text-gray-600">Current Owner:</span>
                   <span className="ml-2 font-medium text-gray-900">
-                    {localData.ownerOfRecord || safeLeadData.ownerName || 'Not specified'}
+                    {localData.ownerOfRecord || leadData.ownerName || 'Not specified'}
                   </span>
                 </div>
                 <div>

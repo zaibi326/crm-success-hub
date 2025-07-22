@@ -90,6 +90,16 @@ export function LeadsTableView({ leads: initialLeads, onLeadSelect }: LeadsTable
     setLeads(prev => [...prev, newSeller]);
   };
 
+  const handleLeadUpdate = (updatedLead: TaxLead) => {
+    setLeads(prev => prev.map(lead => 
+      lead.id === updatedLead.id ? updatedLead : lead
+    ));
+  };
+
+  const handleLeadDelete = (leadId: number) => {
+    setLeads(prev => prev.filter(lead => lead.id !== leadId));
+  };
+
   const getStatusBadge = (status: string) => {
     const colors = {
       'HOT': 'bg-red-100 text-red-800 border-red-200',
@@ -153,6 +163,8 @@ export function LeadsTableView({ leads: initialLeads, onLeadSelect }: LeadsTable
                 <LeadListView 
                   leads={sortedLeads}
                   onLeadSelect={onLeadSelect}
+                  onLeadUpdate={handleLeadUpdate}
+                  onLeadDelete={handleLeadDelete}
                   getStatusBadge={getStatusBadge}
                 />
               )}
@@ -170,6 +182,8 @@ export function LeadsTableView({ leads: initialLeads, onLeadSelect }: LeadsTable
                 <LeadListView 
                   leads={sortedLeads}
                   onLeadSelect={onLeadSelect}
+                  onLeadUpdate={handleLeadUpdate}
+                  onLeadDelete={handleLeadDelete}
                   getStatusBadge={getStatusBadge}
                 />
               )}
@@ -187,6 +201,8 @@ export function LeadsTableView({ leads: initialLeads, onLeadSelect }: LeadsTable
                 <LeadListView 
                   leads={sortedLeads}
                   onLeadSelect={onLeadSelect}
+                  onLeadUpdate={handleLeadUpdate}
+                  onLeadDelete={handleLeadDelete}
                   getStatusBadge={getStatusBadge}
                 />
               )}

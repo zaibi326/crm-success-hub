@@ -9,6 +9,7 @@ interface LeadListViewProps {
   onLeadUpdate: (lead: TaxLead) => void;
   onLeadDelete: (leadId: number) => void;
   selectedLeadId?: number;
+  getStatusBadge?: (status: string) => string;
 }
 
 export function LeadListView({ 
@@ -16,9 +17,10 @@ export function LeadListView({
   onLeadSelect, 
   onLeadUpdate, 
   onLeadDelete,
-  selectedLeadId 
+  selectedLeadId,
+  getStatusBadge 
 }: LeadListViewProps) {
-  const getStatusBadge = (status: string) => {
+  const defaultGetStatusBadge = (status: string) => {
     switch (status) {
       case 'HOT': return 'bg-red-100 text-red-800';
       case 'WARM': return 'bg-yellow-100 text-yellow-800';
@@ -28,6 +30,8 @@ export function LeadListView({
       default: return 'bg-gray-100 text-gray-800';
     }
   };
+
+  const statusBadgeFunction = getStatusBadge || defaultGetStatusBadge;
 
   return (
     <div className="space-y-4">
