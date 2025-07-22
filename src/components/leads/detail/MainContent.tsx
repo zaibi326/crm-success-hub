@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { TaxLead } from '@/types/taxLead';
 import { DispositionSection } from './DispositionSection';
@@ -94,24 +95,28 @@ export function MainContent({
       {/* Conditional Fields Section */}
       <ConditionalFieldsSection
         formData={formData}
+        files={files}
         canEdit={canEdit}
         onInputChange={onInputChange}
+        onFileUpload={onFileUpload}
+        onRemoveFile={onRemoveFile}
       />
 
       {/* Enhanced Ownership Section */}
       <EnhancedOwnershipSection
         lead={formData}
-        onFieldUpdate={onInputChange}
+        onInputChange={onInputChange}
         canEdit={canEdit}
         onSave={handleOwnershipSave}
       />
 
       {/* Enhanced Additional Info Section */}
       <EnhancedAdditionalInfoSection
-        lead={formData}
-        onFieldUpdate={onInputChange}
+        formData={formData}
+        onInputChange={onInputChange}
         canEdit={canEdit}
       />
     </div>
   );
 }
+
