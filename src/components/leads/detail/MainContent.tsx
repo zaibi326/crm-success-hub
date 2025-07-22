@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 import { TaxLead } from '@/types/taxLead';
 import { DispositionSection } from './DispositionSection';
@@ -10,6 +9,7 @@ import { EnhancedSellerContactSection } from './EnhancedSellerContactSection';
 import { EnhancedAdditionalInfoSection } from './EnhancedAdditionalInfoSection';
 import { EnhancedOwnershipSection } from './EnhancedOwnershipSection';
 import { AttachmentsSection } from './AttachmentsSection';
+import { EnhancedLeadDetailsSection } from './EnhancedLeadDetailsSection';
 
 interface UploadedFile {
   id: string;
@@ -85,11 +85,32 @@ export function MainContent({
         onAddNote={onAddNote}
       />
 
+      {/* Enhanced Seller Contact Section */}
+      <EnhancedSellerContactSection
+        lead={formData}
+        onFieldUpdate={onInputChange}
+        canEdit={canEdit}
+      />
+
+      {/* Enhanced Lead Details Section - Below Seller Contact */}
+      <EnhancedLeadDetailsSection 
+        lead={formData} 
+        onFieldUpdate={onInputChange} 
+        canEdit={canEdit} 
+      />
+
       {/* Editable Fields Section */}
       <EditableFieldsSection
         formData={formData}
         canEdit={canEdit}
         onInputChange={onInputChange}
+      />
+
+      {/* Enhanced Additional Info Section - Above Conditional Fields */}
+      <EnhancedAdditionalInfoSection
+        formData={formData}
+        onInputChange={onInputChange}
+        canEdit={canEdit}
       />
 
       {/* Conditional Fields Section */}
@@ -102,20 +123,22 @@ export function MainContent({
         onRemoveFile={onRemoveFile}
       />
 
+      {/* Lead Attachments Section */}
+      <AttachmentsSection
+        files={files}
+        onRemoveFile={onRemoveFile}
+        onFileUpload={onFileUpload}
+        canEdit={canEdit}
+        title="Lead Attachments"
+        description="Upload documents related to this lead"
+      />
+
       {/* Enhanced Ownership Section */}
       <EnhancedOwnershipSection
         lead={formData}
         canEdit={canEdit}
         onSave={handleOwnershipSave}
       />
-
-      {/* Enhanced Additional Info Section */}
-      <EnhancedAdditionalInfoSection
-        formData={formData}
-        onInputChange={onInputChange}
-        canEdit={canEdit}
-      />
     </div>
   );
 }
-
