@@ -38,9 +38,11 @@ export function LeadSearchFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="hot">Hot</SelectItem>
-            <SelectItem value="warm">Warm</SelectItem>
-            <SelectItem value="cold">Cold</SelectItem>
+            <SelectItem value="hot">🔥 Hot</SelectItem>
+            <SelectItem value="warm">🌤️ Warm</SelectItem>
+            <SelectItem value="cold">❄️ Cold</SelectItem>
+            <SelectItem value="keep">✅ Keep</SelectItem>
+            <SelectItem value="pass">⏭️ Pass</SelectItem>
             <SelectItem value="disqualified">Disqualified</SelectItem>
           </SelectContent>
         </Select>

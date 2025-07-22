@@ -17,6 +17,9 @@ export function DropdownFilters({ onAddFilter }: FilterComponentProps) {
           <SelectContent className="bg-white border-agile-gray-200 z-50">
             <SelectItem value="john_doe">John Doe</SelectItem>
             <SelectItem value="jane_smith">Jane Smith</SelectItem>
+            <SelectItem value="mike_johnson">Mike Johnson</SelectItem>
+            <SelectItem value="sarah_wilson">Sarah Wilson</SelectItem>
+            <SelectItem value="david_chen">David Chen</SelectItem>
             <SelectItem value="admin_user">Admin User</SelectItem>
             <SelectItem value="lead_manager">Lead Manager</SelectItem>
           </SelectContent>
@@ -35,6 +38,8 @@ export function DropdownFilters({ onAddFilter }: FilterComponentProps) {
             <SelectItem value="manual">✋ Manual</SelectItem>
             <SelectItem value="webform">🌐 Webform</SelectItem>
             <SelectItem value="import">📊 Import</SelectItem>
+            <SelectItem value="csv_upload">📄 CSV Upload</SelectItem>
+            <SelectItem value="form_submission">📝 Form Submission</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -66,6 +71,7 @@ export function DropdownFilters({ onAddFilter }: FilterComponentProps) {
             <SelectItem value="hot_leads">Hot Leads</SelectItem>
             <SelectItem value="warm_leads">Warm Leads</SelectItem>
             <SelectItem value="cold_leads">Cold Leads</SelectItem>
+            <SelectItem value="keep_leads">Keep Leads</SelectItem>
             <SelectItem value="archive">Archive</SelectItem>
           </SelectContent>
         </Select>
@@ -83,6 +89,8 @@ export function DropdownFilters({ onAddFilter }: FilterComponentProps) {
             <SelectItem value="mike_davis">Mike Davis</SelectItem>
             <SelectItem value="lisa_chen">Lisa Chen</SelectItem>
             <SelectItem value="david_wilson">David Wilson</SelectItem>
+            <SelectItem value="admin_user">Admin User</SelectItem>
+            <SelectItem value="lead_manager">Lead Manager</SelectItem>
           </SelectContent>
         </Select>
       </div>

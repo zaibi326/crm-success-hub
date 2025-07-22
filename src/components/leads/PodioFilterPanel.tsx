@@ -120,13 +120,17 @@ export function PodioFilterPanel({
     return [...new Set(values)].filter(v => typeof v === 'string') as string[];
   };
 
-  // Get unique team members from leads - using available TaxLead properties
-  const getTeamMembers = () => {
-    // Use agentName and leadManager as available team member fields
-    const agentNames = leads.map(lead => lead.agentName).filter(Boolean);
+  // Get unique creators from leads - using available TaxLead properties
+  const getCreatedByOptions = () => {
+    // Use leadManager and agentName as available creator fields, plus add some default options
     const leadManagers = leads.map(lead => lead.leadManager).filter(Boolean);
-    const allMembers = [...agentNames, ...leadManagers];
-    return [...new Set(allMembers)].filter(v => typeof v === 'string') as string[];
+    const agentNames = leads.map(lead => lead.agentName).filter(Boolean);
+    const allCreators = [...leadManagers, ...agentNames];
+    const uniqueCreators = [...new Set(allCreators)].filter(v => typeof v === 'string') as string[];
+    
+    // Add some default creator options if none exist
+    const defaultCreators = ['John Doe', 'Jane Smith', 'Mike Johnson', 'Sarah Wilson', 'David Chen'];
+    return uniqueCreators.length > 0 ? uniqueCreators : defaultCreators;
   };
 
   // Get unique creation sources
@@ -139,7 +143,10 @@ export function PodioFilterPanel({
 
   // Get unique lead managers
   const getLeadManagers = () => {
-    return getUniqueStringValues('leadManager');
+    const managers = getUniqueStringValues('leadManager');
+    // Add some default manager options if none exist
+    const defaultManagers = ['Sarah Johnson', 'Mike Davis', 'Lisa Chen', 'David Wilson', 'Admin User'];
+    return managers.length > 0 ? managers : defaultManagers;
   };
 
   if (!isOpen) {
@@ -228,9 +235,9 @@ export function PodioFilterPanel({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All</SelectItem>
-                    {getTeamMembers().map((member) => (
-                      <SelectItem key={member} value={member}>
-                        {member}
+                    {getCreatedByOptions().map((creator) => (
+                      <SelectItem key={creator} value={creator}>
+                        {creator}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -304,6 +311,7 @@ export function PodioFilterPanel({
                     <SelectItem value="HOT">🔥 Hot</SelectItem>
                     <SelectItem value="WARM">🌤️ Warm</SelectItem>
                     <SelectItem value="COLD">❄️ Cold</SelectItem>
+                    <SelectItem value="KEEP">✅ Keep</SelectItem>
                     <SelectItem value="PASS">⏭️ Pass</SelectItem>
                   </SelectContent>
                 </Select>

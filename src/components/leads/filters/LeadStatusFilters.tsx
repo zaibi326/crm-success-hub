@@ -18,7 +18,12 @@ const leadStatusOptions = [
   { value: 'interested_follow_up', label: 'Interested - Add to Follow up' },
   { value: 'interested_offer_status', label: 'Interested - Set Offer Status' },
   { value: 'contract_sent_out', label: 'Contract Sent Out - Set Contract Status' },
-  { value: 'in_contract', label: 'In Contract - Set Manually' }
+  { value: 'in_contract', label: 'In Contract - Set Manually' },
+  { value: 'hot', label: '🔥 Hot' },
+  { value: 'warm', label: '🌤️ Warm' },
+  { value: 'cold', label: '❄️ Cold' },
+  { value: 'keep', label: '✅ Keep' },
+  { value: 'pass', label: '⏭️ Pass' }
 ];
 
 export function LeadStatusFilters({ onAddFilter }: FilterComponentProps) {
