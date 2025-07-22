@@ -105,7 +105,6 @@ export function MainContent({
       {/* Enhanced Ownership Section */}
       <EnhancedOwnershipSection
         lead={formData}
-        onInputChange={onInputChange}
         canEdit={canEdit}
         onSave={handleOwnershipSave}
       />
