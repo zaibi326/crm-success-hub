@@ -107,6 +107,11 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
     return heirs.reduce((sum, heir) => sum + heir.percentage, 0);
   };
 
+  const getPrimaryOwnerPercentage = () => {
+    const heirsTotal = getTotalPercentage();
+    return Math.max(0, 100 - heirsTotal);
+  };
+
   const handleSave = () => {
     if (!validateOwnership()) {
       toast({
@@ -135,20 +140,29 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
     return 'bg-gray-500';
   };
 
-  // Create chart data - if no heirs, show sole owner
-  const chartData = heirs.length === 0 
-    ? [{
-        name: lead.ownerName || 'Owner',
-        value: 100,
-        relationship: 'Sole Owner'
-      }]
-    : heirs
-        .filter(heir => heir.percentage > 0 && heir.name.trim())
-        .map(heir => ({
-          name: heir.name,
-          value: heir.percentage,
-          relationship: heir.relationship
-        }));
+  // Create chart data with Primary Owner and Heirs
+  const primaryOwnerPercentage = getPrimaryOwnerPercentage();
+  const chartData = [];
+  
+  // Add Primary Owner if they have ownership
+  if (primaryOwnerPercentage > 0) {
+    chartData.push({
+      name: lead.ownerName || 'Primary Owner',
+      value: primaryOwnerPercentage,
+      relationship: 'Primary Owner'
+    });
+  }
+  
+  // Add Heirs with ownership
+  heirs
+    .filter(heir => heir.percentage > 0 && heir.name.trim())
+    .forEach(heir => {
+      chartData.push({
+        name: heir.name,
+        value: heir.percentage,
+        relationship: heir.relationship
+      });
+    });
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -166,7 +180,7 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
 
   return (
     <div className="space-y-6">
-      {/* Heirs Cards or Sole Owner Display */}
+      {/* Primary Owner and Heirs Cards */}
       <Card className="shadow-lg border-0">
         <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-t-lg">
           <CardTitle className="flex items-center justify-between">
@@ -205,153 +219,164 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
               <Badge 
                 variant="outline" 
                 className={`text-sm font-bold ${
-                  heirs.length === 0 || Math.abs(getTotalPercentage() - 100) < 0.01 
+                  Math.abs(getTotalPercentage() + primaryOwnerPercentage - 100) < 0.01 
                     ? 'border-green-500 text-green-700 bg-green-50' 
                     : 'border-red-500 text-red-700 bg-red-50'
                 }`}
               >
-                {heirs.length === 0 ? '100%' : `${getTotalPercentage().toFixed(1)}%`}
+                100%
               </Badge>
             </div>
           </div>
 
-          {/* Sole Owner Mode or Heirs Grid */}
-          {heirs.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-xl mx-auto mb-4">
-                {getInitials(lead.ownerName || '')}
+          {/* Primary Owner Section */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Primary Owner</h3>
+            <Card className="shadow-sm border border-gray-200">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                      {getInitials(lead.ownerName || '')}
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">{lead.ownerName || 'Owner'}</h4>
+                      <p className="text-sm text-gray-600">Primary Owner</p>
+                    </div>
+                  </div>
+                  <Badge className={`${getPercentageColor(primaryOwnerPercentage)} text-white`}>
+                    {primaryOwnerPercentage.toFixed(1)}%
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Heirs Grid */}
+          {heirs.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Heirs</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {heirs.map((heir, index) => (
+                  <Card key={heir.id} className="shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                    <CardContent className="p-4 space-y-4">
+                      {/* Header with Avatar and Actions */}
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                            {getInitials(heir.name)}
+                          </div>
+                        </div>
+                        
+                        {/* Delete Button */}
+                        {canEdit && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeHeir(heir.id)}
+                            className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 h-auto"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        )}
+                      </div>
+
+                      {/* Heir Details using EditableField */}
+                      <div className="space-y-3">
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium text-gray-600">Name</label>
+                          <EditableField
+                            label=""
+                            value={heir.name}
+                            onSave={(value) => updateHeir(heir.id, 'name', value)}
+                            className="font-semibold text-gray-900"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium text-gray-600">Relationship</label>
+                          <Select
+                            value={heir.relationship}
+                            onValueChange={(value) => updateHeir(heir.id, 'relationship', value)}
+                            disabled={!canEdit}
+                          >
+                            <SelectTrigger className="w-full h-8 text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {RELATIONSHIP_OPTIONS.map(option => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 space-y-1">
+                            <label className="text-xs font-medium text-gray-600">Ownership %</label>
+                            <EditableField
+                              label=""
+                              value={heir.percentage.toString()}
+                              onSave={(value) => updateHeir(heir.id, 'percentage', parseFloat(value) || 0)}
+                              type="text"
+                              className="text-sm"
+                            />
+                          </div>
+                          <Badge className={`${getPercentageColor(heir.percentage)} text-white text-xs mt-5`}>
+                            {heir.percentage}%
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {/* Contact Details */}
+                      <div className="space-y-3 pt-2 border-t border-gray-100">
+                        <div className="flex items-start gap-2">
+                          <MapPin className="w-3 h-3 text-gray-500 mt-1 flex-shrink-0" />
+                          <div className="flex-1">
+                            <label className="text-xs font-medium text-gray-600 block mb-1">Address</label>
+                            <EditableField
+                              label=""
+                              value={heir.propertyAddress}
+                              onSave={(value) => updateHeir(heir.id, 'propertyAddress', value)}
+                              className="text-xs text-gray-600"
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start gap-2">
+                          <Phone className="w-3 h-3 text-gray-500 mt-1 flex-shrink-0" />
+                          <div className="flex-1">
+                            <label className="text-xs font-medium text-gray-600 block mb-1">Phone</label>
+                            <EditableField
+                              label=""
+                              value={heir.phoneNumber}
+                              onSave={(value) => updateHeir(heir.id, 'phoneNumber', value)}
+                              type="tel"
+                              className="text-xs text-gray-600"
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start gap-2">
+                          <Mail className="w-3 h-3 text-gray-500 mt-1 flex-shrink-0" />
+                          <div className="flex-1">
+                            <label className="text-xs font-medium text-gray-600 block mb-1">Email</label>
+                            <EditableField
+                              label=""
+                              value={heir.email}
+                              onSave={(value) => updateHeir(heir.id, 'email', value)}
+                              type="email"
+                              className="text-xs text-gray-600"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {lead.ownerName || 'Owner'}
-              </h3>
-              <Badge className="bg-green-500 text-white mb-2">
-                Sole Owner - 100%
-              </Badge>
-              <p className="text-sm text-gray-600">
-                No heirs added. Owner has full ownership of the property.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-              {heirs.map((heir, index) => (
-                <Card key={heir.id} className="shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                  <CardContent className="p-4 space-y-4">
-                    {/* Header with Avatar and Actions */}
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                          {getInitials(heir.name)}
-                        </div>
-                      </div>
-                      
-                      {/* Delete Button */}
-                      {canEdit && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeHeir(heir.id)}
-                          className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 h-auto"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      )}
-                    </div>
-
-                    {/* Heir Details using EditableField */}
-                    <div className="space-y-3">
-                      <div className="space-y-1">
-                        <label className="text-xs font-medium text-gray-600">Name</label>
-                        <EditableField
-                          label=""
-                          value={heir.name}
-                          onSave={(value) => updateHeir(heir.id, 'name', value)}
-                          className="font-semibold text-gray-900"
-                        />
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-xs font-medium text-gray-600">Relationship</label>
-                        <Select
-                          value={heir.relationship}
-                          onValueChange={(value) => updateHeir(heir.id, 'relationship', value)}
-                          disabled={!canEdit}
-                        >
-                          <SelectTrigger className="w-full h-8 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {RELATIONSHIP_OPTIONS.map(option => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 space-y-1">
-                          <label className="text-xs font-medium text-gray-600">Ownership %</label>
-                          <EditableField
-                            label=""
-                            value={heir.percentage.toString()}
-                            onSave={(value) => updateHeir(heir.id, 'percentage', parseFloat(value) || 0)}
-                            type="text"
-                            className="text-sm"
-                          />
-                        </div>
-                        <Badge className={`${getPercentageColor(heir.percentage)} text-white text-xs mt-5`}>
-                          {heir.percentage}%
-                        </Badge>
-                      </div>
-                    </div>
-
-                    {/* Contact Details */}
-                    <div className="space-y-3 pt-2 border-t border-gray-100">
-                      <div className="flex items-start gap-2">
-                        <MapPin className="w-3 h-3 text-gray-500 mt-1 flex-shrink-0" />
-                        <div className="flex-1">
-                          <label className="text-xs font-medium text-gray-600 block mb-1">Address</label>
-                          <EditableField
-                            label=""
-                            value={heir.propertyAddress}
-                            onSave={(value) => updateHeir(heir.id, 'propertyAddress', value)}
-                            className="text-xs text-gray-600"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start gap-2">
-                        <Phone className="w-3 h-3 text-gray-500 mt-1 flex-shrink-0" />
-                        <div className="flex-1">
-                          <label className="text-xs font-medium text-gray-600 block mb-1">Phone</label>
-                          <EditableField
-                            label=""
-                            value={heir.phoneNumber}
-                            onSave={(value) => updateHeir(heir.id, 'phoneNumber', value)}
-                            type="tel"
-                            className="text-xs text-gray-600"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start gap-2">
-                        <Mail className="w-3 h-3 text-gray-500 mt-1 flex-shrink-0" />
-                        <div className="flex-1">
-                          <label className="text-xs font-medium text-gray-600 block mb-1">Email</label>
-                          <EditableField
-                            label=""
-                            value={heir.email}
-                            onSave={(value) => updateHeir(heir.id, 'email', value)}
-                            type="email"
-                            className="text-xs text-gray-600"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
             </div>
           )}
 
