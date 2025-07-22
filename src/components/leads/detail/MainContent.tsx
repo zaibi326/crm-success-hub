@@ -106,7 +106,7 @@ export function MainContent({
           />
 
           <SimplifiedOwnershipSection 
-            lead={formData}
+            leadData={formData}
             onFieldUpdate={onInputChange}
             canEdit={canEdit}
           />

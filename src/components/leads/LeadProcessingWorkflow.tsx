@@ -1,25 +1,23 @@
 
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { 
   CheckCircle, 
-  XCircle, 
-  User, 
-  Phone, 
-  Mail, 
-  MapPin,
+  Clock, 
+  AlertCircle, 
   FileText,
-  Calendar,
-  DollarSign
+  Users,
+  ChevronRight
 } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
 
 interface LeadProcessingWorkflowProps {
   leads: TaxLead[];
   onLeadUpdate: (updatedLead: TaxLead) => void;
-  onLeadProcessed: (leadId: number, action: 'keep' | 'pass') => void;
+  onLeadProcessed?: (lead: TaxLead) => void;
   onComplete?: () => void;
 }
 
@@ -29,209 +27,185 @@ export function LeadProcessingWorkflow({
   onLeadProcessed,
   onComplete 
 }: LeadProcessingWorkflowProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [processedCount, setProcessedCount] = useState(0);
-  
-  // Filter leads to only show unprocessed ones
-  const unprocessedLeads = leads.filter(lead => 
-    lead.disposition === 'UNDECIDED' || !lead.disposition
-  );
-  
-  const currentLead = unprocessedLeads[currentIndex];
-  
-  const handleAction = (action: 'keep' | 'pass') => {
+  const [currentLeadIndex, setCurrentLeadIndex] = useState(0);
+  const [processedLeads, setProcessedLeads] = useState<Set<number>>(new Set());
+
+  const currentLead = leads[currentLeadIndex];
+  const progress = (processedLeads.size / leads.length) * 100;
+
+  const handleLeadDecision = (decision: 'keep' | 'pass', reason?: string) => {
     if (!currentLead) return;
     
     const updatedLead: TaxLead = {
       ...currentLead,
-      disposition: action === 'keep' ? 'QUALIFIED' : 'DISQUALIFIED',
-      status: action === 'keep' ? 'KEEP' : 'PASS'
+      status: decision === 'keep' ? 'KEEP' : 'PASS',
+      disposition: decision === 'keep' ? 'QUALIFIED' : 'DISQUALIFIED',
+      notes: reason ? `${currentLead.notes || ''}\n\nDecision: ${reason}` : currentLead.notes
     };
     
     onLeadUpdate(updatedLead);
-    onLeadProcessed(currentLead.id, action);
+    if (onLeadProcessed) {
+      onLeadProcessed(updatedLead);
+    }
     
-    setProcessedCount(prev => prev + 1);
+    setProcessedLeads(prev => new Set(prev).add(currentLead.id));
     
-    // Move to next lead
-    if (currentIndex < unprocessedLeads.length - 1) {
-      setCurrentIndex(prev => prev + 1);
+    if (currentLeadIndex < leads.length - 1) {
+      setCurrentLeadIndex(prev => prev + 1);
     } else if (onComplete) {
       onComplete();
     }
   };
 
-  const goToNext = () => {
-    if (currentIndex < unprocessedLeads.length - 1) {
-      setCurrentIndex(prev => prev + 1);
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'HOT':
+        return <Badge className="bg-red-100 text-red-800">🔥 Hot</Badge>;
+      case 'WARM':
+        return <Badge className="bg-yellow-100 text-yellow-800">☀️ Warm</Badge>;
+      case 'COLD':
+        return <Badge className="bg-blue-100 text-blue-800">❄️ Cold</Badge>;
+      case 'KEEP':
+        return <Badge className="bg-green-100 text-green-800">✅ Keep</Badge>;
+      case 'PASS':
+        return <Badge className="bg-gray-100 text-gray-800">❌ Pass</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
 
-  const goToPrevious = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
-    }
-  };
-
-  if (unprocessedLeads.length === 0) {
+  if (!currentLead) {
     return (
-      <Card className="w-full max-w-4xl mx-auto">
-        <CardContent className="text-center py-12">
+      <Card>
+        <CardContent className="p-8 text-center">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2">All Leads Processed!</h2>
-          <p className="text-gray-600">
-            You have processed all available leads. Great work!
-          </p>
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">Processing Complete!</h3>
+          <p className="text-gray-600">All leads have been processed successfully.</p>
         </CardContent>
       </Card>
     );
   }
 
-  const progressPercentage = ((currentIndex + 1) / unprocessedLeads.length) * 100;
-
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Progress Header */}
       <Card>
-        <CardContent className="py-6">
-          <div className="flex items-center justify-between mb-4">
+        <CardHeader>
+          <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold">Lead Processing Workflow</h2>
-              <p className="text-gray-600">
-                Review lead {currentIndex + 1} of {unprocessedLeads.length}
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                Lead Processing Workflow
+              </CardTitle>
+              <p className="text-sm text-gray-600 mt-1">
+                Processing lead {currentLeadIndex + 1} of {leads.length}
               </p>
             </div>
             <div className="text-right">
-              <div className="text-sm text-gray-500">Progress</div>
-              <div className="text-2xl font-bold">{Math.round(progressPercentage)}%</div>
+              <div className="text-2xl font-bold text-blue-600">
+                {Math.round(progress)}%
+              </div>
+              <p className="text-sm text-gray-600">Complete</p>
             </div>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-crm-primary h-2 rounded-full transition-all duration-300"
-              style={{ width: `${progressPercentage}%` }}
-            />
-          </div>
-        </CardContent>
+          <Progress value={progress} className="mt-4" />
+        </CardHeader>
       </Card>
 
-      {/* Lead Details Card */}
+      {/* Current Lead Details */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="w-5 h-5" />
-            {currentLead.ownerName}
-            <Badge variant="outline" className="ml-auto">
-              {currentLead.status}
-            </Badge>
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-xl">{currentLead.ownerName}</CardTitle>
+              <p className="text-gray-600">{currentLead.propertyAddress}</p>
+            </div>
+            {getStatusBadge(currentLead.status)}
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Contact Information */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg mb-3">Contact Information</h3>
-              
-              {currentLead.phone && (
-                <div className="flex items-center gap-3">
-                  <Phone className="w-4 h-4 text-gray-500" />
-                  <span>{currentLead.phone}</span>
-                </div>
-              )}
-              
-              {currentLead.email && (
-                <div className="flex items-center gap-3">
-                  <Mail className="w-4 h-4 text-gray-500" />
-                  <span>{currentLead.email}</span>
-                </div>
-              )}
-              
-              <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-gray-500 mt-1" />
-                <span>{currentLead.propertyAddress}</span>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <p className="text-sm font-medium text-gray-700">Tax ID</p>
+              <p className="text-sm text-gray-900">{currentLead.taxId}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-700">Arrears</p>
+              <p className="text-sm text-gray-900">
+                {currentLead.currentArrears ? `$${currentLead.currentArrears.toLocaleString()}` : 'N/A'}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-700">Phone</p>
+              <p className="text-sm text-gray-900">{currentLead.phone || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-700">Email</p>
+              <p className="text-sm text-gray-900">{currentLead.email || 'N/A'}</p>
+            </div>
+          </div>
+
+          {currentLead.notes && (
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">Notes</p>
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-sm text-gray-800">{currentLead.notes}</p>
               </div>
             </div>
-
-            {/* Property Information */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg mb-3">Property Details</h3>
-              
-              {currentLead.taxId && (
-                <div className="flex items-center gap-3">
-                  <FileText className="w-4 h-4 text-gray-500" />
-                  <span>Tax ID: {currentLead.taxId}</span>
-                </div>
-              )}
-              
-              {currentLead.currentArrears && (
-                <div className="flex items-center gap-3">
-                  <DollarSign className="w-4 h-4 text-gray-500" />
-                  <span>Arrears: ${currentLead.currentArrears.toLocaleString()}</span>
-                </div>
-              )}
-              
-              {currentLead.taxLawsuitNumber && (
-                <div className="flex items-center gap-3">
-                  <FileText className="w-4 h-4 text-gray-500" />
-                  <span>Lawsuit #: {currentLead.taxLawsuitNumber}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Notes */}
-          {currentLead.notes && (
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-              <h4 className="font-semibold mb-2">Notes</h4>
-              <p className="text-sm text-gray-700">{currentLead.notes}</p>
-            </div>
           )}
-        </CardContent>
-      </Card>
 
-      {/* Action Buttons */}
-      <Card>
-        <CardContent className="py-6">
-          <div className="flex items-center justify-between">
+          {/* Decision Buttons */}
+          <div className="flex gap-4 pt-4 border-t">
             <Button
-              variant="outline"
-              onClick={goToPrevious}
-              disabled={currentIndex === 0}
+              onClick={() => handleLeadDecision('keep')}
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
             >
-              Previous Lead
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Keep Lead
             </Button>
-
-            <div className="flex gap-4">
-              <Button
-                variant="destructive"
-                size="lg"
-                onClick={() => handleAction('pass')}
-                className="flex items-center gap-2"
-              >
-                <XCircle className="w-5 h-5" />
-                Pass
-              </Button>
-              
-              <Button
-                size="lg"
-                onClick={() => handleAction('keep')}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
-              >
-                <CheckCircle className="w-5 h-5" />
-                Keep
-              </Button>
-            </div>
-
             <Button
+              onClick={() => handleLeadDecision('pass', 'Not qualified during review')}
               variant="outline"
-              onClick={goToNext}
-              disabled={currentIndex === unprocessedLeads.length - 1}
+              className="flex-1 border-red-300 text-red-700 hover:bg-red-50"
             >
-              Next Lead
+              <AlertCircle className="w-4 h-4 mr-2" />
+              Pass on Lead
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Quick Stats */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-blue-600">{leads.length}</div>
+            <p className="text-sm text-gray-600">Total Leads</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-green-600">
+              {Array.from(processedLeads).filter(id => {
+                const lead = leads.find(l => l.id === id);
+                return lead?.status === 'KEEP';
+              }).length}
+            </div>
+            <p className="text-sm text-gray-600">Kept</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-red-600">
+              {Array.from(processedLeads).filter(id => {
+                const lead = leads.find(l => l.id === id);
+                return lead?.status === 'PASS';
+              }).length}
+            </div>
+            <p className="text-sm text-gray-600">Passed</p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
