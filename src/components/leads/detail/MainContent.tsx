@@ -7,8 +7,8 @@ import { EditableFieldsSection } from './EditableFieldsSection';
 import { ConditionalFieldsSection } from './ConditionalFieldsSection';
 import { EnhancedSellerContactSection } from './EnhancedSellerContactSection';
 import { EnhancedAdditionalInfoSection } from './EnhancedAdditionalInfoSection';
-import { SimplifiedOwnershipSection } from './SimplifiedOwnershipSection';
 import { EnhancedOwnershipSection } from './EnhancedOwnershipSection';
+import { AttachmentsSection } from './AttachmentsSection';
 
 interface UploadedFile {
   id: string;
@@ -111,11 +111,14 @@ export function MainContent({
             canEdit={canEdit}
           />
 
-          {/* Simplified Ownership Section for basic property details */}
-          <SimplifiedOwnershipSection 
-            leadData={formData}
-            onFieldUpdate={onInputChange}
+          {/* Attachments Section */}
+          <AttachmentsSection
+            files={files}
+            onRemoveFile={onRemoveFile}
+            onFileUpload={onFileUpload}
             canEdit={canEdit}
+            title="Lead Attachments"
+            description="Upload documents related to this lead"
           />
 
           <NotesSection
