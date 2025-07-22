@@ -45,12 +45,13 @@ export interface TaxLead {
   grantorGranteeName?: string;
   ownerOfRecord?: string;
   
-  // Attachments
+  // Attachments - Updated with size property
   attachedFiles?: Array<{
     id: string;
     name: string;
     type: string;
     url: string;
     preview?: string;
+    size?: number;
   }>;
 }

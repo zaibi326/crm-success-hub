@@ -2,500 +2,243 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { Users, Plus, Trash2, Phone, Mail, MapPin, AlertTriangle, Save } from 'lucide-react';
+import { 
+  Home, 
+  Calendar,
+  FileText,
+  ChevronDown,
+  ChevronUp,
+  Save
+} from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useToast } from '@/hooks/use-toast';
-import { InlineEditField } from './InlineEditField';
-
-interface Heir {
-  id: string;
-  name: string;
-  relationship: string;
-  percentage: number;
-  propertyAddress: string;
-  phoneNumber: string;
-  email: string;
-  saved?: boolean;
-}
 
 interface SimplifiedOwnershipSectionProps {
-  lead: TaxLead;
-  onFieldUpdate: (field: keyof TaxLead, value: string) => void;
-  canEdit?: boolean;
+  leadData: TaxLead;
+  onFieldUpdate: (field: keyof TaxLead, value: string | number | boolean) => void;
+  canEdit: boolean;
 }
 
-const RELATIONSHIP_OPTIONS = [
-  { value: 'Mother', label: 'Mother' },
-  { value: 'Father', label: 'Father' },
-  { value: 'Son', label: 'Son' },
-  { value: 'Daughter', label: 'Daughter' },
-  { value: 'Brother', label: 'Brother' },
-  { value: 'Sister', label: 'Sister' },
-  { value: 'Husband', label: 'Husband' },
-  { value: 'Wife', label: 'Wife' },
-  { value: 'Grandfather', label: 'Grandfather' },
-  { value: 'Grandmother', label: 'Grandmother' },
-  { value: 'Uncle', label: 'Uncle' },
-  { value: 'Aunt', label: 'Aunt' },
-  { value: 'Cousin', label: 'Cousin' },
-  { value: 'Other', label: 'Other' }
-];
-
-const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
-
-export function SimplifiedOwnershipSection({ lead, onFieldUpdate, canEdit = true }: SimplifiedOwnershipSectionProps) {
-  const [heirs, setHeirs] = useState<Heir[]>([]);
+export function SimplifiedOwnershipSection({ 
+  leadData, 
+  onFieldUpdate, 
+  canEdit 
+}: SimplifiedOwnershipSectionProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [localData, setLocalData] = useState({
+    ownerOfRecord: leadData.ownerOfRecord || '',
+    vestingDeedDate: leadData.vestingDeedDate || '',
+    grantorGranteeName: leadData.grantorGranteeName || '',
+    occupancyStatus: leadData.occupancyStatus || 'UNKNOWN'
+  });
   const { toast } = useToast();
 
-  const addHeir = () => {
-    const newHeir: Heir = {
-      id: Date.now().toString(),
-      name: '',
-      relationship: 'Other',
-      percentage: 0,
-      propertyAddress: '',
-      phoneNumber: '',
-      email: '',
-      saved: false
-    };
-    setHeirs(prev => [...prev, newHeir]);
+  const handleLocalUpdate = (field: string, value: string) => {
+    setLocalData(prev => ({ ...prev, [field]: value }));
+    setHasChanges(true);
   };
 
-  const removeHeir = (id: string) => {
-    setHeirs(prev => prev.filter(heir => heir.id !== id));
-  };
+  const handleSave = () => {
+    if (!hasChanges) return;
 
-  const updateHeir = (id: string, field: keyof Heir, value: string | number) => {
-    setHeirs(prev => prev.map(heir => 
-      heir.id === id ? { ...heir, [field]: value, saved: false } : heir
-    ));
-  };
+    Object.entries(localData).forEach(([field, value]) => {
+      onFieldUpdate(field as keyof TaxLead, value);
+    });
 
-  const saveHeir = (id: string) => {
-    const heir = heirs.find(h => h.id === id);
-    if (!heir || !heir.name || heir.percentage <= 0) {
-      toast({
-        title: "Validation Error",
-        description: "Please enter heir name and percentage before saving",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setHeirs(prev => prev.map(h => 
-      h.id === id ? { ...h, saved: true } : h
-    ));
-
+    setHasChanges(false);
     toast({
-      title: "Heir Saved",
-      description: `${heir.name} has been saved successfully`,
+      title: "Ownership Details Saved",
+      description: "Property ownership information has been updated successfully",
     });
   };
 
-  const getTotalHeirsPercentage = () => {
-    return heirs.filter(h => h.saved).reduce((sum, heir) => sum + heir.percentage, 0);
-  };
-
-  const getOwnerPercentage = () => {
-    const heirsTotal = getTotalHeirsPercentage();
-    return Math.max(0, 100 - heirsTotal);
-  };
-
-  const getTotalPercentage = () => {
-    return getTotalHeirsPercentage() + getOwnerPercentage();
-  };
-
-  const getValidationMessage = () => {
-    const total = getTotalPercentage();
-    if (total > 100) {
-      return `Total ownership is ${total.toFixed(1)}%. Cannot exceed 100%`;
+  const getOccupancyBadgeColor = (status: string) => {
+    switch (status) {
+      case 'OWNER_OCCUPIED': return 'bg-green-100 text-green-800 border-green-200';
+      case 'TENANT_OCCUPIED': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'VACANT': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'UNKNOWN': return 'bg-gray-100 text-gray-800 border-gray-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
-    return null;
   };
 
-  const getInitials = (name: string) => {
-    return name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '??';
-  };
-
-  const getPercentageColor = (percentage: number) => {
-    if (percentage >= 50) return 'bg-green-500';
-    if (percentage >= 25) return 'bg-blue-500';
-    if (percentage >= 10) return 'bg-amber-500';
-    return 'bg-gray-500';
-  };
-
-  const hasUnsavedChanges = () => {
-    return heirs.some(h => !h.saved && (h.name || h.percentage > 0));
-  };
-
-  // Create chart data with owner and saved heirs
-  const chartData = [
-    // Owner data (only if they have ownership)
-    ...(getOwnerPercentage() > 0 ? [{
-      name: lead.ownerName || 'Owner',
-      value: getOwnerPercentage(),
-      relationship: 'Primary Owner'
-    }] : []),
-    // Saved heirs data (only those with percentage > 0)
-    ...heirs
-      .filter(heir => heir.saved && heir.percentage > 0 && heir.name.trim())
-      .map(heir => ({
-        name: heir.name,
-        value: heir.percentage,
-        relationship: heir.relationship
-      }))
-  ];
-
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-white p-3 border rounded shadow-lg">
-          <p className="font-semibold">{data.name}</p>
-          <p className="text-sm text-gray-600">{data.relationship}</p>
-          <p className="text-sm font-medium">{data.value.toFixed(1)}%</p>
-        </div>
-      );
-    }
-    return null;
+  const formatOccupancyLabel = (status: string) => {
+    return status.replace('_', ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
   };
 
   return (
-    <div className="space-y-6">
-      {/* Heirs & Ownership Details Card */}
-      <Card className="shadow-lg border-0">
-        <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-t-lg">
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-3 text-xl">
-              <Users className="w-6 h-6 text-purple-600" />
-              Heirs & Ownership Details
-            </div>
-            {canEdit && (
-              <Button onClick={addHeir} size="sm" className="bg-purple-600 hover:bg-purple-700">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Heir
-              </Button>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          {/* Validation Alert */}
-          {getValidationMessage() && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <div className="flex items-center gap-2 text-red-700">
-                <AlertTriangle className="w-4 h-4" />
-                <span className="font-medium">{getValidationMessage()}</span>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
+        <CollapsibleTrigger asChild>
+          <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors rounded-t-lg pb-4">
+            <CardTitle className="flex items-center justify-between text-lg font-semibold text-gray-900">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Home className="w-4 h-4 text-blue-600" />
+                </div>
+                <div>
+                  <span>Property Ownership Details</span>
+                  <p className="text-sm text-gray-500 font-normal mt-1">
+                    Owner information and property occupancy status
+                  </p>
+                </div>
+                {hasChanges && (
+                  <span className="text-sm text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
+                    Unsaved changes
+                  </span>
+                )}
               </div>
-            </div>
-          )}
-
-          {/* Total Percentage Display */}
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700">Total Ownership:</span>
-              <Badge 
-                variant="outline" 
-                className={`text-sm font-bold ${
-                  Math.abs(getTotalPercentage() - 100) < 0.01 
-                    ? 'border-green-500 text-green-700 bg-green-50' 
-                    : 'border-red-500 text-red-700 bg-red-50'
-                }`}
-              >
-                {getTotalPercentage().toFixed(1)}%
-              </Badge>
-            </div>
-          </div>
-
-          {/* Primary Owner Card (always show if they have ownership) */}
-          {getOwnerPercentage() > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3 text-gray-900">Primary Owner</h3>
-              <Card className="shadow-sm border border-gray-200">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                        {getInitials(lead.ownerName || '')}
-                      </div>
-                      <div>
-                        <div className="text-lg font-semibold text-gray-900">
-                          {lead.ownerName || 'Owner'}
-                        </div>
-                        <div className="text-sm text-gray-600">Primary Owner</div>
-                      </div>
-                    </div>
-                    <Badge className={`${getPercentageColor(getOwnerPercentage())} text-white`}>
-                      {getOwnerPercentage().toFixed(1)}%
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {/* Saved Heirs Display (Vertical format like Primary Owner) */}
-          {heirs.filter(h => h.saved).length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3 text-gray-900">Heirs</h3>
-              <div className="space-y-3">
-                {heirs.filter(h => h.saved).map((heir) => (
-                  <Card key={heir.id} className="shadow-sm border border-gray-200">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                            {getInitials(heir.name)}
-                          </div>
-                          <div>
-                            <div className="text-lg font-semibold text-gray-900">
-                              {heir.name}
-                            </div>
-                            <div className="text-sm text-gray-600">{heir.relationship}</div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge className={`${getPercentageColor(heir.percentage)} text-white`}>
-                            {heir.percentage}%
-                          </Badge>
-                          {canEdit && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeHeir(heir.id)}
-                              className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 h-auto"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {/* Contact Details */}
-                      {(heir.propertyAddress || heir.phoneNumber || heir.email) && (
-                        <div className="space-y-2 text-sm text-gray-600 pl-15">
-                          {heir.propertyAddress && (
-                            <div className="flex items-center gap-2">
-                              <MapPin className="w-4 h-4" />
-                              <span>{heir.propertyAddress}</span>
-                            </div>
-                          )}
-                          {heir.phoneNumber && (
-                            <div className="flex items-center gap-2">
-                              <Phone className="w-4 h-4" />
-                              <span>{heir.phoneNumber}</span>
-                            </div>
-                          )}
-                          {heir.email && (
-                            <div className="flex items-center gap-2">
-                              <Mail className="w-4 h-4" />
-                              <span>{heir.email}</span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
+              
+              <div className="flex items-center gap-3">
+                <Badge className={getOccupancyBadgeColor(localData.occupancyStatus)}>
+                  {formatOccupancyLabel(localData.occupancyStatus)}
+                </Badge>
+                {isOpen ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
               </div>
-            </div>
-          )}
-
-          {/* Editable Heirs Cards (Unsaved) */}
-          {heirs.filter(h => !h.saved).length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold mb-3 text-gray-900">Add New Heirs</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {heirs.filter(h => !h.saved).map((heir) => (
-                  <Card key={heir.id} className="shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                    <CardContent className="p-4 space-y-4">
-                      {/* Header with Avatar and Actions */}
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                            {getInitials(heir.name)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm">
-                              <InlineEditField 
-                                label=""
-                                value={heir.name}
-                                onSave={(value) => updateHeir(heir.id, 'name', value)}
-                                placeholder="Enter name"
-                                className="font-semibold text-gray-900"
-                              />
-                            </div>
-                            <div className="text-xs text-gray-600 mt-1">
-                              <InlineEditField 
-                                label=""
-                                value={heir.relationship}
-                                onSave={(value) => updateHeir(heir.id, 'relationship', value)}
-                                type="select"
-                                options={RELATIONSHIP_OPTIONS}
-                                placeholder="Select relationship"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        
-                        {/* Delete Button */}
-                        {canEdit && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeHeir(heir.id)}
-                            className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 h-auto"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        )}
-                      </div>
-
-                      {/* Percentage Field */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-600">Ownership %:</span>
-                        <div className="flex-1">
-                          <InlineEditField 
-                            label=""
-                            value={heir.percentage.toString()}
-                            onSave={(value) => updateHeir(heir.id, 'percentage', parseFloat(value) || 0)}
-                            type="number"
-                            placeholder="0"
-                            className="text-sm"
-                          />
-                        </div>
-                        <Badge className={`${getPercentageColor(heir.percentage)} text-white text-xs`}>
-                          {heir.percentage}%
-                        </Badge>
-                      </div>
-
-                      {/* Contact Details */}
-                      <div className="space-y-3 text-xs">
-                        <div className="flex items-center gap-2 text-gray-600">
-                          <MapPin className="w-3 h-3 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <InlineEditField 
-                              label=""
-                              value={heir.propertyAddress}
-                              onSave={(value) => updateHeir(heir.id, 'propertyAddress', value)}
-                              placeholder="Property address"
-                              className="text-xs"
-                            />
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2 text-gray-600">
-                          <Phone className="w-3 h-3 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <InlineEditField 
-                              label=""
-                              value={heir.phoneNumber}
-                              onSave={(value) => updateHeir(heir.id, 'phoneNumber', value)}
-                              type="tel"
-                              placeholder="Phone number"
-                              className="text-xs"
-                            />
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2 text-gray-600">
-                          <Mail className="w-3 h-3 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <InlineEditField 
-                              label=""
-                              value={heir.email}
-                              onSave={(value) => updateHeir(heir.id, 'email', value)}
-                              type="email"
-                              placeholder="Email address"
-                              className="text-xs"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Save Button */}
-                      {canEdit && (heir.name || heir.percentage > 0) && (
-                        <Button 
-                          onClick={() => saveHeir(heir.id)}
-                          size="sm"
-                          className="w-full bg-green-600 hover:bg-green-700"
-                        >
-                          <Save className="w-4 h-4 mr-2" />
-                          Save Heir
-                        </Button>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* No Heirs State */}
-          {heirs.length === 0 && (
-            <div className="text-center py-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-xl mx-auto mb-4">
-                {getInitials(lead.ownerName || '')}
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {lead.ownerName || 'Owner'}
-              </h3>
-              <Badge className="bg-green-500 text-white mb-2">
-                Sole Owner - 100%
-              </Badge>
-              <p className="text-sm text-gray-600">
-                No heirs added. Owner has full ownership of the property.
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Ownership Distribution Chart */}
-      {chartData.length > 0 && (
-        <Card className="shadow-lg border-0">
-          <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-t-lg">
-            <CardTitle className="flex items-center gap-3 text-xl">
-              <div className="w-6 h-6 bg-emerald-600 rounded flex items-center justify-center">
-                <Users className="w-4 h-4 text-white" />
-              </div>
-              Ownership Distribution
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={120}
-                    paddingAngle={2}
-                    dataKey="value"
-                    animationBegin={0}
-                    animationDuration={800}
-                  >
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend 
-                    formatter={(value, entry) => (
-                      <span style={{ color: entry.color }}>
-                        {value} ({entry.payload?.value?.toFixed(1)}%)
-                      </span>
-                    )}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent>
+          <CardContent className="p-6 pt-0 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Owner of Record */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-gray-500" />
+                  Owner of Record
+                </Label>
+                <Input
+                  value={localData.ownerOfRecord}
+                  onChange={(e) => handleLocalUpdate('ownerOfRecord', e.target.value)}
+                  placeholder="Enter owner of record name"
+                  disabled={!canEdit}
+                  className="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                />
+                <p className="text-xs text-gray-500">
+                  Legal owner name as recorded in public records
+                </p>
+              </div>
+
+              {/* Occupancy Status */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Home className="w-4 h-4 text-gray-500" />
+                  Occupancy Status
+                </Label>
+                <Select
+                  value={localData.occupancyStatus}
+                  onValueChange={(value) => handleLocalUpdate('occupancyStatus', value)}
+                  disabled={!canEdit}
+                >
+                  <SelectTrigger className="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                    <SelectValue placeholder="Select occupancy status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="OWNER_OCCUPIED">Owner Occupied</SelectItem>
+                    <SelectItem value="TENANT_OCCUPIED">Tenant Occupied</SelectItem>
+                    <SelectItem value="VACANT">Vacant</SelectItem>
+                    <SelectItem value="UNKNOWN">Unknown</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-500">
+                  Current occupancy status of the property
+                </p>
+              </div>
+
+              {/* Vesting Deed Date */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-gray-500" />
+                  Vesting Deed Date
+                </Label>
+                <Input
+                  type="date"
+                  value={localData.vestingDeedDate}
+                  onChange={(e) => handleLocalUpdate('vestingDeedDate', e.target.value)}
+                  disabled={!canEdit}
+                  className="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                />
+                <p className="text-xs text-gray-500">
+                  Date when the property was vested to current owner
+                </p>
+              </div>
+
+              {/* Grantor/Grantee Name */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-gray-500" />
+                  Grantor/Grantee Name
+                </Label>
+                <Input
+                  value={localData.grantorGranteeName}
+                  onChange={(e) => handleLocalUpdate('grantorGranteeName', e.target.value)}
+                  placeholder="Enter grantor/grantee name"
+                  disabled={!canEdit}
+                  className="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                />
+                <p className="text-xs text-gray-500">
+                  Name of the party transferring/receiving the property
+                </p>
+              </div>
+            </div>
+
+            {/* Save Button */}
+            {canEdit && hasChanges && (
+              <div className="flex justify-end pt-4 border-t border-gray-200">
+                <Button
+                  onClick={handleSave}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 flex items-center gap-2"
+                >
+                  <Save className="w-4 h-4" />
+                  Save Ownership Details
+                </Button>
+              </div>
+            )}
+
+            {/* Information Summary */}
+            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">Property Overview</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-gray-600">Current Owner:</span>
+                  <span className="ml-2 font-medium text-gray-900">
+                    {localData.ownerOfRecord || leadData.ownerName || 'Not specified'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Occupancy:</span>
+                  <span className="ml-2 font-medium text-gray-900">
+                    {formatOccupancyLabel(localData.occupancyStatus)}
+                  </span>
+                </div>
+                {localData.vestingDeedDate && (
+                  <div>
+                    <span className="text-gray-600">Vested:</span>
+                    <span className="ml-2 font-medium text-gray-900">
+                      {new Date(localData.vestingDeedDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+                {localData.grantorGranteeName && (
+                  <div>
+                    <span className="text-gray-600">From/To:</span>
+                    <span className="ml-2 font-medium text-gray-900">
+                      {localData.grantorGranteeName}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
-        </Card>
-      )}
-    </div>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
   );
 }

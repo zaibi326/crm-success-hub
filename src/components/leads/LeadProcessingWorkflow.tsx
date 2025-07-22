@@ -20,12 +20,14 @@ interface LeadProcessingWorkflowProps {
   leads: TaxLead[];
   onLeadUpdate: (updatedLead: TaxLead) => void;
   onLeadProcessed: (leadId: number, action: 'keep' | 'pass') => void;
+  onComplete?: () => void;
 }
 
 export function LeadProcessingWorkflow({ 
   leads, 
   onLeadUpdate, 
-  onLeadProcessed 
+  onLeadProcessed,
+  onComplete 
 }: LeadProcessingWorkflowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [processedCount, setProcessedCount] = useState(0);
@@ -54,6 +56,8 @@ export function LeadProcessingWorkflow({
     // Move to next lead
     if (currentIndex < unprocessedLeads.length - 1) {
       setCurrentIndex(prev => prev + 1);
+    } else if (onComplete) {
+      onComplete();
     }
   };
 

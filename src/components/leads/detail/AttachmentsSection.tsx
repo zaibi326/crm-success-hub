@@ -52,12 +52,20 @@ export function AttachmentsSection({
 
   const handleAddPdfLink = () => {
     if (!pdfUrl.trim()) {
-      toast.error('Please enter a valid PDF URL');
+      toast({
+        title: "Error",
+        description: "Please enter a valid PDF URL",
+        variant: "destructive",
+      });
       return;
     }
 
     if (!pdfUrl.includes('http')) {
-      toast.error('Please enter a valid URL starting with http:// or https://');
+      toast({
+        title: "Error", 
+        description: "Please enter a valid URL starting with http:// or https://",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -82,7 +90,10 @@ export function AttachmentsSection({
       onFileUpload(pendingFiles, 'other');
       setPendingFiles([]);
       setHasChanges(false);
-      toast.success(`${pendingFiles.length} file(s) uploaded successfully`);
+      toast({
+        title: "Success",
+        description: `${pendingFiles.length} file(s) uploaded successfully`,
+      });
     }
   };
 

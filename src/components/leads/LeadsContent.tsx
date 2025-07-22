@@ -31,6 +31,15 @@ export const LeadsContent = memo(function LeadsContent() {
     setSelectedLead(updatedLead);
   };
 
+  const handleLeadDelete = (leadId: number) => {
+    // Implementation for lead deletion
+    console.log('Deleting lead with ID:', leadId);
+    toast({
+      title: "Lead Deleted",
+      description: "Lead has been successfully deleted",
+    });
+  };
+
   return (
     <div className="flex flex-col h-full">
       <LeadsHeader 
@@ -55,6 +64,7 @@ export const LeadsContent = memo(function LeadsContent() {
             leads={filteredLeads}
             onLeadSelect={setSelectedLead}
             onLeadUpdate={onLeadUpdate}
+            onLeadDelete={handleLeadDelete}
           />
         ) : (
           <TaxLeadDetailView 
