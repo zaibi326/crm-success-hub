@@ -3,12 +3,12 @@ import React from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/dashboard/AppSidebar';
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
-import { RoleBasedSettings } from '@/components/settings/RoleBasedSettings';
+import RoleBasedSettings from '@/components/settings/RoleBasedSettings';
 
 const Settings = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-crm-gradient-start via-white to-crm-gradient-end">
-      <SidebarProvider>
+    <SidebarProvider>
+      <div className="min-h-screen bg-gradient-to-br from-crm-gradient-start via-white to-crm-gradient-end">
         <div className="min-h-screen flex w-full">
           <AppSidebar />
           <SidebarInset className="flex-1 overflow-auto bg-gradient-to-br from-crm-gradient-start via-white to-crm-gradient-end">
@@ -23,12 +23,12 @@ const Settings = () => {
             </header>
             
             <main className="p-6">
-              <RoleBasedSettings />
+              <RoleBasedSettings userRole="Employee" />
             </main>
           </SidebarInset>
         </div>
-      </SidebarProvider>
-    </div>
+      </div>
+    </SidebarProvider>
   );
 };
 
