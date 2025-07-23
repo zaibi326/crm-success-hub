@@ -9,6 +9,7 @@ interface UploadedFile {
   name: string;
   type: string;
   url: string;
+  size?: number;
   category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities';
 }
 
@@ -27,6 +28,9 @@ export function Sidebar({
   onRemoveFile,
   onFileUpload
 }: SidebarProps) {
+  // Filter files for general attachments (exclude vesting_deed which is handled separately)
+  const generalFiles = files.filter(file => file.category !== 'vesting_deed');
+
   return (
     <div className="space-y-6">
       {/* Lead Summary Card */}
@@ -48,21 +52,25 @@ export function Sidebar({
               <span className="font-medium">2 hours ago</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Files:</span>
+              <span className="text-gray-600">Total Files:</span>
               <span className="font-medium">{files.length}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Documents:</span>
+              <span className="font-medium">{generalFiles.length}</span>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Attachments Section - Below Lead Summary */}
+      {/* Lead Documents - Attachment Section */}
       <AttachmentsSection
-        files={files}
+        files={generalFiles}
         onRemoveFile={onRemoveFile}
         onFileUpload={onFileUpload}
         canEdit={canEdit}
-        title="Attachments"
-        description="Upload documents related to this lead"
+        title="Lead Documents"
+        description="Attach multiple PDF/image files (e.g., title deeds, legal docs, correspondence)"
       />
     </div>
   );
