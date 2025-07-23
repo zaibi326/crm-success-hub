@@ -7,6 +7,7 @@ export interface RealUser {
   email: string;
   first_name?: string;
   last_name?: string;
+  role: 'Admin' | 'Manager' | 'Lead Manager' | 'Employee' | 'Guest';
   display_name: string;
 }
 
@@ -16,7 +17,7 @@ export function useRealUsers() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, email, first_name, last_name')
+        .select('id, email, first_name, last_name, role')
         .order('first_name', { ascending: true });
 
       if (error) {
@@ -26,6 +27,7 @@ export function useRealUsers() {
 
       return (data || []).map((user): RealUser => ({
         ...user,
+        role: user.role || 'Employee',
         display_name: user.first_name && user.last_name 
           ? `${user.first_name} ${user.last_name}`
           : user.email

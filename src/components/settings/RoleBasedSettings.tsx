@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Crown, Users, Settings, BarChart3, Shield, UserCheck, Target } from 'lucide-react';
 
 interface RoleBasedSettingsProps {
-  userRole: 'Admin' | 'Manager' | 'Lead Manager' | 'Employee';
+  userRole: 'Admin' | 'Manager' | 'Lead Manager' | 'Employee' | 'Guest';
 }
 
 const RoleBasedSettings: React.FC<RoleBasedSettingsProps> = ({ userRole }) => {
@@ -179,6 +179,34 @@ const RoleBasedSettings: React.FC<RoleBasedSettingsProps> = ({ userRole }) => {
     </>
   );
 
+  const renderGuestSettings = () => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <UserCheck className="w-5 h-5" />
+          Guest Settings
+          <Badge className="bg-gray-100 text-gray-800 border-gray-200">Guest</Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <Label className="text-base">Lead View Notifications</Label>
+            <p className="text-sm text-gray-600">Get notified about lead updates</p>
+          </div>
+          <Switch defaultChecked />
+        </div>
+        <div className="flex items-center justify-between">
+          <div>
+            <Label className="text-base">System Updates</Label>
+            <p className="text-sm text-gray-600">Receive system update notifications</p>
+          </div>
+          <Switch />
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   switch (userRole) {
     case 'Admin':
       return <div className="space-y-6">{renderAdminSettings()}</div>;
@@ -186,6 +214,8 @@ const RoleBasedSettings: React.FC<RoleBasedSettingsProps> = ({ userRole }) => {
       return <div className="space-y-6">{renderManagerSettings()}</div>;
     case 'Lead Manager':
       return <div className="space-y-6">{renderLeadManagerSettings()}</div>;
+    case 'Guest':
+      return <div className="space-y-6">{renderGuestSettings()}</div>;
     case 'Employee':
     default:
       return <div className="space-y-6">{renderEmployeeSettings()}</div>;

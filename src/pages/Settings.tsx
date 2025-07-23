@@ -35,9 +35,9 @@ const Settings = () => {
     }, 1000);
   };
 
-  const getUserRole = (): 'Admin' | 'Manager' | 'Lead Manager' | 'Employee' => {
+  const getUserRole = (): 'Admin' | 'Manager' | 'Lead Manager' | 'Employee' | 'Guest' => {
     const role = profile?.role || 'Employee';
-    if (role === 'Admin' || role === 'Manager' || role === 'Lead Manager' || role === 'Employee') {
+    if (role === 'Admin' || role === 'Manager' || role === 'Lead Manager' || role === 'Employee' || role === 'Guest') {
       return role;
     }
     return 'Employee';
