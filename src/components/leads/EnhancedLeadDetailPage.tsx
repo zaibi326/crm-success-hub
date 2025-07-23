@@ -12,7 +12,6 @@ import { TaxLead } from '@/types/taxLead';
 import { PropertyMap } from './PropertyMap';
 import { TemplateModificationDialog } from './TemplateModificationDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { EditableField } from './EditableField';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PersonalInfoSection } from './detail/PersonalInfoSection';
@@ -21,6 +20,7 @@ import { FinancialInfoSection } from './detail/FinancialInfoSection';
 import { LeadInfoSection } from './detail/LeadInfoSection';
 import { DatabaseActivityTimeline } from './DatabaseActivityTimeline';
 import { EnhancedOwnershipSection } from './detail/EnhancedOwnershipSection';
+import { EnhancedSellerContactSection } from './detail/EnhancedSellerContactSection';
 
 interface EnhancedLeadDetailPageProps {
   lead: TaxLead;
@@ -40,15 +40,42 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
 
   const { toast } = useToast();
 
-  const handleFieldUpdate = (field: keyof TaxLead, value: string) => {
+  const handleSellerContactUpdate = async (field: keyof TaxLead, value: string) => {
     const updatedLead = { ...leadData, [field]: value };
     setLeadData(updatedLead);
-    onLeadUpdate(updatedLead);
     
-    toast({
-      title: "Field Updated",
-      description: `${field} has been updated successfully`,
-    });
+    try {
+      await onLeadUpdate(updatedLead);
+      toast({
+        title: "Seller Contact Updated",
+        description: `${field} has been updated successfully`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update seller contact",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleLeadDetailsUpdate = async (field: keyof TaxLead, value: string) => {
+    const updatedLead = { ...leadData, [field]: value };
+    setLeadData(updatedLead);
+    
+    try {
+      await onLeadUpdate(updatedLead);
+      toast({
+        title: "Lead Details Updated",
+        description: `${field} has been updated successfully`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update lead details",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleOwnershipSave = (heirs: any[]) => {
@@ -126,24 +153,32 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Column */}
               <div className="space-y-6">
+                {/* Seller Contact Section - Independent */}
+                <EnhancedSellerContactSection 
+                  lead={leadData}
+                  onFieldUpdate={handleSellerContactUpdate}
+                  canEdit={true}
+                />
+                
+                {/* Lead Details Sections - Independent */}
                 <PersonalInfoSection 
                   leadData={leadData} 
-                  onFieldUpdate={handleFieldUpdate} 
+                  onFieldUpdate={handleLeadDetailsUpdate} 
                 />
                 
                 <PropertyInfoSection 
                   leadData={leadData} 
-                  onFieldUpdate={handleFieldUpdate} 
+                  onFieldUpdate={handleLeadDetailsUpdate} 
                 />
 
                 <FinancialInfoSection 
                   leadData={leadData} 
-                  onFieldUpdate={handleFieldUpdate} 
+                  onFieldUpdate={handleLeadDetailsUpdate} 
                 />
 
                 <LeadInfoSection 
                   leadData={leadData} 
-                  onFieldUpdate={handleFieldUpdate} 
+                  onFieldUpdate={handleLeadDetailsUpdate} 
                 />
               </div>
 
@@ -168,12 +203,9 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
                       <CardTitle>Notes</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <EditableField
-                        label=""
-                        value={leadData.notes}
-                        onSave={(value) => handleFieldUpdate('notes', value)}
-                        multiline={true}
-                      />
+                      <div className="p-4 bg-gray-50 rounded-lg">
+                        <p className="text-gray-700">{leadData.notes}</p>
+                      </div>
                     </CardContent>
                   </Card>
                 )}

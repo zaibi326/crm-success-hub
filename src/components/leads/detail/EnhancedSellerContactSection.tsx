@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, ExternalLink } from 'lucide-react';
+import { User, ExternalLink, Save } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
 import { InlineEditField } from './InlineEditField';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 interface EnhancedSellerContactSectionProps {
   lead: TaxLead;
@@ -19,15 +20,55 @@ const statusCards = [
 ];
 
 export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = true }: EnhancedSellerContactSectionProps) {
-  const handleFieldUpdate = (field: keyof TaxLead, value: string) => {
+  const [hasChanges, setHasChanges] = useState(false);
+  const [pendingChanges, setPendingChanges] = useState<Partial<TaxLead>>({});
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
+
+  const handleFieldChange = (field: keyof TaxLead, value: string) => {
     if (canEdit) {
-      onFieldUpdate(field, value);
+      // Track pending changes
+      setPendingChanges(prev => ({
+        ...prev,
+        [field]: value
+      }));
+      setHasChanges(true);
     }
   };
 
   const handleStatusChange = (status: string) => {
     if (canEdit) {
-      onFieldUpdate('status', status);
+      handleFieldChange('status', status);
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    if (!hasChanges || !canEdit) return;
+
+    setIsSaving(true);
+    
+    try {
+      // Apply all pending changes
+      for (const [field, value] of Object.entries(pendingChanges)) {
+        await onFieldUpdate(field as keyof TaxLead, value as string);
+      }
+
+      // Clear pending changes
+      setPendingChanges({});
+      setHasChanges(false);
+
+      toast({
+        title: "✅ Seller Contact Updated",
+        description: "All changes have been saved successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save seller contact changes",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -44,12 +85,41 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
     return `https://www.zillow.com/homes/${encodedAddress}/`;
   };
 
+  const currentValues = { ...lead, ...pendingChanges };
+
   return (
     <Card className="shadow-lg border-0 bg-white">
       <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
-        <CardTitle className="flex items-center gap-3 text-xl">
-          <User className="w-6 h-6 text-blue-600" />
-          Lead Details
+        <CardTitle className="flex items-center justify-between text-xl">
+          <div className="flex items-center gap-3">
+            <User className="w-6 h-6 text-blue-600" />
+            Seller Contact Details
+            {hasChanges && (
+              <span className="text-sm text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
+                Unsaved changes
+              </span>
+            )}
+          </div>
+          {hasChanges && canEdit && (
+            <Button
+              onClick={handleSaveChanges}
+              disabled={isSaving}
+              className="bg-green-600 hover:bg-green-700 text-white"
+              size="sm"
+            >
+              {isSaving ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Saving...
+                </div>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Changes
+                </>
+              )}
+            </Button>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
@@ -57,31 +127,31 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <InlineEditField
             label="Owner Name"
-            value={lead.ownerName}
-            onSave={(value) => handleFieldUpdate('ownerName', value)}
+            value={currentValues.ownerName || ''}
+            onSave={(value) => handleFieldChange('ownerName', value)}
             placeholder="Enter owner name"
             required
           />
 
           <InlineEditField
             label="Tax ID"
-            value={lead.taxId}
-            onSave={(value) => handleFieldUpdate('taxId', value)}
+            value={currentValues.taxId || ''}
+            onSave={(value) => handleFieldChange('taxId', value)}
             placeholder="Enter tax ID"
           />
 
           <InlineEditField
             label="Phone Number"
-            value={lead.phone}
-            onSave={(value) => handleFieldUpdate('phone', value)}
+            value={currentValues.phone || ''}
+            onSave={(value) => handleFieldChange('phone', value)}
             type="tel"
             placeholder="Enter phone number"
           />
 
           <InlineEditField
             label="Email Address"
-            value={lead.email}
-            onSave={(value) => handleFieldUpdate('email', value)}
+            value={currentValues.email || ''}
+            onSave={(value) => handleFieldChange('email', value)}
             type="email"
             placeholder="Enter email address"
           />
@@ -92,7 +162,7 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
           <label className="text-sm font-medium text-gray-700">Lead Status</label>
           <div className="flex gap-3 flex-wrap">
             {statusCards.map((status) => {
-              const isActive = lead.status === status.value;
+              const isActive = currentValues.status === status.value;
               return (
                 <div
                   key={status.value}
@@ -118,14 +188,14 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
         <div className="space-y-4">
           <InlineEditField
             label="Property Address"
-            value={lead.propertyAddress}
-            onSave={(value) => handleFieldUpdate('propertyAddress', value)}
+            value={currentValues.propertyAddress || ''}
+            onSave={(value) => handleFieldChange('propertyAddress', value)}
             placeholder="Enter property address"
             required
           />
           
           {/* Zillow Integration */}
-          {lead.propertyAddress && (
+          {currentValues.propertyAddress && (
             <div className="bg-gray-50 rounded-lg p-4 border">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-gray-700">Property Preview</span>
@@ -142,10 +212,10 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
               
               <div className="bg-white rounded border p-4 space-y-2">
                 <div className="text-sm text-gray-600">
-                  Map preview for: <span className="font-medium text-gray-900">{lead.propertyAddress}</span>
+                  Map preview for: <span className="font-medium text-gray-900">{currentValues.propertyAddress}</span>
                 </div>
                 <div className="text-xs text-blue-600 break-all">
-                  {formatZillowUrl(lead.propertyAddress)}
+                  {formatZillowUrl(currentValues.propertyAddress)}
                 </div>
               </div>
             </div>
