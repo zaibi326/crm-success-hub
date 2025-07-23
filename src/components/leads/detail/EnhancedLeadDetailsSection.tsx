@@ -115,18 +115,18 @@ export function EnhancedLeadDetailsSection({
               />
 
               <InlineEditField
-                label="Assessed Value"
-                value={formatCurrency(lead.assessedValue)}
-                onSave={(value) => handleCurrencyUpdate('assessedValue', value)}
-                placeholder="Enter assessed value"
+                label="Property Value"
+                value={formatCurrency(lead.propertyValue)}
+                onSave={(value) => handleCurrencyUpdate('propertyValue', value)}
+                placeholder="Enter property value"
                 canEdit={canEdit}
               />
 
               <InlineEditField
-                label="Market Value"
-                value={formatCurrency(lead.marketValue)}
-                onSave={(value) => handleCurrencyUpdate('marketValue', value)}
-                placeholder="Enter market value"
+                label="Asking Price"
+                value={formatCurrency(lead.askingPrice)}
+                onSave={(value) => handleCurrencyUpdate('askingPrice', value)}
+                placeholder="Enter asking price"
                 canEdit={canEdit}
               />
 
@@ -140,10 +140,10 @@ export function EnhancedLeadDetailsSection({
               />
 
               <InlineEditField
-                label="Delinquent Amount"
-                value={formatCurrency(lead.delinquentAmount)}
-                onSave={(value) => handleCurrencyUpdate('delinquentAmount', value)}
-                placeholder="Enter delinquent amount"
+                label="Tax Amount"
+                value={formatCurrency(lead.taxAmount)}
+                onSave={(value) => handleCurrencyUpdate('taxAmount', value)}
+                placeholder="Enter tax amount"
                 canEdit={canEdit}
               />
             </div>
