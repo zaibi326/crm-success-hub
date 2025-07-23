@@ -19,10 +19,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-crm-gradient-start via-white to-crm-gradient-end">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
         <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
           <div className="flex items-center space-x-3">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-crm-primary"></div>
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
             <span className="text-gray-700 font-medium">Loading...</span>
           </div>
         </div>
@@ -30,8 +30,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  if (!user || !profile) {
+  if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (!profile) {
+    // If user exists but profile is still loading, show loading state
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
+        <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
+          <div className="flex items-center space-x-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+            <span className="text-gray-700 font-medium">Loading profile...</span>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const userRole = profile.role;

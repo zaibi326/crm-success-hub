@@ -25,17 +25,29 @@ const Login = () => {
     setShowConfirmPassword
   } = useLoginLogic();
 
-  // Redirect if user is already logged in and profile is loaded
+  // Handle redirect logic more carefully
   useEffect(() => {
-    if (user && profile && !isLoading) {
-      console.log('User authenticated with profile:', profile.role);
-      const redirectPath = getRoleBasedRedirect(profile.role);
-      console.log('Redirecting to:', redirectPath);
-      navigate(redirectPath, { replace: true });
-    } else if (user && !profile && !isLoading) {
-      // If user exists but profile failed to load, try redirecting to dashboard anyway
-      console.log('User authenticated but no profile loaded, redirecting to dashboard');
-      navigate('/dashboard', { replace: true });
+    // Only redirect if we have a user and we're not loading
+    if (user && !isLoading) {
+      if (profile) {
+        // We have both user and profile, safe to redirect
+        console.log('User authenticated with profile:', profile.role);
+        const redirectPath = getRoleBasedRedirect(profile.role);
+        console.log('Redirecting to:', redirectPath);
+        navigate(redirectPath, { replace: true });
+      } else {
+        // User exists but no profile yet, wait a bit more
+        console.log('User authenticated, waiting for profile...');
+        const timeout = setTimeout(() => {
+          // If still no profile after 3 seconds, redirect to dashboard anyway
+          if (user && !profile) {
+            console.log('Profile load timeout, redirecting to dashboard');
+            navigate('/dashboard', { replace: true });
+          }
+        }, 3000);
+        
+        return () => clearTimeout(timeout);
+      }
     }
   }, [user, profile, isLoading, navigate]);
 
@@ -47,6 +59,20 @@ const Login = () => {
           <div className="flex items-center space-x-3">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
             <span className="text-gray-700 font-medium">Loading...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is authenticated, don't show login form
+  if (user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
+          <div className="flex items-center space-x-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+            <span className="text-gray-700 font-medium">Redirecting...</span>
           </div>
         </div>
       </div>

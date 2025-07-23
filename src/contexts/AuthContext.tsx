@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -39,7 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchUserProfile = async (userId: string, retryCount = 0) => {
+  const fetchUserProfile = async (userId: string) => {
     try {
       console.log('Fetching profile for user:', userId);
       const { data, error } = await supabase
@@ -50,14 +51,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Error fetching profile:', error);
-        
-        // If it's a profile not found error and we haven't retried too many times, retry
-        if (error.code === 'PGRST116' && retryCount < 3) {
-          console.log('Profile not found, retrying in 1 second...');
-          setTimeout(() => fetchUserProfile(userId, retryCount + 1), 1000);
-          return null;
-        }
-        
         return null;
       }
 
@@ -79,32 +72,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         console.log('Auth state changed:', event, session?.user?.email);
         
-        setSession(session);
-        setUser(session?.user ?? null);
+        if (isMounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+        }
         
-        if (session?.user) {
-          // Fetch profile with a small delay to avoid recursion issues
-          setTimeout(async () => {
-            if (!isMounted) return;
-            
-            try {
-              const profileData = await fetchUserProfile(session.user.id);
-              if (isMounted) {
-                setProfile(profileData);
-              }
-            } catch (error) {
-              console.error('Profile fetch error:', error);
-            } finally {
-              if (isMounted) {
-                setIsLoading(false);
-              }
+        if (session?.user && isMounted) {
+          // Fetch profile for authenticated user
+          try {
+            const profileData = await fetchUserProfile(session.user.id);
+            if (isMounted) {
+              setProfile(profileData);
             }
-          }, 100);
-        } else {
-          if (isMounted) {
-            setProfile(null);
-            setIsLoading(false);
+          } catch (error) {
+            console.error('Profile fetch error:', error);
           }
+        } else if (isMounted) {
+          setProfile(null);
+        }
+        
+        if (isMounted) {
+          setIsLoading(false);
         }
       }
     );
@@ -164,11 +152,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         return { success: false, error: error.message };
-      }
-
-      if (data.user) {
-        const profileData = await fetchUserProfile(data.user.id);
-        setProfile(profileData);
       }
 
       return { success: true };
