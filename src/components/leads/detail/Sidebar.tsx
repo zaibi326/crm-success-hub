@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Paperclip } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import { AttachmentsSection } from './AttachmentsSection';
 
 interface UploadedFile {
@@ -28,7 +28,7 @@ export function Sidebar({
   onRemoveFile,
   onFileUpload
 }: SidebarProps) {
-  // Filter files for general attachments (exclude vesting_deed which is handled separately)
+  // Filter files for general attachments (exclude vesting_deed which is handled separately in ConditionalFieldsSection)
   const generalFiles = files.filter(file => file.category !== 'vesting_deed');
 
   return (
@@ -63,7 +63,7 @@ export function Sidebar({
         </CardContent>
       </Card>
 
-      {/* Lead Documents - Attachment Section */}
+      {/* Lead Documents - Attachment Section (Only appears here) */}
       <AttachmentsSection
         files={generalFiles}
         onRemoveFile={onRemoveFile}

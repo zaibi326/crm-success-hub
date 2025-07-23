@@ -4,10 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { FileUp, AlertTriangle, Upload, Eye, Trash2, Link, Plus } from 'lucide-react';
+import { FileUp, AlertTriangle, Upload, Eye, Trash2, Link } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
 import { useToast } from '@/hooks/use-toast';
-import { FilesList } from './attachments/FilesList';
 
 interface UploadedFile {
   id: string;
@@ -37,7 +36,7 @@ export function ConditionalFieldsSection({
 }: ConditionalFieldsSectionProps) {
   const { toast } = useToast();
   
-  // Filter files for vesting deed category
+  // Filter files for vesting deed category only
   const vestingDeedFiles = files.filter(file => file.category === 'vesting_deed');
 
   const handleVestingDeedUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,7 +81,7 @@ export function ConditionalFieldsSection({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Vesting Deed Information with Integrated Document Upload */}
+        {/* Vesting Deed Information with Specific Document Upload */}
         <div className="space-y-4">
           <h4 className="font-semibold text-gray-900 flex items-center gap-2">
             <FileUp className="w-4 h-4 text-blue-500" />
@@ -113,11 +112,11 @@ export function ConditionalFieldsSection({
             </div>
           </div>
 
-          {/* Integrated PDF Document Attachment */}
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
+          {/* Vesting Deed Specific PDF Upload */}
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <div className="flex items-center justify-between mb-3">
-              <Label className="text-sm font-medium text-gray-700">
-                Vesting Deed Documents
+              <Label className="text-sm font-medium text-blue-700">
+                Upload Vesting Deed PDF
               </Label>
               {canEdit && (
                 <div className="flex gap-2">
@@ -133,7 +132,7 @@ export function ConditionalFieldsSection({
                     size="sm"
                     variant="outline"
                     onClick={() => document.getElementById('vesting-deed-upload')?.click()}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700"
                   >
                     <Upload className="w-4 h-4" />
                     Upload PDF
@@ -194,7 +193,7 @@ export function ConditionalFieldsSection({
                 <FileUp className="w-8 h-8 mx-auto mb-2 text-gray-300" />
                 <p className="text-sm">No vesting deed documents uploaded</p>
                 {canEdit && (
-                  <p className="text-xs mt-1">Click "Upload PDF" or "Add Link" to add documents</p>
+                  <p className="text-xs mt-1">Click "Upload PDF" or "Add Link" to add vesting deed documents</p>
                 )}
               </div>
             )}

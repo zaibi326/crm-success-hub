@@ -8,7 +8,6 @@ import { ConditionalFieldsSection } from './ConditionalFieldsSection';
 import { EnhancedSellerContactSection } from './EnhancedSellerContactSection';
 import { EnhancedAdditionalInfoSection } from './EnhancedAdditionalInfoSection';
 import { EnhancedOwnershipSection } from './EnhancedOwnershipSection';
-import { AttachmentsSection } from './AttachmentsSection';
 import { EnhancedLeadDetailsSection } from './EnhancedLeadDetailsSection';
 
 interface UploadedFile {
@@ -107,7 +106,7 @@ export function MainContent({
             canEdit={canEdit}
           />
 
-          {/* Conditional Fields Section */}
+          {/* Conditional Fields Section - Only vesting deed specific uploads */}
           <ConditionalFieldsSection
             formData={formData}
             files={files}
@@ -115,16 +114,6 @@ export function MainContent({
             onInputChange={onInputChange}
             onFileUpload={onFileUpload}
             onRemoveFile={onRemoveFile}
-          />
-
-          {/* Attachments Section */}
-          <AttachmentsSection
-            files={files}
-            onRemoveFile={onRemoveFile}
-            onFileUpload={onFileUpload}
-            canEdit={canEdit}
-            title="Lead Attachments"
-            description="Upload documents related to this lead"
           />
 
           {/* Enhanced Ownership Section */}
