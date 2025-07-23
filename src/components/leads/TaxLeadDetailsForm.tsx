@@ -11,7 +11,6 @@ import { Sidebar } from './detail/Sidebar';
 import { ViewOnlyMessage } from './detail/ViewOnlyMessage';
 import { SellerContactSection } from './detail/SellerContactSection';
 import { EnhancedLeadDetailsSection } from './detail/EnhancedLeadDetailsSection';
-import { AttachmentsSection } from './detail/AttachmentsSection';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UploadedFile {
@@ -312,7 +311,7 @@ export function TaxLeadDetailsForm({
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
               {/* Left Column - Main Content */}
               <div className="xl:col-span-2 space-y-6">
-                {/* Seller Contact Section - Enhanced with save functionality */}
+                {/* Seller Contact Section */}
                 <SellerContactSection 
                   lead={formData} 
                   onFieldUpdate={handleInputChange} 
@@ -326,17 +325,7 @@ export function TaxLeadDetailsForm({
                   canEdit={canEdit} 
                 />
 
-                {/* Attachments Section - Enhanced with proper upload/save flow */}
-                <AttachmentsSection
-                  files={files}
-                  onRemoveFile={handleRemoveFile}
-                  onFileUpload={handleFileUpload}
-                  canEdit={canEdit}
-                  title="Lead Attachments"
-                  description="Upload documents related to this lead"
-                />
-
-                {/* Existing Main Content - Lead Disposition */}
+                {/* Main Content - Lead Disposition */}
                 <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
                   <CardContent>
                     <MainContent
