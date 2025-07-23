@@ -32,6 +32,14 @@ interface DatabaseActivityTimelineProps {
   readOnly?: boolean;
 }
 
+// Helper function to safely access metadata properties
+const getMetadataProperty = (metadata: any, property: string): any => {
+  if (metadata && typeof metadata === 'object' && !Array.isArray(metadata)) {
+    return metadata[property];
+  }
+  return null;
+};
+
 export function DatabaseActivityTimeline({ 
   lead, 
   readOnly = false 
@@ -261,18 +269,18 @@ export function DatabaseActivityTimeline({
                       <p className="text-gray-600 text-sm mb-2">{activity.description}</p>
                       
                       {/* Show metadata if available */}
-                      {activity.metadata && Object.keys(activity.metadata).length > 0 && (
+                      {activity.metadata && (
                         <div className="text-xs text-gray-500 mb-2">
-                          {activity.metadata.changes && (
+                          {getMetadataProperty(activity.metadata, 'changes') && (
                             <div className="flex gap-2">
                               <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
                                 Changes recorded
                               </Badge>
                             </div>
                           )}
-                          {activity.metadata.count && (
+                          {getMetadataProperty(activity.metadata, 'count') && (
                             <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
-                              {activity.metadata.count} items
+                              {getMetadataProperty(activity.metadata, 'count')} items
                             </Badge>
                           )}
                         </div>
