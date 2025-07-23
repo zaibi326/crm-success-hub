@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -40,39 +39,18 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
 
   const { toast } = useToast();
 
-  const handleSellerContactUpdate = async (field: keyof TaxLead, value: string) => {
+  // Single handler for all field updates
+  const handleFieldUpdate = async (field: keyof TaxLead, value: string) => {
     const updatedLead = { ...leadData, [field]: value };
     setLeadData(updatedLead);
     
     try {
       await onLeadUpdate(updatedLead);
-      toast({
-        title: "Seller Contact Updated",
-        description: `${field} has been updated successfully`,
-      });
+      console.log(`${field} updated to:`, value);
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update seller contact",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleLeadDetailsUpdate = async (field: keyof TaxLead, value: string) => {
-    const updatedLead = { ...leadData, [field]: value };
-    setLeadData(updatedLead);
-    
-    try {
-      await onLeadUpdate(updatedLead);
-      toast({
-        title: "Lead Details Updated",
-        description: `${field} has been updated successfully`,
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update lead details",
+        description: `Failed to update ${field}`,
         variant: "destructive",
       });
     }
@@ -153,32 +131,32 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Column */}
               <div className="space-y-6">
-                {/* Seller Contact Section - Independent */}
+                {/* Lead Details Section */}
                 <EnhancedSellerContactSection 
                   lead={leadData}
-                  onFieldUpdate={handleSellerContactUpdate}
+                  onFieldUpdate={handleFieldUpdate}
                   canEdit={true}
                 />
                 
-                {/* Lead Details Sections - Independent */}
+                {/* Other Detail Sections */}
                 <PersonalInfoSection 
                   leadData={leadData} 
-                  onFieldUpdate={handleLeadDetailsUpdate} 
+                  onFieldUpdate={handleFieldUpdate} 
                 />
                 
                 <PropertyInfoSection 
                   leadData={leadData} 
-                  onFieldUpdate={handleLeadDetailsUpdate} 
+                  onFieldUpdate={handleFieldUpdate} 
                 />
 
                 <FinancialInfoSection 
                   leadData={leadData} 
-                  onFieldUpdate={handleLeadDetailsUpdate} 
+                  onFieldUpdate={handleFieldUpdate} 
                 />
 
                 <LeadInfoSection 
                   leadData={leadData} 
-                  onFieldUpdate={handleLeadDetailsUpdate} 
+                  onFieldUpdate={handleFieldUpdate} 
                 />
               </div>
 

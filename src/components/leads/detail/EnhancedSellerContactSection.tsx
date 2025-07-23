@@ -27,7 +27,7 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
 
   const handleFieldChange = (field: keyof TaxLead, value: string) => {
     if (canEdit) {
-      // Track pending changes
+      // Only track pending changes, don't save immediately
       setPendingChanges(prev => ({
         ...prev,
         [field]: value
@@ -58,13 +58,13 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
       setHasChanges(false);
 
       toast({
-        title: "✅ Seller Contact Updated",
+        title: "✅ Lead Details Updated",
         description: "All changes have been saved successfully",
       });
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to save seller contact changes",
+        description: "Failed to save lead details changes",
         variant: "destructive",
       });
     } finally {
@@ -73,8 +73,9 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
   };
 
   const openZillow = () => {
-    if (lead.propertyAddress) {
-      const encodedAddress = encodeURIComponent(lead.propertyAddress);
+    const address = currentValues.propertyAddress || lead.propertyAddress;
+    if (address) {
+      const encodedAddress = encodeURIComponent(address);
       window.open(`https://www.zillow.com/homes/${encodedAddress}/`, '_blank');
     }
   };
@@ -85,6 +86,7 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
     return `https://www.zillow.com/homes/${encodedAddress}/`;
   };
 
+  // Show pending changes in UI but don't save to parent until "Save Changes" is clicked
   const currentValues = { ...lead, ...pendingChanges };
 
   return (
@@ -93,7 +95,7 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
         <CardTitle className="flex items-center justify-between text-xl">
           <div className="flex items-center gap-3">
             <User className="w-6 h-6 text-blue-600" />
-            Seller Contact Details
+            Lead Details
             {hasChanges && (
               <span className="text-sm text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
                 Unsaved changes
