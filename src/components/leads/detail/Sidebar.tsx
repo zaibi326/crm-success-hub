@@ -55,12 +55,14 @@ export function Sidebar({
         </CardContent>
       </Card>
 
-      {/* Attachments */}
+      {/* Attachments Section - Below Lead Summary */}
       <AttachmentsSection
         files={files}
         onRemoveFile={onRemoveFile}
         onFileUpload={onFileUpload}
         canEdit={canEdit}
+        title="Attachments"
+        description="Upload documents related to this lead"
       />
     </div>
   );

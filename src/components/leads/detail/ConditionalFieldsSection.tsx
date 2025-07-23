@@ -32,6 +32,9 @@ export function ConditionalFieldsSection({
   onRemoveFile,
   canEdit 
 }: ConditionalFieldsSectionProps) {
+  // Filter files for vesting deed category
+  const vestingDeedFiles = files.filter(file => file.category === 'vesting_deed');
+
   return (
     <Card className="shadow-lg border-0">
       <CardHeader>
@@ -74,7 +77,7 @@ export function ConditionalFieldsSection({
 
           {/* Vesting Deed File Upload */}
           <AttachmentsSection
-            files={files}
+            files={vestingDeedFiles}
             onRemoveFile={onRemoveFile}
             onFileUpload={(uploadedFiles) => onFileUpload(uploadedFiles, 'vesting_deed')}
             canEdit={canEdit}
