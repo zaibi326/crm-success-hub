@@ -55,15 +55,5 @@ export function EnhancedLeadDetailsSection({
       onFieldUpdate(field, '');
     }
   };
-  return <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
-        <CollapsibleTrigger asChild>
-          
-        </CollapsibleTrigger>
-        
-        <CollapsibleContent>
-          
-        </CollapsibleContent>
-      </Card>
-    </Collapsible>;
+  return;
 }
