@@ -9,6 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { User, Mail, Phone, MapPin, Briefcase, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProfileData {
   name: string;
@@ -20,74 +22,149 @@ interface ProfileData {
   bio: string;
   role: string;
   avatar?: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 const ProfileSection = () => {
-  const [profile, setProfile] = useState<ProfileData>({
-    name: 'John Doe',
-    email: 'john.doe@company.com',
-    phone: '+1 (555) 123-4567',
-    address: '123 Business Ave, Suite 100',
-    department: 'Sales',
-    joinDate: '2023-01-15',
-    bio: 'Experienced sales professional with a passion for customer relationships.',
-    role: localStorage.getItem('userRole') || 'Employee'
+  const { user, profile } = useAuth();
+  const [profileData, setProfileData] = useState<ProfileData>({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    department: '',
+    joinDate: '',
+    bio: '',
+    role: '',
+    firstName: '',
+    lastName: ''
   });
   
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Load profile from localStorage if available
-    const savedProfile = localStorage.getItem('userProfile');
-    if (savedProfile) {
-      setProfile(JSON.parse(savedProfile));
+    if (user && profile) {
+      setProfileData({
+        name: profile.first_name && profile.last_name 
+          ? `${profile.first_name} ${profile.last_name}` 
+          : user.email || '',
+        email: user.email || '',
+        phone: localStorage.getItem('userPhone') || '',
+        address: localStorage.getItem('userAddress') || '',
+        department: localStorage.getItem('userDepartment') || 'Sales',
+        joinDate: profile.created_at || new Date().toISOString(),
+        bio: localStorage.getItem('userBio') || 'Professional team member',
+        role: profile.role || 'Employee',
+        firstName: profile.first_name || '',
+        lastName: profile.last_name || ''
+      });
     }
-  }, []);
+  }, [user, profile]);
 
-  const handleSave = () => {
-    localStorage.setItem('userProfile', JSON.stringify(profile));
-    setIsEditing(false);
-    toast({
-      title: "Profile Updated",
-      description: "Your profile has been successfully updated.",
-    });
+  const handleSave = async () => {
+    if (!user || !profile) return;
+
+    setIsLoading(true);
+    try {
+      // Update profile in database
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          first_name: profileData.firstName,
+          last_name: profileData.lastName,
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      // Save additional data to localStorage
+      localStorage.setItem('userPhone', profileData.phone);
+      localStorage.setItem('userAddress', profileData.address);
+      localStorage.setItem('userDepartment', profileData.department);
+      localStorage.setItem('userBio', profileData.bio);
+
+      setIsEditing(false);
+      toast({
+        title: "Profile Updated",
+        description: "Your profile has been successfully updated.",
+      });
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (field: keyof ProfileData, value: string) => {
-    setProfile(prev => ({ ...prev, [field]: value }));
+    setProfileData(prev => ({ ...prev, [field]: value }));
+    
+    // Update name when firstName or lastName changes
+    if (field === 'firstName' || field === 'lastName') {
+      const firstName = field === 'firstName' ? value : profileData.firstName;
+      const lastName = field === 'lastName' ? value : profileData.lastName;
+      setProfileData(prev => ({ 
+        ...prev, 
+        [field]: value,
+        name: firstName && lastName ? `${firstName} ${lastName}` : prev.email
+      }));
+    }
   };
 
   const getRoleBadgeColor = (role: string) => {
     switch (role.toLowerCase()) {
       case 'admin': return 'bg-red-100 text-red-800 border-red-200';
       case 'manager': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'lead manager': return 'bg-purple-100 text-purple-800 border-purple-200';
       default: return 'bg-green-100 text-green-800 border-green-200';
     }
   };
+
+  const getInitials = (name: string) => {
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  if (!user || !profile) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center">Loading profile...</div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="flex items-center space-x-4">
           <Avatar className="w-16 h-16">
-            <AvatarImage src={profile.avatar} alt={profile.name} />
+            <AvatarImage src={profileData.avatar} alt={profileData.name} />
             <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-              {profile.name.split(' ').map(n => n[0]).join('')}
+              {getInitials(profileData.name)}
             </AvatarFallback>
           </Avatar>
           <div>
-            <CardTitle className="text-2xl">{profile.name}</CardTitle>
-            <Badge className={`mt-1 ${getRoleBadgeColor(profile.role)}`}>
-              {profile.role}
+            <CardTitle className="text-2xl">{profileData.name || profileData.email}</CardTitle>
+            <Badge className={`mt-1 ${getRoleBadgeColor(profileData.role)}`}>
+              {profileData.role}
             </Badge>
           </div>
         </div>
         <Button 
           onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+          disabled={isLoading}
           className="bg-crm-primary hover:bg-blue-700"
         >
-          {isEditing ? 'Save Changes' : 'Edit Profile'}
+          {isLoading ? 'Saving...' : isEditing ? 'Save Changes' : 'Edit Profile'}
         </Button>
       </CardHeader>
       
@@ -102,16 +179,30 @@ const ProfileSection = () => {
             
             <div className="space-y-3">
               <div>
-                <Label htmlFor="name" className="text-sm font-medium text-gray-700">Full Name</Label>
+                <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">First Name</Label>
                 {isEditing ? (
                   <Input
-                    id="name"
-                    value={profile.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    id="firstName"
+                    value={profileData.firstName}
+                    onChange={(e) => handleInputChange('firstName', e.target.value)}
                     className="mt-1"
                   />
                 ) : (
-                  <p className="mt-1 text-gray-900">{profile.name}</p>
+                  <p className="mt-1 text-gray-900">{profileData.firstName || 'Not set'}</p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="lastName" className="text-sm font-medium text-gray-700">Last Name</Label>
+                {isEditing ? (
+                  <Input
+                    id="lastName"
+                    value={profileData.lastName}
+                    onChange={(e) => handleInputChange('lastName', e.target.value)}
+                    className="mt-1"
+                  />
+                ) : (
+                  <p className="mt-1 text-gray-900">{profileData.lastName || 'Not set'}</p>
                 )}
               </div>
               
@@ -120,17 +211,7 @@ const ProfileSection = () => {
                   <Mail className="w-4 h-4" />
                   Email
                 </Label>
-                {isEditing ? (
-                  <Input
-                    id="email"
-                    type="email"
-                    value={profile.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    className="mt-1"
-                  />
-                ) : (
-                  <p className="mt-1 text-gray-900">{profile.email}</p>
-                )}
+                <p className="mt-1 text-gray-900">{profileData.email}</p>
               </div>
               
               <div>
@@ -141,12 +222,12 @@ const ProfileSection = () => {
                 {isEditing ? (
                   <Input
                     id="phone"
-                    value={profile.phone}
+                    value={profileData.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
                     className="mt-1"
                   />
                 ) : (
-                  <p className="mt-1 text-gray-900">{profile.phone}</p>
+                  <p className="mt-1 text-gray-900">{profileData.phone || 'Not set'}</p>
                 )}
               </div>
             </div>
@@ -165,12 +246,12 @@ const ProfileSection = () => {
                 {isEditing ? (
                   <Input
                     id="department"
-                    value={profile.department}
+                    value={profileData.department}
                     onChange={(e) => handleInputChange('department', e.target.value)}
                     className="mt-1"
                   />
                 ) : (
-                  <p className="mt-1 text-gray-900">{profile.department}</p>
+                  <p className="mt-1 text-gray-900">{profileData.department}</p>
                 )}
               </div>
               
@@ -179,7 +260,7 @@ const ProfileSection = () => {
                   <Calendar className="w-4 h-4" />
                   Join Date
                 </Label>
-                <p className="mt-1 text-gray-900">{new Date(profile.joinDate).toLocaleDateString()}</p>
+                <p className="mt-1 text-gray-900">{new Date(profileData.joinDate).toLocaleDateString()}</p>
               </div>
               
               <div>
@@ -190,13 +271,13 @@ const ProfileSection = () => {
                 {isEditing ? (
                   <Textarea
                     id="address"
-                    value={profile.address}
+                    value={profileData.address}
                     onChange={(e) => handleInputChange('address', e.target.value)}
                     className="mt-1"
                     rows={2}
                   />
                 ) : (
-                  <p className="mt-1 text-gray-900">{profile.address}</p>
+                  <p className="mt-1 text-gray-900">{profileData.address || 'Not set'}</p>
                 )}
               </div>
             </div>
@@ -209,14 +290,14 @@ const ProfileSection = () => {
           {isEditing ? (
             <Textarea
               id="bio"
-              value={profile.bio}
+              value={profileData.bio}
               onChange={(e) => handleInputChange('bio', e.target.value)}
               className="mt-1"
               rows={3}
               placeholder="Tell us about yourself..."
             />
           ) : (
-            <p className="mt-1 text-gray-900 bg-gray-50 p-3 rounded-lg">{profile.bio}</p>
+            <p className="mt-1 text-gray-900 bg-gray-50 p-3 rounded-lg">{profileData.bio}</p>
           )}
         </div>
       </CardContent>

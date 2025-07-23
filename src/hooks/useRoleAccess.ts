@@ -12,17 +12,18 @@ import {
 
 export const useRoleAccess = () => {
   const { profile } = useAuth();
-  const userRole = profile?.role || 'Guest';
+  const userRole = profile?.role || 'Employee';
 
   return {
     userRole,
     isAdmin: userRole === 'Admin',
-    isMember: userRole === 'Manager' || userRole === 'Employee', // Map existing roles to Member concept
-    isClient: userRole === 'Guest', // Map Guest to Client for now
-    isGuest: userRole === 'Guest',
-    // Legacy support
-    isManager: userRole === 'Admin' || userRole === 'Manager',
+    isManager: userRole === 'Manager',
+    isLeadManager: userRole === 'Lead Manager',
     isEmployee: userRole === 'Employee',
+    // Legacy support for existing code
+    isMember: userRole === 'Manager' || userRole === 'Lead Manager' || userRole === 'Employee',
+    isClient: userRole === 'Guest',
+    isGuest: userRole === 'Guest',
     canManageUsers: canManageUsers(userRole),
     canManageTeam: canManageTeam(userRole),
     canViewAllLeads: canViewAllLeads(userRole),

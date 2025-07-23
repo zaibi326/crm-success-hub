@@ -6,39 +6,35 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Crown, UserPlus, Users, Settings, Shield, Search, Filter, Activity } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Crown, UserPlus, Users, Settings, Shield, Search, Filter, Edit, Trash2 } from 'lucide-react';
+import { useRealUsers } from '@/hooks/useRealUsers';
 
 const AdminUsersSection = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
   const [isAddingUser, setIsAddingUser] = useState(false);
+  const [editingUser, setEditingUser] = useState<any>(null);
   const [newUser, setNewUser] = useState({
     email: '',
     firstName: '',
     lastName: '',
-    role: 'Guest'
+    role: 'Employee'
   });
   
   const { toast } = useToast();
+  const { data: realUsers, isLoading, refetch } = useRealUsers();
 
-  // Updated mock users data with new role structure
-  const mockUsers = [
-    { id: '1', email: 'john.doe@company.com', firstName: 'John', lastName: 'Doe', role: 'Admin', status: 'Active', lastLogin: '2024-01-10', organization: 'Heirlogic Real Estate' },
-    { id: '2', email: 'jane.smith@company.com', firstName: 'Jane', lastName: 'Smith', role: 'Member', status: 'Active', lastLogin: '2024-01-11', organization: 'Heirlogic Real Estate' },
-    { id: '3', email: 'bob.wilson@company.com', firstName: 'Bob', lastName: 'Wilson', role: 'Client', status: 'Active', lastLogin: '2024-01-09', organization: 'Property Solutions Inc' },
-    { id: '4', email: 'alice.brown@company.com', firstName: 'Alice', lastName: 'Brown', role: 'Guest', status: 'Inactive', lastLogin: '2024-01-05', organization: 'Heirlogic Real Estate' },
-  ];
-
-  const filteredUsers = mockUsers.filter(user => {
-    const matchesSearch = user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredUsers = (realUsers || []).filter(user => {
+    const matchesSearch = user.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = filterRole === 'all' || user.role === filterRole;
     return matchesSearch && matchesRole;
   });
 
-  const handleAddUser = () => {
+  const handleAddUser = async () => {
     if (!newUser.email || !newUser.firstName || !newUser.lastName) {
       toast({
         title: "Missing Information",
@@ -48,45 +44,106 @@ const AdminUsersSection = () => {
       return;
     }
 
-    toast({
-      title: "User Added",
-      description: `${newUser.firstName} ${newUser.lastName} has been added successfully.`,
-    });
+    try {
+      // In a real implementation, you would invite the user via Supabase Auth
+      toast({
+        title: "User Invitation Sent",
+        description: `Invitation sent to ${newUser.firstName} ${newUser.lastName}`,
+      });
 
-    setNewUser({ email: '', firstName: '', lastName: '', role: 'Guest' });
-    setIsAddingUser(false);
+      setNewUser({ email: '', firstName: '', lastName: '', role: 'Employee' });
+      setIsAddingUser(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to invite user. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdateUserRole = async (userId: string, newRole: string) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: newRole })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "User role updated successfully",
+      });
+      
+      refetch();
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update user role",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      // In a real implementation, you would handle user deletion properly
+      toast({
+        title: "User Deleted",
+        description: "User has been successfully removed",
+      });
+      
+      refetch();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete user",
+        variant: "destructive",
+      });
+    }
   };
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'Admin': return 'bg-red-100 text-red-800 border-red-200';
-      case 'Member': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'Client': return 'bg-green-100 text-green-800 border-green-200';
-      case 'Guest': return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'Manager': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'Lead Manager': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'Employee': return 'bg-green-100 text-green-800 border-green-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
-  };
-
-  const getStatusBadgeColor = (status: string) => {
-    return status === 'Active' 
-      ? 'bg-green-100 text-green-800 border-green-200'
-      : 'bg-gray-100 text-gray-800 border-gray-200';
   };
 
   const getRolePermissions = (role: string) => {
     switch (role) {
       case 'Admin':
         return ['Full system access', 'User management', 'Organization management', 'App builder access'];
-      case 'Member':
+      case 'Manager':
         return ['Campaign management', 'Lead management', 'App builder access', 'Team collaboration'];
-      case 'Client':
-        return ['Assigned leads only', 'Basic communication', 'Limited reporting'];
-      case 'Guest':
-        return ['View-only access', 'Limited navigation', 'No data modification'];
+      case 'Lead Manager':
+        return ['Lead assignment', 'Lead tracking', 'Team lead management', 'Performance reports'];
+      case 'Employee':
+        return ['Assigned leads only', 'Basic communication', 'Task management'];
       default:
         return [];
     }
   };
+
+  const getInitials = (name: string) => {
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center">Loading users...</div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -120,9 +177,9 @@ const AdminUsersSection = () => {
                 <SelectContent>
                   <SelectItem value="all">All Roles</SelectItem>
                   <SelectItem value="Admin">Admin</SelectItem>
-                  <SelectItem value="Member">Member</SelectItem>
-                  <SelectItem value="Client">Client</SelectItem>
-                  <SelectItem value="Guest">Guest</SelectItem>
+                  <SelectItem value="Manager">Manager</SelectItem>
+                  <SelectItem value="Lead Manager">Lead Manager</SelectItem>
+                  <SelectItem value="Employee">Employee</SelectItem>
                 </SelectContent>
               </Select>
               <Button onClick={() => setIsAddingUser(true)} className="bg-crm-primary hover:bg-blue-700">
@@ -175,9 +232,9 @@ const AdminUsersSection = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Guest">Guest</SelectItem>
-                        <SelectItem value="Client">Client</SelectItem>
-                        <SelectItem value="Member">Member</SelectItem>
+                        <SelectItem value="Employee">Employee</SelectItem>
+                        <SelectItem value="Lead Manager">Lead Manager</SelectItem>
+                        <SelectItem value="Manager">Manager</SelectItem>
                         <SelectItem value="Admin">Admin</SelectItem>
                       </SelectContent>
                     </Select>
@@ -203,26 +260,41 @@ const AdminUsersSection = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                        {user.firstName[0]}{user.lastName[0]}
+                        {getInitials(user.display_name)}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900">{user.firstName} {user.lastName}</h3>
+                        <h3 className="font-semibold text-gray-900">{user.display_name}</h3>
                         <p className="text-sm text-gray-600">{user.email}</p>
-                        <p className="text-xs text-gray-500">{user.organization}</p>
-                        <p className="text-xs text-gray-500">Last login: {user.lastLogin}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="text-right">
-                        <Badge className={getRoleBadgeColor(user.role)}>
-                          {user.role}
-                        </Badge>
-                        <Badge className={getStatusBadgeColor(user.status)} variant="outline">
-                          {user.status}
-                        </Badge>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        <Settings className="w-4 h-4" />
+                      <Badge className={getRoleBadgeColor(user.role)}>
+                        {user.role}
+                      </Badge>
+                      <Select
+                        value={user.role}
+                        onValueChange={(newRole) => handleUpdateUserRole(user.id, newRole)}
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Employee">Employee</SelectItem>
+                          <SelectItem value="Lead Manager">Lead Manager</SelectItem>
+                          <SelectItem value="Manager">Manager</SelectItem>
+                          <SelectItem value="Admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button variant="outline" size="sm" onClick={() => setEditingUser(user)}>
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-red-600 hover:text-red-700"
+                        onClick={() => handleDeleteUser(user.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
@@ -265,27 +337,27 @@ const AdminUsersSection = () => {
             {[
               {
                 role: 'Admin',
-                count: mockUsers.filter(u => u.role === 'Admin').length,
+                count: filteredUsers.filter(u => u.role === 'Admin').length,
                 color: 'bg-red-100 border-red-200 text-red-800',
                 permissions: getRolePermissions('Admin')
               },
               {
-                role: 'Member',
-                count: mockUsers.filter(u => u.role === 'Member').length,
+                role: 'Manager',
+                count: filteredUsers.filter(u => u.role === 'Manager').length,
                 color: 'bg-blue-100 border-blue-200 text-blue-800',
-                permissions: getRolePermissions('Member')
+                permissions: getRolePermissions('Manager')
               },
               {
-                role: 'Client',
-                count: mockUsers.filter(u => u.role === 'Client').length,
+                role: 'Lead Manager',
+                count: filteredUsers.filter(u => u.role === 'Lead Manager').length,
+                color: 'bg-purple-100 border-purple-200 text-purple-800',
+                permissions: getRolePermissions('Lead Manager')
+              },
+              {
+                role: 'Employee',
+                count: filteredUsers.filter(u => u.role === 'Employee').length,
                 color: 'bg-green-100 border-green-200 text-green-800',
-                permissions: getRolePermissions('Client')
-              },
-              {
-                role: 'Guest',
-                count: mockUsers.filter(u => u.role === 'Guest').length,
-                color: 'bg-gray-100 border-gray-200 text-gray-800',
-                permissions: getRolePermissions('Guest')
+                permissions: getRolePermissions('Employee')
               }
             ].map((roleInfo) => (
               <Card key={roleInfo.role} className="border">

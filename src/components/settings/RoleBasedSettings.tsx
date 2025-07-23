@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Crown, Users, Settings, BarChart3, Shield, UserCheck } from 'lucide-react';
+import { Crown, Users, Settings, BarChart3, Shield, UserCheck, Target } from 'lucide-react';
 
 interface RoleBasedSettingsProps {
-  userRole: 'Admin' | 'Manager' | 'Employee';
+  userRole: 'Admin' | 'Manager' | 'Lead Manager' | 'Employee';
 }
 
 const RoleBasedSettings: React.FC<RoleBasedSettingsProps> = ({ userRole }) => {
@@ -47,9 +47,51 @@ const RoleBasedSettings: React.FC<RoleBasedSettingsProps> = ({ userRole }) => {
     </Card>
   );
 
-  const renderManagerSettings = () => (
+  const renderLeadManagerSettings = () => (
     <>
       {renderEmployeeSettings()}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Target className="w-5 h-5" />
+            Lead Manager Settings
+            <Badge className="bg-purple-100 text-purple-800 border-purple-200">Lead Manager</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-base">Lead Assignment Alerts</Label>
+              <p className="text-sm text-gray-600">Get notified when leads are assigned</p>
+            </div>
+            <Switch defaultChecked />
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-base">Lead Performance Reports</Label>
+              <p className="text-sm text-gray-600">Weekly lead performance summaries</p>
+            </div>
+            <Switch defaultChecked />
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-base">Lead Quality Scoring</Label>
+              <p className="text-sm text-gray-600">Auto-scoring of lead quality</p>
+            </div>
+            <Switch defaultChecked />
+          </div>
+          <Button className="w-full bg-purple-600 hover:bg-purple-700">
+            <Target className="w-4 h-4 mr-2" />
+            View Lead Analytics
+          </Button>
+        </CardContent>
+      </Card>
+    </>
+  );
+
+  const renderManagerSettings = () => (
+    <>
+      {renderLeadManagerSettings()}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -68,8 +110,8 @@ const RoleBasedSettings: React.FC<RoleBasedSettingsProps> = ({ userRole }) => {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <Label className="text-base">Lead Assignment Alerts</Label>
-              <p className="text-sm text-gray-600">Get notified when leads are assigned to your team</p>
+              <Label className="text-base">Campaign Management</Label>
+              <p className="text-sm text-gray-600">Create and manage campaigns</p>
             </div>
             <Switch defaultChecked />
           </div>
@@ -142,6 +184,8 @@ const RoleBasedSettings: React.FC<RoleBasedSettingsProps> = ({ userRole }) => {
       return <div className="space-y-6">{renderAdminSettings()}</div>;
     case 'Manager':
       return <div className="space-y-6">{renderManagerSettings()}</div>;
+    case 'Lead Manager':
+      return <div className="space-y-6">{renderLeadManagerSettings()}</div>;
     case 'Employee':
     default:
       return <div className="space-y-6">{renderEmployeeSettings()}</div>;

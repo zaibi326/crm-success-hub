@@ -35,15 +35,16 @@ const Settings = () => {
     }, 1000);
   };
 
-  const getUserRole = (): 'Admin' | 'Manager' | 'Employee' => {
+  const getUserRole = (): 'Admin' | 'Manager' | 'Lead Manager' | 'Employee' => {
     const role = profile?.role || 'Employee';
-    if (role === 'Admin' || role === 'Manager' || role === 'Employee') {
+    if (role === 'Admin' || role === 'Manager' || role === 'Lead Manager' || role === 'Employee') {
       return role;
     }
     return 'Employee';
   };
 
   const isAdmin = getUserRole() === 'Admin';
+  const currentRole = getUserRole();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-crm-gradient-start via-white to-crm-gradient-end">
@@ -58,7 +59,7 @@ const Settings = () => {
                   <div>
                     <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
                     <p className="text-sm text-gray-600 mt-0.5">
-                      Manage your account and preferences - {getUserRole()} Dashboard
+                      Manage your account and preferences - {currentRole} Dashboard
                     </p>
                   </div>
                 </div>
@@ -110,7 +111,7 @@ const Settings = () => {
                   </TabsContent>
 
                   <TabsContent value="role-settings" className="space-y-6">
-                    <RoleBasedSettings userRole={getUserRole()} />
+                    <RoleBasedSettings userRole={currentRole} />
                   </TabsContent>
 
                   <TabsContent value="lead-source" className="space-y-6">
@@ -140,7 +141,7 @@ const Settings = () => {
                       <Button variant="outline" onClick={() => navigate('/campaigns')}>
                         View Campaigns
                       </Button>
-                      {(getUserRole() === 'Admin' || getUserRole() === 'Manager') && (
+                      {(currentRole === 'Admin' || currentRole === 'Manager') && (
                         <Button variant="outline" onClick={() => navigate('/notifications')}>
                           Team Notifications
                         </Button>
