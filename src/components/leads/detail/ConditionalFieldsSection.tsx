@@ -55,8 +55,8 @@ export function ConditionalFieldsSection({
         {/* Vesting Deed Section */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <Label htmlFor="vestingDeed" className="text-sm font-medium">
-              Vesting Deed
+            <Label htmlFor="vestingDeedDate" className="text-sm font-medium">
+              Vesting Deed Date
             </Label>
             <Badge variant="outline" className="text-xs">
               Optional
@@ -64,13 +64,43 @@ export function ConditionalFieldsSection({
           </div>
           
           <Input
-            id="vestingDeed"
-            value={formData.vestingDeed || ''}
-            onChange={(e) => onInputChange('vestingDeed', e.target.value)}
-            placeholder="Enter vesting deed information"
+            id="vestingDeedDate"
+            value={formData.vestingDeedDate || ''}
+            onChange={(e) => onInputChange('vestingDeedDate', e.target.value)}
+            placeholder="Enter vesting deed date"
             disabled={!canEdit}
             className="w-full"
           />
+
+          {/* Grantor/Grantee Name */}
+          <div className="space-y-2">
+            <Label htmlFor="grantorGranteeName" className="text-sm font-medium">
+              Grantor/Grantee Name
+            </Label>
+            <Input
+              id="grantorGranteeName"
+              value={formData.grantorGranteeName || ''}
+              onChange={(e) => onInputChange('grantorGranteeName', e.target.value)}
+              placeholder="Enter grantor/grantee name"
+              disabled={!canEdit}
+              className="w-full"
+            />
+          </div>
+
+          {/* Owner of Record */}
+          <div className="space-y-2">
+            <Label htmlFor="ownerOfRecord" className="text-sm font-medium">
+              Owner of Record
+            </Label>
+            <Input
+              id="ownerOfRecord"
+              value={formData.ownerOfRecord || ''}
+              onChange={(e) => onInputChange('ownerOfRecord', e.target.value)}
+              placeholder="Enter owner of record"
+              disabled={!canEdit}
+              className="w-full"
+            />
+          </div>
 
           {/* Vesting Deed File Upload */}
           <div className="space-y-3">
