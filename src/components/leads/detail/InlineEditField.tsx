@@ -69,7 +69,7 @@ export function InlineEditField({
     }
   };
 
-  const handleClick = () => {
+  const handleDoubleClick = () => {
     if (canEdit && !isEditing) {
       setIsEditing(true);
     }
@@ -88,9 +88,6 @@ export function InlineEditField({
       <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
         {label}
         {required && <span className="text-red-500">*</span>}
-        {canEdit && !isEditing && (
-          <Edit3 className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-        )}
       </label>
       
       <div className="group relative">
@@ -136,6 +133,7 @@ export function InlineEditField({
                 size="sm"
                 onClick={handleSave}
                 className="h-8 w-8 p-0 bg-green-600 hover:bg-green-700"
+                title="Save changes"
               >
                 <Check className="w-4 h-4" />
               </Button>
@@ -144,6 +142,7 @@ export function InlineEditField({
                 variant="outline"
                 onClick={handleCancel}
                 className="h-8 w-8 p-0 border-gray-300 hover:bg-gray-50"
+                title="Cancel changes"
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -151,16 +150,19 @@ export function InlineEditField({
           </div>
         ) : (
           <div 
-            onClick={handleClick}
+            onDoubleClick={handleDoubleClick}
             className={`
-              p-3 rounded-lg border bg-gray-50 min-h-[44px] flex items-center
+              p-3 rounded-lg border bg-gray-50 min-h-[44px] flex items-center justify-between
               ${canEdit ? 'cursor-pointer hover:bg-gray-100 hover:border-blue-300 transition-colors' : 'cursor-default'}
               ${!value ? 'text-gray-400 italic' : 'text-gray-900'}
             `}
+            title={canEdit ? "Double-click to edit" : "Read only"}
           >
-            {getDisplayValue() || placeholder || `Enter ${label.toLowerCase()}`}
+            <span className="flex-1">
+              {getDisplayValue() || placeholder || `Enter ${label.toLowerCase()}`}
+            </span>
             {canEdit && (
-              <Edit3 className="w-4 h-4 text-gray-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Edit3 className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
             )}
           </div>
         )}

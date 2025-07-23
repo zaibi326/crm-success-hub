@@ -7,6 +7,7 @@ import { TaxLead } from '@/types/taxLead';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { InlineEditField } from './InlineEditField';
 import { useToast } from '@/hooks/use-toast';
+import { useEnhancedActivityLogger } from '@/hooks/useEnhancedActivityLogger';
 
 interface SellerContactSectionProps {
   lead: TaxLead;
@@ -19,23 +20,61 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
   const [hasChanges, setHasChanges] = useState(false);
   const [pendingChanges, setPendingChanges] = useState<Partial<TaxLead>>({});
   const { toast } = useToast();
+  const { logLeadActivity } = useEnhancedActivityLogger();
 
   const handleFieldChange = (field: keyof TaxLead, value: string) => {
     if (canEdit) {
+      const oldValue = lead[field];
+      
+      // Update pending changes
       setPendingChanges(prev => ({
         ...prev,
         [field]: value
       }));
-      setHasChanges(true);
+      
+      // Immediately apply the change to the lead
+      onFieldUpdate(field, value);
+      
+      // Log the activity immediately
+      logLeadActivity({
+        actionType: 'updated',
+        description: `Updated ${field} from "${oldValue}" to "${value}" for ${lead.ownerName || 'Unknown'}`,
+        referenceId: lead.id.toString(),
+        metadata: {
+          leadId: lead.id,
+          field: field,
+          oldValue: oldValue,
+          newValue: value,
+          ownerName: lead.ownerName
+        }
+      });
+
+      // Show success toast
+      toast({
+        title: "Field Updated",
+        description: `${field} has been updated successfully`,
+      });
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!hasChanges || !canEdit) return;
 
     // Apply all pending changes
     Object.entries(pendingChanges).forEach(([field, value]) => {
       onFieldUpdate(field as keyof TaxLead, value as string);
+    });
+
+    // Log bulk save activity
+    await logLeadActivity({
+      actionType: 'updated',
+      description: `Saved contact changes for ${lead.ownerName || 'Unknown'}`,
+      referenceId: lead.id.toString(),
+      metadata: {
+        leadId: lead.id,
+        changes: pendingChanges,
+        ownerName: lead.ownerName
+      }
     });
 
     // Clear pending changes
@@ -81,7 +120,7 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <InlineEditField
                 label="First Name"
-                value={pendingChanges.firstName ?? lead.firstName}
+                value={lead.firstName || ''}
                 onSave={(value) => handleFieldChange('firstName', value)}
                 placeholder="Enter first name"
                 required
@@ -90,7 +129,7 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
 
               <InlineEditField
                 label="Last Name"
-                value={pendingChanges.lastName ?? lead.lastName}
+                value={lead.lastName || ''}
                 onSave={(value) => handleFieldChange('lastName', value)}
                 placeholder="Enter last name"
                 required
@@ -99,7 +138,7 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
 
               <InlineEditField
                 label="Seller Phone"
-                value={pendingChanges.phone ?? lead.phone}
+                value={lead.phone || ''}
                 onSave={(value) => handleFieldChange('phone', value)}
                 type="tel"
                 placeholder="Enter phone number"
@@ -108,7 +147,7 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
 
               <InlineEditField
                 label="Seller Email"
-                value={pendingChanges.email ?? lead.email}
+                value={lead.email || ''}
                 onSave={(value) => handleFieldChange('email', value)}
                 type="email"
                 placeholder="Enter email address"
@@ -118,7 +157,7 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
               <div className="md:col-span-2">
                 <InlineEditField
                   label="Property Address"
-                  value={pendingChanges.propertyAddress ?? lead.propertyAddress}
+                  value={lead.propertyAddress || ''}
                   onSave={(value) => handleFieldChange('propertyAddress', value)}
                   placeholder="Enter property address"
                   required
@@ -126,21 +165,6 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
                 />
               </div>
             </div>
-
-            {/* Save Button - Only show if there are changes */}
-            {hasChanges && canEdit && (
-              <div className="mt-6 pt-4 border-t border-gray-200">
-                <div className="flex justify-end">
-                  <Button
-                    onClick={handleSave}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6"
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    Save Contact Changes
-                  </Button>
-                </div>
-              </div>
-            )}
           </CardContent>
         </CollapsibleContent>
       </Card>

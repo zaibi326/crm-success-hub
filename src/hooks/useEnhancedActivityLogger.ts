@@ -49,15 +49,23 @@ export function useEnhancedActivityLogger() {
       return data;
     },
     onSuccess: () => {
-      // Invalidate activities query to refresh the feed
+      // Invalidate all activity-related queries to refresh everywhere
       queryClient.invalidateQueries({ queryKey: ['activities'] });
       queryClient.invalidateQueries({ queryKey: ['lead-activities'] });
       queryClient.invalidateQueries({ queryKey: ['campaign-leads'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-activities'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
+      queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
       
-      console.log('Activity logged and queries invalidated');
+      console.log('Activity logged and all queries invalidated');
     },
     onError: (error) => {
       console.error('Failed to log activity:', error);
+      toast({
+        title: "Activity Logging Failed",
+        description: "Could not log the activity. Please try again.",
+        variant: "destructive"
+      });
     }
   });
 

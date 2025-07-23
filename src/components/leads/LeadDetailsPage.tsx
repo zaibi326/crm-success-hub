@@ -3,14 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TaxLead } from '@/types/taxLead';
 import { TemplateModificationDialog } from './TemplateModificationDialog';
-import { ContactSection } from './detail/ContactSection';
+import { SellerContactSection } from './detail/SellerContactSection';
 import { PropertyDetailsSection } from './detail/PropertyDetailsSection';
 import { PropertyMapSection } from './detail/PropertyMapSection';
 import { NotesDisplaySection } from './detail/NotesDisplaySection';
 import { DatabaseActivityTimeline } from './DatabaseActivityTimeline';
 import { LeadDetailsHeader } from './detail/LeadDetailsHeader';
-import { SaveButton } from './detail/SaveButton';
 import { useToast } from '@/hooks/use-toast';
+import { useEnhancedActivityLogger } from '@/hooks/useEnhancedActivityLogger';
 
 interface LeadDetailsPageProps {
   lead: TaxLead;
@@ -21,33 +21,69 @@ interface LeadDetailsPageProps {
 export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageProps) {
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
   const [leadData, setLeadData] = useState<TaxLead>(lead);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [disposition, setDisposition] = useState<'keep' | 'pass' | null>(null);
   const { toast } = useToast();
+  const { logLeadActivity } = useEnhancedActivityLogger();
 
   // Update local state when lead prop changes
   useEffect(() => {
     setLeadData(lead);
-    setHasChanges(false);
   }, [lead]);
-  
+
   const handleCall = (phoneNumber: string) => {
     window.open(`tel:${phoneNumber}`, '_self');
+    
+    // Log call activity
+    logLeadActivity({
+      actionType: 'call',
+      description: `Initiated call to ${phoneNumber} for ${leadData.ownerName || 'Unknown'}`,
+      referenceId: leadData.id.toString(),
+      metadata: {
+        leadId: leadData.id,
+        phoneNumber: phoneNumber,
+        ownerName: leadData.ownerName
+      }
+    });
   };
 
   const handleSendText = (phoneNumber: string) => {
     window.open(`sms:${phoneNumber}`, '_self');
+    
+    // Log SMS activity
+    logLeadActivity({
+      actionType: 'sms',
+      description: `Sent SMS to ${phoneNumber} for ${leadData.ownerName || 'Unknown'}`,
+      referenceId: leadData.id.toString(),
+      metadata: {
+        leadId: leadData.id,
+        phoneNumber: phoneNumber,
+        ownerName: leadData.ownerName
+      }
+    });
   };
 
   const handleEmail = (email: string) => {
     window.open(`mailto:${email}`, '_self');
+    
+    // Log email activity
+    logLeadActivity({
+      actionType: 'email',
+      description: `Sent email to ${email} for ${leadData.ownerName || 'Unknown'}`,
+      referenceId: leadData.id.toString(),
+      metadata: {
+        leadId: leadData.id,
+        email: email,
+        ownerName: leadData.ownerName
+      }
+    });
   };
 
-  const handleFieldUpdate = (field: keyof TaxLead, value: string) => {
+  const handleFieldUpdate = async (field: keyof TaxLead, value: string) => {
+    const originalValue = leadData[field];
     const updatedLead = { ...leadData, [field]: value };
+    
+    // Update local state immediately
     setLeadData(updatedLead);
-    setHasChanges(true);
     
     // Check if this affects disposition
     if (field === 'status') {
@@ -58,27 +94,10 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
       }
     }
     
-    console.log('Field updated:', field, value);
-  };
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      await onLeadUpdate(leadData);
-      setHasChanges(false);
-      toast({
-        title: "Success",
-        description: "Lead details saved successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save lead details",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
+    // Update the parent component
+    await onLeadUpdate(updatedLead);
+    
+    console.log('Field updated:', field, 'from', originalValue, 'to', value);
   };
 
   const getStatusColor = (status: string) => {
@@ -121,12 +140,10 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
             <TabsContent value="details" className="space-y-6 mt-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-6">
-                  <ContactSection
+                  <SellerContactSection
                     lead={leadData}
-                    onCall={handleCall}
-                    onSendText={handleSendText}
-                    onEmail={handleEmail}
-                    onLeadUpdate={handleFieldUpdate}
+                    onFieldUpdate={handleFieldUpdate}
+                    canEdit={true}
                   />
 
                   <PropertyDetailsSection 
@@ -143,16 +160,6 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
                   )}
                 </div>
               </div>
-
-              {/* Save Button - Show when there are changes */}
-              {hasChanges && (
-                <SaveButton
-                  onSave={handleSave}
-                  isSaving={isSaving}
-                  canEdit={true}
-                  disposition={disposition}
-                />
-              )}
             </TabsContent>
 
             <TabsContent value="activity" className="space-y-6 mt-6">
@@ -169,10 +176,21 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
         isOpen={isTemplateDialogOpen}
         onClose={() => setIsTemplateDialogOpen(false)}
         lead={leadData}
-        onSave={(updatedLead) => {
+        onSave={async (updatedLead) => {
           setLeadData(updatedLead);
-          setHasChanges(true);
-          onLeadUpdate(updatedLead);
+          await onLeadUpdate(updatedLead);
+          
+          // Log template modification activity
+          await logLeadActivity({
+            actionType: 'updated',
+            description: `Modified lead template for ${updatedLead.ownerName || 'Unknown'}`,
+            referenceId: updatedLead.id.toString(),
+            metadata: {
+              leadId: updatedLead.id,
+              ownerName: updatedLead.ownerName,
+              modificationType: 'template'
+            }
+          });
         }}
       />
     </div>
