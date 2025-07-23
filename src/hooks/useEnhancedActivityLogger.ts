@@ -45,20 +45,29 @@ export function useEnhancedActivityLogger() {
         throw error;
       }
 
+      console.log('Activity logged successfully:', data);
       return data;
     },
     onSuccess: () => {
       // Invalidate activities query to refresh the feed
       queryClient.invalidateQueries({ queryKey: ['activities'] });
       queryClient.invalidateQueries({ queryKey: ['lead-activities'] });
+      queryClient.invalidateQueries({ queryKey: ['campaign-leads'] });
+      
+      console.log('Activity logged and queries invalidated');
     },
     onError: (error) => {
       console.error('Failed to log activity:', error);
     }
   });
 
-  const logLeadActivity = (params: LogActivityParams) => {
-    logActivity.mutate(params);
+  const logLeadActivity = async (params: LogActivityParams) => {
+    return new Promise<void>((resolve, reject) => {
+      logActivity.mutate(params, {
+        onSuccess: () => resolve(),
+        onError: (error) => reject(error)
+      });
+    });
   };
 
   return {

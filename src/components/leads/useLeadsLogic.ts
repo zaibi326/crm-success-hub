@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from 'react';
 import { TaxLead } from '@/types/taxLead';
 import { useLeadsData } from '@/hooks/useLeadsData';
@@ -153,12 +152,12 @@ export function useLeadsLogic() {
     setSortBy(field);
   };
 
-  const handleAddLead = (lead: TaxLead) => {
+  const handleAddLead = async (lead: TaxLead) => {
     const newLead = { ...lead, id: Date.now() };
-    addLead(newLead);
+    await addLead(newLead);
     
-    // Log the activity
-    logLeadActivity({
+    // Log the activity with proper await
+    await logLeadActivity({
       actionType: 'created',
       description: `Created new lead for ${newLead.ownerName}`,
       referenceId: newLead.id.toString(),
@@ -173,12 +172,12 @@ export function useLeadsLogic() {
     console.log('Adding lead:', newLead);
   };
 
-  const handleLeadUpdate = (updatedLead: TaxLead) => {
+  const handleLeadUpdate = async (updatedLead: TaxLead) => {
     const originalLead = mockLeads.find(lead => lead.id === updatedLead.id);
-    updateLead(updatedLead);
+    await updateLead(updatedLead);
     
-    // Log the activity
-    logLeadActivity({
+    // Log the activity with proper await
+    await logLeadActivity({
       actionType: 'updated',
       description: `Updated lead information for ${updatedLead.ownerName}`,
       referenceId: updatedLead.id.toString(),
@@ -195,11 +194,11 @@ export function useLeadsLogic() {
     console.log('Updating lead:', updatedLead);
   };
 
-  const handleBulkLeadsUpdate = (updatedLeads: TaxLead[]) => {
+  const handleBulkLeadsUpdate = async (updatedLeads: TaxLead[]) => {
     setMockLeads(updatedLeads);
     
-    // Log bulk update activity
-    logLeadActivity({
+    // Log bulk update activity with proper await
+    await logLeadActivity({
       actionType: 'bulk_updated',
       description: `Bulk updated ${updatedLeads.length} leads`,
       metadata: {
@@ -211,13 +210,13 @@ export function useLeadsLogic() {
     console.log('Bulk updating leads:', updatedLeads);
   };
 
-  const handleDeleteSingleLead = (leadId: number) => {
+  const handleDeleteSingleLead = async (leadId: number) => {
     const leadToDelete = mockLeads.find(lead => lead.id === leadId);
-    handleDeleteLead(leadId);
+    await handleDeleteLead(leadId);
     
-    // Log the activity
+    // Log the activity with proper await
     if (leadToDelete) {
-      logLeadActivity({
+      await logLeadActivity({
         actionType: 'deleted',
         description: `Deleted lead for ${leadToDelete.ownerName}`,
         referenceId: leadId.toString(),
@@ -232,12 +231,12 @@ export function useLeadsLogic() {
     console.log('Deleting single lead:', leadId);
   };
 
-  const handleDeleteMultipleLeads = (leadIds: number[]) => {
+  const handleDeleteMultipleLeads = async (leadIds: number[]) => {
     const leadsToDelete = mockLeads.filter(lead => leadIds.includes(lead.id));
-    handleBulkDeleteLeads(leadIds);
+    await handleBulkDeleteLeads(leadIds);
     
-    // Log the activity
-    logLeadActivity({
+    // Log the activity with proper await
+    await logLeadActivity({
       actionType: 'bulk_deleted',
       description: `Bulk deleted ${leadIds.length} leads`,
       metadata: {

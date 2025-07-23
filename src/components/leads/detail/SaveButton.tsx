@@ -11,7 +11,7 @@ interface SaveButtonProps {
 }
 
 export function SaveButton({ onSave, isSaving, canEdit, disposition }: SaveButtonProps) {
-  if (!canEdit || !disposition) return null;
+  if (!canEdit) return null;
 
   return (
     <div className="sticky bottom-6 z-10 flex justify-center">

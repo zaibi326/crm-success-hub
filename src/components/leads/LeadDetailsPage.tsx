@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TaxLead } from '@/types/taxLead';
 import { TemplateModificationDialog } from './TemplateModificationDialog';
@@ -9,6 +9,8 @@ import { PropertyMapSection } from './detail/PropertyMapSection';
 import { NotesDisplaySection } from './detail/NotesDisplaySection';
 import { DatabaseActivityTimeline } from './DatabaseActivityTimeline';
 import { LeadDetailsHeader } from './detail/LeadDetailsHeader';
+import { SaveButton } from './detail/SaveButton';
+import { useToast } from '@/hooks/use-toast';
 
 interface LeadDetailsPageProps {
   lead: TaxLead;
@@ -19,6 +21,16 @@ interface LeadDetailsPageProps {
 export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageProps) {
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
   const [leadData, setLeadData] = useState<TaxLead>(lead);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [disposition, setDisposition] = useState<'keep' | 'pass' | null>(null);
+  const { toast } = useToast();
+
+  // Update local state when lead prop changes
+  useEffect(() => {
+    setLeadData(lead);
+    setHasChanges(false);
+  }, [lead]);
   
   const handleCall = (phoneNumber: string) => {
     window.open(`tel:${phoneNumber}`, '_self');
@@ -35,7 +47,38 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
   const handleFieldUpdate = (field: keyof TaxLead, value: string) => {
     const updatedLead = { ...leadData, [field]: value };
     setLeadData(updatedLead);
-    onLeadUpdate(updatedLead);
+    setHasChanges(true);
+    
+    // Check if this affects disposition
+    if (field === 'status') {
+      if (value === 'KEEP') {
+        setDisposition('keep');
+      } else if (value === 'PASS') {
+        setDisposition('pass');
+      }
+    }
+    
+    console.log('Field updated:', field, value);
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await onLeadUpdate(leadData);
+      setHasChanges(false);
+      toast({
+        title: "Success",
+        description: "Lead details saved successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save lead details",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -100,6 +143,16 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
                   )}
                 </div>
               </div>
+
+              {/* Save Button - Show when there are changes */}
+              {hasChanges && (
+                <SaveButton
+                  onSave={handleSave}
+                  isSaving={isSaving}
+                  canEdit={true}
+                  disposition={disposition}
+                />
+              )}
             </TabsContent>
 
             <TabsContent value="activity" className="space-y-6 mt-6">
@@ -116,7 +169,11 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
         isOpen={isTemplateDialogOpen}
         onClose={() => setIsTemplateDialogOpen(false)}
         lead={leadData}
-        onSave={onLeadUpdate}
+        onSave={(updatedLead) => {
+          setLeadData(updatedLead);
+          setHasChanges(true);
+          onLeadUpdate(updatedLead);
+        }}
       />
     </div>
   );

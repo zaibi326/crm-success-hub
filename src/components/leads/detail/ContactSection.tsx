@@ -1,10 +1,11 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Phone, Mail, MessageSquare, User } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
-import { CommunicationButton } from '@/components/communication/CommunicationButton';
-import { EditableField } from '../EditableField';
 
 interface ContactSectionProps {
   lead: TaxLead;
@@ -14,72 +15,101 @@ interface ContactSectionProps {
   onLeadUpdate: (field: keyof TaxLead, value: string) => void;
 }
 
-export function ContactSection({ lead, onCall, onSendText, onEmail, onLeadUpdate }: ContactSectionProps) {
+export function ContactSection({ 
+  lead, 
+  onCall, 
+  onSendText, 
+  onEmail, 
+  onLeadUpdate 
+}: ContactSectionProps) {
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onLeadUpdate('phone', e.target.value);
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onLeadUpdate('email', e.target.value);
+  };
+
+  const handleOwnerNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onLeadUpdate('ownerName', e.target.value);
+  };
+
   return (
-    <div className="podio-container p-6">
-      <div className="flex items-center gap-2 mb-4">
-        <User className="w-5 h-5 text-podio-primary" />
-        <h3 className="font-semibold text-podio-text">Seller Contact</h3>
-      </div>
-      <div className="space-y-4">
-        <div className="podio-field-row">
-          <div className="podio-field-label">Seller Name</div>
-          <div className="podio-field-value">
-            <EditableField
-              label=""
-              value={lead.ownerName}
-              onSave={(value) => onLeadUpdate('ownerName', value)}
-              className="font-medium"
+    <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <User className="w-5 h-5 text-crm-primary" />
+          Contact Information
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="ownerName">Owner Name</Label>
+          <Input
+            id="ownerName"
+            value={lead.ownerName || ''}
+            onChange={handleOwnerNameChange}
+            placeholder="Enter owner name"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="phone">Phone Number</Label>
+          <div className="flex gap-2">
+            <Input
+              id="phone"
+              value={lead.phone || ''}
+              onChange={handlePhoneChange}
+              placeholder="Enter phone number"
+              className="flex-1"
             />
+            {lead.phone && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onCall(lead.phone!)}
+                  className="px-3"
+                >
+                  <Phone className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onSendText(lead.phone!)}
+                  className="px-3"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                </Button>
+              </>
+            )}
           </div>
         </div>
-        
-        {lead.phone && (
-          <div className="podio-field-row">
-            <div className="podio-field-label">Seller Phone</div>
-            <div className="podio-field-value flex items-center gap-2">
-              <div className="flex-1">
-                <EditableField
-                  label=""
-                  value={lead.phone}
-                  onSave={(value) => onLeadUpdate('phone', value)}
-                  type="tel"
-                />
-              </div>
-              <div className="flex gap-1">
-                <CommunicationButton
-                  phoneNumber={lead.phone}
-                  leadId={lead.id.toString()}
-                  leadName={lead.ownerName}
-                  type="call"
-                  onCommunicationStart={onCall}
-                />
-                <CommunicationButton
-                  phoneNumber={lead.phone}
-                  leadId={lead.id.toString()}
-                  leadName={lead.ownerName}
-                  type="sms"
-                  onCommunicationStart={onSendText}
-                />
-              </div>
-            </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="email">Email Address</Label>
+          <div className="flex gap-2">
+            <Input
+              id="email"
+              type="email"
+              value={lead.email || ''}
+              onChange={handleEmailChange}
+              placeholder="Enter email address"
+              className="flex-1"
+            />
+            {lead.email && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEmail(lead.email!)}
+                className="px-3"
+              >
+                <Mail className="w-4 h-4" />
+              </Button>
+            )}
           </div>
-        )}
-        
-        {lead.email && (
-          <div className="podio-field-row">
-            <div className="podio-field-label">Seller Email</div>
-            <div className="podio-field-value">
-              <EditableField
-                label=""
-                value={lead.email}
-                onSave={(value) => onLeadUpdate('email', value)}
-                type="email"
-              />
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
