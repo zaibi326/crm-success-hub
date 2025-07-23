@@ -22,12 +22,26 @@ export function useEnhancedActivityLogger() {
         throw new Error('User not authenticated');
       }
 
-      // Get user name from profile or fallback to email
-      const userName = profile 
-        ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email || 'Unknown User'
-        : user.email || 'Unknown User';
+      // Get user name from profile with better fallback logic
+      let userName = 'Unknown User';
+      if (profile?.first_name && profile?.last_name) {
+        userName = `${profile.first_name} ${profile.last_name}`;
+      } else if (profile?.first_name) {
+        userName = profile.first_name;
+      } else if (profile?.last_name) {
+        userName = profile.last_name;
+      } else if (profile?.email) {
+        userName = profile.email;
+      } else if (user.email) {
+        userName = user.email;
+      }
 
-      console.log('Logging activity with user:', userName, 'for action:', params.actionType);
+      console.log('Logging activity:', {
+        user: userName,
+        actionType: params.actionType,
+        description: params.description,
+        referenceId: params.referenceId
+      });
 
       // Use the database function for logging
       const { data, error } = await supabase
@@ -48,16 +62,24 @@ export function useEnhancedActivityLogger() {
       console.log('Activity logged successfully:', data);
       return data;
     },
-    onSuccess: () => {
-      // Invalidate all activity-related queries to refresh everywhere
+    onSuccess: (data, variables) => {
+      // Invalidate specific queries with the reference ID
+      const referenceId = variables.referenceId;
+      
+      // Invalidate lead-specific activities
+      if (referenceId) {
+        queryClient.invalidateQueries({ queryKey: ['lead-activities', referenceId] });
+      }
+      
+      // Invalidate all activity-related queries
       queryClient.invalidateQueries({ queryKey: ['activities'] });
       queryClient.invalidateQueries({ queryKey: ['lead-activities'] });
-      queryClient.invalidateQueries({ queryKey: ['campaign-leads'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-activities'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
       queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
+      queryClient.invalidateQueries({ queryKey: ['campaign-leads'] });
       
-      console.log('Activity logged and all queries invalidated');
+      console.log('Activity logged successfully and queries invalidated for reference:', referenceId);
     },
     onError: (error) => {
       console.error('Failed to log activity:', error);

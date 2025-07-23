@@ -19,7 +19,12 @@ export function useLeadActivities(leadId?: string) {
   return useQuery({
     queryKey: ['lead-activities', leadId],
     queryFn: async () => {
-      if (!leadId) return [];
+      if (!leadId) {
+        console.log('No leadId provided to useLeadActivities');
+        return [];
+      }
+
+      console.log('Fetching activities for lead:', leadId);
 
       const { data, error } = await supabase
         .from('activities')
@@ -33,8 +38,12 @@ export function useLeadActivities(leadId?: string) {
         throw error;
       }
 
+      console.log('Fetched activities:', data?.length || 0, 'activities for lead', leadId);
       return data || [];
     },
     enabled: !!leadId,
+    staleTime: 30000, // 30 seconds
+    refetchOnWindowFocus: true,
+    refetchInterval: 60000, // Refetch every minute
   });
 }
