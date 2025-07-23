@@ -25,13 +25,21 @@ export function useRealUsers() {
         throw error;
       }
 
-      return (data || []).map((user): RealUser => ({
-        ...user,
-        role: user.role || 'Employee',
-        display_name: user.first_name && user.last_name 
-          ? `${user.first_name} ${user.last_name}`
-          : user.email
-      }));
+      return (data || []).map((user): RealUser => {
+        const validRoles: ('Admin' | 'Manager' | 'Lead Manager' | 'Employee' | 'Guest')[] = [
+          'Admin', 'Manager', 'Lead Manager', 'Employee', 'Guest'
+        ];
+        
+        const userRole = validRoles.includes(user.role as any) ? user.role as RealUser['role'] : 'Employee';
+        
+        return {
+          ...user,
+          role: userRole,
+          display_name: user.first_name && user.last_name 
+            ? `${user.first_name} ${user.last_name}`
+            : user.email
+        };
+      });
     },
   });
 }

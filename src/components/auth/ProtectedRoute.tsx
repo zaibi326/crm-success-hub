@@ -6,8 +6,8 @@ import { canAccessRoute, getRoleBasedRedirect } from '@/utils/roleRedirect';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'Admin' | 'Manager' | 'Employee';
-  allowedRoles?: ('Admin' | 'Manager' | 'Employee')[];
+  requiredRole?: 'Admin' | 'Manager' | 'Lead Manager' | 'Employee' | 'Guest';
+  allowedRoles?: ('Admin' | 'Manager' | 'Lead Manager' | 'Employee' | 'Guest')[];
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
