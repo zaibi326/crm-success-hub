@@ -66,21 +66,21 @@ export function MainContent({
 
   return (
     <div className="space-y-6">
-      {/* Step 1: Always show Seller Contact Section */}
+      {/* Step 1: Seller Contact Section - NO attachments here */}
       <EnhancedSellerContactSection
         lead={formData}
         onFieldUpdate={onInputChange}
         canEdit={canEdit}
       />
 
-      {/* Step 2: Always show Lead Details Section */}
+      {/* Step 2: Lead Details Section */}
       <EnhancedLeadDetailsSection 
         lead={formData} 
         onFieldUpdate={onInputChange} 
         canEdit={canEdit} 
       />
 
-      {/* Step 3: Always show Disposition Section */}
+      {/* Step 3: Disposition Section */}
       <DispositionSection
         disposition={disposition}
         passReason={passReason}
