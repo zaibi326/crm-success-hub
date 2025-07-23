@@ -67,7 +67,21 @@ export function MainContent({
 
   return (
     <div className="space-y-6">
-      {/* Disposition Section */}
+      {/* Step 1: Always show Seller Contact Section */}
+      <EnhancedSellerContactSection
+        lead={formData}
+        onFieldUpdate={onInputChange}
+        canEdit={canEdit}
+      />
+
+      {/* Step 2: Always show Lead Details Section */}
+      <EnhancedLeadDetailsSection 
+        lead={formData} 
+        onFieldUpdate={onInputChange} 
+        canEdit={canEdit} 
+      />
+
+      {/* Step 3: Always show Disposition Section */}
       <DispositionSection
         disposition={disposition}
         passReason={passReason}
@@ -76,69 +90,73 @@ export function MainContent({
         onPassReasonChange={onPassReasonChange}
       />
 
-      {/* Notes Section */}
-      <NotesSection
-        notes={notes}
-        newNote={newNote}
-        canEdit={canEdit}
-        onNewNoteChange={onNewNoteChange}
-        onAddNote={onAddNote}
-      />
+      {/* Step 4: Conditional rendering based on disposition */}
+      {disposition === 'keep' && (
+        <>
+          {/* Editable Fields Section */}
+          <EditableFieldsSection
+            formData={formData}
+            canEdit={canEdit}
+            onInputChange={onInputChange}
+          />
 
-      {/* Enhanced Seller Contact Section */}
-      <EnhancedSellerContactSection
-        lead={formData}
-        onFieldUpdate={onInputChange}
-        canEdit={canEdit}
-      />
+          {/* Additional Information Section */}
+          <EnhancedAdditionalInfoSection
+            formData={formData}
+            onInputChange={onInputChange}
+            canEdit={canEdit}
+          />
 
-      {/* Enhanced Lead Details Section - Below Seller Contact */}
-      <EnhancedLeadDetailsSection 
-        lead={formData} 
-        onFieldUpdate={onInputChange} 
-        canEdit={canEdit} 
-      />
+          {/* Conditional Fields Section */}
+          <ConditionalFieldsSection
+            formData={formData}
+            files={files}
+            canEdit={canEdit}
+            onInputChange={onInputChange}
+            onFileUpload={onFileUpload}
+            onRemoveFile={onRemoveFile}
+          />
 
-      {/* Editable Fields Section */}
-      <EditableFieldsSection
-        formData={formData}
-        canEdit={canEdit}
-        onInputChange={onInputChange}
-      />
+          {/* Attachments Section */}
+          <AttachmentsSection
+            files={files}
+            onRemoveFile={onRemoveFile}
+            onFileUpload={onFileUpload}
+            canEdit={canEdit}
+            title="Lead Attachments"
+            description="Upload documents related to this lead"
+          />
 
-      {/* Enhanced Additional Info Section - Above Conditional Fields */}
-      <EnhancedAdditionalInfoSection
-        formData={formData}
-        onInputChange={onInputChange}
-        canEdit={canEdit}
-      />
+          {/* Enhanced Ownership Section */}
+          <EnhancedOwnershipSection
+            lead={formData}
+            canEdit={canEdit}
+            onSave={handleOwnershipSave}
+          />
+        </>
+      )}
 
-      {/* Conditional Fields Section */}
-      <ConditionalFieldsSection
-        formData={formData}
-        files={files}
-        canEdit={canEdit}
-        onInputChange={onInputChange}
-        onFileUpload={onFileUpload}
-        onRemoveFile={onRemoveFile}
-      />
+      {/* Step 5: If disposition is 'pass', show Notes Section */}
+      {disposition === 'pass' && (
+        <NotesSection
+          notes={notes}
+          newNote={newNote}
+          canEdit={canEdit}
+          onNewNoteChange={onNewNoteChange}
+          onAddNote={onAddNote}
+        />
+      )}
 
-      {/* Lead Attachments Section */}
-      <AttachmentsSection
-        files={files}
-        onRemoveFile={onRemoveFile}
-        onFileUpload={onFileUpload}
-        canEdit={canEdit}
-        title="Lead Attachments"
-        description="Upload documents related to this lead"
-      />
-
-      {/* Enhanced Ownership Section */}
-      <EnhancedOwnershipSection
-        lead={formData}
-        canEdit={canEdit}
-        onSave={handleOwnershipSave}
-      />
+      {/* Step 6: If no disposition is selected, show Notes Section for general notes */}
+      {disposition === null && (
+        <NotesSection
+          notes={notes}
+          newNote={newNote}
+          canEdit={canEdit}
+          onNewNoteChange={onNewNoteChange}
+          onAddNote={onAddNote}
+        />
+      )}
     </div>
   );
 }
