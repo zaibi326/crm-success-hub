@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Check, X, Edit3 } from 'lucide-react';
 
@@ -9,7 +10,8 @@ interface InlineEditFieldProps {
   label: string;
   value: string;
   onSave: (value: string) => void;
-  type?: 'text' | 'email' | 'tel' | 'number';
+  type?: 'text' | 'email' | 'tel' | 'number' | 'select';
+  options?: Array<{ value: string; label: string }>;
   placeholder?: string;
   required?: boolean;
   multiline?: boolean;
@@ -22,6 +24,7 @@ export function InlineEditField({
   value,
   onSave,
   type = 'text',
+  options = [],
   placeholder,
   required = false,
   multiline = false,
@@ -72,6 +75,14 @@ export function InlineEditField({
     }
   };
 
+  const getDisplayValue = () => {
+    if (type === 'select' && options.length > 0) {
+      const option = options.find(opt => opt.value === value);
+      return option ? option.label : value;
+    }
+    return value;
+  };
+
   return (
     <div className={`space-y-2 ${className}`}>
       <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
@@ -85,7 +96,20 @@ export function InlineEditField({
       <div className="group relative">
         {isEditing ? (
           <div className="flex items-center gap-2">
-            {multiline ? (
+            {type === 'select' ? (
+              <Select value={editValue} onValueChange={setEditValue}>
+                <SelectTrigger className="flex-1 border-blue-300 focus:border-blue-500 focus:ring-blue-500">
+                  <SelectValue placeholder={placeholder} />
+                </SelectTrigger>
+                <SelectContent>
+                  {options.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : multiline ? (
               <Textarea
                 ref={inputRef as React.RefObject<HTMLTextAreaElement>}
                 value={editValue}
@@ -134,7 +158,7 @@ export function InlineEditField({
               ${!value ? 'text-gray-400 italic' : 'text-gray-900'}
             `}
           >
-            {value || placeholder || `Enter ${label.toLowerCase()}`}
+            {getDisplayValue() || placeholder || `Enter ${label.toLowerCase()}`}
             {canEdit && (
               <Edit3 className="w-4 h-4 text-gray-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
             )}

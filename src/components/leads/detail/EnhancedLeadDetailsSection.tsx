@@ -90,8 +90,8 @@ export function EnhancedLeadDetailsSection({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Lead Status */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Lead Status</label>
                 <InlineEditField
+                  label="Lead Status"
                   value={lead.status || ''}
                   onSave={(value) => handleFieldUpdate('status', value)}
                   type="select"
@@ -103,8 +103,8 @@ export function EnhancedLeadDetailsSection({
 
               {/* Property Value */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Property Value</label>
                 <InlineEditField
+                  label="Property Value"
                   value={formatCurrency(lead.propertyValue)}
                   onSave={(value) => handleCurrencyUpdate('propertyValue', value)}
                   canEdit={canEdit}
@@ -114,8 +114,8 @@ export function EnhancedLeadDetailsSection({
 
               {/* Tax Amount */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Tax Amount</label>
                 <InlineEditField
+                  label="Tax Amount"
                   value={formatCurrency(lead.taxAmount)}
                   onSave={(value) => handleCurrencyUpdate('taxAmount', value)}
                   canEdit={canEdit}
@@ -125,8 +125,8 @@ export function EnhancedLeadDetailsSection({
 
               {/* Occupancy Status */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Occupancy Status</label>
                 <InlineEditField
+                  label="Occupancy Status"
                   value={lead.occupancyStatus || ''}
                   onSave={(value) => handleFieldUpdate('occupancyStatus', value)}
                   type="select"
@@ -138,8 +138,8 @@ export function EnhancedLeadDetailsSection({
 
               {/* County */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">County</label>
                 <InlineEditField
+                  label="County"
                   value={lead.county || ''}
                   onSave={(value) => handleFieldUpdate('county', value)}
                   canEdit={canEdit}
@@ -149,8 +149,8 @@ export function EnhancedLeadDetailsSection({
 
               {/* State */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">State</label>
                 <InlineEditField
+                  label="State"
                   value={lead.state || ''}
                   onSave={(value) => handleFieldUpdate('state', value)}
                   canEdit={canEdit}

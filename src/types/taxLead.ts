@@ -29,6 +29,12 @@ export interface TaxLead {
   // Financial Information
   askingPrice?: number;
   mortgagePrice?: number;
+  propertyValue?: number;
+  taxAmount?: number;
+  
+  // Location Information
+  county?: string;
+  state?: string;
   
   // Additional Information Fields
   hasDeath?: boolean;
