@@ -25,29 +25,24 @@ const Login = () => {
     setShowConfirmPassword
   } = useLoginLogic();
 
-  // Handle redirect logic more carefully
+  // Handle redirect logic
   useEffect(() => {
-    // Only redirect if we have a user and we're not loading
-    if (user && !isLoading) {
-      if (profile) {
-        // We have both user and profile, safe to redirect
-        console.log('User authenticated with profile:', profile.role);
-        const redirectPath = getRoleBasedRedirect(profile.role);
-        console.log('Redirecting to:', redirectPath);
-        navigate(redirectPath, { replace: true });
-      } else {
-        // User exists but no profile yet, wait a bit more
-        console.log('User authenticated, waiting for profile...');
-        const timeout = setTimeout(() => {
-          // If still no profile after 3 seconds, redirect to dashboard anyway
-          if (user && !profile) {
-            console.log('Profile load timeout, redirecting to dashboard');
-            navigate('/dashboard', { replace: true });
-          }
-        }, 3000);
-        
-        return () => clearTimeout(timeout);
-      }
+    console.log('Login useEffect - user:', !!user, 'profile:', !!profile, 'isLoading:', isLoading);
+    
+    if (!isLoading && user) {
+      // Small delay to ensure profile is loaded
+      const timer = setTimeout(() => {
+        if (profile?.role) {
+          console.log('Redirecting user with role:', profile.role);
+          const redirectPath = getRoleBasedRedirect(profile.role);
+          navigate(redirectPath, { replace: true });
+        } else {
+          console.log('No profile found, redirecting to dashboard');
+          navigate('/dashboard', { replace: true });
+        }
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
   }, [user, profile, isLoading, navigate]);
 
@@ -65,7 +60,7 @@ const Login = () => {
     );
   }
 
-  // If user is authenticated, don't show login form
+  // If user is authenticated, show redirecting message
   if (user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">

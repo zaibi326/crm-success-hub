@@ -79,19 +79,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (session?.user && isMounted) {
           // Fetch profile for authenticated user
-          try {
-            const profileData = await fetchUserProfile(session.user.id);
+          setTimeout(async () => {
             if (isMounted) {
-              setProfile(profileData);
+              try {
+                const profileData = await fetchUserProfile(session.user.id);
+                if (isMounted) {
+                  setProfile(profileData);
+                }
+              } catch (error) {
+                console.error('Profile fetch error:', error);
+              } finally {
+                if (isMounted) {
+                  setIsLoading(false);
+                }
+              }
             }
-          } catch (error) {
-            console.error('Profile fetch error:', error);
-          }
+          }, 0);
         } else if (isMounted) {
           setProfile(null);
-        }
-        
-        if (isMounted) {
           setIsLoading(false);
         }
       }
