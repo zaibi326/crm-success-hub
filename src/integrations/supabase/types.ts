@@ -454,6 +454,17 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      log_lead_activity: {
+        Args: {
+          p_user_id: string
+          p_user_name: string
+          p_action_type: string
+          p_description: string
+          p_reference_id: string
+          p_metadata?: Json
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

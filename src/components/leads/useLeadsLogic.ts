@@ -2,6 +2,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { TaxLead } from '@/types/taxLead';
 import { useLeadsData } from '@/hooks/useLeadsData';
+import { useEnhancedActivityLogger } from '@/hooks/useEnhancedActivityLogger';
 import { FilterCondition } from './filters/types';
 
 const FILTERS_STORAGE_KEY = 'seller-leads-filters';
@@ -15,6 +16,8 @@ export function useLeadsLogic() {
   const [filters, setFilters] = useState<FilterCondition[]>([]);
   const [showFilterSidebar, setShowFilterSidebar] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const { logLeadActivity } = useEnhancedActivityLogger();
 
   // Use the persistent data hook instead of local state
   const { 
@@ -153,26 +156,101 @@ export function useLeadsLogic() {
   const handleAddLead = (lead: TaxLead) => {
     const newLead = { ...lead, id: Date.now() };
     addLead(newLead);
+    
+    // Log the activity
+    logLeadActivity({
+      actionType: 'created',
+      description: `Created new lead for ${newLead.ownerName}`,
+      referenceId: newLead.id.toString(),
+      metadata: {
+        leadId: newLead.id,
+        ownerName: newLead.ownerName,
+        propertyAddress: newLead.propertyAddress,
+        status: newLead.status
+      }
+    });
+    
     console.log('Adding lead:', newLead);
   };
 
   const handleLeadUpdate = (updatedLead: TaxLead) => {
+    const originalLead = mockLeads.find(lead => lead.id === updatedLead.id);
     updateLead(updatedLead);
+    
+    // Log the activity
+    logLeadActivity({
+      actionType: 'updated',
+      description: `Updated lead information for ${updatedLead.ownerName}`,
+      referenceId: updatedLead.id.toString(),
+      metadata: {
+        leadId: updatedLead.id,
+        ownerName: updatedLead.ownerName,
+        changes: {
+          from: originalLead,
+          to: updatedLead
+        }
+      }
+    });
+    
     console.log('Updating lead:', updatedLead);
   };
 
   const handleBulkLeadsUpdate = (updatedLeads: TaxLead[]) => {
     setMockLeads(updatedLeads);
+    
+    // Log bulk update activity
+    logLeadActivity({
+      actionType: 'bulk_updated',
+      description: `Bulk updated ${updatedLeads.length} leads`,
+      metadata: {
+        count: updatedLeads.length,
+        leadIds: updatedLeads.map(lead => lead.id)
+      }
+    });
+    
     console.log('Bulk updating leads:', updatedLeads);
   };
 
   const handleDeleteSingleLead = (leadId: number) => {
+    const leadToDelete = mockLeads.find(lead => lead.id === leadId);
     handleDeleteLead(leadId);
+    
+    // Log the activity
+    if (leadToDelete) {
+      logLeadActivity({
+        actionType: 'deleted',
+        description: `Deleted lead for ${leadToDelete.ownerName}`,
+        referenceId: leadId.toString(),
+        metadata: {
+          leadId: leadId,
+          ownerName: leadToDelete.ownerName,
+          propertyAddress: leadToDelete.propertyAddress
+        }
+      });
+    }
+    
     console.log('Deleting single lead:', leadId);
   };
 
   const handleDeleteMultipleLeads = (leadIds: number[]) => {
+    const leadsToDelete = mockLeads.filter(lead => leadIds.includes(lead.id));
     handleBulkDeleteLeads(leadIds);
+    
+    // Log the activity
+    logLeadActivity({
+      actionType: 'bulk_deleted',
+      description: `Bulk deleted ${leadIds.length} leads`,
+      metadata: {
+        count: leadIds.length,
+        leadIds: leadIds,
+        deletedLeads: leadsToDelete.map(lead => ({
+          id: lead.id,
+          ownerName: lead.ownerName,
+          propertyAddress: lead.propertyAddress
+        }))
+      }
+    });
+    
     console.log('Deleting multiple leads:', leadIds);
   };
 

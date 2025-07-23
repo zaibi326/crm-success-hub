@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,24 +19,13 @@ import { PersonalInfoSection } from './detail/PersonalInfoSection';
 import { PropertyInfoSection } from './detail/PropertyInfoSection';
 import { FinancialInfoSection } from './detail/FinancialInfoSection';
 import { LeadInfoSection } from './detail/LeadInfoSection';
-import { ActivityTimelineSection } from './detail/ActivityTimelineSection';
+import { DatabaseActivityTimeline } from './DatabaseActivityTimeline';
 import { EnhancedOwnershipSection } from './detail/EnhancedOwnershipSection';
 
 interface EnhancedLeadDetailPageProps {
   lead: TaxLead;
   onBack: () => void;
   onLeadUpdate: (updatedLead: TaxLead) => void;
-}
-
-interface ActivityItem {
-  id: number;
-  type: 'created' | 'note' | 'status_change' | 'field_update' | 'file_upload' | 'comment';
-  title: string;
-  description: string;
-  timestamp: Date;
-  user: string;
-  userInitials: string;
-  mentions?: string[];
 }
 
 export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedLeadDetailPageProps) {
@@ -47,36 +37,6 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
     temperature: lead.temperature || 'WARM',
     occupancyStatus: lead.occupancyStatus || 'OWNER_OCCUPIED'
   });
-  
-  const [activities, setActivities] = useState<ActivityItem[]>([
-    {
-      id: 1,
-      type: 'created',
-      title: 'Lead Created',
-      description: `Lead for ${leadData.firstName} ${leadData.lastName} was created`,
-      timestamp: new Date(leadData.createdAt || Date.now() - 2 * 24 * 60 * 60 * 1000),
-      user: 'System',
-      userInitials: 'SY'
-    },
-    {
-      id: 2,
-      type: 'field_update',
-      title: 'Temperature Updated',
-      description: `Temperature set to ${leadData.temperature}`,
-      timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-      user: 'John Doe',
-      userInitials: 'JD'
-    },
-    {
-      id: 3,
-      type: 'note',
-      title: 'Note Added',
-      description: leadData.notes || 'Initial contact attempted - very interested in selling',
-      timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000),
-      user: 'Jane Smith',
-      userInitials: 'JS'
-    }
-  ]);
 
   const { toast } = useToast();
 
@@ -89,21 +49,6 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
       title: "Field Updated",
       description: `${field} has been updated successfully`,
     });
-  };
-
-  const handleAddComment = (comment: string) => {
-    const newActivity: ActivityItem = {
-      id: activities.length + 1,
-      type: 'comment',
-      title: 'Comment Added',
-      description: comment,
-      timestamp: new Date(),
-      user: 'Current User',
-      userInitials: 'CU',
-      mentions: comment.match(/@\w+/g) || []
-    };
-
-    setActivities(prev => [newActivity, ...prev]);
   };
 
   const handleOwnershipSave = (heirs: any[]) => {
@@ -267,9 +212,9 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
           </TabsContent>
 
           <TabsContent value="activity" className="space-y-6 mt-6">
-            <ActivityTimelineSection 
-              activities={activities}
-              onAddComment={handleAddComment}
+            <DatabaseActivityTimeline 
+              lead={leadData}
+              readOnly={false}
             />
           </TabsContent>
         </Tabs>

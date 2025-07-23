@@ -2,13 +2,12 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TaxLead } from '@/types/taxLead';
-import { ActivityItem } from '@/types/activity';
 import { TemplateModificationDialog } from './TemplateModificationDialog';
 import { ContactSection } from './detail/ContactSection';
 import { PropertyDetailsSection } from './detail/PropertyDetailsSection';
 import { PropertyMapSection } from './detail/PropertyMapSection';
 import { NotesDisplaySection } from './detail/NotesDisplaySection';
-import { ActivitySection } from './detail/ActivitySection';
+import { DatabaseActivityTimeline } from './DatabaseActivityTimeline';
 import { LeadDetailsHeader } from './detail/LeadDetailsHeader';
 
 interface LeadDetailsPageProps {
@@ -48,36 +47,6 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
-
-  const activities: ActivityItem[] = [
-    {
-      id: 1,
-      type: 'created',
-      title: 'Lead Created',
-      description: `Lead for ${leadData.ownerName} was created`,
-      timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-      user: 'System',
-      userInitials: 'SY'
-    },
-    {
-      id: 2,
-      type: 'note',
-      title: 'Note Added',
-      description: leadData.notes || 'Initial contact attempted',
-      timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-      user: 'John Doe',
-      userInitials: 'JD'
-    },
-    {
-      id: 3,
-      type: 'status_change',
-      title: 'Status Updated',
-      description: `Status changed to ${leadData.status}`,
-      timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000),
-      user: 'Jane Smith',
-      userInitials: 'JS'
-    }
-  ];
 
   return (
     <div className="min-h-screen bg-podio-surface">
@@ -134,9 +103,9 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
             </TabsContent>
 
             <TabsContent value="activity" className="space-y-6 mt-6">
-              <ActivitySection 
+              <DatabaseActivityTimeline 
                 lead={leadData}
-                activities={activities} 
+                readOnly={false}
               />
             </TabsContent>
           </Tabs>
