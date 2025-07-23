@@ -40,6 +40,16 @@ const getMetadataProperty = (metadata: any, property: string): any => {
   return null;
 };
 
+// Helper function to get user initials from full name
+const getUserInitials = (userName: string): string => {
+  return userName
+    .split(' ')
+    .map(name => name.charAt(0))
+    .join('')
+    .substring(0, 2)
+    .toUpperCase();
+};
+
 export function DatabaseActivityTimeline({ 
   lead, 
   readOnly = false 
@@ -289,10 +299,10 @@ export function DatabaseActivityTimeline({
                       <div className="flex items-center gap-2 text-xs text-gray-500">
                         <Avatar className="w-4 h-4">
                           <AvatarFallback className="text-xs bg-gray-200">
-                            {activity.user_name.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                            {getUserInitials(activity.user_name)}
                           </AvatarFallback>
                         </Avatar>
-                        <span>{activity.user_name}</span>
+                        <span className="font-medium">{activity.user_name}</span>
                         <span>•</span>
                         <span>{formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}</span>
                       </div>

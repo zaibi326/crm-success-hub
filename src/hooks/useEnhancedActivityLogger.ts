@@ -27,6 +27,8 @@ export function useEnhancedActivityLogger() {
         ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email || 'Unknown User'
         : user.email || 'Unknown User';
 
+      console.log('Logging activity with user:', userName, 'for action:', params.actionType);
+
       // Use the database function for logging
       const { data, error } = await supabase
         .rpc('log_lead_activity', {

@@ -3,25 +3,30 @@ import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FilterComponentProps } from './types';
+import { useRealUsers } from '@/hooks/useRealUsers';
 
 export function DropdownFilters({ onAddFilter }: FilterComponentProps) {
+  const { data: users = [], isLoading: isLoadingUsers } = useRealUsers();
+
   return (
     <>
       {/* Created By Filter */}
       <div className="space-y-2">
         <Label className="text-sm font-medium text-agile-gray-700">Created By</Label>
-        <Select onValueChange={(value) => onAddFilter('createdBy', 'equals', value, `Created By: ${value}`)}>
+        <Select onValueChange={(value) => {
+          const selectedUser = users.find(user => user.id === value);
+          const displayName = selectedUser?.display_name || value;
+          onAddFilter('createdBy', 'equals', value, `Created By: ${displayName}`);
+        }}>
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select creator..." />
+            <SelectValue placeholder={isLoadingUsers ? "Loading users..." : "Select creator..."} />
           </SelectTrigger>
           <SelectContent className="bg-white border-agile-gray-200 z-50">
-            <SelectItem value="john_doe">John Doe</SelectItem>
-            <SelectItem value="jane_smith">Jane Smith</SelectItem>
-            <SelectItem value="mike_johnson">Mike Johnson</SelectItem>
-            <SelectItem value="sarah_wilson">Sarah Wilson</SelectItem>
-            <SelectItem value="david_chen">David Chen</SelectItem>
-            <SelectItem value="admin_user">Admin User</SelectItem>
-            <SelectItem value="lead_manager">Lead Manager</SelectItem>
+            {users.map(user => (
+              <SelectItem key={user.id} value={user.id}>
+                {user.display_name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -80,17 +85,20 @@ export function DropdownFilters({ onAddFilter }: FilterComponentProps) {
       {/* Lead Manager Filter */}
       <div className="space-y-2">
         <Label className="text-sm font-medium text-agile-gray-700">Lead Manager</Label>
-        <Select onValueChange={(value) => onAddFilter('leadManager', 'equals', value, `Manager: ${value}`)}>
+        <Select onValueChange={(value) => {
+          const selectedUser = users.find(user => user.id === value);
+          const displayName = selectedUser?.display_name || value;
+          onAddFilter('leadManager', 'equals', value, `Manager: ${displayName}`);
+        }}>
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select manager..." />
+            <SelectValue placeholder={isLoadingUsers ? "Loading managers..." : "Select manager..."} />
           </SelectTrigger>
           <SelectContent className="bg-white border-agile-gray-200 z-50">
-            <SelectItem value="sarah_johnson">Sarah Johnson</SelectItem>
-            <SelectItem value="mike_davis">Mike Davis</SelectItem>
-            <SelectItem value="lisa_chen">Lisa Chen</SelectItem>
-            <SelectItem value="david_wilson">David Wilson</SelectItem>
-            <SelectItem value="admin_user">Admin User</SelectItem>
-            <SelectItem value="lead_manager">Lead Manager</SelectItem>
+            {users.map(user => (
+              <SelectItem key={user.id} value={user.id}>
+                {user.display_name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
