@@ -7,5 +7,9 @@ interface PropertyMapSectionProps {
 }
 
 export function PropertyMapSection({ address }: PropertyMapSectionProps) {
-  return <ZillowMap address={address} />;
+  return (
+    <div className="w-full">
+      <ZillowMap address={address} className="h-80 w-full" />
+    </div>
+  );
 }

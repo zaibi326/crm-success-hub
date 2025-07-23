@@ -73,7 +73,7 @@ export function MainContent({
         canEdit={canEdit}
       />
 
-      {/* Step 2: Always show Lead Details Section */}
+      {/* Step 2: Always show Lead Details Section with Zillow Map */}
       <EnhancedLeadDetailsSection 
         lead={formData} 
         onFieldUpdate={onInputChange} 
