@@ -43,40 +43,62 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const { toast } = useToast();
 
   useEffect(() => {
-    const getSession = async () => {
-      setIsLoading(true);
+    console.log('AuthProvider initializing...');
+    
+    // Get initial session
+    const getInitialSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error getting session:", error);
+          setIsLoading(false);
+          return;
+        }
 
+        console.log('Initial session:', !!session);
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
+          console.log('Fetching profile for user:', session.user.id);
           await fetchProfile(session.user.id);
         }
       } catch (error) {
-        console.error("Error getting session:", error);
+        console.error("Error in getInitialSession:", error);
       } finally {
         setIsLoading(false);
       }
-    }
+    };
 
-    getSession();
+    getInitialSession();
 
-    supabase.auth.onAuthStateChange(async (_event, session) => {
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, !!session);
+      
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
+        console.log('Auth state change - fetching profile for user:', session.user.id);
+        // Don't set loading here, let fetchProfile handle it
         await fetchProfile(session.user.id);
       } else {
         setProfile(null);
+        setIsLoading(false);
       }
     });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchProfile = async (userId: string) => {
     try {
+      console.log('Fetching profile for userId:', userId);
+      
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -85,27 +107,59 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (profileError) {
         console.error("Error fetching profile:", profileError);
+        
+        // If profile doesn't exist, create a default one
+        if (profileError.code === 'PGRST116') {
+          console.log('Profile not found, creating default profile');
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              id: userId,
+              email: user?.email || '',
+              first_name: '',
+              last_name: '',
+              role: 'Employee'
+            })
+            .select()
+            .single();
+
+          if (createError) {
+            console.error("Error creating profile:", createError);
+            return;
+          }
+
+          setProfile(newProfile as Profile);
+          console.log('Default profile created:', newProfile);
+        }
         return;
       }
 
       setProfile(profileData as Profile);
+      console.log('Profile fetched successfully:', profileData);
     } catch (error) {
-      console.error("Error fetching profile:", error);
+      console.error("Error in fetchProfile:", error);
     }
   };
 
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
+      console.log('Attempting login for:', email);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
       });
-      if (error) throw error;
       
+      if (error) {
+        console.error('Login error:', error);
+        return { success: false, error: error.message };
+      }
+      
+      console.log('Login successful');
       return { success: true };
     } catch (error: any) {
-      console.error('Login error:', error.message);
+      console.error('Login error:', error);
       return { success: false, error: error.message };
     } finally {
       setIsLoading(false);
@@ -115,6 +169,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const signup = async (email: string, password: string, role: string, firstName?: string, lastName?: string) => {
     try {
       setIsLoading(true);
+      console.log('Attempting signup for:', email);
+      
       const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
@@ -126,6 +182,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           }
         }
       });
+      
       if (error) {
         console.error('Signup error:', error);
         return { success: false, error: error.message };

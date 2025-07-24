@@ -29,20 +29,29 @@ const Login = () => {
   useEffect(() => {
     console.log('Login useEffect - user:', !!user, 'profile:', !!profile, 'isLoading:', isLoading);
     
-    if (!isLoading && user) {
-      // Small delay to ensure profile is loaded
-      const timer = setTimeout(() => {
-        if (profile?.role) {
-          console.log('Redirecting user with role:', profile.role);
-          const redirectPath = getRoleBasedRedirect(profile.role);
-          navigate(redirectPath, { replace: true });
-        } else {
-          console.log('No profile found, redirecting to dashboard');
-          navigate('/dashboard', { replace: true });
-        }
-      }, 100);
+    // Only redirect if we have a user and are not loading
+    if (user && !isLoading) {
+      console.log('User authenticated, checking profile...');
       
-      return () => clearTimeout(timer);
+      // If we have a profile, redirect based on role
+      if (profile?.role) {
+        console.log('Profile found with role:', profile.role);
+        const redirectPath = getRoleBasedRedirect(profile.role);
+        console.log('Redirecting to:', redirectPath);
+        navigate(redirectPath, { replace: true });
+      } else {
+        // If no profile yet, wait a moment for it to load
+        console.log('No profile found, waiting...');
+        const timer = setTimeout(() => {
+          // If still no profile after waiting, redirect to dashboard
+          if (!profile) {
+            console.log('Profile still not loaded, redirecting to dashboard');
+            navigate('/dashboard', { replace: true });
+          }
+        }, 2000);
+        
+        return () => clearTimeout(timer);
+      }
     }
   }, [user, profile, isLoading, navigate]);
 
@@ -60,8 +69,22 @@ const Login = () => {
     );
   }
 
-  // If user is authenticated, show redirecting message
-  if (user) {
+  // If user is authenticated but still loading profile, show different message
+  if (user && !profile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
+          <div className="flex items-center space-x-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+            <span className="text-gray-700 font-medium">Setting up your profile...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is authenticated and has profile, show redirecting message
+  if (user && profile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
