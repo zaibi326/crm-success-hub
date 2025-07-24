@@ -14,9 +14,11 @@ export function DropdownFilters({ onAddFilter }: FilterComponentProps) {
       <div className="space-y-2">
         <Label className="text-sm font-medium text-agile-gray-700">Created By</Label>
         <Select onValueChange={(value) => {
-          const selectedUser = users.find(user => user.id === value);
-          const displayName = selectedUser?.display_name || value;
-          onAddFilter('createdBy', 'equals', value, `Created By: ${displayName}`);
+          if (value && value !== "placeholder") {
+            const selectedUser = users.find(user => user.id === value);
+            const displayName = selectedUser?.display_name || value;
+            onAddFilter('createdBy', 'equals', value, `Created By: ${displayName}`);
+          }
         }}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder={isLoadingUsers ? "Loading users..." : "Select creator..."} />
@@ -34,7 +36,11 @@ export function DropdownFilters({ onAddFilter }: FilterComponentProps) {
       {/* Created Via Filter */}
       <div className="space-y-2">
         <Label className="text-sm font-medium text-agile-gray-700">Created Via</Label>
-        <Select onValueChange={(value) => onAddFilter('createdVia', 'equals', value, `Via: ${value}`)}>
+        <Select onValueChange={(value) => {
+          if (value && value !== "placeholder") {
+            onAddFilter('createdVia', 'equals', value, `Via: ${value}`);
+          }
+        }}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select source..." />
           </SelectTrigger>
@@ -52,7 +58,11 @@ export function DropdownFilters({ onAddFilter }: FilterComponentProps) {
       {/* Last Edited Filter */}
       <div className="space-y-2">
         <Label className="text-sm font-medium text-agile-gray-700">Last Edited</Label>
-        <Select onValueChange={(value) => onAddFilter('lastEdited', 'equals', value, `Last Edited: ${value}`)}>
+        <Select onValueChange={(value) => {
+          if (value && value !== "placeholder") {
+            onAddFilter('lastEdited', 'equals', value, `Last Edited: ${value}`);
+          }
+        }}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select timeframe..." />
           </SelectTrigger>
@@ -68,7 +78,11 @@ export function DropdownFilters({ onAddFilter }: FilterComponentProps) {
       {/* Move To Filter */}
       <div className="space-y-2">
         <Label className="text-sm font-medium text-agile-gray-700">Move To</Label>
-        <Select onValueChange={(value) => onAddFilter('moveTo', 'equals', value, `Move To: ${value}`)}>
+        <Select onValueChange={(value) => {
+          if (value && value !== "placeholder") {
+            onAddFilter('moveTo', 'equals', value, `Move To: ${value}`);
+          }
+        }}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select destination..." />
           </SelectTrigger>
@@ -86,9 +100,11 @@ export function DropdownFilters({ onAddFilter }: FilterComponentProps) {
       <div className="space-y-2">
         <Label className="text-sm font-medium text-agile-gray-700">Lead Manager</Label>
         <Select onValueChange={(value) => {
-          const selectedUser = users.find(user => user.id === value);
-          const displayName = selectedUser?.display_name || value;
-          onAddFilter('leadManager', 'equals', value, `Manager: ${displayName}`);
+          if (value && value !== "placeholder") {
+            const selectedUser = users.find(user => user.id === value);
+            const displayName = selectedUser?.display_name || value;
+            onAddFilter('leadManager', 'equals', value, `Manager: ${displayName}`);
+          }
         }}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder={isLoadingUsers ? "Loading managers..." : "Select manager..."} />

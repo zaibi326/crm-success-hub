@@ -36,7 +36,7 @@ export function CampaignFilters({
         </div>
 
         {/* Status Filter */}
-        <Select value={filterStatus} onValueChange={onFilterChange}>
+        <Select value={filterStatus || "all"} onValueChange={onFilterChange}>
           <SelectTrigger className="w-40 bg-white/80 backdrop-blur-sm shadow-lg border-gray-200 hover:shadow-xl transition-all duration-200">
             <Filter className="w-4 h-4 mr-2 text-gray-400" />
             <SelectValue placeholder="Filter by status" />
@@ -50,7 +50,7 @@ export function CampaignFilters({
         </Select>
 
         {/* Sort */}
-        <Select value={sortBy} onValueChange={onSortChange}>
+        <Select value={sortBy || "name"} onValueChange={onSortChange}>
           <SelectTrigger className="w-40 bg-white/80 backdrop-blur-sm shadow-lg border-gray-200 hover:shadow-xl transition-all duration-200">
             <ChevronDown className="w-4 h-4 mr-2 text-gray-400" />
             <SelectValue placeholder="Sort by" />

@@ -45,7 +45,7 @@ export function EditableField({
       return (
         <div className="flex items-center gap-2">
           {type === 'select' ? (
-            <Select value={editValue} onValueChange={setEditValue}>
+            <Select value={editValue || "default"} onValueChange={(val) => val !== "default" && setEditValue(val)}>
               <SelectTrigger className="flex-1">
                 <SelectValue />
               </SelectTrigger>
@@ -115,7 +115,7 @@ export function EditableField({
         <div className="font-medium text-gray-700">{label}</div>
         <div className="col-span-2 flex items-center gap-2">
           {type === 'select' ? (
-            <Select value={editValue} onValueChange={setEditValue}>
+            <Select value={editValue || "default"} onValueChange={(val) => val !== "default" && setEditValue(val)}>
               <SelectTrigger className="flex-1">
                 <SelectValue />
               </SelectTrigger>
