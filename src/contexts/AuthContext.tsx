@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -18,7 +19,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
-  loading: boolean;
+  isLoading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signup: (email: string, password: string, role: string, firstName?: string, lastName?: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
@@ -39,13 +40,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const { trackUserLogout } = useAuthActivityTracking();
 
   useEffect(() => {
     const getSession = async () => {
-      setLoading(true);
+      setIsLoading(true);
       try {
         const { data: { session } } = await supabase.auth.getSession();
 
@@ -58,7 +59,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       } catch (error) {
         console.error("Error getting session:", error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     }
 
@@ -99,7 +100,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async (email: string, password: string) => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
@@ -111,13 +112,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.error('Login error:', error.message);
       return { success: false, error: error.message };
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const signup = async (email: string, password: string, role: string, firstName?: string, lastName?: string) => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
@@ -144,7 +145,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.error('Signup error:', error);
       return { success: false, error: error.message };
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -180,7 +181,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const updateProfile = async (updates: Partial<Profile>) => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       if (!user?.id) throw new Error('User not authenticated');
 
       const { data: updatedProfile, error: updateError } = await supabase
@@ -210,7 +211,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       });
       return { success: false, error: error.message };
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -218,7 +219,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     user,
     session,
     profile,
-    loading,
+    isLoading,
     login,
     signup,
     logout,

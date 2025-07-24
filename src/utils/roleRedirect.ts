@@ -5,6 +5,8 @@ export const getRoleBasedRedirect = (role: string): string => {
       return '/dashboard';
     case 'Manager':
       return '/campaigns';
+    case 'Lead Manager':
+      return '/leads';
     case 'Employee':
       return '/leads';
     case 'Guest':
@@ -20,6 +22,8 @@ export const getRoleDashboardTitle = (role: string): string => {
       return 'Admin Dashboard';
     case 'Manager':
       return 'Manager Dashboard';
+    case 'Lead Manager':
+      return 'Lead Manager Dashboard';
     case 'Employee':
       return 'Employee Dashboard';
     case 'Guest':
@@ -37,15 +41,15 @@ export const canAccessRoute = (userRole: string, route: string): boolean => {
   const routePermissions: Record<string, string[]> = {
     '/dashboard': ['Admin'],
     '/campaigns': ['Admin', 'Manager'],
-    '/leads': ['Admin', 'Manager', 'Employee', 'Guest'],
-    '/communication': ['Admin', 'Manager', 'Employee'],
+    '/leads': ['Admin', 'Manager', 'Lead Manager', 'Employee', 'Guest'],
+    '/communication': ['Admin', 'Manager', 'Lead Manager', 'Employee'],
     '/organizations': ['Admin'],
     '/organization-management': ['Admin'],
     '/app-builder': ['Admin', 'Manager'],
     '/admin-users': ['Admin'],
-    '/settings': ['Admin', 'Manager', 'Employee'],
-    '/notifications': ['Admin', 'Manager', 'Employee', 'Guest'],
-    '/calendar': ['Admin', 'Manager', 'Employee']
+    '/settings': ['Admin', 'Manager', 'Lead Manager', 'Employee'],
+    '/notifications': ['Admin', 'Manager', 'Lead Manager', 'Employee', 'Guest'],
+    '/calendar': ['Admin', 'Manager', 'Lead Manager', 'Employee']
   };
 
   const allowedRoles = routePermissions[route];
@@ -56,13 +60,13 @@ export const getVisibleNavigationItems = (userRole: string) => {
   const allItems = [
     { title: "Dashboard", url: "/dashboard", requiredRoles: ['Admin'] },
     { title: "Campaigns", url: "/campaigns", requiredRoles: ['Admin', 'Manager'] },
-    { title: "Leads", url: "/leads", requiredRoles: ['Admin', 'Manager', 'Employee', 'Guest'] },
-    { title: "Communication", url: "/communication", requiredRoles: ['Admin', 'Manager', 'Employee'] },
+    { title: "Leads", url: "/leads", requiredRoles: ['Admin', 'Manager', 'Lead Manager', 'Employee', 'Guest'] },
+    { title: "Communication", url: "/communication", requiredRoles: ['Admin', 'Manager', 'Lead Manager', 'Employee'] },
     { title: "Organizations", url: "/organizations", requiredRoles: ['Admin'] },
     { title: "App Builder", url: "/app-builder", requiredRoles: ['Admin', 'Manager'] },
-    { title: "Calendar", url: "/calendar", requiredRoles: ['Admin', 'Manager', 'Employee'] },
-    { title: "Notifications", url: "/notifications", requiredRoles: ['Admin', 'Manager', 'Employee', 'Guest'] },
-    { title: "Settings", url: "/settings", requiredRoles: ['Admin', 'Manager', 'Employee'] }
+    { title: "Calendar", url: "/calendar", requiredRoles: ['Admin', 'Manager', 'Lead Manager', 'Employee'] },
+    { title: "Notifications", url: "/notifications", requiredRoles: ['Admin', 'Manager', 'Lead Manager', 'Employee', 'Guest'] },
+    { title: "Settings", url: "/settings", requiredRoles: ['Admin', 'Manager', 'Lead Manager', 'Employee'] }
   ];
 
   return allItems.filter(item => hasPermission(userRole, item.requiredRoles));
