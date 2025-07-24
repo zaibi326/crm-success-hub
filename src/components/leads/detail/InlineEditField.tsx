@@ -9,7 +9,7 @@ import { Check, X, Edit3 } from 'lucide-react';
 interface InlineEditFieldProps {
   label: string;
   value: string;
-  onSave: (value: string) => void;
+  onSave: (value: string) => Promise<void> | void;
   type?: 'text' | 'email' | 'tel' | 'number' | 'select';
   options?: Array<{ value: string; label: string }>;
   placeholder?: string;
@@ -33,6 +33,7 @@ export function InlineEditField({
 }: InlineEditFieldProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value || '');
+  const [isSaving, setIsSaving] = useState(false);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -48,11 +49,22 @@ export function InlineEditField({
     }
   }, [isEditing]);
 
-  const handleSave = () => {
-    if (editValue.trim() !== value) {
-      onSave(editValue.trim());
+  const handleSave = async () => {
+    if (editValue.trim() !== value && canEdit) {
+      setIsSaving(true);
+      try {
+        await onSave(editValue.trim());
+        setIsEditing(false);
+      } catch (error) {
+        console.error('Error saving field:', error);
+        // Reset to original value on error
+        setEditValue(value || '');
+      } finally {
+        setIsSaving(false);
+      }
+    } else {
+      setIsEditing(false);
     }
-    setIsEditing(false);
   };
 
   const handleCancel = () => {
@@ -132,15 +144,21 @@ export function InlineEditField({
               <Button
                 size="sm"
                 onClick={handleSave}
+                disabled={isSaving}
                 className="h-8 w-8 p-0 bg-green-600 hover:bg-green-700 text-white"
                 title="Save changes"
               >
-                <Check className="w-4 h-4" />
+                {isSaving ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Check className="w-4 h-4" />
+                )}
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={handleCancel}
+                disabled={isSaving}
                 className="h-8 w-8 p-0 border-gray-300 hover:bg-gray-50 text-gray-700"
                 title="Cancel changes"
               >

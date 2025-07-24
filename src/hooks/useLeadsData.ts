@@ -187,9 +187,12 @@ export function useLeadsData() {
         disposition: updatedLead.disposition,
         notes: updatedLead.notes,
         phone: updatedLead.phone,
-        email: updatedLead.email
+        email: updatedLead.email,
+        firstName: updatedLead.firstName,
+        lastName: updatedLead.lastName
       });
 
+      // Update the lead in the database
       const { error } = await supabase
         .from('campaign_leads')
         .update({
@@ -214,16 +217,17 @@ export function useLeadsData() {
           description: "Failed to update lead in database",
           variant: "destructive",
         });
-        return;
+        throw error;
       }
 
-      toast({
-        title: "Success",
-        description: "Lead successfully updated",
-      });
+      // Update local state immediately to show changes
+      setMockLeads(prevLeads => 
+        prevLeads.map(lead => 
+          lead.id === updatedLead.id ? { ...updatedLead, supabaseId: leadWithSupabaseId.supabaseId } : lead
+        )
+      );
 
-      // Reload leads from database
-      await loadLeadsFromDatabase();
+      console.log('Lead updated successfully in database');
     } catch (error) {
       console.error('Error in handleLeadUpdate:', error);
       toast({
@@ -231,6 +235,7 @@ export function useLeadsData() {
         description: "Failed to update lead",
         variant: "destructive",
       });
+      throw error;
     }
   };
 

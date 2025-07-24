@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, ExternalLink, Save } from 'lucide-react';
+import { User, ExternalLink } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
 import { InlineEditField } from './InlineEditField';
 import { Button } from '@/components/ui/button';
@@ -20,60 +20,48 @@ const statusCards = [
 ];
 
 export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = true }: EnhancedSellerContactSectionProps) {
-  const [hasChanges, setHasChanges] = useState(false);
-  const [pendingChanges, setPendingChanges] = useState<Partial<TaxLead>>({});
-  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
-  const handleFieldChange = (field: keyof TaxLead, value: string) => {
+  const handleFieldChange = async (field: keyof TaxLead, value: string) => {
     if (canEdit) {
-      // Only track pending changes, don't save immediately
-      setPendingChanges(prev => ({
-        ...prev,
-        [field]: value
-      }));
-      setHasChanges(true);
-    }
-  };
-
-  const handleStatusChange = (status: string) => {
-    if (canEdit) {
-      handleFieldChange('status', status);
-    }
-  };
-
-  const handleSaveChanges = async () => {
-    if (!hasChanges || !canEdit) return;
-
-    setIsSaving(true);
-    
-    try {
-      // Apply all pending changes
-      for (const [field, value] of Object.entries(pendingChanges)) {
-        await onFieldUpdate(field as keyof TaxLead, value as string);
+      try {
+        // Save immediately to backend
+        await onFieldUpdate(field, value);
+        
+        toast({
+          title: "✅ Field Updated",
+          description: `${field} has been updated successfully`,
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: `Failed to update ${field}`,
+          variant: "destructive",
+        });
       }
+    }
+  };
 
-      // Clear pending changes
-      setPendingChanges({});
-      setHasChanges(false);
-
-      toast({
-        title: "✅ Lead Details Updated",
-        description: "All changes have been saved successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save lead details changes",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
+  const handleStatusChange = async (status: string) => {
+    if (canEdit) {
+      try {
+        await onFieldUpdate('status', status);
+        toast({
+          title: "✅ Status Updated",
+          description: `Status changed to ${status}`,
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to update status",
+          variant: "destructive",
+        });
+      }
     }
   };
 
   const openZillow = () => {
-    const address = currentValues.propertyAddress || lead.propertyAddress;
+    const address = lead.propertyAddress;
     if (address) {
       const encodedAddress = encodeURIComponent(address);
       window.open(`https://www.zillow.com/homes/${encodedAddress}/`, '_blank');
@@ -86,42 +74,12 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
     return `https://www.zillow.com/homes/${encodedAddress}/`;
   };
 
-  // Show pending changes in UI but don't save to parent until "Save Changes" is clicked
-  const currentValues = { ...lead, ...pendingChanges };
-
   return (
     <Card className="shadow-lg border-0 bg-white">
       <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
-        <CardTitle className="flex items-center justify-between text-xl">
-          <div className="flex items-center gap-3">
-            <User className="w-6 h-6 text-blue-600" />
-            Lead Details
-            {hasChanges && (
-              <span className="text-sm text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
-                Unsaved changes
-              </span>
-            )}
-          </div>
-          {hasChanges && canEdit && (
-            <Button
-              onClick={handleSaveChanges}
-              disabled={isSaving}
-              className="bg-green-600 hover:bg-green-700 text-white"
-              size="sm"
-            >
-              {isSaving ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Saving...
-                </div>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Changes
-                </>
-              )}
-            </Button>
-          )}
+        <CardTitle className="flex items-center gap-3 text-xl">
+          <User className="w-6 h-6 text-blue-600" />
+          Lead Details
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
@@ -129,33 +87,37 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <InlineEditField
             label="Owner Name"
-            value={currentValues.ownerName || ''}
+            value={lead.ownerName || ''}
             onSave={(value) => handleFieldChange('ownerName', value)}
             placeholder="Enter owner name"
             required
+            canEdit={canEdit}
           />
 
           <InlineEditField
             label="Tax ID"
-            value={currentValues.taxId || ''}
+            value={lead.taxId || ''}
             onSave={(value) => handleFieldChange('taxId', value)}
             placeholder="Enter tax ID"
+            canEdit={canEdit}
           />
 
           <InlineEditField
             label="Phone Number"
-            value={currentValues.phone || ''}
+            value={lead.phone || ''}
             onSave={(value) => handleFieldChange('phone', value)}
             type="tel"
             placeholder="Enter phone number"
+            canEdit={canEdit}
           />
 
           <InlineEditField
             label="Email Address"
-            value={currentValues.email || ''}
+            value={lead.email || ''}
             onSave={(value) => handleFieldChange('email', value)}
             type="email"
             placeholder="Enter email address"
+            canEdit={canEdit}
           />
         </div>
 
@@ -164,7 +126,7 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
           <label className="text-sm font-medium text-gray-700">Lead Status</label>
           <div className="flex gap-3 flex-wrap">
             {statusCards.map((status) => {
-              const isActive = currentValues.status === status.value;
+              const isActive = lead.status === status.value;
               return (
                 <div
                   key={status.value}
@@ -190,14 +152,15 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
         <div className="space-y-4">
           <InlineEditField
             label="Property Address"
-            value={currentValues.propertyAddress || ''}
+            value={lead.propertyAddress || ''}
             onSave={(value) => handleFieldChange('propertyAddress', value)}
             placeholder="Enter property address"
             required
+            canEdit={canEdit}
           />
           
           {/* Zillow Integration */}
-          {currentValues.propertyAddress && (
+          {lead.propertyAddress && (
             <div className="bg-gray-50 rounded-lg p-4 border">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-gray-700">Property Preview</span>
@@ -214,10 +177,10 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
               
               <div className="bg-white rounded border p-4 space-y-2">
                 <div className="text-sm text-gray-600">
-                  Map preview for: <span className="font-medium text-gray-900">{currentValues.propertyAddress}</span>
+                  Map preview for: <span className="font-medium text-gray-900">{lead.propertyAddress}</span>
                 </div>
                 <div className="text-xs text-blue-600 break-all">
-                  {formatZillowUrl(currentValues.propertyAddress)}
+                  {formatZillowUrl(lead.propertyAddress)}
                 </div>
               </div>
             </div>
