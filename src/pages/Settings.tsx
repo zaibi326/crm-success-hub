@@ -18,6 +18,15 @@ const Settings = () => {
 
   const canAccessAdminTab = profile?.role === 'Admin';
 
+  // Type-safe role casting
+  const getUserRole = (): 'Admin' | 'Manager' | 'Lead Manager' | 'Employee' | 'Guest' => {
+    const role = profile?.role;
+    if (role === 'Admin' || role === 'Manager' || role === 'Lead Manager' || role === 'Employee' || role === 'Guest') {
+      return role;
+    }
+    return 'Employee'; // Default fallback
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-gradient-to-br from-crm-gradient-start via-white to-crm-gradient-end">
@@ -70,7 +79,7 @@ const Settings = () => {
                 </TabsContent>
 
                 <TabsContent value="role-settings" className="mt-6">
-                  <RoleBasedSettings userRole={profile?.role as 'Admin' | 'Manager' | 'Lead Manager' | 'Employee' | 'Guest' || 'Employee'} />
+                  <RoleBasedSettings userRole={getUserRole()} />
                 </TabsContent>
 
                 <TabsContent value="lead-source" className="mt-6">
