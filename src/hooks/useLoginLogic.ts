@@ -1,7 +1,7 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAuthActivityTracking } from './useAuthActivityTracking';
 
 export const useLoginLogic = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -19,6 +19,7 @@ export const useLoginLogic = () => {
   
   const { toast } = useToast();
   const { login, signup } = useAuth();
+  const { trackUserLogin, trackUserRegistered } = useAuthActivityTracking();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -105,14 +106,18 @@ export const useLoginLogic = () => {
         : await login(formData.email, formData.password);
 
       if (result.success) {
-        if (isSignUp && result.error) {
-          // Email confirmation required
-          toast({
-            title: "Account Created! 🎉",
-            description: result.error,
-            className: "animate-fade-in backdrop-blur-xl bg-white/90 border-white/30"
-          });
+        if (isSignUp) {
+          trackUserRegistered(formData.email, formData.role);
+          if (result.error) {
+            // Email confirmation required
+            toast({
+              title: "Account Created! 🎉",
+              description: result.error,
+              className: "animate-fade-in backdrop-blur-xl bg-white/90 border-white/30"
+            });
+          }
         } else {
+          trackUserLogin(formData.email);
           // Successful login/signup - show success message
           toast({
             title: isSignUp ? "Account Created Successfully! 🎉" : "Welcome Back! 👋",

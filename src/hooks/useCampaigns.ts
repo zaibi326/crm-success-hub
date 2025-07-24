@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useCampaignActivityTracking } from './useCampaignActivityTracking';
 
 export interface Campaign {
   id: string;
@@ -25,6 +25,7 @@ export function useCampaigns() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { trackCampaignCreated, trackCampaignUpdated, trackCampaignDeleted } = useCampaignActivityTracking();
 
   const fetchCampaigns = async () => {
     try {
@@ -64,6 +65,7 @@ export function useCampaigns() {
       if (error) throw error;
 
       setCampaigns(prev => [data, ...prev]);
+      trackCampaignCreated(data);
       toast({
         title: "Success",
         description: "Campaign created successfully"
@@ -82,6 +84,9 @@ export function useCampaigns() {
 
   const updateCampaign = async (id: string, updates: Partial<Campaign>) => {
     try {
+      const originalCampaign = campaigns.find(c => c.id === id);
+      const changedFields = Object.keys(updates);
+      
       const { data, error } = await supabase
         .from('campaigns')
         .update({ ...updates, updated_at: new Date().toISOString() })
@@ -92,6 +97,7 @@ export function useCampaigns() {
       if (error) throw error;
 
       setCampaigns(prev => prev.map(c => c.id === id ? data : c));
+      trackCampaignUpdated(data, changedFields);
       toast({
         title: "Success",
         description: "Campaign updated successfully"
@@ -110,6 +116,8 @@ export function useCampaigns() {
 
   const deleteCampaign = async (id: string) => {
     try {
+      const campaignToDelete = campaigns.find(c => c.id === id);
+      
       const { error } = await supabase
         .from('campaigns')
         .delete()
@@ -118,6 +126,9 @@ export function useCampaigns() {
       if (error) throw error;
 
       setCampaigns(prev => prev.filter(c => c.id !== id));
+      if (campaignToDelete) {
+        trackCampaignDeleted(campaignToDelete);
+      }
       toast({
         title: "Success",
         description: "Campaign deleted successfully"

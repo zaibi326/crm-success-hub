@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Phone, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useComprehensiveActivityLogger } from '@/hooks/useComprehensiveActivityLogger';
 
 interface CommunicationButtonProps {
   phoneNumber: string;
@@ -24,6 +24,7 @@ export function CommunicationButton({
   onCommunicationStart
 }: CommunicationButtonProps) {
   const { toast } = useToast();
+  const { logCommunicationActivity } = useComprehensiveActivityLogger();
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -47,7 +48,16 @@ export function CommunicationButton({
     });
     
     // Log call attempt
-    logCommunication('call', 'initiated');
+    logCommunicationActivity(
+      'call',
+      `Initiated call to ${phoneNumber}${leadName ? ` (${leadName})` : ''}`,
+      leadId,
+      {
+        phoneNumber,
+        leadName,
+        callStatus: 'initiated'
+      }
+    );
   };
 
   const handleSMS = () => {
@@ -56,11 +66,18 @@ export function CommunicationButton({
       title: "Opening SMS",
       description: `Preparing message to ${phoneNumber}${leadName ? ` (${leadName})` : ''}`,
     });
-  };
 
-  const logCommunication = (type: string, status: string) => {
-    // TODO: Log to database
-    console.log(`Communication logged: ${type} - ${status} - ${phoneNumber}`);
+    // Log SMS attempt
+    logCommunicationActivity(
+      'sms',
+      `Opened SMS panel for ${phoneNumber}${leadName ? ` (${leadName})` : ''}`,
+      leadId,
+      {
+        phoneNumber,
+        leadName,
+        smsStatus: 'opened'
+      }
+    );
   };
 
   return (
