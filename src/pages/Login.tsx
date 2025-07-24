@@ -29,40 +29,23 @@ const Login = () => {
   useEffect(() => {
     console.log('Login useEffect - user:', !!user, 'profile:', !!profile, 'isLoading:', isLoading);
     
-    // Only redirect if we have a user and are not loading
-    if (user && !isLoading) {
-      console.log('User authenticated, checking profile...');
-      
-      // If we have a profile, redirect based on role
-      if (profile?.role) {
-        console.log('Profile found with role:', profile.role);
-        const redirectPath = getRoleBasedRedirect(profile.role);
-        console.log('Redirecting to:', redirectPath);
-        navigate(redirectPath, { replace: true });
-      } else {
-        // If no profile yet, wait a moment for it to load
-        console.log('No profile found, waiting...');
-        const timer = setTimeout(() => {
-          // If still no profile after waiting, redirect to dashboard
-          if (!profile) {
-            console.log('Profile still not loaded, redirecting to dashboard');
-            navigate('/dashboard', { replace: true });
-          }
-        }, 2000);
-        
-        return () => clearTimeout(timer);
-      }
+    // Only redirect if we have a user, profile, and are not loading
+    if (user && profile && !isLoading) {
+      console.log('User authenticated with profile, redirecting based on role:', profile.role);
+      const redirectPath = getRoleBasedRedirect(profile.role);
+      console.log('Redirecting to:', redirectPath);
+      navigate(redirectPath, { replace: true });
     }
   }, [user, profile, isLoading, navigate]);
 
   // Show loading while auth state is being determined
-  if (isLoading) {
+  if (isLoading && !user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
           <div className="flex items-center space-x-3">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
-            <span className="text-gray-700 font-medium">Loading...</span>
+            <span className="text-gray-700 font-medium">Initializing...</span>
           </div>
         </div>
       </div>
@@ -70,13 +53,13 @@ const Login = () => {
   }
 
   // If user is authenticated but still loading profile, show different message
-  if (user && !profile) {
+  if (user && !profile && isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
           <div className="flex items-center space-x-3">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
-            <span className="text-gray-700 font-medium">Setting up your profile...</span>
+            <span className="text-gray-700 font-medium">Loading your profile...</span>
           </div>
         </div>
       </div>
@@ -84,13 +67,35 @@ const Login = () => {
   }
 
   // If user is authenticated and has profile, show redirecting message
-  if (user && profile) {
+  if (user && profile && !isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
           <div className="flex items-center space-x-3">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
-            <span className="text-gray-700 font-medium">Redirecting...</span>
+            <span className="text-gray-700 font-medium">Redirecting to your dashboard...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If user exists but no profile and not loading, there might be an error
+  if (user && !profile && !isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 shadow-2xl">
+          <div className="text-center space-y-4">
+            <div className="text-red-500 font-medium">Profile Loading Error</div>
+            <p className="text-gray-600 text-sm">
+              There was an issue loading your profile. Please try refreshing the page.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              Refresh Page
+            </button>
           </div>
         </div>
       </div>

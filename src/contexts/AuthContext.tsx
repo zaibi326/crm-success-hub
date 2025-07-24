@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -45,59 +44,65 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     console.log('AuthProvider initializing...');
     
-    // Get initial session
-    const getInitialSession = async () => {
+    const initializeAuth = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        // Set up auth state listener first
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+          console.log('Auth state changed:', event, !!session);
+          
+          setSession(session);
+          setUser(session?.user ?? null);
+          
+          if (session?.user) {
+            console.log('Auth state change - user found, fetching profile...');
+            // Use setTimeout to avoid blocking the auth state change
+            setTimeout(() => {
+              fetchProfile(session.user.id, session.user.email || '');
+            }, 0);
+          } else {
+            console.log('Auth state change - no user, clearing profile');
+            setProfile(null);
+            setIsLoading(false);
+          }
+        });
+
+        // Then get initial session
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error("Error getting session:", error);
+          console.error("Error getting initial session:", error);
           setIsLoading(false);
           return;
         }
 
-        console.log('Initial session:', !!session);
-        setSession(session);
-        setUser(session?.user ?? null);
-
-        if (session?.user) {
-          console.log('Fetching profile for user:', session.user.id);
-          await fetchProfile(session.user.id);
+        console.log('Initial session:', !!initialSession);
+        
+        if (initialSession?.user) {
+          console.log('Initial session - user found, fetching profile...');
+          setSession(initialSession);
+          setUser(initialSession.user);
+          await fetchProfile(initialSession.user.id, initialSession.user.email || '');
+        } else {
+          console.log('Initial session - no user found');
+          setIsLoading(false);
         }
+
+        // Cleanup subscription on unmount
+        return () => {
+          subscription.unsubscribe();
+        };
       } catch (error) {
-        console.error("Error in getInitialSession:", error);
-      } finally {
+        console.error("Error in auth initialization:", error);
         setIsLoading(false);
       }
     };
 
-    getInitialSession();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event, !!session);
-      
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        console.log('Auth state change - fetching profile for user:', session.user.id);
-        // Don't set loading here, let fetchProfile handle it
-        await fetchProfile(session.user.id);
-      } else {
-        setProfile(null);
-        setIsLoading(false);
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    initializeAuth();
   }, []);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (userId: string, userEmail: string) => {
     try {
-      console.log('Fetching profile for userId:', userId);
+      console.log('Fetching profile for userId:', userId, 'email:', userEmail);
       
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -110,34 +115,63 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         // If profile doesn't exist, create a default one
         if (profileError.code === 'PGRST116') {
-          console.log('Profile not found, creating default profile');
-          const { data: newProfile, error: createError } = await supabase
-            .from('profiles')
-            .insert({
-              id: userId,
-              email: user?.email || '',
-              first_name: '',
-              last_name: '',
-              role: 'Employee'
-            })
-            .select()
-            .single();
+          console.log('Profile not found, creating default profile...');
+          try {
+            const { data: newProfile, error: createError } = await supabase
+              .from('profiles')
+              .insert({
+                id: userId,
+                email: userEmail,
+                first_name: '',
+                last_name: '',
+                role: 'Employee'
+              })
+              .select()
+              .single();
 
-          if (createError) {
-            console.error("Error creating profile:", createError);
+            if (createError) {
+              console.error("Error creating profile:", createError);
+              toast({
+                title: "Profile Creation Error",
+                description: "Failed to create user profile. Please try again.",
+                variant: "destructive",
+              });
+              setIsLoading(false);
+              return;
+            }
+
+            setProfile(newProfile as Profile);
+            console.log('Default profile created successfully:', newProfile);
+            setIsLoading(false);
+            return;
+          } catch (createError) {
+            console.error("Error in profile creation:", createError);
+            setIsLoading(false);
             return;
           }
-
-          setProfile(newProfile as Profile);
-          console.log('Default profile created:', newProfile);
         }
+        
+        // For other errors, show toast and stop loading
+        toast({
+          title: "Profile Error",
+          description: "Failed to load user profile. Please try again.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
         return;
       }
 
       setProfile(profileData as Profile);
       console.log('Profile fetched successfully:', profileData);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error in fetchProfile:", error);
+      toast({
+        title: "Profile Error",
+        description: "Failed to load user profile. Please try again.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
     }
   };
 
@@ -153,16 +187,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       if (error) {
         console.error('Login error:', error);
+        setIsLoading(false);
         return { success: false, error: error.message };
       }
       
       console.log('Login successful');
+      // Don't set isLoading to false here - let the auth state change handle it
       return { success: true };
     } catch (error: any) {
       console.error('Login error:', error);
-      return { success: false, error: error.message };
-    } finally {
       setIsLoading(false);
+      return { success: false, error: error.message };
     }
   };
 
@@ -171,10 +206,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(true);
       console.log('Attempting signup for:', email);
       
+      const redirectUrl = `${window.location.origin}/`;
+      
       const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
         options: {
+          emailRedirectTo: redirectUrl,
           data: {
             first_name: firstName,
             last_name: lastName,
@@ -185,20 +223,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       if (error) {
         console.error('Signup error:', error);
+        setIsLoading(false);
         return { success: false, error: error.message };
       }
 
       // Check if the user was created successfully but requires email confirmation
       if (data?.user && !data?.user.confirmed_at) {
+        setIsLoading(false);
         return { success: true, error: "Please check your email to confirm your account." };
       }
 
+      console.log('Signup successful');
+      // Don't set isLoading to false here - let the auth state change handle it
       return { success: true };
     } catch (error: any) {
       console.error('Signup error:', error);
-      return { success: false, error: error.message };
-    } finally {
       setIsLoading(false);
+      return { success: false, error: error.message };
     }
   };
 
