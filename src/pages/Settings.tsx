@@ -10,7 +10,7 @@ import SecuritySection from '@/components/settings/SecuritySection';
 import RoleBasedSettings from '@/components/settings/RoleBasedSettings';
 import LeadSourceSection from '@/components/settings/LeadSourceSection';
 import AdminUsersSection from '@/components/settings/AdminUsersSection';
-import { User, Shield, Settings, Database, Crown } from 'lucide-react';
+import { User, Shield, Settings as SettingsIcon, Database, Crown } from 'lucide-react';
 
 const Settings = () => {
   const { profile } = useAuth();
@@ -46,7 +46,7 @@ const Settings = () => {
                     Security
                   </TabsTrigger>
                   <TabsTrigger value="role-settings" className="flex items-center gap-2">
-                    <Settings className="w-4 h-4" />
+                    <SettingsIcon className="w-4 h-4" />
                     Role Settings
                   </TabsTrigger>
                   <TabsTrigger value="lead-source" className="flex items-center gap-2">
@@ -70,7 +70,7 @@ const Settings = () => {
                 </TabsContent>
 
                 <TabsContent value="role-settings" className="mt-6">
-                  <RoleBasedSettings userRole={profile?.role || 'Employee'} />
+                  <RoleBasedSettings userRole={profile?.role as 'Admin' | 'Manager' | 'Lead Manager' | 'Employee' | 'Guest' || 'Employee'} />
                 </TabsContent>
 
                 <TabsContent value="lead-source" className="mt-6">
