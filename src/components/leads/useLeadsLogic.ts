@@ -234,6 +234,11 @@ export function useLeadsLogic() {
   };
 
   const handleLeadView = (lead: TaxLead) => {
+    if (!lead) {
+      console.warn('Attempted to view null lead');
+      return;
+    }
+    
     setSelectedLead(lead);
     trackLeadViewed(lead);
   };
