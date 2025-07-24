@@ -1,15 +1,26 @@
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Home, Calendar, Bell, Settings, Activity, Target, Phone, Building2, Users, Briefcase, Zap } from 'lucide-react';
-import { Sidebar, SidebarTrigger, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuBadge } from "@/components/ui/sidebar";
+import { Sidebar, SidebarTrigger, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuBadge, useSidebar } from "@/components/ui/sidebar";
 import { useAuth } from '@/contexts/AuthContext';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
+
 export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { setOpen } = useSidebar();
   const {
     userRole
   } = useRoleAccess();
+
+  // Auto-collapse sidebar when navigating to leads
+  useEffect(() => {
+    if (location.pathname === '/leads') {
+      setOpen(false);
+    }
+  }, [location.pathname, setOpen]);
+
   const navigationItems = [{
     title: "Dashboard",
     url: "/dashboard",
@@ -53,10 +64,12 @@ export function AppSidebar() {
     icon: Settings,
     color: "text-agile-gray-600"
   }];
+
   const handleNavigation = (url: string) => {
     console.log('Navigating to:', url);
     navigate(url);
   };
+
   return <Sidebar className="bg-white border-r border-agile-gray-200 shadow-agile">
       <SidebarContent className="p-6">
         {/* Logo Section */}
