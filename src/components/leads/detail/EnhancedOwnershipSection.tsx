@@ -136,12 +136,12 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
     setEditValue('');
   };
 
-  const getTotalPercentage = () => {
+  const getHeirsTotalPercentage = () => {
     return heirs.reduce((sum, heir) => sum + heir.percentage, 0);
   };
 
   const getPrimaryOwnerPercentage = () => {
-    const heirsTotal = getTotalPercentage();
+    const heirsTotal = getHeirsTotalPercentage();
     return Math.max(0, 100 - heirsTotal);
   };
 
@@ -260,6 +260,10 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
     return null;
   };
 
+  const heirsTotalPercentage = getHeirsTotalPercentage();
+  const totalPercentage = heirsTotalPercentage + primaryOwnerPercentage;
+  const isValidTotal = Math.abs(totalPercentage - 100) < 0.01;
+
   return (
     <div className="space-y-6">
       {/* Primary Owner and Heirs Cards */}
@@ -290,13 +294,16 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
               <Badge 
                 variant="outline" 
                 className={`text-sm font-bold ${
-                  Math.abs(getTotalPercentage() + primaryOwnerPercentage - 100) < 0.01 
+                  isValidTotal 
                     ? 'border-green-500 text-green-700 bg-green-50' 
                     : 'border-red-500 text-red-700 bg-red-50'
                 }`}
               >
-                {(getTotalPercentage() + primaryOwnerPercentage).toFixed(1)}%
+                {totalPercentage.toFixed(1)}%
               </Badge>
+            </div>
+            <div className="mt-2 text-xs text-gray-500">
+              Primary Owner: {primaryOwnerPercentage.toFixed(1)}% | Heirs: {heirsTotalPercentage.toFixed(1)}%
             </div>
           </div>
 
