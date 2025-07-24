@@ -2,7 +2,7 @@
 import React from 'react';
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { DashboardStats } from './DashboardStats';
-import { ActivityFeed } from './ActivityFeed';
+import { EnhancedActivityFeed } from './EnhancedActivityFeed';
 import { LeadsPieChart } from './LeadsPieChart';
 import { useDashboardDataContext } from '@/contexts/DashboardDataContext';
 
@@ -35,7 +35,7 @@ export function DashboardContent({ userRole, showLeadsInDashboard = false }: Das
         {/* Charts and Activity Feed */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <LeadsPieChart />
-          <ActivityFeed userRole={userRole} />
+          <EnhancedActivityFeed userRole={userRole} />
         </div>
       </main>
     </SidebarInset>

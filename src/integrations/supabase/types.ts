@@ -20,10 +20,15 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          ip_address: string | null
           metadata: Json | null
           module: string
           reference_id: string | null
           reference_type: string | null
+          session_id: string | null
+          target_id: string | null
+          target_type: string | null
+          user_agent: string | null
           user_id: string
           user_name: string
         }
@@ -32,10 +37,15 @@ export type Database = {
           created_at?: string
           description: string
           id?: string
+          ip_address?: string | null
           metadata?: Json | null
           module: string
           reference_id?: string | null
           reference_type?: string | null
+          session_id?: string | null
+          target_id?: string | null
+          target_type?: string | null
+          user_agent?: string | null
           user_id: string
           user_name: string
         }
@@ -44,10 +54,15 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          ip_address?: string | null
           metadata?: Json | null
           module?: string
           reference_id?: string | null
           reference_type?: string | null
+          session_id?: string | null
+          target_id?: string | null
+          target_type?: string | null
+          user_agent?: string | null
           user_id?: string
           user_name?: string
         }
@@ -454,6 +469,24 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      log_comprehensive_activity: {
+        Args: {
+          p_user_id: string
+          p_user_name: string
+          p_module: string
+          p_action_type: string
+          p_description: string
+          p_reference_id?: string
+          p_reference_type?: string
+          p_target_id?: string
+          p_target_type?: string
+          p_metadata?: Json
+          p_ip_address?: string
+          p_user_agent?: string
+          p_session_id?: string
+        }
+        Returns: string
+      }
       log_lead_activity: {
         Args: {
           p_user_id: string
@@ -464,6 +497,10 @@ export type Database = {
           p_metadata?: Json
         }
         Returns: string
+      }
+      reset_activity_logs: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {
