@@ -1,14 +1,15 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { Users, Plus, Trash2, Phone, Mail, MapPin, AlertTriangle } from 'lucide-react';
+import { Users, Plus, Trash2, Phone, Mail, MapPin, AlertTriangle, Edit2, Check, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { TaxLead } from '@/types/taxLead';
-import { EditableField } from '../EditableField';
 
 interface Heir {
   id: string;
@@ -50,57 +51,89 @@ const COLORS = [
 
 export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: EnhancedOwnershipSectionProps) {
   const [heirs, setHeirs] = useState<Heir[]>([]);
+  const [editingHeir, setEditingHeir] = useState<string | null>(null);
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState<string>('');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newHeir, setNewHeir] = useState<Heir>({
+    id: '',
+    name: '',
+    relationship: 'Other',
+    percentage: 0,
+    propertyAddress: '',
+    phoneNumber: '',
+    email: ''
+  });
   const { toast } = useToast();
 
   const addHeir = () => {
-    const newHeir: Heir = {
+    if (!newHeir.name.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Name is required",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const heir: Heir = {
+      ...newHeir,
       id: Date.now().toString(),
+    };
+    
+    setHeirs(prev => [...prev, heir]);
+    setNewHeir({
+      id: '',
       name: '',
       relationship: 'Other',
       percentage: 0,
       propertyAddress: '',
       phoneNumber: '',
       email: ''
-    };
-    setHeirs(prev => [...prev, newHeir]);
+    });
+    setShowAddForm(false);
+    
+    toast({
+      title: "Heir Added",
+      description: "New heir has been added successfully",
+    });
   };
 
   const removeHeir = (id: string) => {
     setHeirs(prev => prev.filter(heir => heir.id !== id));
+    toast({
+      title: "Heir Removed",
+      description: "Heir has been removed successfully",
+    });
   };
 
-  const updateHeir = (id: string, field: keyof Heir, value: string | number) => {
+  const startEdit = (heirId: string, field: string, currentValue: string) => {
+    setEditingHeir(heirId);
+    setEditingField(field);
+    setEditValue(currentValue);
+  };
+
+  const saveEdit = (heirId: string, field: string) => {
     setHeirs(prev => prev.map(heir => 
-      heir.id === id ? { 
-        ...heir, 
-        [field]: field === 'percentage' ? parseFloat(value.toString()) || 0 : value 
-      } : heir
+      heir.id === heirId 
+        ? { ...heir, [field]: field === 'percentage' ? parseFloat(editValue) || 0 : editValue }
+        : heir
     ));
-    validateOwnership();
+    setEditingHeir(null);
+    setEditingField(null);
+    setEditValue('');
+    
+    toast({
+      title: "Field Updated",
+      description: "Heir information has been updated successfully",
+    });
   };
 
-  const validateOwnership = () => {
-    const errors: string[] = [];
-    const total = getTotalPercentage();
-    
-    if (total > 100) {
-      errors.push(`Total ownership is ${total.toFixed(1)}%. Cannot exceed 100%`);
-    }
-    
-    const emails = heirs.filter(h => h.email).map(h => h.email);
-    const duplicateEmails = emails.filter((email, index) => emails.indexOf(email) !== index);
-    if (duplicateEmails.length > 0) {
-      errors.push('Duplicate email addresses found');
-    }
-
-    const missingRequired = heirs.filter(h => !h.name || h.percentage <= 0);
-    if (missingRequired.length > 0) {
-      errors.push('Some heirs are missing required fields (name, percentage)');
-    }
-    
-    setValidationErrors(errors);
-    return errors.length === 0;
+  const cancelEdit = () => {
+    setEditingHeir(null);
+    setEditingField(null);
+    setEditValue('');
   };
 
   const getTotalPercentage = () => {
@@ -112,23 +145,6 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
     return Math.max(0, 100 - heirsTotal);
   };
 
-  const handleSave = () => {
-    if (!validateOwnership()) {
-      toast({
-        title: "Validation Error",
-        description: validationErrors.join('. '),
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    onSave(heirs);
-    toast({
-      title: "Ownership Saved",
-      description: "Ownership breakdown has been saved successfully"
-    });
-  };
-
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '??';
   };
@@ -138,6 +154,71 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
     if (percentage >= 25) return 'bg-blue-500';
     if (percentage >= 10) return 'bg-amber-500';
     return 'bg-gray-500';
+  };
+
+  const renderEditableField = (heir: Heir, field: keyof Heir, label: string, type: string = 'text') => {
+    const isEditing = editingHeir === heir.id && editingField === field;
+    const value = heir[field];
+
+    if (isEditing) {
+      return (
+        <div className="flex items-center gap-2">
+          {field === 'relationship' ? (
+            <Select value={editValue} onValueChange={setEditValue}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {RELATIONSHIP_OPTIONS.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Input
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              type={type}
+              className="w-32"
+            />
+          )}
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => saveEdit(heir.id, field)}
+            className="text-green-600 hover:text-green-800 hover:bg-green-50 p-1"
+          >
+            <Check className="w-3 h-3" />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={cancelEdit}
+            className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1"
+          >
+            <X className="w-3 h-3" />
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-gray-900">{value}</span>
+        {canEdit && (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => startEdit(heir.id, field, value.toString())}
+            className="text-gray-400 hover:text-gray-600 hover:bg-gray-50 p-1"
+          >
+            <Edit2 className="w-3 h-3" />
+          </Button>
+        )}
+      </div>
+    );
   };
 
   // Create chart data with Primary Owner and Heirs
@@ -189,7 +270,11 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
               Heirs & Ownership Details
             </div>
             {canEdit && (
-              <Button onClick={addHeir} size="sm" className="bg-purple-600 hover:bg-purple-700">
+              <Button 
+                onClick={() => setShowAddForm(true)} 
+                size="sm" 
+                className="bg-purple-600 hover:bg-purple-700"
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Heir
               </Button>
@@ -197,21 +282,6 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          {/* Validation Errors */}
-          {validationErrors.length > 0 && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <div className="flex items-center gap-2 text-red-700 mb-2">
-                <AlertTriangle className="w-4 h-4" />
-                <span className="font-medium">Validation Errors:</span>
-              </div>
-              <ul className="text-sm text-red-600 space-y-1">
-                {validationErrors.map((error, index) => (
-                  <li key={index}>• {error}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
           {/* Total Percentage Indicator */}
           <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
             <div className="flex items-center justify-between">
@@ -224,7 +294,7 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
                     : 'border-red-500 text-red-700 bg-red-50'
                 }`}
               >
-                100%
+                {(getTotalPercentage() + primaryOwnerPercentage).toFixed(1)}%
               </Badge>
             </div>
           </div>
@@ -252,125 +322,138 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
             </Card>
           </div>
 
-          {/* Heirs Grid */}
+          {/* Add Heir Form */}
+          {showAddForm && (
+            <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Heir</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <Label className="text-sm font-medium">Name</Label>
+                  <Input
+                    value={newHeir.name}
+                    onChange={(e) => setNewHeir(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Enter heir name"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Relationship</Label>
+                  <Select
+                    value={newHeir.relationship}
+                    onValueChange={(value) => setNewHeir(prev => ({ ...prev, relationship: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {RELATIONSHIP_OPTIONS.map(option => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Ownership %</Label>
+                  <Input
+                    type="number"
+                    value={newHeir.percentage}
+                    onChange={(e) => setNewHeir(prev => ({ ...prev, percentage: parseFloat(e.target.value) || 0 }))}
+                    placeholder="0"
+                    min="0"
+                    max="100"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Email</Label>
+                  <Input
+                    type="email"
+                    value={newHeir.email}
+                    onChange={(e) => setNewHeir(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="Email address"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Phone</Label>
+                  <Input
+                    type="tel"
+                    value={newHeir.phoneNumber}
+                    onChange={(e) => setNewHeir(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                    placeholder="Phone number"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Address</Label>
+                  <Input
+                    value={newHeir.propertyAddress}
+                    onChange={(e) => setNewHeir(prev => ({ ...prev, propertyAddress: e.target.value }))}
+                    placeholder="Property address"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2 mt-4">
+                <Button onClick={addHeir} className="bg-green-600 hover:bg-green-700">
+                  <Check className="w-4 h-4 mr-2" />
+                  Add Heir
+                </Button>
+                <Button variant="outline" onClick={() => setShowAddForm(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Heirs List */}
           {heirs.length > 0 && (
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Heirs</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {heirs.map((heir, index) => (
-                  <Card key={heir.id} className="shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                    <CardContent className="p-4 space-y-4">
-                      {/* Header with Avatar and Actions */}
-                      <div className="flex items-start justify-between">
+              <div className="space-y-3">
+                {heirs.map((heir) => (
+                  <Card key={heir.id} className="shadow-sm border border-gray-200">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                             {getInitials(heir.name)}
                           </div>
+                          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 flex-1">
+                            <div>
+                              <Label className="text-xs font-medium text-gray-600">Name</Label>
+                              {renderEditableField(heir, 'name', 'Name')}
+                            </div>
+                            <div>
+                              <Label className="text-xs font-medium text-gray-600">Relationship</Label>
+                              {renderEditableField(heir, 'relationship', 'Relationship')}
+                            </div>
+                            <div>
+                              <Label className="text-xs font-medium text-gray-600">Email</Label>
+                              {renderEditableField(heir, 'email', 'Email', 'email')}
+                            </div>
+                            <div>
+                              <Label className="text-xs font-medium text-gray-600">Phone</Label>
+                              {renderEditableField(heir, 'phoneNumber', 'Phone', 'tel')}
+                            </div>
+                            <div>
+                              <Label className="text-xs font-medium text-gray-600">Ownership %</Label>
+                              {renderEditableField(heir, 'percentage', 'Percentage', 'number')}
+                            </div>
+                          </div>
                         </div>
                         
-                        {/* Delete Button */}
-                        {canEdit && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeHeir(heir.id)}
-                            className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 h-auto"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        )}
-                      </div>
-
-                      {/* Heir Details using EditableField */}
-                      <div className="space-y-3">
-                        <div className="space-y-1">
-                          <label className="text-xs font-medium text-gray-600">Name</label>
-                          <EditableField
-                            label=""
-                            value={heir.name}
-                            onSave={(value) => updateHeir(heir.id, 'name', value)}
-                            className="font-semibold text-gray-900"
-                          />
-                        </div>
-
-                        <div className="space-y-1">
-                          <label className="text-xs font-medium text-gray-600">Relationship</label>
-                          <Select
-                            value={heir.relationship}
-                            onValueChange={(value) => updateHeir(heir.id, 'relationship', value)}
-                            disabled={!canEdit}
-                          >
-                            <SelectTrigger className="w-full h-8 text-xs">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {RELATIONSHIP_OPTIONS.map(option => (
-                                <SelectItem key={option.value} value={option.value}>
-                                  {option.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
                         <div className="flex items-center gap-2">
-                          <div className="flex-1 space-y-1">
-                            <label className="text-xs font-medium text-gray-600">Ownership %</label>
-                            <EditableField
-                              label=""
-                              value={heir.percentage.toString()}
-                              onSave={(value) => updateHeir(heir.id, 'percentage', parseFloat(value) || 0)}
-                              type="text"
-                              className="text-sm"
-                            />
-                          </div>
-                          <Badge className={`${getPercentageColor(heir.percentage)} text-white text-xs mt-5`}>
+                          <Badge className={`${getPercentageColor(heir.percentage)} text-white`}>
                             {heir.percentage}%
                           </Badge>
-                        </div>
-                      </div>
-
-                      {/* Contact Details */}
-                      <div className="space-y-3 pt-2 border-t border-gray-100">
-                        <div className="flex items-start gap-2">
-                          <MapPin className="w-3 h-3 text-gray-500 mt-1 flex-shrink-0" />
-                          <div className="flex-1">
-                            <label className="text-xs font-medium text-gray-600 block mb-1">Address</label>
-                            <EditableField
-                              label=""
-                              value={heir.propertyAddress}
-                              onSave={(value) => updateHeir(heir.id, 'propertyAddress', value)}
-                              className="text-xs text-gray-600"
-                            />
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-start gap-2">
-                          <Phone className="w-3 h-3 text-gray-500 mt-1 flex-shrink-0" />
-                          <div className="flex-1">
-                            <label className="text-xs font-medium text-gray-600 block mb-1">Phone</label>
-                            <EditableField
-                              label=""
-                              value={heir.phoneNumber}
-                              onSave={(value) => updateHeir(heir.id, 'phoneNumber', value)}
-                              type="tel"
-                              className="text-xs text-gray-600"
-                            />
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-start gap-2">
-                          <Mail className="w-3 h-3 text-gray-500 mt-1 flex-shrink-0" />
-                          <div className="flex-1">
-                            <label className="text-xs font-medium text-gray-600 block mb-1">Email</label>
-                            <EditableField
-                              label=""
-                              value={heir.email}
-                              onSave={(value) => updateHeir(heir.id, 'email', value)}
-                              type="email"
-                              className="text-xs text-gray-600"
-                            />
-                          </div>
+                          {canEdit && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeHeir(heir.id)}
+                              className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </CardContent>
@@ -384,8 +467,7 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
           {canEdit && heirs.length > 0 && (
             <div className="flex justify-end">
               <Button 
-                onClick={handleSave}
-                disabled={validationErrors.length > 0}
+                onClick={() => onSave(heirs)}
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 Save Ownership
