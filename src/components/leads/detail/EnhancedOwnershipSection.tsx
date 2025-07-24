@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -411,7 +410,7 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
             </div>
           )}
 
-          {/* Heirs List */}
+          {/* Heirs Table */}
           {heirs.length > 0 && (
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Heirs</h3>

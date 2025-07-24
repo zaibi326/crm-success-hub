@@ -1,7 +1,8 @@
+
 import { useState, useMemo, useEffect } from 'react';
 import { TaxLead } from '@/types/taxLead';
 import { useLeadsData } from '@/hooks/useLeadsData';
-import { useEnhancedActivityLogger } from '@/hooks/useEnhancedActivityLogger';
+import { useComprehensiveLeadActivityTracker } from '@/hooks/useComprehensiveLeadActivityTracker';
 import { FilterCondition } from './filters/types';
 
 const FILTERS_STORAGE_KEY = 'seller-leads-filters';
@@ -16,7 +17,16 @@ export function useLeadsLogic() {
   const [showFilterSidebar, setShowFilterSidebar] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  const { logLeadActivity } = useEnhancedActivityLogger();
+  const {
+    trackLeadCreated,
+    trackLeadUpdated,
+    trackLeadDeleted,
+    trackStatusChanged,
+    trackTemperatureChanged,
+    trackBulkLeadsUpdated,
+    trackBulkLeadsDeleted,
+    trackLeadViewed
+  } = useComprehensiveLeadActivityTracker();
 
   // Use the persistent data hook instead of local state
   const { 
@@ -156,40 +166,38 @@ export function useLeadsLogic() {
     const newLead = { ...lead, id: Date.now() };
     await addLead(newLead);
     
-    // Log the activity with proper await
-    await logLeadActivity({
-      actionType: 'created',
-      description: `Created new lead for ${newLead.ownerName}`,
-      referenceId: newLead.id.toString(),
-      metadata: {
-        leadId: newLead.id,
-        ownerName: newLead.ownerName,
-        propertyAddress: newLead.propertyAddress,
-        status: newLead.status
-      }
-    });
+    // Track the activity
+    trackLeadCreated(newLead);
     
     console.log('Adding lead:', newLead);
   };
 
   const handleLeadUpdate = async (updatedLead: TaxLead) => {
     const originalLead = mockLeads.find(lead => lead.id === updatedLead.id);
+    
+    // Determine changed fields
+    const changedFields: string[] = [];
+    if (originalLead) {
+      Object.keys(updatedLead).forEach(key => {
+        if (originalLead[key as keyof TaxLead] !== updatedLead[key as keyof TaxLead]) {
+          changedFields.push(key);
+        }
+      });
+    }
+
     await updateLead(updatedLead);
     
-    // Log the activity with proper await
-    await logLeadActivity({
-      actionType: 'updated',
-      description: `Updated lead information for ${updatedLead.ownerName}`,
-      referenceId: updatedLead.id.toString(),
-      metadata: {
-        leadId: updatedLead.id,
-        ownerName: updatedLead.ownerName,
-        changes: {
-          from: originalLead,
-          to: updatedLead
-        }
-      }
-    });
+    // Track the activity with changed fields
+    trackLeadUpdated(updatedLead, changedFields, originalLead);
+    
+    // Track specific status or temperature changes
+    if (originalLead && originalLead.status !== updatedLead.status) {
+      trackStatusChanged(updatedLead, originalLead.status, updatedLead.status);
+    }
+    
+    if (originalLead && originalLead.temperature !== updatedLead.temperature) {
+      trackTemperatureChanged(updatedLead, originalLead.temperature, updatedLead.temperature);
+    }
     
     console.log('Updating lead:', updatedLead);
   };
@@ -197,15 +205,8 @@ export function useLeadsLogic() {
   const handleBulkLeadsUpdate = async (updatedLeads: TaxLead[]) => {
     setMockLeads(updatedLeads);
     
-    // Log bulk update activity with proper await
-    await logLeadActivity({
-      actionType: 'bulk_updated',
-      description: `Bulk updated ${updatedLeads.length} leads`,
-      metadata: {
-        count: updatedLeads.length,
-        leadIds: updatedLeads.map(lead => lead.id)
-      }
-    });
+    // Track bulk update activity
+    trackBulkLeadsUpdated(updatedLeads, 'Updated');
     
     console.log('Bulk updating leads:', updatedLeads);
   };
@@ -214,18 +215,9 @@ export function useLeadsLogic() {
     const leadToDelete = mockLeads.find(lead => lead.id === leadId);
     await handleDeleteLead(leadId);
     
-    // Log the activity with proper await
+    // Track the activity
     if (leadToDelete) {
-      await logLeadActivity({
-        actionType: 'deleted',
-        description: `Deleted lead for ${leadToDelete.ownerName}`,
-        referenceId: leadId.toString(),
-        metadata: {
-          leadId: leadId,
-          ownerName: leadToDelete.ownerName,
-          propertyAddress: leadToDelete.propertyAddress
-        }
-      });
+      trackLeadDeleted(leadToDelete);
     }
     
     console.log('Deleting single lead:', leadId);
@@ -235,22 +227,15 @@ export function useLeadsLogic() {
     const leadsToDelete = mockLeads.filter(lead => leadIds.includes(lead.id));
     await handleBulkDeleteLeads(leadIds);
     
-    // Log the activity with proper await
-    await logLeadActivity({
-      actionType: 'bulk_deleted',
-      description: `Bulk deleted ${leadIds.length} leads`,
-      metadata: {
-        count: leadIds.length,
-        leadIds: leadIds,
-        deletedLeads: leadsToDelete.map(lead => ({
-          id: lead.id,
-          ownerName: lead.ownerName,
-          propertyAddress: lead.propertyAddress
-        }))
-      }
-    });
+    // Track the activity
+    trackBulkLeadsDeleted(leadsToDelete);
     
     console.log('Deleting multiple leads:', leadIds);
+  };
+
+  const handleLeadView = (lead: TaxLead) => {
+    setSelectedLead(lead);
+    trackLeadViewed(lead);
   };
 
   const handleFilterToggle = () => {
@@ -279,7 +264,7 @@ export function useLeadsLogic() {
     setCurrentView,
     setSortBy,
     setFilterStatus,
-    setSelectedLead,
+    setSelectedLead: handleLeadView,
     setIsTemplateDialogOpen,
     setFilters,
     setShowFilterSidebar,

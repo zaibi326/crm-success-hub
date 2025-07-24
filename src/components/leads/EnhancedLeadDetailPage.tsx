@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +21,7 @@ import { LeadInfoSection } from './detail/LeadInfoSection';
 import { DatabaseActivityTimeline } from './DatabaseActivityTimeline';
 import { EnhancedOwnershipSection } from './detail/EnhancedOwnershipSection';
 import { EnhancedSellerContactSection } from './detail/EnhancedSellerContactSection';
+import { useComprehensiveLeadActivityTracker } from '@/hooks/useComprehensiveLeadActivityTracker';
 
 interface EnhancedLeadDetailPageProps {
   lead: TaxLead;
@@ -38,6 +40,7 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
   });
 
   const { toast } = useToast();
+  const { trackHeirDataModified, trackLeadNoteAdded } = useComprehensiveLeadActivityTracker();
 
   // Single handler for all field updates
   const handleFieldUpdate = async (field: keyof TaxLead, value: string) => {
@@ -47,6 +50,11 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
     try {
       await onLeadUpdate(updatedLead);
       console.log(`${field} updated to:`, value);
+      
+      // Track note additions specifically
+      if (field === 'notes' && value && value !== leadData.notes) {
+        trackLeadNoteAdded(updatedLead, value);
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -58,6 +66,12 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
 
   const handleOwnershipSave = (heirs: any[]) => {
     console.log('Heirs saved:', heirs);
+    
+    // Track heir data modifications
+    heirs.forEach(heir => {
+      trackHeirDataModified(leadData, 'added', heir);
+    });
+    
     toast({
       title: "Ownership Saved",
       description: "Heirs and ownership details have been saved successfully",
