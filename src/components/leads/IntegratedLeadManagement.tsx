@@ -1,10 +1,19 @@
 
 import React from 'react';
+import { useContext } from 'react';
 import { EnhancedLeadsContent } from './EnhancedLeadsContent';
-import { useAuth } from '@/contexts/AuthContext';
+import { AuthContext } from '@/contexts/AuthContext';
 
 export function IntegratedLeadManagement() {
-  const { isLoading } = useAuth();
+  const context = useContext(AuthContext);
+  
+  // If AuthProvider is not available, don't show loading state
+  if (!context) {
+    console.warn('IntegratedLeadManagement used outside of AuthProvider, proceeding without auth');
+    return <EnhancedLeadsContent />;
+  }
+
+  const { isLoading } = context;
 
   if (isLoading) {
     return (
