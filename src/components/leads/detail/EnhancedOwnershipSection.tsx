@@ -162,10 +162,10 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
 
     if (isEditing) {
       return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 min-w-0">
           {field === 'relationship' ? (
             <Select value={editValue} onValueChange={setEditValue}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className="h-8 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -181,14 +181,14 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
               type={type}
-              className="w-32"
+              className="h-8 text-xs"
             />
           )}
           <Button
             size="sm"
             variant="ghost"
             onClick={() => saveEdit(heir.id, field)}
-            className="text-green-600 hover:text-green-800 hover:bg-green-50 p-1"
+            className="text-green-600 hover:text-green-800 hover:bg-green-50 p-1 h-8 w-8"
           >
             <Check className="w-3 h-3" />
           </Button>
@@ -196,7 +196,7 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
             size="sm"
             variant="ghost"
             onClick={cancelEdit}
-            className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1"
+            className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 h-8 w-8"
           >
             <X className="w-3 h-3" />
           </Button>
@@ -205,14 +205,14 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
     }
 
     return (
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-gray-900">{value}</span>
+      <div className="flex items-center gap-1 min-w-0">
+        <span className="text-xs text-gray-900 truncate">{value}</span>
         {canEdit && (
           <Button
             size="sm"
             variant="ghost"
             onClick={() => startEdit(heir.id, field, value.toString())}
-            className="text-gray-400 hover:text-gray-600 hover:bg-gray-50 p-1"
+            className="text-gray-400 hover:text-gray-600 hover:bg-gray-50 p-1 h-6 w-6"
           >
             <Edit2 className="w-3 h-3" />
           </Button>
@@ -407,57 +407,75 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
           {heirs.length > 0 && (
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Heirs</h3>
-              <div className="space-y-3">
-                {heirs.map((heir) => (
-                  <Card key={heir.id} className="shadow-sm border border-gray-200">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+              
+              {/* Table Header */}
+              <div className="bg-gray-50 rounded-t-lg p-3 border border-gray-200">
+                <div className="grid grid-cols-12 gap-2 items-center text-xs font-medium text-gray-600">
+                  <div className="col-span-3">Name</div>
+                  <div className="col-span-2">Relationship</div>
+                  <div className="col-span-3">Email</div>
+                  <div className="col-span-2">Phone</div>
+                  <div className="col-span-1">Ownership</div>
+                  <div className="col-span-1">Actions</div>
+                </div>
+              </div>
+
+              {/* Heirs List */}
+              <div className="space-y-0">
+                {heirs.map((heir, index) => (
+                  <div key={heir.id} className={`border-l border-r border-gray-200 ${index === heirs.length - 1 ? 'border-b rounded-b-lg' : 'border-b'}`}>
+                    <div className="p-3 bg-white">
+                      <div className="grid grid-cols-12 gap-2 items-center">
+                        {/* Avatar and Name */}
+                        <div className="col-span-3 flex items-center gap-2">
+                          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
                             {getInitials(heir.name)}
                           </div>
-                          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 flex-1">
-                            <div>
-                              <Label className="text-xs font-medium text-gray-600">Name</Label>
-                              {renderEditableField(heir, 'name', 'Name')}
-                            </div>
-                            <div>
-                              <Label className="text-xs font-medium text-gray-600">Relationship</Label>
-                              {renderEditableField(heir, 'relationship', 'Relationship')}
-                            </div>
-                            <div>
-                              <Label className="text-xs font-medium text-gray-600">Email</Label>
-                              {renderEditableField(heir, 'email', 'Email', 'email')}
-                            </div>
-                            <div>
-                              <Label className="text-xs font-medium text-gray-600">Phone</Label>
-                              {renderEditableField(heir, 'phoneNumber', 'Phone', 'tel')}
-                            </div>
-                            <div>
-                              <Label className="text-xs font-medium text-gray-600">Ownership %</Label>
-                              {renderEditableField(heir, 'percentage', 'Percentage', 'number')}
-                            </div>
+                          <div className="min-w-0">
+                            {renderEditableField(heir, 'name', 'Name')}
                           </div>
                         </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Badge className={`${getPercentageColor(heir.percentage)} text-white`}>
-                            {heir.percentage}%
-                          </Badge>
+
+                        {/* Relationship */}
+                        <div className="col-span-2">
+                          {renderEditableField(heir, 'relationship', 'Relationship')}
+                        </div>
+
+                        {/* Email */}
+                        <div className="col-span-3">
+                          {renderEditableField(heir, 'email', 'Email', 'email')}
+                        </div>
+
+                        {/* Phone */}
+                        <div className="col-span-2">
+                          {renderEditableField(heir, 'phoneNumber', 'Phone', 'tel')}
+                        </div>
+
+                        {/* Ownership Percentage */}
+                        <div className="col-span-1">
+                          <div className="flex items-center gap-1">
+                            <Badge className={`${getPercentageColor(heir.percentage)} text-white text-xs`}>
+                              {heir.percentage}%
+                            </Badge>
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="col-span-1 flex justify-end">
                           {canEdit && (
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => removeHeir(heir.id)}
-                              className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1"
+                              className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 h-8 w-8"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3 h-3" />
                             </Button>
                           )}
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
