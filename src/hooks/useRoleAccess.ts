@@ -1,5 +1,6 @@
 
-import { useAuth } from '@/contexts/AuthContext';
+import { useContext } from 'react';
+import { AuthContext } from '@/contexts/AuthContext';
 import { 
   canManageUsers, 
   canManageTeam, 
@@ -11,7 +12,33 @@ import {
 } from '@/utils/roleRedirect';
 
 export const useRoleAccess = () => {
-  const { profile } = useAuth();
+  const context = useContext(AuthContext);
+  
+  // If AuthProvider is not available, return default values
+  if (!context) {
+    console.warn('useRoleAccess called outside of AuthProvider, returning default values');
+    const defaultRole = 'Employee';
+    
+    return {
+      userRole: defaultRole,
+      isAdmin: false,
+      isManager: false,
+      isLeadManager: false,
+      isEmployee: true,
+      isMember: true,
+      isClient: false,
+      isGuest: false,
+      canManageUsers: canManageUsers(defaultRole),
+      canManageTeam: canManageTeam(defaultRole),
+      canViewAllLeads: canViewAllLeads(defaultRole),
+      canCreateCampaigns: canCreateCampaigns(defaultRole),
+      canViewAnalytics: canViewAnalytics(defaultRole),
+      canCreateApps: canCreateApps(defaultRole),
+      hasPermission: (requiredRoles: string[]) => hasPermission(defaultRole, requiredRoles)
+    };
+  }
+
+  const { profile } = context;
   const userRole = profile?.role || 'Employee';
 
   return {

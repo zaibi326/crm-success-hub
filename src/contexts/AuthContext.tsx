@@ -25,7 +25,7 @@ interface AuthContextType {
   updateProfile: (updates: Partial<Profile>) => Promise<{ success: boolean; error?: string }>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -85,14 +85,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (profileError) {
         console.error("Error fetching profile:", profileError);
-        // Handle the error appropriately, maybe set a default profile or show an error message
         return;
       }
 
       setProfile(profileData as Profile);
     } catch (error) {
       console.error("Error fetching profile:", error);
-      // Handle the error appropriately
     }
   };
 
