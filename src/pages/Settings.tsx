@@ -1,11 +1,23 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/dashboard/AppSidebar';
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/contexts/AuthContext';
+import ProfileSection from '@/components/settings/ProfileSection';
+import SecuritySection from '@/components/settings/SecuritySection';
 import RoleBasedSettings from '@/components/settings/RoleBasedSettings';
+import LeadSourceSection from '@/components/settings/LeadSourceSection';
+import AdminUsersSection from '@/components/settings/AdminUsersSection';
+import { User, Shield, Settings, Database, Crown } from 'lucide-react';
 
 const Settings = () => {
+  const { profile } = useAuth();
+  const [activeTab, setActiveTab] = useState('profile');
+
+  const canAccessAdminTab = profile?.role === 'Admin';
+
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-gradient-to-br from-crm-gradient-start via-white to-crm-gradient-end">
@@ -23,7 +35,54 @@ const Settings = () => {
             </header>
             
             <main className="p-6">
-              <RoleBasedSettings userRole="Employee" />
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-5 mb-6">
+                  <TabsTrigger value="profile" className="flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Profile
+                  </TabsTrigger>
+                  <TabsTrigger value="security" className="flex items-center gap-2">
+                    <Shield className="w-4 h-4" />
+                    Security
+                  </TabsTrigger>
+                  <TabsTrigger value="role-settings" className="flex items-center gap-2">
+                    <Settings className="w-4 h-4" />
+                    Role Settings
+                  </TabsTrigger>
+                  <TabsTrigger value="lead-source" className="flex items-center gap-2">
+                    <Database className="w-4 h-4" />
+                    Lead Source
+                  </TabsTrigger>
+                  {canAccessAdminTab && (
+                    <TabsTrigger value="admin" className="flex items-center gap-2">
+                      <Crown className="w-4 h-4" />
+                      Admin
+                    </TabsTrigger>
+                  )}
+                </TabsList>
+
+                <TabsContent value="profile" className="mt-6">
+                  <ProfileSection />
+                </TabsContent>
+
+                <TabsContent value="security" className="mt-6">
+                  <SecuritySection />
+                </TabsContent>
+
+                <TabsContent value="role-settings" className="mt-6">
+                  <RoleBasedSettings userRole={profile?.role || 'Employee'} />
+                </TabsContent>
+
+                <TabsContent value="lead-source" className="mt-6">
+                  <LeadSourceSection />
+                </TabsContent>
+
+                {canAccessAdminTab && (
+                  <TabsContent value="admin" className="mt-6">
+                    <AdminUsersSection />
+                  </TabsContent>
+                )}
+              </Tabs>
             </main>
           </SidebarInset>
         </div>
