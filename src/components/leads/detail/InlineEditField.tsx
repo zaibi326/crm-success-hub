@@ -128,11 +128,11 @@ export function InlineEditField({
               />
             )}
             
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 flex-shrink-0">
               <Button
                 size="sm"
                 onClick={handleSave}
-                className="h-8 w-8 p-0 bg-green-600 hover:bg-green-700"
+                className="h-8 w-8 p-0 bg-green-600 hover:bg-green-700 text-white"
                 title="Save changes"
               >
                 <Check className="w-4 h-4" />
@@ -141,7 +141,7 @@ export function InlineEditField({
                 size="sm"
                 variant="outline"
                 onClick={handleCancel}
-                className="h-8 w-8 p-0 border-gray-300 hover:bg-gray-50"
+                className="h-8 w-8 p-0 border-gray-300 hover:bg-gray-50 text-gray-700"
                 title="Cancel changes"
               >
                 <X className="w-4 h-4" />

@@ -24,67 +24,64 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
 
   const handleFieldChange = (field: keyof TaxLead, value: string) => {
     if (canEdit) {
-      const oldValue = lead[field];
-      
-      // Update pending changes
+      // Store pending changes without immediately saving
       setPendingChanges(prev => ({
         ...prev,
         [field]: value
       }));
-      
-      // Immediately apply the change to the lead
-      onFieldUpdate(field, value);
-      
-      // Log the activity immediately
-      logLeadActivity({
-        actionType: 'updated',
-        description: `Updated ${field} from "${oldValue}" to "${value}" for ${lead.ownerName || 'Unknown'}`,
-        referenceId: lead.id.toString(),
-        metadata: {
-          leadId: lead.id,
-          field: field,
-          oldValue: oldValue,
-          newValue: value,
-          ownerName: lead.ownerName
-        }
-      });
-
-      // Show success toast
-      toast({
-        title: "Field Updated",
-        description: `${field} has been updated successfully`,
-      });
+      setHasChanges(true);
     }
   };
 
   const handleSave = async () => {
     if (!hasChanges || !canEdit) return;
 
-    // Apply all pending changes
-    Object.entries(pendingChanges).forEach(([field, value]) => {
-      onFieldUpdate(field as keyof TaxLead, value as string);
-    });
-
-    // Log bulk save activity
-    await logLeadActivity({
-      actionType: 'updated',
-      description: `Saved contact changes for ${lead.ownerName || 'Unknown'}`,
-      referenceId: lead.id.toString(),
-      metadata: {
-        leadId: lead.id,
-        changes: pendingChanges,
-        ownerName: lead.ownerName
+    try {
+      // Apply all pending changes
+      for (const [field, value] of Object.entries(pendingChanges)) {
+        const oldValue = lead[field as keyof TaxLead];
+        onFieldUpdate(field as keyof TaxLead, value as string);
+        
+        // Log each field change
+        await logLeadActivity({
+          actionType: 'updated',
+          description: `Updated ${field} from "${oldValue}" to "${value}" for ${lead.ownerName || 'Unknown'}`,
+          referenceId: lead.id.toString(),
+          metadata: {
+            leadId: lead.id,
+            field: field,
+            oldValue: oldValue,
+            newValue: value,
+            ownerName: lead.ownerName
+          }
+        });
       }
-    });
 
-    // Clear pending changes
+      // Clear pending changes
+      setPendingChanges({});
+      setHasChanges(false);
+
+      toast({
+        title: "Success",
+        description: "✅ Seller Contact updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save changes",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCancel = () => {
     setPendingChanges({});
     setHasChanges(false);
+  };
 
-    toast({
-      title: "Success",
-      description: "✅ Seller Contact updated successfully",
-    });
+  // Show current values with pending changes overlaid
+  const getCurrentValue = (field: keyof TaxLead) => {
+    return pendingChanges[field] !== undefined ? pendingChanges[field] as string : (lead[field] as string || '');
   };
 
   return (
@@ -120,7 +117,7 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <InlineEditField
                 label="First Name"
-                value={lead.firstName || ''}
+                value={getCurrentValue('firstName')}
                 onSave={(value) => handleFieldChange('firstName', value)}
                 placeholder="Enter first name"
                 required
@@ -129,7 +126,7 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
 
               <InlineEditField
                 label="Last Name"
-                value={lead.lastName || ''}
+                value={getCurrentValue('lastName')}
                 onSave={(value) => handleFieldChange('lastName', value)}
                 placeholder="Enter last name"
                 required
@@ -138,7 +135,7 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
 
               <InlineEditField
                 label="Seller Phone"
-                value={lead.phone || ''}
+                value={getCurrentValue('phone')}
                 onSave={(value) => handleFieldChange('phone', value)}
                 type="tel"
                 placeholder="Enter phone number"
@@ -147,7 +144,7 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
 
               <InlineEditField
                 label="Seller Email"
-                value={lead.email || ''}
+                value={getCurrentValue('email')}
                 onSave={(value) => handleFieldChange('email', value)}
                 type="email"
                 placeholder="Enter email address"
@@ -157,7 +154,7 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
               <div className="md:col-span-2">
                 <InlineEditField
                   label="Property Address"
-                  value={lead.propertyAddress || ''}
+                  value={getCurrentValue('propertyAddress')}
                   onSave={(value) => handleFieldChange('propertyAddress', value)}
                   placeholder="Enter property address"
                   required
@@ -165,6 +162,28 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
                 />
               </div>
             </div>
+
+            {/* Save/Cancel buttons - only show when there are changes */}
+            {hasChanges && canEdit && (
+              <div className="flex items-center gap-3 mt-6 pt-6 border-t border-gray-200">
+                <Button
+                  onClick={handleSave}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  size="sm"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Changes
+                </Button>
+                <Button
+                  onClick={handleCancel}
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-300 hover:bg-gray-50"
+                >
+                  Cancel
+                </Button>
+              </div>
+            )}
           </CardContent>
         </CollapsibleContent>
       </Card>
