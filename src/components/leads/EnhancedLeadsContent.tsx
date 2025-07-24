@@ -74,7 +74,8 @@ export function EnhancedLeadsContent() {
 
   const handleBackToLeads = () => {
     setSelectedLead(null);
-    setSearchParams({});
+    // Clear the URL parameters and navigate back to the leads page
+    navigate('/leads', { replace: true });
   };
 
   const handleRemoveFilter = (filterId: string) => {

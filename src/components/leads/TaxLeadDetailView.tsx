@@ -5,6 +5,7 @@ import { TaxLeadDetailsForm } from './TaxLeadDetailsForm';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useActivityLogger } from '@/hooks/useActivityLogger';
+import { useNavigate } from 'react-router-dom';
 
 interface TaxLeadDetailViewProps {
   selectedLead: TaxLead;
@@ -13,6 +14,7 @@ interface TaxLeadDetailViewProps {
 
 export function TaxLeadDetailView({ selectedLead, onBack }: TaxLeadDetailViewProps) {
   const { logActivity } = useActivityLogger();
+  const navigate = useNavigate();
 
   // Log when user views a lead
   useEffect(() => {
@@ -49,6 +51,13 @@ export function TaxLeadDetailView({ selectedLead, onBack }: TaxLeadDetailViewPro
     });
   };
 
+  const handleBackClick = () => {
+    // Call the onBack function first
+    onBack();
+    // Then navigate to the leads page, replacing the current history entry
+    navigate('/leads', { replace: true });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-crm-gradient-start via-white to-crm-gradient-end">
       <div className="max-w-7xl mx-auto">
@@ -58,7 +67,7 @@ export function TaxLeadDetailView({ selectedLead, onBack }: TaxLeadDetailViewPro
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
-                onClick={onBack}
+                onClick={handleBackClick}
                 className="flex items-center gap-2 text-crm-primary hover:text-crm-accent hover:bg-crm-primary/10"
               >
                 <ArrowLeft className="w-4 h-4" />
