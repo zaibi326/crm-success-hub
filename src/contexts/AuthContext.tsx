@@ -3,7 +3,6 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { useToast } from '@/hooks/use-toast';
-import { useAuthActivityTracking } from '@/hooks/useAuthActivityTracking';
 
 interface Profile {
   id: string;
@@ -42,7 +41,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-  const { trackUserLogout } = useAuthActivityTracking();
 
   useEffect(() => {
     const getSession = async () => {
@@ -151,15 +149,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = async () => {
     try {
-      const currentEmail = user?.email;
-      
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-
-      // Track logout activity before clearing state
-      if (currentEmail) {
-        trackUserLogout(currentEmail);
-      }
 
       setUser(null);
       setSession(null);

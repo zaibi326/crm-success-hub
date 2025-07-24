@@ -48,7 +48,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  const userRole = profile.role;
+  const userRole = profile.role as 'Admin' | 'Manager' | 'Lead Manager' | 'Employee' | 'Guest';
   const currentPath = window.location.pathname;
 
   // Check if user can access current route
