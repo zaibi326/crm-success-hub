@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -60,7 +61,7 @@ export function EnhancedActivityTimeline({
       if (lead.notes) {
         defaultActivities.push({
           id: 2,
-          type: 'note',
+          type: 'note_added',
           title: 'Note Added',
           description: lead.notes,
           timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
@@ -72,7 +73,7 @@ export function EnhancedActivityTimeline({
       if (lead.status) {
         defaultActivities.push({
           id: 3,
-          type: 'status_change',
+          type: 'status_changed',
           title: 'Status Updated',
           description: `Status changed to ${lead.status}`,
           timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000),
@@ -109,9 +110,9 @@ export function EnhancedActivityTimeline({
     switch (type) {
       case 'created':
         return <Plus className="w-4 h-4 text-green-600" />;
-      case 'note':
+      case 'note_added':
         return <FileText className="w-4 h-4 text-blue-600" />;
-      case 'status_change':
+      case 'status_changed':
         return <TrendingUp className="w-4 h-4 text-orange-600" />;
       case 'field_update':
         return <Edit className="w-4 h-4 text-purple-600" />;
@@ -134,9 +135,9 @@ export function EnhancedActivityTimeline({
     switch (type) {
       case 'created':
         return 'bg-green-100 border-green-200';
-      case 'note':
+      case 'note_added':
         return 'bg-blue-100 border-blue-200';
-      case 'status_change':
+      case 'status_changed':
         return 'bg-orange-100 border-orange-200';
       case 'field_update':
         return 'bg-purple-100 border-purple-200';
@@ -162,8 +163,8 @@ export function EnhancedActivityTimeline({
   const activityTypes = [
     { value: 'all', label: 'All Activities' },
     { value: 'created', label: 'Created' },
-    { value: 'note', label: 'Notes' },
-    { value: 'status_change', label: 'Status Changes' },
+    { value: 'note_added', label: 'Notes' },
+    { value: 'status_changed', label: 'Status Changes' },
     { value: 'field_update', label: 'Field Updates' },
     { value: 'file_upload', label: 'File Uploads' },
     { value: 'comment', label: 'Comments' },
