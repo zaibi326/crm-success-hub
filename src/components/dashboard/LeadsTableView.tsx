@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -22,7 +23,6 @@ export function LeadsTableView({ leads: initialLeads, onLeadSelect }: LeadsTable
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [isTableView, setIsTableView] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
-  const [isAddSellerOpen, setIsAddSellerOpen] = useState(false);
 
   // Filter leads based on search term
   const filteredLeads = leads.filter(lead => 
@@ -88,7 +88,6 @@ export function LeadsTableView({ leads: initialLeads, onLeadSelect }: LeadsTable
 
   const handleAddSeller = (newSeller: TaxLead) => {
     setLeads(prev => [...prev, newSeller]);
-    setIsAddSellerOpen(false);
   };
 
   const handleLeadUpdate = (updatedLead: TaxLead) => {
@@ -118,11 +117,7 @@ export function LeadsTableView({ leads: initialLeads, onLeadSelect }: LeadsTable
           <div className="flex items-center justify-between flex-wrap gap-4">
             <CardTitle className="text-xl font-bold text-gray-900">Seller Leads</CardTitle>
             <div className="flex items-center gap-4">
-              <AddSellerDialog 
-                isOpen={isAddSellerOpen}
-                onClose={() => setIsAddSellerOpen(false)}
-                onSellerAdded={handleAddSeller}
-              />
+              <AddSellerDialog onAddSeller={handleAddSeller} />
               <div className="flex items-center gap-2">
                 <Grid className={`w-4 h-4 ${isTableView ? 'text-blue-600' : 'text-gray-400'}`} />
                 <Switch

@@ -1,14 +1,14 @@
-
-import { useState, useEffect } from 'react';
-import { TaxLead } from '@/types/taxLead';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { TaxLead } from '@/types/taxLead';
+import { useEffect } from 'react';
 
-interface DashboardStats {
+export interface DashboardStats {
+  totalLeads: number;
   hotDeals: number;
   warmDeals: number;
   coldDeals: number;
   passRate: number;
-  totalLeads: number;
   keepRate: number;
   passDeals: number;
   keepDeals: number;
@@ -31,125 +31,134 @@ interface ActivityItem {
   metadata?: any;
 }
 
-export function useDashboardData() {
-  const [leads, setLeads] = useState<TaxLead[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+export interface DashboardDataContextType {
+  leads: TaxLead[];
+  stats: DashboardStats;
+  activities: ActivityItem[];
+  loading: boolean;
+  error: string | null;
+  refetch: () => Promise<void>;
+}
 
-  const mockTaxLeads: TaxLead[] = [
-    {
-      id: 1,
-      taxId: 'TX001',
-      ownerName: 'John Smith',
-      firstName: 'John',
-      lastName: 'Smith',
-      propertyAddress: '123 Main St, Dallas, TX',
-      currentArrears: 15000,
-      status: 'HOT',
-      temperature: 'HOT',
-      occupancyStatus: 'OWNER_OCCUPIED',
-      disposition: 'QUALIFIED',
-      email: 'john@email.com',
-      phone: '555-0123',
-      taxLawsuitNumber: 'TL001',
-      notes: 'Interested buyer',
-      createdAt: '2024-01-15T10:00:00Z',
-      updatedAt: '2024-01-15T10:00:00Z'
+export function useDashboardData(): DashboardDataContextType {
+  const { data: campaignLeads = [], isLoading: leadsLoading, error: leadsError, refetch: refetchLeads } = useQuery({
+    queryKey: ['campaign-leads'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('campaign_leads')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      console.log('Loaded campaign leads from database:', data?.length || 0, 'leads');
+      return data || [];
     },
-    {
-      id: 2,
-      taxId: 'TX002',
-      ownerName: 'Jane Doe',
-      firstName: 'Jane',
-      lastName: 'Doe',
-      propertyAddress: '456 Oak Ave, Austin, TX',
-      currentArrears: 22000,
-      status: 'WARM',
-      temperature: 'WARM',
-      occupancyStatus: 'VACANT',
-      disposition: 'UNDECIDED',
-      email: 'jane@email.com',
-      phone: '555-0456',
-      taxLawsuitNumber: 'TL002',
-      notes: 'Follow up needed',
-      createdAt: '2024-01-14T09:00:00Z',
-      updatedAt: '2024-01-14T09:00:00Z'
-    }
-  ];
+  });
 
-  // Calculate stats based on leads
-  const calculateStats = (leadsData: TaxLead[]): DashboardStats => {
-    const totalLeads = leadsData.length;
-    const hotDeals = leadsData.filter(lead => lead.status === 'HOT').length;
-    const warmDeals = leadsData.filter(lead => lead.status === 'WARM').length;
-    const coldDeals = leadsData.filter(lead => lead.status === 'COLD').length;
-    const passDeals = leadsData.filter(lead => lead.status === 'PASS').length;
-    const keepDeals = leadsData.filter(lead => lead.status === 'KEEP').length;
-    
-    return {
-      hotDeals,
-      warmDeals,
-      coldDeals,
-      passRate: totalLeads > 0 ? Math.round((passDeals / totalLeads) * 100) : 0,
-      totalLeads,
-      keepRate: totalLeads > 0 ? Math.round((keepDeals / totalLeads) * 100) : 0,
-      passDeals,
-      keepDeals,
-      thisWeekLeads: leadsData.filter(lead => {
-        const leadDate = new Date(lead.createdAt);
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        return leadDate >= weekAgo;
-      }).length,
-      thisMonthLeads: leadsData.filter(lead => {
-        const leadDate = new Date(lead.createdAt);
-        const monthAgo = new Date();
-        monthAgo.setMonth(monthAgo.getMonth() - 1);
-        return leadDate >= monthAgo;
-      }).length,
-      avgResponseTime: '2.5h'
-    };
-  };
+  const { data: activitiesData = [], isLoading: activitiesLoading, error: activitiesError, refetch: refetchActivities } = useQuery({
+    queryKey: ['activities'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('activities')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+      
+      if (error) throw error;
+      console.log('Loaded activities from database:', data?.length || 0, 'activities');
+      return data || [];
+    },
+  });
 
-  // Mock activities
-  const mockActivities: ActivityItem[] = [
-    {
-      id: '1',
-      type: 'lead_update',
-      description: 'Updated lead status to HOT',
-      userName: 'John Doe',
-      timestamp: new Date(),
-      leadId: '1',
-      module: 'leads',
-      actionType: 'update'
-    }
-  ];
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      // For now, using mock data
-      setLeads(mockTaxLeads);
-    } catch (err: any) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Set up real-time subscription for activities
   useEffect(() => {
-    fetchData();
-  }, []);
+    const channel = supabase
+      .channel('activities-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'activities'
+        },
+        (payload) => {
+          console.log('Real-time activity update:', payload);
+          refetchActivities();
+        }
+      )
+      .subscribe();
 
-  const refetch = async () => {
-    await fetchData();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetchActivities]);
+
+  // Transform campaign_leads to TaxLead format
+  const leads: TaxLead[] = campaignLeads.map(lead => ({
+    id: parseInt(lead.id) || 0,
+    taxId: lead.tax_id || '',
+    ownerName: lead.owner_name,
+    propertyAddress: lead.property_address,
+    currentArrears: lead.current_arrears || undefined,
+    status: (lead.status as 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP') || 'COLD',
+    email: lead.email || undefined,
+    phone: lead.phone || undefined,
+    taxLawsuitNumber: lead.tax_lawsuit_number || undefined,
+    notes: lead.notes || undefined,
+    createdAt: lead.created_at,
+    updatedAt: lead.updated_at,
+    disposition: (lead.disposition as 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED') || 'UNDECIDED',
+  }));
+
+  // Fixed stats calculation - KEEP and PASS are mutually exclusive
+  const stats: DashboardStats = {
+    totalLeads: leads.length,
+    hotDeals: leads.filter(lead => lead.status === 'HOT').length,
+    warmDeals: leads.filter(lead => lead.status === 'WARM').length,
+    coldDeals: leads.filter(lead => lead.status === 'COLD').length,
+    passDeals: leads.filter(lead => lead.status === 'PASS' || lead.disposition === 'DISQUALIFIED').length,
+    keepDeals: leads.filter(lead => lead.status === 'KEEP' || lead.disposition === 'QUALIFIED').length,
+    passRate: leads.length > 0 ? Math.round((leads.filter(lead => lead.status === 'PASS' || lead.disposition === 'DISQUALIFIED').length / leads.length) * 100) : 0,
+    keepRate: leads.length > 0 ? Math.round((leads.filter(lead => lead.status === 'KEEP' || lead.disposition === 'QUALIFIED').length / leads.length) * 100) : 0,
+    thisWeekLeads: leads.filter(lead => {
+      const leadDate = new Date(lead.createdAt || '');
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      return leadDate >= weekAgo;
+    }).length,
+    thisMonthLeads: leads.filter(lead => {
+      const leadDate = new Date(lead.createdAt || '');
+      const monthAgo = new Date();
+      monthAgo.setMonth(monthAgo.getMonth() - 1);
+      return leadDate >= monthAgo;
+    }).length,
+    avgResponseTime: '2.5 hrs'
   };
+
+  // Transform activities data
+  const activities: ActivityItem[] = activitiesData.map(activity => ({
+    id: activity.id,
+    type: activity.action_type,
+    description: activity.description,
+    userName: activity.user_name,
+    timestamp: new Date(activity.created_at),
+    leadId: activity.reference_id || '',
+    module: activity.module,
+    actionType: activity.action_type,
+    referenceId: activity.reference_id,
+    referenceType: activity.reference_type,
+    metadata: activity.metadata
+  }));
 
   return {
     leads,
-    stats: calculateStats(leads),
-    activities: mockActivities,
-    loading,
-    refetch
+    stats,
+    activities,
+    loading: leadsLoading || activitiesLoading,
+    error: leadsError?.message || activitiesError?.message || null,
+    refetch: async () => {
+      await refetchLeads();
+      await refetchActivities();
+    }
   };
 }

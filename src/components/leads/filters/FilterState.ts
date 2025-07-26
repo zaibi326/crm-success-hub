@@ -11,10 +11,6 @@ export interface FilterState {
   moveTo: string;
   minArrears: number | undefined;
   maxArrears: number | undefined;
-  // Add missing properties for PodioFilterPanel
-  name: string;
-  address: string;
-  score: number;
 }
 
 export const createEmptyFilterState = (): FilterState => ({
@@ -29,7 +25,4 @@ export const createEmptyFilterState = (): FilterState => ({
   moveTo: '',
   minArrears: undefined,
   maxArrears: undefined,
-  name: '',
-  address: '',
-  score: 50,
 });

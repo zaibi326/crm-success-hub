@@ -61,7 +61,7 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
   };
 
   const openZillow = () => {
-    const address = lead.sellerPropertyAddress || lead.propertyAddress;
+    const address = lead.propertyAddress;
     if (address) {
       const encodedAddress = encodeURIComponent(address);
       window.open(`https://www.zillow.com/homes/${encodedAddress}/`, '_blank');
@@ -79,7 +79,7 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
       <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
         <CardTitle className="flex items-center gap-3 text-xl">
           <User className="w-6 h-6 text-blue-600" />
-          Seller Contact Details
+          Lead Details
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
@@ -148,19 +148,19 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
           </div>
         </div>
 
-        {/* Seller Property Address - Separate from Lead Details */}
+        {/* Property Address with Zillow Integration */}
         <div className="space-y-4">
           <InlineEditField
-            label="Seller Property Address"
-            value={lead.sellerPropertyAddress || lead.propertyAddress || ''}
-            onSave={(value) => handleFieldChange('sellerPropertyAddress', value)}
-            placeholder="Enter seller's property address"
+            label="Property Address"
+            value={lead.propertyAddress || ''}
+            onSave={(value) => handleFieldChange('propertyAddress', value)}
+            placeholder="Enter property address"
             required
             canEdit={canEdit}
           />
           
           {/* Zillow Integration */}
-          {(lead.sellerPropertyAddress || lead.propertyAddress) && (
+          {lead.propertyAddress && (
             <div className="bg-gray-50 rounded-lg p-4 border">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-gray-700">Property Preview</span>
@@ -177,10 +177,10 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
               
               <div className="bg-white rounded border p-4 space-y-2">
                 <div className="text-sm text-gray-600">
-                  Map preview for: <span className="font-medium text-gray-900">{lead.sellerPropertyAddress || lead.propertyAddress}</span>
+                  Map preview for: <span className="font-medium text-gray-900">{lead.propertyAddress}</span>
                 </div>
                 <div className="text-xs text-blue-600 break-all">
-                  {formatZillowUrl(lead.sellerPropertyAddress || lead.propertyAddress)}
+                  {formatZillowUrl(lead.propertyAddress)}
                 </div>
               </div>
             </div>

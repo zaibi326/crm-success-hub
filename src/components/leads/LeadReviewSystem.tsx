@@ -1,137 +1,205 @@
-
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, Edit, CheckCircle, XCircle } from 'lucide-react';
-import { LeadDetailsForm } from './LeadDetailsForm';
-import { TaxLead } from '@/types/taxLead';
+import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { convertTaxLeadToLead, Lead } from '@/types/lead';
+import { LeadSearchFilters } from './LeadSearchFilters';
+import { LeadReviewCard } from './LeadReviewCard';
+import { ReviewActions } from './ReviewActions';
+import { TaxLeadDetailsForm } from './TaxLeadDetailsForm';
 
-interface LeadReviewSystemProps {
-  leads: TaxLead[];
-  onLeadUpdate: (updatedLead: TaxLead) => void;
-  onReviewComplete: () => void;
-  canEdit: boolean;
+interface Lead {
+  id: number;
+  taxId: string;
+  ownerName: string;
+  propertyAddress: string;
+  taxLawsuitNumber?: string;
+  currentArrears?: number;
+  status: 'HOT' | 'WARM' | 'COLD' | 'PASS';
+  notes?: string;
+  phone?: string;
+  email?: string;
 }
 
-export function LeadReviewSystem({ leads, onLeadUpdate, onReviewComplete, canEdit }: LeadReviewSystemProps) {
-  const [currentLeadIndex, setCurrentLeadIndex] = useState(0);
-  const { toast } = useToast();
+const mockLeads: Lead[] = [
+  {
+    id: 1,
+    taxId: 'TX123456789',
+    ownerName: 'John Smith',
+    propertyAddress: '123 Main St, Dallas, TX 75201',
+    taxLawsuitNumber: 'TL-2024-001',
+    currentArrears: 15000,
+    status: 'HOT',
+    notes: 'High-value property with significant arrears',
+    phone: '(555) 123-4567',
+    email: 'john.smith@email.com'
+  },
+  {
+    id: 2,
+    taxId: 'TX987654321',
+    ownerName: 'Sarah Johnson',
+    propertyAddress: '456 Oak Ave, Houston, TX 77001',
+    taxLawsuitNumber: 'TL-2024-002',
+    currentArrears: 8500,
+    status: 'WARM',
+    notes: 'Property owner contacted previously',
+    phone: '(555) 987-6543',
+    email: 'sarah.j@email.com'
+  },
+  {
+    id: 3,
+    taxId: 'TX456789123',
+    ownerName: 'Mike Rodriguez',
+    propertyAddress: '789 Pine Rd, Austin, TX 73301',
+    taxLawsuitNumber: 'TL-2024-003',
+    currentArrears: 3200,
+    status: 'COLD',
+    notes: 'Small arrears, low priority',
+    phone: '(555) 456-7890'
+  }
+];
 
-  useEffect(() => {
-    if (leads.length === 0) {
-      toast({
-        title: "No Leads to Review",
-        description: "There are currently no leads available for review.",
-      });
-      onReviewComplete();
-    }
-  }, [leads, onReviewComplete, toast]);
+export function LeadReviewSystem() {
+  const [leads, setLeads] = useState(mockLeads);
+  const [currentLeadIndex, setCurrentLeadIndex] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [showDetailForm, setShowDetailForm] = useState(false);
+  const { toast } = useToast();
 
   const currentLead = leads[currentLeadIndex];
 
-  const handleNextLead = () => {
-    if (currentLeadIndex < leads.length - 1) {
+  const filteredLeads = leads.filter(lead => {
+    const matchesSearch = lead.ownerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         lead.propertyAddress.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         lead.taxId.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'ALL' || lead.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const handleAction = (action: 'pass' | 'keep') => {
+    if (!currentLead) return;
+
+    if (action === 'pass') {
+      const updatedLeads = leads.map(lead =>
+        lead.id === currentLead.id ? { ...lead, status: 'PASS' as const } : lead
+      );
+      setLeads(updatedLeads);
+      
+      toast({
+        title: "Lead Passed",
+        description: `${currentLead.ownerName} has been marked as passed.`,
+      });
+    } else {
+      // Show detailed form for "Keep" action
+      setShowDetailForm(true);
+      return; // Don't move to next lead yet
+    }
+
+    // Move to next lead
+    if (currentLeadIndex < filteredLeads.length - 1) {
       setCurrentLeadIndex(currentLeadIndex + 1);
     } else {
       toast({
-        title: "Review Complete",
-        description: "You have reviewed all leads.",
+        title: "Review Complete! ✅",
+        description: "You've reviewed all available leads!",
       });
-      onReviewComplete();
     }
   };
 
-  const handlePreviousLead = () => {
-    if (currentLeadIndex > 0) {
-      setCurrentLeadIndex(currentLeadIndex - 1);
+  const handleLeadUpdate = (updatedLead: Lead) => {
+    const updatedLeads = leads.map(lead =>
+      lead.id === updatedLead.id ? updatedLead : lead
+    );
+    setLeads(updatedLeads);
+  };
+
+  const handleDetailFormSave = (updatedLead: Lead) => {
+    handleLeadUpdate(updatedLead);
+    setShowDetailForm(false);
+    
+    toast({
+      title: "Lead Kept! 🎉",
+      description: `${updatedLead.ownerName} has been added to your pipeline with detailed information.`,
+    });
+
+    // Move to next lead after saving details
+    if (currentLeadIndex < filteredLeads.length - 1) {
+      setCurrentLeadIndex(currentLeadIndex + 1);
+    } else {
+      toast({
+        title: "Review Complete! ✅",
+        description: "You've reviewed all available leads!",
+      });
     }
-  };
-
-  const handleApproveLead = () => {
-    toast({
-      title: "Lead Approved",
-      description: `Lead ${currentLead.ownerName} has been approved.`,
-    });
-    handleNextLead();
-  };
-
-  const handleRejectLead = () => {
-    toast({
-      title: "Lead Rejected",
-      description: `Lead ${currentLead.ownerName} has been rejected.`,
-    });
-    handleNextLead();
   };
 
   if (!currentLead) {
     return (
-      <div className="flex flex-col items-center justify-center h-96">
-        <h2 className="text-2xl font-semibold mb-4">No Leads to Review</h2>
-        <p className="text-gray-600">Please check back later.</p>
-        <Button onClick={onReviewComplete} className="mt-4">
-          Return to Leads
-        </Button>
+      <div className="text-center py-12">
+        <h3 className="text-lg font-medium text-gray-900 mb-2">No leads to review</h3>
+        <p className="text-gray-600">Upload a CSV file to start reviewing leads.</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">Reviewing Lead {currentLeadIndex + 1} of {leads.length}</h2>
-        <div className="flex items-center space-x-2">
-          <Button onClick={handlePreviousLead} disabled={currentLeadIndex === 0} variant="outline">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Previous
-          </Button>
-          <Button onClick={handleNextLead} disabled={currentLeadIndex === leads.length - 1}>
-            Next
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
+    <div className="space-y-6">
+      {/* Search and Filter Bar */}
+      <LeadSearchFilters
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
+      />
+
+      {/* Lead Review Interface */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Lead Information */}
+        <div className="lg:col-span-2">
+          <LeadReviewCard
+            lead={currentLead}
+            onLeadUpdate={handleLeadUpdate}
+            onOpenDetailedForm={() => setShowDetailForm(true)}
+          />
+        </div>
+
+        {/* Action Buttons */}
+        <div className="space-y-4">
+          <ReviewActions
+            onAction={handleAction}
+            isLoading={false}
+            leadsRemaining={filteredLeads.length - currentLeadIndex - 1}
+          />
+
+          {/* Progress Card */}
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-crm-primary to-crm-accent text-white">
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold mb-2">
+                  {currentLeadIndex + 1} / {filteredLeads.length}
+                </div>
+                <div className="text-sm opacity-90">
+                  Leads Progress
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-4 border">
-        <LeadDetailsForm
-          lead={convertTaxLeadToLead(currentLead)}
-          onSave={(updatedLead: Lead) => {
-            // Convert back to TaxLead format with proper type handling
-            const updatedTaxLead: TaxLead = {
-              ...currentLead,
-              ownerName: updatedLead.name,
-              email: updatedLead.email,
-              phone: updatedLead.phone,
-              propertyAddress: updatedLead.address,
-              notes: updatedLead.notes,
-              status: updatedLead.status as TaxLead['status'], // Cast to TaxLead status which includes KEEP
-              tags: updatedLead.tags,
-              updatedAt: new Date().toISOString()
-            };
-            onLeadUpdate(updatedTaxLead);
-          }}
-          canEdit={canEdit}
-        />
-      </div>
-
-      <div className="flex justify-between mt-4">
-        <Button
-          variant="ghost"
-          className="bg-green-500 text-white hover:bg-green-700"
-          onClick={handleApproveLead}
-        >
-          <CheckCircle className="w-4 h-4 mr-2" />
-          Approve
-        </Button>
-        <Button
-          variant="ghost"
-          className="bg-red-500 text-white hover:bg-red-700"
-          onClick={handleRejectLead}
-        >
-          <XCircle className="w-4 h-4 mr-2" />
-          Reject
-        </Button>
-      </div>
+      {/* Detailed Lead Form Dialog */}
+      <Dialog open={showDetailForm} onOpenChange={setShowDetailForm}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Detailed Lead Information - {currentLead.ownerName}</DialogTitle>
+          </DialogHeader>
+          <TaxLeadDetailsForm
+            lead={currentLead as any}
+            onSave={handleDetailFormSave}
+            userRole="editor"
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

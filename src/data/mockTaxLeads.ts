@@ -20,8 +20,7 @@ export const mockTaxLeads: TaxLead[] = [
     createdVia: 'Website Form',
     leadManager: 'Jane Smith',
     tags: ['High Priority', 'Hot Lead'],
-    occupancyStatus: 'OWNER_OCCUPIED',
-    disposition: 'QUALIFIED',
+    occupancyStatus: 'Owner Occupied',
     askingPrice: 250000,
     mortgagePrice: 180000,
     hasDeath: false,
@@ -29,8 +28,7 @@ export const mockTaxLeads: TaxLead[] = [
     hasLawsuit: true,
     lawsuitNotes: 'Tax lien lawsuit filed in district court',
     hasAdditionalTaxingEntities: false,
-    ownerOfRecord: 'John Smith',
-    taxLawsuitNumber: 'TL-2024-001'
+    ownerOfRecord: 'John Smith'
   },
   {
     id: 2,
@@ -50,8 +48,7 @@ export const mockTaxLeads: TaxLead[] = [
     createdVia: 'Cold Calling',
     leadManager: 'John Doe',
     tags: ['Follow Up', 'Qualified'],
-    occupancyStatus: 'OWNER_OCCUPIED',
-    disposition: 'QUALIFIED',
+    occupancyStatus: 'Owner Occupied',
     askingPrice: 180000,
     mortgagePrice: 120000,
     hasDeath: false,
@@ -59,8 +56,7 @@ export const mockTaxLeads: TaxLead[] = [
     hasLawsuit: false,
     hasAdditionalTaxingEntities: true,
     additionalTaxingNotes: 'School district and municipal taxes also owed',
-    ownerOfRecord: 'Maria Garcia',
-    taxLawsuitNumber: 'TL-2024-002'
+    ownerOfRecord: 'Maria Garcia'
   },
   {
     id: 3,
@@ -80,8 +76,7 @@ export const mockTaxLeads: TaxLead[] = [
     createdVia: 'Referral',
     leadManager: 'Sarah Wilson',
     tags: ['Inherited Property', 'Out of State'],
-    occupancyStatus: 'VACANT',
-    disposition: 'UNDECIDED',
+    occupancyStatus: 'Vacant',
     askingPrice: 320000,
     mortgagePrice: 0,
     hasDeath: true,
@@ -92,8 +87,7 @@ export const mockTaxLeads: TaxLead[] = [
     hasAdditionalTaxingEntities: false,
     vestingDeedDate: '2023-08-15',
     grantorGranteeName: 'Estate of William Wilson',
-    ownerOfRecord: 'Robert Wilson (Heir)',
-    taxLawsuitNumber: 'TL-2024-003'
+    ownerOfRecord: 'Robert Wilson (Heir)'
   },
   {
     id: 4,
@@ -113,16 +107,14 @@ export const mockTaxLeads: TaxLead[] = [
     createdVia: 'Facebook Lead Ads',
     leadManager: 'Mike Johnson',
     tags: ['Divorce Sale', 'Quick Sale Needed'],
-    occupancyStatus: 'OWNER_OCCUPIED',
-    disposition: 'QUALIFIED',
+    occupancyStatus: 'Owner Occupied',
     askingPrice: 195000,
     mortgagePrice: 145000,
     hasDeath: false,
     hasProbate: false,
     hasLawsuit: false,
     hasAdditionalTaxingEntities: false,
-    ownerOfRecord: 'Jennifer Brown',
-    taxLawsuitNumber: 'TL-2024-004'
+    ownerOfRecord: 'Jennifer Brown'
   },
   {
     id: 5,
@@ -142,16 +134,14 @@ export const mockTaxLeads: TaxLead[] = [
     createdVia: 'Direct Mail',
     leadManager: 'David Chen',
     tags: ['Investment Property', 'Portfolio Sale'],
-    occupancyStatus: 'TENANT_OCCUPIED',
-    disposition: 'QUALIFIED',
+    occupancyStatus: 'Rental Property',
     askingPrice: 275000,
     mortgagePrice: 200000,
     hasDeath: false,
     hasProbate: false,
     hasLawsuit: false,
     hasAdditionalTaxingEntities: false,
-    ownerOfRecord: 'Chen Investment Properties LLC',
-    taxLawsuitNumber: 'TL-2024-005'
+    ownerOfRecord: 'Chen Investment Properties LLC'
   },
   {
     id: 6,
@@ -171,8 +161,7 @@ export const mockTaxLeads: TaxLead[] = [
     createdVia: 'Email Campaign',
     leadManager: 'Unassigned',
     tags: ['Not Interested', 'Working with Attorney'],
-    occupancyStatus: 'OWNER_OCCUPIED',
-    disposition: 'DISQUALIFIED',
+    occupancyStatus: 'Owner Occupied',
     askingPrice: 0,
     mortgagePrice: 155000,
     hasDeath: false,
@@ -180,7 +169,6 @@ export const mockTaxLeads: TaxLead[] = [
     hasLawsuit: true,
     lawsuitNotes: 'Working with attorney to resolve tax issues',
     hasAdditionalTaxingEntities: false,
-    ownerOfRecord: 'Linda Johnson',
-    taxLawsuitNumber: 'TL-2024-006'
+    ownerOfRecord: 'Linda Johnson'
   }
 ];

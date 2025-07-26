@@ -5,7 +5,24 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { User, Mail, Phone, MapPin, Building, ChevronDown } from 'lucide-react';
-import { Lead } from '@/types/lead';
+
+interface Lead {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  position: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  status: 'HOT' | 'WARM' | 'COLD' | 'PASS';
+  score: number;
+  notes: string;
+  avatar?: string;
+  tags: string[];
+}
 
 interface ContactInfoSectionProps {
   formData: Lead;
