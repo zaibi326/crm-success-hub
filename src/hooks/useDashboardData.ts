@@ -1,9 +1,37 @@
+
 import { useState, useEffect } from 'react';
 import { TaxLead } from '@/types/taxLead';
 import { supabase } from '@/integrations/supabase/client';
 
+interface DashboardStats {
+  hotDeals: number;
+  warmDeals: number;
+  coldDeals: number;
+  passRate: number;
+  totalLeads: number;
+  keepRate: number;
+  passDeals: number;
+  keepDeals: number;
+  thisWeekLeads: number;
+  thisMonthLeads: number;
+  avgResponseTime: string;
+}
+
+interface ActivityItem {
+  id: string;
+  type: string;
+  description: string;
+  userName: string;
+  timestamp: Date;
+  leadId: string;
+  module: string;
+  actionType: string;
+  referenceId?: string;
+  referenceType?: string;
+  metadata?: any;
+}
+
 export function useDashboardData() {
-  // State variables
   const [leads, setLeads] = useState<TaxLead[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -49,34 +77,79 @@ export function useDashboardData() {
     }
   ];
 
-  // Fetch leads from Supabase (example)
-  useEffect(() => {
-    const fetchLeads = async () => {
-      setLoading(true);
-      try {
-        // const { data, error } = await supabase
-        //   .from('leads')
-        //   .select('*');
-
-        // if (error) {
-        //   setError(error);
-        // } else {
-        //   setLeads(data || []);
-        // }
-        setLeads(mockTaxLeads);
-      } catch (err: any) {
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
+  // Calculate stats based on leads
+  const calculateStats = (leadsData: TaxLead[]): DashboardStats => {
+    const totalLeads = leadsData.length;
+    const hotDeals = leadsData.filter(lead => lead.status === 'HOT').length;
+    const warmDeals = leadsData.filter(lead => lead.status === 'WARM').length;
+    const coldDeals = leadsData.filter(lead => lead.status === 'COLD').length;
+    const passDeals = leadsData.filter(lead => lead.status === 'PASS').length;
+    const keepDeals = leadsData.filter(lead => lead.status === 'KEEP').length;
+    
+    return {
+      hotDeals,
+      warmDeals,
+      coldDeals,
+      passRate: totalLeads > 0 ? Math.round((passDeals / totalLeads) * 100) : 0,
+      totalLeads,
+      keepRate: totalLeads > 0 ? Math.round((keepDeals / totalLeads) * 100) : 0,
+      passDeals,
+      keepDeals,
+      thisWeekLeads: leadsData.filter(lead => {
+        const leadDate = new Date(lead.createdAt);
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        return leadDate >= weekAgo;
+      }).length,
+      thisMonthLeads: leadsData.filter(lead => {
+        const leadDate = new Date(lead.createdAt);
+        const monthAgo = new Date();
+        monthAgo.setMonth(monthAgo.getMonth() - 1);
+        return leadDate >= monthAgo;
+      }).length,
+      avgResponseTime: '2.5h'
     };
+  };
 
-    fetchLeads();
+  // Mock activities
+  const mockActivities: ActivityItem[] = [
+    {
+      id: '1',
+      type: 'lead_update',
+      description: 'Updated lead status to HOT',
+      userName: 'John Doe',
+      timestamp: new Date(),
+      leadId: '1',
+      module: 'leads',
+      actionType: 'update'
+    }
+  ];
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      // For now, using mock data
+      setLeads(mockTaxLeads);
+    } catch (err: any) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
   }, []);
+
+  const refetch = async () => {
+    await fetchData();
+  };
 
   return {
     leads,
+    stats: calculateStats(leads),
+    activities: mockActivities,
     loading,
-    error,
+    refetch
   };
 }
