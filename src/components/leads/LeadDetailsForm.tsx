@@ -6,24 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ContactInfoSection } from './ContactInfoSection';
 import { LegalInfoSection } from './LegalInfoSection';
 import { NotesSection } from './NotesSection';
-
-interface Lead {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  company: string;
-  position: string;
-  address: string;
-  city: string;
-  state: string;
-  zip: string;
-  status: 'HOT' | 'WARM' | 'COLD' | 'PASS';
-  score: number;
-  notes: string;
-  avatar?: string;
-  tags: string[];
-}
+import { Lead } from '@/types/lead';
 
 interface LeadDetailsFormProps {
   lead: Lead;
