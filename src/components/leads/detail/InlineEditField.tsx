@@ -106,13 +106,16 @@ export function InlineEditField({
         {isEditing ? (
           <div className="flex items-center gap-2">
             {type === 'select' ? (
-              <Select value={editValue} onValueChange={setEditValue}>
+              <Select value={editValue || "default_option"} onValueChange={setEditValue}>
                 <SelectTrigger className="flex-1 border-blue-300 focus:border-blue-500 focus:ring-blue-500">
                   <SelectValue placeholder={placeholder} />
                 </SelectTrigger>
                 <SelectContent>
                   {options.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
+                    <SelectItem 
+                      key={option.value} 
+                      value={option.value || `option_${option.label.replace(/\s+/g, '_').toLowerCase()}`}
+                    >
                       {option.label}
                     </SelectItem>
                   ))}
