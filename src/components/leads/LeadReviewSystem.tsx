@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight, Edit, CheckCircle, XCircle } from 'lucide-react';
 import { LeadDetailsForm } from './LeadDetailsForm';
 import { TaxLead } from '@/types/taxLead';
 import { useToast } from '@/hooks/use-toast';
-import { convertTaxLeadToLead } from '@/types/lead';
+import { convertTaxLeadToLead } from '@/types/taxLead';
 
 interface LeadReviewSystemProps {
   leads: TaxLead[];
@@ -95,7 +96,7 @@ export function LeadReviewSystem({ leads, onLeadUpdate, onReviewComplete, canEdi
         <LeadDetailsForm
           lead={convertTaxLeadToLead(currentLead)}
           onSave={(updatedLead) => {
-            // Convert back to TaxLead format
+            // Convert back to TaxLead format with proper type handling
             const updatedTaxLead: TaxLead = {
               ...currentLead,
               ownerName: updatedLead.name,
@@ -103,7 +104,7 @@ export function LeadReviewSystem({ leads, onLeadUpdate, onReviewComplete, canEdi
               phone: updatedLead.phone,
               propertyAddress: updatedLead.address,
               notes: updatedLead.notes,
-              status: updatedLead.status === 'PASS' ? 'PASS' : updatedLead.status as any,
+              status: updatedLead.status === 'KEEP' ? 'KEEP' : updatedLead.status as 'HOT' | 'WARM' | 'COLD' | 'PASS',
               tags: updatedLead.tags,
               updatedAt: new Date().toISOString()
             };

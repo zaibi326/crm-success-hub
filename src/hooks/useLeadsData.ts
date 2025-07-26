@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { TaxLead } from '@/types/taxLead';
 import { supabase } from '@/integrations/supabase/client';
@@ -44,7 +43,7 @@ export function useLeadsData() {
           taxId: lead.tax_id || '',
           ownerName: lead.owner_name,
           propertyAddress: lead.property_address,
-          sellerPropertyAddress: lead.seller_property_address || lead.property_address, // Handle separate seller property address
+          sellerPropertyAddress: lead.property_address, // Use property_address as fallback
           taxLawsuitNumber: lead.tax_lawsuit_number || '',
           currentArrears: lead.current_arrears || 0,
           status: (lead.status || 'COLD') as 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP',
