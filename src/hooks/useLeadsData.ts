@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { TaxLead } from '@/types/taxLead';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,15 +7,17 @@ import { useToast } from '@/hooks/use-toast';
 export function useLeadsData() {
   const [mockLeads, setMockLeads] = useState<TaxLead[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
   const { toast } = useToast();
 
-  // Load leads from Supabase on component mount
+  // Load leads from Supabase on component mount and when refetch is triggered
   useEffect(() => {
     loadLeadsFromDatabase();
-  }, []);
+  }, [refetchTrigger]);
 
   const loadLeadsFromDatabase = async () => {
     try {
+      console.log('Loading leads from database...');
       const { data, error } = await supabase
         .from('campaign_leads')
         .select('*')
@@ -41,6 +44,7 @@ export function useLeadsData() {
           taxId: lead.tax_id || '',
           ownerName: lead.owner_name,
           propertyAddress: lead.property_address,
+          sellerPropertyAddress: lead.seller_property_address || lead.property_address, // Handle separate seller property address
           taxLawsuitNumber: lead.tax_lawsuit_number || '',
           currentArrears: lead.current_arrears || 0,
           status: (lead.status || 'COLD') as 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP',
@@ -59,7 +63,7 @@ export function useLeadsData() {
       }) || [];
 
       setMockLeads(leadsData);
-      console.log('Loaded leads from database:', leadsData.length, 'leads');
+      console.log('Successfully loaded leads from database:', leadsData.length, 'leads');
     } catch (error) {
       console.error('Error in loadLeadsFromDatabase:', error);
       toast({
@@ -70,6 +74,12 @@ export function useLeadsData() {
     } finally {
       setIsLoaded(true);
     }
+  };
+
+  // Force refetch function to ensure fresh data
+  const refetch = async () => {
+    console.log('Force refetching leads...');
+    setRefetchTrigger(prev => prev + 1);
   };
 
   const handleAddLead = async (newLead: TaxLead) => {
@@ -129,6 +139,7 @@ export function useLeadsData() {
           tax_id: newLead.taxId,
           owner_name: newLead.ownerName,
           property_address: newLead.propertyAddress,
+          seller_property_address: newLead.sellerPropertyAddress,
           tax_lawsuit_number: newLead.taxLawsuitNumber,
           current_arrears: newLead.currentArrears,
           status: newLead.status,
@@ -151,12 +162,12 @@ export function useLeadsData() {
       }
 
       toast({
-        title: "Success",
-        description: "Lead successfully added",
+        title: "✅ Success",
+        description: "Lead successfully added and saved",
       });
 
-      // Reload leads from database
-      await loadLeadsFromDatabase();
+      // Force reload leads from database to get fresh data
+      await refetch();
     } catch (error) {
       console.error('Error in handleAddLead:', error);
       toast({
@@ -189,7 +200,8 @@ export function useLeadsData() {
         phone: updatedLead.phone,
         email: updatedLead.email,
         firstName: updatedLead.firstName,
-        lastName: updatedLead.lastName
+        lastName: updatedLead.lastName,
+        sellerPropertyAddress: updatedLead.sellerPropertyAddress
       });
 
       // Update the lead in the database
@@ -199,6 +211,7 @@ export function useLeadsData() {
           tax_id: updatedLead.taxId,
           owner_name: updatedLead.ownerName,
           property_address: updatedLead.propertyAddress,
+          seller_property_address: updatedLead.sellerPropertyAddress,
           tax_lawsuit_number: updatedLead.taxLawsuitNumber,
           current_arrears: updatedLead.currentArrears,
           status: updatedLead.status,
@@ -227,7 +240,19 @@ export function useLeadsData() {
         )
       );
 
+      // Show success toast
+      toast({
+        title: "✅ Changes Saved Successfully",
+        description: "Lead has been updated and saved to database",
+      });
+
       console.log('Lead updated successfully in database');
+
+      // Force refetch to ensure we have the latest data
+      setTimeout(() => {
+        refetch();
+      }, 500);
+      
     } catch (error) {
       console.error('Error in handleLeadUpdate:', error);
       toast({
@@ -342,6 +367,6 @@ export function useLeadsData() {
     handleDeleteLead,
     handleBulkDeleteLeads,
     isLoaded,
-    refetch: loadLeadsFromDatabase
+    refetch
   };
 }

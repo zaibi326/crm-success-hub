@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from 'react';
 import { TaxLead } from '@/types/taxLead';
 import { useLeadsData } from '@/hooks/useLeadsData';
@@ -36,7 +35,8 @@ export function useLeadsLogic() {
     handleLeadUpdate: updateLead,
     handleDeleteLead,
     handleBulkDeleteLeads,
-    isLoaded
+    isLoaded,
+    refetch
   } = useLeadsData();
 
   // Load filters from session storage on mount
@@ -233,7 +233,7 @@ export function useLeadsLogic() {
     console.log('Deleting multiple leads:', leadIds);
   };
 
-  const handleLeadView = (lead: TaxLead) => {
+  const handleLeadView = (lead: TaxLead | null) => {
     if (!lead) {
       console.warn('Attempted to view null lead');
       return;
@@ -282,6 +282,7 @@ export function useLeadsLogic() {
     handleDeleteSingleLead,
     handleDeleteMultipleLeads,
     handleFilterToggle,
-    handleClearAllFilters
+    handleClearAllFilters,
+    refetchLeads: refetch
   };
 }

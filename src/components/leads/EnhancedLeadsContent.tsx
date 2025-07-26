@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { TaxLeadDetailsForm } from './TaxLeadDetailsForm';
@@ -47,20 +46,23 @@ export function EnhancedLeadsContent() {
     handleBulkLeadsUpdate,
     handleDeleteSingleLead,
     handleDeleteMultipleLeads,
-    handleFilterToggle
+    handleFilterToggle,
+    refetchLeads
   } = useLeadsLogic();
 
-  // Handle URL-based lead selection
+  // Handle URL-based lead selection with fresh data loading
   useEffect(() => {
     if (selectedLeadId && mockLeads.length > 0) {
       const lead = mockLeads.find(l => l.id.toString() === selectedLeadId);
       if (lead && lead !== selectedLead) {
+        // Ensure we have fresh data when viewing a lead
+        refetchLeads();
         setSelectedLead(lead);
       }
     } else if (!selectedLeadId && selectedLead) {
       setSelectedLead(null);
     }
-  }, [selectedLeadId, mockLeads, selectedLead, setSelectedLead]);
+  }, [selectedLeadId, mockLeads, selectedLead, setSelectedLead, refetchLeads]);
 
   const handleSellerAdded = (seller: any) => {
     setSelectedLead(seller);
@@ -73,9 +75,16 @@ export function EnhancedLeadsContent() {
   };
 
   const handleBackToLeads = () => {
+    console.log('Navigating back to leads...');
     setSelectedLead(null);
-    // Clear the URL parameters and navigate back to the leads page
+    // Clear URL parameters first
+    setSearchParams({});
+    // Then navigate with replace to ensure proper history management
     navigate('/leads', { replace: true });
+    // Refetch fresh data when returning to leads list
+    setTimeout(() => {
+      refetchLeads();
+    }, 100);
   };
 
   const handleRemoveFilter = (filterId: string) => {
@@ -98,6 +107,21 @@ export function EnhancedLeadsContent() {
 
   const handlePodioFiltersChange = (newFilters: FilterState) => {
     setPodioFilters(newFilters);
+  };
+
+  // Enhanced lead update handler that ensures data persistence
+  const handleEnhancedLeadUpdate = async (updatedLead: any) => {
+    try {
+      await handleLeadUpdate(updatedLead);
+      setSelectedLead(updatedLead);
+      
+      // Force refresh data after update to ensure consistency
+      setTimeout(() => {
+        refetchLeads();
+      }, 1000);
+    } catch (error) {
+      console.error('Error updating lead:', error);
+    }
   };
 
   // Show loading state while data is being loaded
@@ -139,10 +163,7 @@ export function EnhancedLeadsContent() {
           <div className="pb-6">
             <TaxLeadDetailsForm
               lead={selectedLead}
-              onSave={(updatedLead) => {
-                handleLeadUpdate(updatedLead);
-                setSelectedLead(updatedLead);
-              }}
+              onSave={handleEnhancedLeadUpdate}
               userRole="editor"
             />
           </div>
@@ -217,7 +238,7 @@ export function EnhancedLeadsContent() {
             onClose={() => setIsTemplateDialogOpen(false)}
             lead={mockLeads[0]}
             onSave={(updatedLead) => {
-              handleLeadUpdate(updatedLead);
+              handleEnhancedLeadUpdate(updatedLead);
               setIsTemplateDialogOpen(false);
             }}
           />
