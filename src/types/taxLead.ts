@@ -1,4 +1,5 @@
 
+
 export interface TaxLead {
   id: number;
   taxId: string;
@@ -22,5 +23,29 @@ export interface TaxLead {
   tags?: string[];
   leadManager?: string;
   ownerOfRecord?: string;
-  attachedFiles?: { id: string; name: string; url: string }[];
+  attachedFiles?: { id: string; name: string; url: string; type?: string; size?: number }[];
+  
+  // Financial fields
+  askingPrice?: number;
+  mortgagePrice?: number;
+  
+  // Lead source and campaign fields
+  leadSource?: string;
+  campaignId?: string;
+  agentName?: string;
+  
+  // Additional information fields
+  hasDeath?: boolean;
+  deathNotes?: string;
+  hasProbate?: boolean;
+  probateNotes?: string;
+  hasLawsuit?: boolean;
+  lawsuitNotes?: string;
+  hasAdditionalTaxingEntities?: boolean;
+  additionalTaxingNotes?: string;
+  
+  // Conditional fields
+  vestingDeedDate?: string;
+  grantorGranteeName?: string;
 }
+
