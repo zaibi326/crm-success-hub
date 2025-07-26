@@ -6,24 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { StickyNote, ChevronDown } from 'lucide-react';
-
-interface Lead {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  company: string;
-  position: string;
-  address: string;
-  city: string;
-  state: string;
-  zip: string;
-  status: 'HOT' | 'WARM' | 'COLD' | 'PASS';
-  score: number;
-  notes: string;
-  avatar?: string;
-  tags: string[];
-}
+import { Lead } from '@/types/lead';
 
 interface NotesSectionProps {
   formData: Lead;
