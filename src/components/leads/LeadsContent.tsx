@@ -31,6 +31,10 @@ export const LeadsContent = memo(function LeadsContent() {
     setSelectedLead(updatedLead);
   };
 
+  const handleBackToLeads = () => {
+    setSelectedLead(null);
+  };
+
   const handleLeadDelete = (leadId: number) => {
     // Implementation for lead deletion
     console.log('Deleting lead with ID:', leadId);
@@ -69,7 +73,7 @@ export const LeadsContent = memo(function LeadsContent() {
         ) : (
           <TaxLeadDetailView 
             selectedLead={selectedLead}
-            onBack={() => setSelectedLead(null)}
+            onBack={handleBackToLeads}
           />
         )}
       </main>

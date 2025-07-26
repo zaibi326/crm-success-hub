@@ -100,6 +100,10 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
     console.log('Field updated:', field, 'from', originalValue, 'to', value);
   };
 
+  const handleBackClick = () => {
+    onBack();
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'HOT': return 'bg-red-100 text-red-800 border-red-200';
@@ -115,7 +119,7 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
       <div className="max-w-7xl mx-auto">
         <LeadDetailsHeader
           lead={leadData}
-          onBack={onBack}
+          onBack={handleBackClick}
           onEditClick={() => setIsTemplateDialogOpen(true)}
           getStatusColor={getStatusColor}
         />

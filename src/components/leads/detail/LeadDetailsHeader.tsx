@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Edit } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
-import { useNavigate } from 'react-router-dom';
 
 interface LeadDetailsHeaderProps {
   lead: TaxLead;
@@ -14,13 +13,8 @@ interface LeadDetailsHeaderProps {
 }
 
 export function LeadDetailsHeader({ lead, onBack, onEditClick, getStatusColor }: LeadDetailsHeaderProps) {
-  const navigate = useNavigate();
-
   const handleBackClick = () => {
-    // Call the onBack function first
     onBack();
-    // Then navigate to the leads page, replacing the current history entry
-    navigate('/leads', { replace: true });
   };
 
   return (
