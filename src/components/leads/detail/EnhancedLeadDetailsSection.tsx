@@ -217,7 +217,7 @@ export function EnhancedLeadDetailsSection({
             </div>
           </CardContent>
         </CollapsibleContent>
-      </Card>
-    </Collapsible>
+      </Collapsible>
+    </Card>
   );
 }
