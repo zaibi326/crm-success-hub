@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { TaxLeadDetailsForm } from './TaxLeadDetailsForm';
@@ -74,6 +73,7 @@ export function EnhancedLeadsContent() {
   };
 
   const handleBackToLeads = () => {
+    console.log('EnhancedLeadsContent: Back to leads called');
     setSelectedLead(null);
     setSearchParams({});
   };
@@ -117,35 +117,10 @@ export function EnhancedLeadsContent() {
     return (
       <div className="w-full min-h-screen overflow-auto bg-white">
         <div className="min-h-screen bg-gradient-to-br from-agile-gray-50 to-white">
-          {/* Header with back button */}
-          <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-agile-gray-200 p-6">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                onClick={handleBackToLeads}
-                className="flex items-center gap-2 text-agile-blue-600 hover:text-agile-blue-700 hover:bg-agile-blue-50"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Leads
-              </Button>
-              <div>
-                <h1 className="text-3xl font-bold text-agile-gray-900">{selectedLead.ownerName}</h1>
-                <p className="text-agile-gray-600 mt-1">{selectedLead.propertyAddress}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Enhanced Lead Details Form */}
-          <div className="pb-6">
-            <TaxLeadDetailsForm
-              lead={selectedLead}
-              onSave={(updatedLead) => {
-                handleLeadUpdate(updatedLead);
-                setSelectedLead(updatedLead);
-              }}
-              userRole="editor"
-            />
-          </div>
+          <TaxLeadDetailView 
+            selectedLead={selectedLead}
+            onBack={handleBackToLeads}
+          />
         </div>
       </div>
     );

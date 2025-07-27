@@ -13,7 +13,10 @@ interface LeadDetailsHeaderProps {
 }
 
 export function LeadDetailsHeader({ lead, onBack, onEditClick, getStatusColor }: LeadDetailsHeaderProps) {
-  const handleBackClick = () => {
+  const handleBackClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Header back button clicked');
     onBack();
   };
 
@@ -24,7 +27,8 @@ export function LeadDetailsHeader({ lead, onBack, onEditClick, getStatusColor }:
           <Button 
             variant="ghost" 
             onClick={handleBackClick}
-            className="podio-button-secondary flex items-center gap-2"
+            className="podio-button-secondary flex items-center gap-2 hover:bg-gray-100"
+            type="button"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Leads

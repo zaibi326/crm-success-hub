@@ -1,10 +1,8 @@
 
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TaxLead } from '@/types/taxLead';
-import { TaxLeadDetailsForm } from './TaxLeadDetailsForm';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { useActivityLogger } from '@/hooks/useActivityLogger';
+import { LeadDetailsPage } from './LeadDetailsPage';
+import { useComprehensiveLeadActivityTracker } from '@/hooks/useComprehensiveLeadActivityTracker';
 
 interface TaxLeadDetailViewProps {
   selectedLead: TaxLead;
@@ -12,79 +10,42 @@ interface TaxLeadDetailViewProps {
 }
 
 export function TaxLeadDetailView({ selectedLead, onBack }: TaxLeadDetailViewProps) {
-  const { logActivity } = useActivityLogger();
+  const [lead, setLead] = useState<TaxLead>(selectedLead);
+  const { trackLeadViewed, trackLeadUpdated } = useComprehensiveLeadActivityTracker();
 
-  // Log when user views a lead
   useEffect(() => {
-    logActivity({
-      module: 'leads',
-      actionType: 'viewed',
-      description: `Viewed lead details for ${selectedLead.ownerName}`,
-      referenceId: selectedLead.id.toString(),
-      referenceType: 'lead',
-      metadata: {
-        leadId: selectedLead.id,
-        ownerName: selectedLead.ownerName,
-        status: selectedLead.status
-      }
-    });
-  }, [selectedLead.id, selectedLead.ownerName, selectedLead.status, logActivity]);
+    setLead(selectedLead);
+    // Track that the lead was viewed
+    trackLeadViewed(selectedLead);
+  }, [selectedLead, trackLeadViewed]);
 
-  const handleSave = (updatedLead: TaxLead) => {
-    console.log('Lead updated:', updatedLead);
+  const handleLeadUpdate = async (updatedLead: TaxLead) => {
+    const changedFields = Object.keys(updatedLead).filter(
+      key => updatedLead[key as keyof TaxLead] !== lead[key as keyof TaxLead]
+    );
     
-    // Log the lead update activity
-    logActivity({
-      module: 'leads',
-      actionType: 'updated',
-      description: `Updated lead information for ${updatedLead.ownerName}`,
-      referenceId: updatedLead.id.toString(),
-      referenceType: 'lead',
-      metadata: {
-        leadId: updatedLead.id,
-        ownerName: updatedLead.ownerName,
-        status: updatedLead.status,
-        previousStatus: selectedLead.status
-      }
-    });
+    if (changedFields.length > 0) {
+      const oldValues = changedFields.reduce((acc, field) => {
+        acc[field] = lead[field as keyof TaxLead];
+        return acc;
+      }, {} as any);
+      
+      trackLeadUpdated(updatedLead, changedFields, oldValues);
+    }
+    
+    setLead(updatedLead);
   };
 
-  const handleBackClick = () => {
+  const handleBackToLeads = () => {
+    console.log('TaxLeadDetailView: Back to leads called');
     onBack();
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-crm-gradient-start via-white to-crm-gradient-end">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-gray-200/50 p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                onClick={handleBackClick}
-                className="flex items-center gap-2 text-crm-primary hover:text-crm-accent hover:bg-crm-primary/10"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Leads
-              </Button>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">{selectedLead.ownerName}</h1>
-                <p className="text-gray-600 mt-1">{selectedLead.propertyAddress}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Enhanced Lead Details Form */}
-        <div className="pb-6">
-          <TaxLeadDetailsForm
-            lead={selectedLead}
-            onSave={handleSave}
-            userRole="editor"
-          />
-        </div>
-      </div>
-    </div>
+    <LeadDetailsPage
+      lead={lead}
+      onBack={handleBackToLeads}
+      onLeadUpdate={handleLeadUpdate}
+    />
   );
 }

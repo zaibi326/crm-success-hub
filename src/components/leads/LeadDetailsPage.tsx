@@ -7,7 +7,7 @@ import { SellerContactSection } from './detail/SellerContactSection';
 import { PropertyDetailsSection } from './detail/PropertyDetailsSection';
 import { PropertyMapSection } from './detail/PropertyMapSection';
 import { NotesDisplaySection } from './detail/NotesDisplaySection';
-import { DatabaseActivityTimeline } from './DatabaseActivityTimeline';
+import { LeadActivityTimeline } from './LeadActivityTimeline';
 import { LeadDetailsHeader } from './detail/LeadDetailsHeader';
 import { useToast } from '@/hooks/use-toast';
 import { useEnhancedActivityLogger } from '@/hooks/useEnhancedActivityLogger';
@@ -101,6 +101,7 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
   };
 
   const handleBackClick = () => {
+    console.log('Back button clicked, calling onBack');
     onBack();
   };
 
@@ -167,8 +168,9 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
             </TabsContent>
 
             <TabsContent value="activity" className="space-y-6 mt-6">
-              <DatabaseActivityTimeline 
-                lead={leadData}
+              <LeadActivityTimeline 
+                leadId={leadData.id.toString()}
+                leadName={leadData.ownerName}
                 readOnly={false}
               />
             </TabsContent>
