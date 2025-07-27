@@ -62,9 +62,10 @@ export function EnhancedLeadsContent() {
     }
   }, [selectedLeadId, mockLeads, selectedLead, setSelectedLead]);
 
+  // Modified to NOT redirect to details when adding a seller
   const handleSellerAdded = (seller: any) => {
-    setSelectedLead(seller);
-    setSearchParams({ leadId: seller.id.toString() });
+    // Just refresh the leads list, don't redirect to details
+    console.log('New seller added:', seller);
   };
 
   const handleLeadSelect = (lead: any) => {

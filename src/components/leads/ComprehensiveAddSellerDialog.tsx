@@ -29,7 +29,7 @@ export function ComprehensiveAddSellerDialog({ onAddSeller, onSellerAdded, trigg
     handleInputChange,
     handleSubmit,
     resetForm,
-  } = useAddSellerForm(onAddSeller, onSellerAdded, () => setOpen(false));
+  } = useAddSellerForm(onAddSeller, undefined, () => setOpen(false)); // Remove onSellerAdded to prevent redirect
 
   const onOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);

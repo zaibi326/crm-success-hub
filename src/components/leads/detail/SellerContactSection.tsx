@@ -120,11 +120,10 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
 
               <div className="md:col-span-2">
                 <InlineEditField
-                  label="Property Address"
-                  value={lead.propertyAddress || ''}
-                  onSave={(value) => handleFieldChange('propertyAddress', value)}
-                  placeholder="Enter property address"
-                  required
+                  label="Seller Mailing Address"
+                  value={lead.sellerMailingAddress || ''}
+                  onSave={(value) => handleFieldChange('sellerMailingAddress', value)}
+                  placeholder="Enter seller's mailing address"
                   canEdit={canEdit}
                 />
               </div>

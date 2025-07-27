@@ -1,63 +1,42 @@
 
 export interface TaxLead {
   id: number;
-  taxId: string;
-  ownerName: string;
+  supabaseId?: string;
   firstName?: string;
   lastName?: string;
+  ownerName: string;
   propertyAddress: string;
-  currentArrears?: number;
-  status: 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP';
-  temperature?: 'HOT' | 'WARM' | 'COLD' | 'PASS';
-  email?: string;
+  sellerMailingAddress?: string; // Added separate field for seller's mailing address
   phone?: string;
-  taxLawsuitNumber?: string;
-  notes?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  createdVia?: string;
-  leadManager?: string;
-  tags?: string[];
-  occupancyStatus?: string;
-  
-  // Lead Information
+  email?: string;
   leadSource?: string;
-  campaignId?: string;
+  status: 'HOT' | 'WARM' | 'COLD' | 'PASS';
+  temperature: 'HOT' | 'WARM' | 'COLD';
+  occupancyStatus: 'OWNER_OCCUPIED' | 'TENANT_OCCUPIED' | 'VACANT' | 'UNKNOWN';
   agentName?: string;
-  disposition?: 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED';
-  
-  // Financial Information
+  notes?: string;
   askingPrice?: number;
   mortgagePrice?: number;
-  propertyValue?: number;
-  taxAmount?: number;
-  
-  // Location Information
-  county?: string;
-  state?: string;
-  
-  // Additional Information Fields
-  hasDeath?: boolean;
-  deathNotes?: string;
-  hasProbate?: boolean;
-  probateNotes?: string;
-  hasLawsuit?: boolean;
-  lawsuitNotes?: string;
-  hasAdditionalTaxingEntities?: boolean;
-  additionalTaxingNotes?: string;
-  
-  // Conditional Fields
+  currentArrears?: number;
+  taxId?: string;
+  campaignId?: string;
+  taxLawsuitNumber?: string;
+  attachedFiles?: AttachedFile[];
+  createdAt?: string;
+  updatedAt?: string;
+  disposition?: 'UNDECIDED' | 'INTERESTED' | 'NOT_INTERESTED' | 'CALLBACK' | 'SOLD' | 'PASSED';
   vestingDeedDate?: string;
   grantorGranteeName?: string;
-  ownerOfRecord?: string;
-  
-  // Attachments - Updated with size property
-  attachedFiles?: Array<{
-    id: string;
-    name: string;
-    type: string;
-    url: string;
-    preview?: string;
-    size?: number;
-  }>;
+  createdVia?: string;
+  tags?: string[];
+  leadManager?: string;
+}
+
+export interface AttachedFile {
+  id: string;
+  name: string;
+  url: string;
+  type: string;
+  size: number;
+  uploadedAt: string;
 }
