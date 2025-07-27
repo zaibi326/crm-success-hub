@@ -1,6 +1,8 @@
+
 import React, { useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { TaxLeadDetailsForm } from './TaxLeadDetailsForm';
+import { TaxLeadDetailView } from './TaxLeadDetailView';
 import { TemplateModificationDialog } from './TemplateModificationDialog';
 import { LeadsHeader } from './LeadsHeader';
 import { LeadsMainContent } from './LeadsMainContent';
