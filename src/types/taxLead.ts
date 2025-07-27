@@ -1,38 +1,42 @@
 
 export interface TaxLead {
   id: number;
-  supabaseId?: string;
+  taxId: string;
+  ownerName: string;
   firstName?: string;
   lastName?: string;
-  ownerName: string;
   propertyAddress: string;
-  sellerMailingAddress?: string; // Added separate field for seller's mailing address
-  phone?: string;
-  email?: string;
-  leadSource?: string;
-  status: 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP';
-  temperature: 'HOT' | 'WARM' | 'COLD';
-  occupancyStatus: 'OWNER_OCCUPIED' | 'TENANT_OCCUPIED' | 'VACANT' | 'UNKNOWN';
-  agentName?: string;
-  notes?: string;
-  askingPrice?: number;
-  mortgagePrice?: number;
   currentArrears?: number;
-  taxId?: string;
-  campaignId?: string;
+  status: 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP';
+  temperature?: 'HOT' | 'WARM' | 'COLD' | 'PASS';
+  email?: string;
+  phone?: string;
   taxLawsuitNumber?: string;
-  attachedFiles?: AttachedFile[];
+  notes?: string;
   createdAt?: string;
   updatedAt?: string;
-  disposition?: 'UNDECIDED' | 'INTERESTED' | 'NOT_INTERESTED' | 'CALLBACK' | 'SOLD' | 'PASSED' | 'QUALIFIED' | 'DISQUALIFIED';
-  vestingDeedDate?: string;
-  grantorGranteeName?: string;
   createdVia?: string;
-  tags?: string[];
   leadManager?: string;
+  tags?: string[];
+  occupancyStatus?: string;
   
-  // Additional properties that were missing
-  ownerOfRecord?: string;
+  // Lead Information
+  leadSource?: string;
+  campaignId?: string;
+  agentName?: string;
+  disposition?: 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED';
+  
+  // Financial Information
+  askingPrice?: number;
+  mortgagePrice?: number;
+  propertyValue?: number;
+  taxAmount?: number;
+  
+  // Location Information
+  county?: string;
+  state?: string;
+  
+  // Additional Information Fields
   hasDeath?: boolean;
   deathNotes?: string;
   hasProbate?: boolean;
@@ -41,13 +45,19 @@ export interface TaxLead {
   lawsuitNotes?: string;
   hasAdditionalTaxingEntities?: boolean;
   additionalTaxingNotes?: string;
-}
-
-export interface AttachedFile {
-  id: string;
-  name: string;
-  url: string;
-  type: string;
-  size: number;
-  uploadedAt: string;
+  
+  // Conditional Fields
+  vestingDeedDate?: string;
+  grantorGranteeName?: string;
+  ownerOfRecord?: string;
+  
+  // Attachments - Updated with size property
+  attachedFiles?: Array<{
+    id: string;
+    name: string;
+    type: string;
+    url: string;
+    preview?: string;
+    size?: number;
+  }>;
 }

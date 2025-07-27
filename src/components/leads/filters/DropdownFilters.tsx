@@ -25,8 +25,8 @@ export function DropdownFilters({ onAddFilter }: FilterComponentProps) {
           </SelectTrigger>
           <SelectContent className="bg-white border-agile-gray-200 z-50">
             {users.map(user => (
-              <SelectItem key={user.id} value={user.id || `user_${user.id}`}>
-                {user.display_name || 'Unknown User'}
+              <SelectItem key={user.id} value={user.id}>
+                {user.display_name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -111,8 +111,8 @@ export function DropdownFilters({ onAddFilter }: FilterComponentProps) {
           </SelectTrigger>
           <SelectContent className="bg-white border-agile-gray-200 z-50">
             {users.map(user => (
-              <SelectItem key={user.id} value={user.id || `manager_${user.id}`}>
-                {user.display_name || 'Unknown Manager'}
+              <SelectItem key={user.id} value={user.id}>
+                {user.display_name}
               </SelectItem>
             ))}
           </SelectContent>

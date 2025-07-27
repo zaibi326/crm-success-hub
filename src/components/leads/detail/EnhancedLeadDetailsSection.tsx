@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, ChevronDown, ChevronUp, MapPin, ExternalLink } from 'lucide-react';
+import { FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { InlineEditField } from './InlineEditField';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 interface EnhancedLeadDetailsSectionProps {
   lead: TaxLead;
   onFieldUpdate: (field: keyof TaxLead, value: string) => void;
@@ -40,24 +38,9 @@ export function EnhancedLeadDetailsSection({
   canEdit = true
 }: EnhancedLeadDetailsSectionProps) {
   const [isOpen, setIsOpen] = useState(true);
-  const {
-    toast
-  } = useToast();
-  const handleFieldUpdate = async (field: keyof TaxLead, value: string) => {
+  const handleFieldUpdate = (field: keyof TaxLead, value: string) => {
     if (canEdit) {
-      try {
-        await onFieldUpdate(field, value);
-        toast({
-          title: "Success",
-          description: `✅ ${field} updated successfully`
-        });
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: `Failed to update ${field}`,
-          variant: "destructive"
-        });
-      }
+      onFieldUpdate(field, value);
     }
   };
   const formatCurrency = (amount: number | undefined) => {
@@ -71,18 +54,6 @@ export function EnhancedLeadDetailsSection({
     } else if (value === '') {
       onFieldUpdate(field, '');
     }
-  };
-  const openZillow = () => {
-    const address = lead.propertyAddress;
-    if (address) {
-      const encodedAddress = encodeURIComponent(address);
-      window.open(`https://www.zillow.com/homes/${encodedAddress}/`, '_blank');
-    }
-  };
-  const formatZillowUrl = (address: string) => {
-    if (!address) return '';
-    const encodedAddress = encodeURIComponent(address);
-    return `https://www.zillow.com/homes/${encodedAddress}/`;
   };
   return <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>

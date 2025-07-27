@@ -1,13 +1,14 @@
-
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { TaxLead } from '@/types/taxLead';
+import { useEffect } from 'react';
 
-interface DashboardStats {
+export interface DashboardStats {
+  totalLeads: number;
   hotDeals: number;
   warmDeals: number;
   coldDeals: number;
   passRate: number;
-  totalLeads: number;
   keepRate: number;
   passDeals: number;
   keepDeals: number;
@@ -30,134 +31,134 @@ interface ActivityItem {
   metadata?: any;
 }
 
-export function useDashboardData() {
-  const [loading, setLoading] = useState(true);
-  const [leads, setLeads] = useState<TaxLead[]>([]);
-  const [stats, setStats] = useState<DashboardStats>({
-    hotDeals: 0,
-    warmDeals: 0,
-    coldDeals: 0,
-    passRate: 0,
-    totalLeads: 0,
-    keepRate: 0,
-    passDeals: 0,
-    keepDeals: 0,
-    thisWeekLeads: 0,
-    thisMonthLeads: 0,
-    avgResponseTime: '0h 0m'
+export interface DashboardDataContextType {
+  leads: TaxLead[];
+  stats: DashboardStats;
+  activities: ActivityItem[];
+  loading: boolean;
+  error: string | null;
+  refetch: () => Promise<void>;
+}
+
+export function useDashboardData(): DashboardDataContextType {
+  const { data: campaignLeads = [], isLoading: leadsLoading, error: leadsError, refetch: refetchLeads } = useQuery({
+    queryKey: ['campaign-leads'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('campaign_leads')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      console.log('Loaded campaign leads from database:', data?.length || 0, 'leads');
+      return data || [];
+    },
   });
-  const [activities, setActivities] = useState<ActivityItem[]>([]);
 
+  const { data: activitiesData = [], isLoading: activitiesLoading, error: activitiesError, refetch: refetchActivities } = useQuery({
+    queryKey: ['activities'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('activities')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+      
+      if (error) throw error;
+      console.log('Loaded activities from database:', data?.length || 0, 'activities');
+      return data || [];
+    },
+  });
+
+  // Set up real-time subscription for activities
   useEffect(() => {
-    // Simulate API call
-    const mockLeads: TaxLead[] = [
-      {
-        id: 1,
-        taxId: 'TX-001-2024',
-        ownerName: 'John Smith',
-        propertyAddress: '123 Main St, Dallas, TX 75201',
-        currentArrears: 15000,
-        status: 'HOT',
-        temperature: 'HOT',
-        occupancyStatus: 'OWNER_OCCUPIED',
-        email: 'john.smith@email.com',
-        phone: '(555) 123-4567',
-        taxLawsuitNumber: 'TL-2024-001',
-        notes: 'High-value property with significant arrears',
-        createdAt: '2024-01-15T10:30:00Z',
-        updatedAt: '2024-01-15T10:30:00Z',
-        disposition: 'UNDECIDED'
-      },
-      {
-        id: 2,
-        taxId: 'TX-002-2024',
-        ownerName: 'Sarah Johnson',
-        propertyAddress: '456 Oak Ave, Houston, TX 77001',
-        currentArrears: 8500,
-        status: 'WARM',
-        temperature: 'WARM',
-        occupancyStatus: 'OWNER_OCCUPIED',
-        email: 'sarah.j@email.com',
-        phone: '(555) 987-6543',
-        taxLawsuitNumber: 'TL-2024-002',
-        notes: 'Property owner contacted previously',
-        createdAt: '2024-01-10T14:20:00Z',
-        updatedAt: '2024-01-10T14:20:00Z',
-        disposition: 'INTERESTED'
-      },
-      {
-        id: 3,
-        taxId: 'TX-003-2024',
-        ownerName: 'Mike Rodriguez',
-        propertyAddress: '789 Pine Rd, Austin, TX 73301',
-        currentArrears: 3200,
-        status: 'COLD',
-        temperature: 'COLD',
-        occupancyStatus: 'VACANT',
-        phone: '(555) 456-7890',
-        taxLawsuitNumber: 'TL-2024-003',
-        notes: 'Small arrears, low priority',
-        createdAt: '2024-01-05T09:15:00Z',
-        updatedAt: '2024-01-05T09:15:00Z',
-        disposition: 'UNDECIDED'
-      }
-    ];
+    const channel = supabase
+      .channel('activities-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'activities'
+        },
+        (payload) => {
+          console.log('Real-time activity update:', payload);
+          refetchActivities();
+        }
+      )
+      .subscribe();
 
-    const mockStats: DashboardStats = {
-      hotDeals: mockLeads.filter(lead => lead.status === 'HOT').length,
-      warmDeals: mockLeads.filter(lead => lead.status === 'WARM').length,
-      coldDeals: mockLeads.filter(lead => lead.status === 'COLD').length,
-      passRate: 15,
-      totalLeads: mockLeads.length,
-      keepRate: 25,
-      passDeals: Math.round(mockLeads.length * 0.15),
-      keepDeals: Math.round(mockLeads.length * 0.25),
-      thisWeekLeads: 12,
-      thisMonthLeads: 47,
-      avgResponseTime: '2h 15m'
+    return () => {
+      supabase.removeChannel(channel);
     };
+  }, [refetchActivities]);
 
-    const mockActivities: ActivityItem[] = [
-      {
-        id: '1',
-        type: 'lead_created',
-        description: 'New lead created',
-        userName: 'John Doe',
-        timestamp: new Date(),
-        leadId: '1',
-        module: 'leads',
-        actionType: 'create'
-      },
-      {
-        id: '2',
-        type: 'lead_updated',
-        description: 'Lead status updated',
-        userName: 'Jane Smith',
-        timestamp: new Date(Date.now() - 3600000),
-        leadId: '2',
-        module: 'leads',
-        actionType: 'update'
-      }
-    ];
+  // Transform campaign_leads to TaxLead format
+  const leads: TaxLead[] = campaignLeads.map(lead => ({
+    id: parseInt(lead.id) || 0,
+    taxId: lead.tax_id || '',
+    ownerName: lead.owner_name,
+    propertyAddress: lead.property_address,
+    currentArrears: lead.current_arrears || undefined,
+    status: (lead.status as 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP') || 'COLD',
+    email: lead.email || undefined,
+    phone: lead.phone || undefined,
+    taxLawsuitNumber: lead.tax_lawsuit_number || undefined,
+    notes: lead.notes || undefined,
+    createdAt: lead.created_at,
+    updatedAt: lead.updated_at,
+    disposition: (lead.disposition as 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED') || 'UNDECIDED',
+  }));
 
-    setLeads(mockLeads);
-    setStats(mockStats);
-    setActivities(mockActivities);
-    setLoading(false);
-  }, []);
-
-  const refetch = async () => {
-    setLoading(true);
-    // Simulate refetch delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setLoading(false);
+  // Fixed stats calculation - KEEP and PASS are mutually exclusive
+  const stats: DashboardStats = {
+    totalLeads: leads.length,
+    hotDeals: leads.filter(lead => lead.status === 'HOT').length,
+    warmDeals: leads.filter(lead => lead.status === 'WARM').length,
+    coldDeals: leads.filter(lead => lead.status === 'COLD').length,
+    passDeals: leads.filter(lead => lead.status === 'PASS' || lead.disposition === 'DISQUALIFIED').length,
+    keepDeals: leads.filter(lead => lead.status === 'KEEP' || lead.disposition === 'QUALIFIED').length,
+    passRate: leads.length > 0 ? Math.round((leads.filter(lead => lead.status === 'PASS' || lead.disposition === 'DISQUALIFIED').length / leads.length) * 100) : 0,
+    keepRate: leads.length > 0 ? Math.round((leads.filter(lead => lead.status === 'KEEP' || lead.disposition === 'QUALIFIED').length / leads.length) * 100) : 0,
+    thisWeekLeads: leads.filter(lead => {
+      const leadDate = new Date(lead.createdAt || '');
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      return leadDate >= weekAgo;
+    }).length,
+    thisMonthLeads: leads.filter(lead => {
+      const leadDate = new Date(lead.createdAt || '');
+      const monthAgo = new Date();
+      monthAgo.setMonth(monthAgo.getMonth() - 1);
+      return leadDate >= monthAgo;
+    }).length,
+    avgResponseTime: '2.5 hrs'
   };
+
+  // Transform activities data
+  const activities: ActivityItem[] = activitiesData.map(activity => ({
+    id: activity.id,
+    type: activity.action_type,
+    description: activity.description,
+    userName: activity.user_name,
+    timestamp: new Date(activity.created_at),
+    leadId: activity.reference_id || '',
+    module: activity.module,
+    actionType: activity.action_type,
+    referenceId: activity.reference_id,
+    referenceType: activity.reference_type,
+    metadata: activity.metadata
+  }));
 
   return {
     leads,
     stats,
     activities,
-    loading,
-    refetch
+    loading: leadsLoading || activitiesLoading,
+    error: leadsError?.message || activitiesError?.message || null,
+    refetch: async () => {
+      await refetchLeads();
+      await refetchActivities();
+    }
   };
 }

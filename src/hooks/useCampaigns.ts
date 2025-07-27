@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -119,18 +118,6 @@ export function useCampaigns() {
     try {
       const campaignToDelete = campaigns.find(c => c.id === id);
       
-      // Check how many leads will be affected
-      const { data: leadsData, error: leadsError } = await supabase
-        .from('campaign_leads')
-        .select('id')
-        .eq('campaign_id', id);
-
-      if (leadsError) {
-        console.error('Error checking leads:', leadsError);
-      }
-
-      const leadsCount = leadsData?.length || 0;
-
       const { error } = await supabase
         .from('campaigns')
         .delete()
@@ -142,19 +129,10 @@ export function useCampaigns() {
       if (campaignToDelete) {
         trackCampaignDeleted(campaignToDelete);
       }
-
-      // Show appropriate message based on whether leads were preserved
-      if (leadsCount > 0) {
-        toast({
-          title: "Campaign deleted successfully",
-          description: `${leadsCount} leads from this campaign have been preserved and moved to your general leads list.`,
-        });
-      } else {
-        toast({
-          title: "Success",
-          description: "Campaign deleted successfully"
-        });
-      }
+      toast({
+        title: "Success",
+        description: "Campaign deleted successfully"
+      });
     } catch (error) {
       console.error('Error deleting campaign:', error);
       toast({
@@ -162,6 +140,7 @@ export function useCampaigns() {
         description: "Failed to delete campaign",
         variant: "destructive"
       });
+      throw error;
     }
   };
 

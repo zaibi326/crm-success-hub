@@ -54,9 +54,8 @@ export function useLeadsData() {
           disposition: (lead.disposition as 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED') || 'UNDECIDED',
           createdAt: lead.created_at,
           updatedAt: lead.updated_at,
-          campaignId: lead.campaign_id, // This can now be null for orphaned leads
           supabaseId: lead.id // Store the actual Supabase ID for operations
-        } as TaxLead & { supabaseId: string; campaignId: string | null };
+        } as TaxLead & { supabaseId: string };
       }) || [];
 
       setMockLeads(leadsData);
@@ -86,19 +85,17 @@ export function useLeadsData() {
         return;
       }
 
-      // Check if user has any campaigns, but don't require one
+      // Check if user has any campaigns, create one if not
       let { data: campaigns } = await supabase
         .from('campaigns')
         .select('id')
         .eq('created_by', user.id)
         .limit(1);
 
-      let campaignId: string | null = null;
+      let campaignId: string;
 
-      if (campaigns && campaigns.length > 0) {
-        campaignId = campaigns[0].id;
-      } else {
-        // Create a default campaign only if the user wants to organize leads
+      if (!campaigns || campaigns.length === 0) {
+        // Create a default campaign
         const { data: newCampaign, error: campaignError } = await supabase
           .from('campaigns')
           .insert({
@@ -110,13 +107,21 @@ export function useLeadsData() {
           .select('id')
           .single();
 
-        if (!campaignError && newCampaign) {
-          campaignId = newCampaign.id;
+        if (campaignError) {
+          console.error('Error creating campaign:', campaignError);
+          toast({
+            title: "Error",
+            description: "Failed to create campaign for lead",
+            variant: "destructive",
+          });
+          return;
         }
-        // If campaign creation fails, that's okay - lead can exist without campaign
+        campaignId = newCampaign.id;
+      } else {
+        campaignId = campaigns[0].id;
       }
 
-      // Insert the new lead (campaign_id can be null)
+      // Insert the new lead
       const { data, error } = await supabase
         .from('campaign_leads')
         .insert({

@@ -70,7 +70,7 @@ export type Database = {
       }
       campaign_leads: {
         Row: {
-          campaign_id: string | null
+          campaign_id: string
           created_at: string
           current_arrears: number | null
           disposition: string | null
@@ -86,7 +86,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          campaign_id?: string | null
+          campaign_id: string
           created_at?: string
           current_arrears?: number | null
           disposition?: string | null
@@ -102,7 +102,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          campaign_id?: string | null
+          campaign_id?: string
           created_at?: string
           current_arrears?: number | null
           disposition?: string | null
