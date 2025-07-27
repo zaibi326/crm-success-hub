@@ -10,7 +10,7 @@ export interface TaxLead {
   phone?: string;
   email?: string;
   leadSource?: string;
-  status: 'HOT' | 'WARM' | 'COLD' | 'PASS';
+  status: 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP';
   temperature: 'HOT' | 'WARM' | 'COLD';
   occupancyStatus: 'OWNER_OCCUPIED' | 'TENANT_OCCUPIED' | 'VACANT' | 'UNKNOWN';
   agentName?: string;
@@ -24,12 +24,23 @@ export interface TaxLead {
   attachedFiles?: AttachedFile[];
   createdAt?: string;
   updatedAt?: string;
-  disposition?: 'UNDECIDED' | 'INTERESTED' | 'NOT_INTERESTED' | 'CALLBACK' | 'SOLD' | 'PASSED';
+  disposition?: 'UNDECIDED' | 'INTERESTED' | 'NOT_INTERESTED' | 'CALLBACK' | 'SOLD' | 'PASSED' | 'QUALIFIED' | 'DISQUALIFIED';
   vestingDeedDate?: string;
   grantorGranteeName?: string;
   createdVia?: string;
   tags?: string[];
   leadManager?: string;
+  
+  // Additional properties that were missing
+  ownerOfRecord?: string;
+  hasDeath?: boolean;
+  deathNotes?: string;
+  hasProbate?: boolean;
+  probateNotes?: string;
+  hasLawsuit?: boolean;
+  lawsuitNotes?: string;
+  hasAdditionalTaxingEntities?: boolean;
+  additionalTaxingNotes?: string;
 }
 
 export interface AttachedFile {
