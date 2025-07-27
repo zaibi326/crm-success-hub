@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -6,6 +7,7 @@ import { LeadSearchFilters } from './LeadSearchFilters';
 import { LeadReviewCard } from './LeadReviewCard';
 import { ReviewActions } from './ReviewActions';
 import { TaxLeadDetailsForm } from './TaxLeadDetailsForm';
+import { TaxLead } from '@/types/taxLead';
 
 interface Lead {
   id: number;
@@ -113,7 +115,21 @@ export function LeadReviewSystem() {
     setLeads(updatedLeads);
   };
 
-  const handleDetailFormSave = (updatedLead: Lead) => {
+  const handleDetailFormSave = (updatedTaxLead: TaxLead) => {
+    // Convert TaxLead back to Lead for this component
+    const updatedLead: Lead = {
+      id: updatedTaxLead.id,
+      taxId: updatedTaxLead.taxId || '',
+      ownerName: updatedTaxLead.ownerName,
+      propertyAddress: updatedTaxLead.propertyAddress,
+      taxLawsuitNumber: updatedTaxLead.taxLawsuitNumber,
+      currentArrears: updatedTaxLead.currentArrears,
+      status: updatedTaxLead.status as 'HOT' | 'WARM' | 'COLD' | 'PASS',
+      notes: updatedTaxLead.notes,
+      phone: updatedTaxLead.phone,
+      email: updatedTaxLead.email
+    };
+    
     handleLeadUpdate(updatedLead);
     setShowDetailForm(false);
     
@@ -131,6 +147,25 @@ export function LeadReviewSystem() {
         description: "You've reviewed all available leads!",
       });
     }
+  };
+
+  // Convert Lead to TaxLead for the detail form
+  const convertLeadToTaxLead = (lead: Lead): TaxLead => {
+    return {
+      id: lead.id,
+      taxId: lead.taxId,
+      ownerName: lead.ownerName,
+      propertyAddress: lead.propertyAddress,
+      taxLawsuitNumber: lead.taxLawsuitNumber,
+      currentArrears: lead.currentArrears,
+      status: lead.status as 'HOT' | 'WARM' | 'COLD' | 'PASS',
+      temperature: lead.status as 'HOT' | 'WARM' | 'COLD',
+      occupancyStatus: 'UNKNOWN',
+      notes: lead.notes,
+      phone: lead.phone,
+      email: lead.email,
+      disposition: 'UNDECIDED'
+    };
   };
 
   if (!currentLead) {
@@ -194,7 +229,7 @@ export function LeadReviewSystem() {
             <DialogTitle>Detailed Lead Information - {currentLead.ownerName}</DialogTitle>
           </DialogHeader>
           <TaxLeadDetailsForm
-            lead={currentLead as any}
+            lead={convertLeadToTaxLead(currentLead)}
             onSave={handleDetailFormSave}
             userRole="editor"
           />
