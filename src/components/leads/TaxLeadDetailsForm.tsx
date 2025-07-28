@@ -26,6 +26,7 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole }: TaxLeadDetailsFor
   const [formData, setFormData] = useState<TaxLead>(lead);
   const [isEditing, setIsEditing] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [files, setFiles] = useState<any[]>([]);
   const { toast } = useToast();
 
   const canEdit = userRole === 'admin' || userRole === 'editor';
@@ -74,15 +75,14 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole }: TaxLeadDetailsFor
     handleFieldChange('temperature', status === 'PASS' ? 'COLD' : (status === 'KEEP' ? 'WARM' : status));
   };
 
-  const sections = [
-    { id: 'contact', title: 'Contact Information', icon: Phone, color: 'text-blue-600' },
-    { id: 'property', title: 'Property Information', icon: MapPin, color: 'text-green-600' },
-    { id: 'financial', title: 'Financial Information', icon: DollarSign, color: 'text-yellow-600' },
-    { id: 'notes', title: 'Notes & Comments', icon: FileText, color: 'text-purple-600' },
-    { id: 'attachments', title: 'Attachments', icon: FileIcon, color: 'text-red-600' },
-    { id: 'additional', title: 'Additional Information', icon: FileText, color: 'text-indigo-600' },
-    { id: 'conditional', title: 'Conditional Fields', icon: FileText, color: 'text-teal-600' }
-  ];
+  const handleFileUpload = (uploadedFiles: File[], category: string) => {
+    // Handle file upload logic here
+    console.log('Files uploaded:', uploadedFiles, 'Category:', category);
+  };
+
+  const handleRemoveFile = (fileId: string) => {
+    setFiles(prev => prev.filter(f => f.id !== fileId));
+  };
 
   // Add null check for lead data
   if (!lead) {
@@ -198,8 +198,11 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole }: TaxLeadDetailsFor
       {/* Additional Information Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <AdditionalInformationSection
-          lead={formData}
-          onLeadUpdate={handleLeadUpdate}
+          formData={formData}
+          files={files}
+          onInputChange={handleFieldChange}
+          onFileUpload={handleFileUpload}
+          onRemoveFile={handleRemoveFile}
           canEdit={canEdit}
         />
 

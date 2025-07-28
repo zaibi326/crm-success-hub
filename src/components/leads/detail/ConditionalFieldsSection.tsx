@@ -1,157 +1,123 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { FileText, Upload, X } from 'lucide-react';
+import { FileUploadSection } from '../FileUploadSection';
 import { TaxLead } from '@/types/taxLead';
-
-interface UploadedFile {
-  id: string;
-  name: string;
-  type: string;
-  url: string;
-  category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities';
-}
+import { Calendar, User, FileText } from 'lucide-react';
 
 interface ConditionalFieldsSectionProps {
-  formData: TaxLead;
-  files: UploadedFile[];
+  lead: TaxLead | undefined;
+  onLeadUpdate: (updatedLead: TaxLead) => void;
   canEdit: boolean;
-  onInputChange: (field: keyof TaxLead, value: any) => void;
-  onFileUpload: (files: File[], category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities') => void;
-  onRemoveFile: (fileId: string) => void;
 }
 
-export function ConditionalFieldsSection({
-  formData,
-  files,
-  canEdit,
-  onInputChange,
-  onFileUpload,
-  onRemoveFile
-}: ConditionalFieldsSectionProps) {
-  // Filter files specifically for vesting deed category
-  const vestingDeedFiles = files.filter(file => file.category === 'vesting_deed');
+export function ConditionalFieldsSection({ lead, onLeadUpdate, canEdit }: ConditionalFieldsSectionProps) {
+  if (!lead) {
+    return (
+      <Card className="shadow-lg border-0">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            Conditional Fields
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center p-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading conditional fields...</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const uploadedFiles = Array.from(event.target.files || []);
-    if (uploadedFiles.length > 0) {
-      onFileUpload(uploadedFiles, 'vesting_deed');
-    }
+  const files = lead.attachedFiles?.filter(f => f.type === 'vesting_deed') || [];
+
+  const handleFieldChange = (field: keyof TaxLead, value: any) => {
+    const updatedLead = { ...lead, [field]: value };
+    onLeadUpdate(updatedLead);
+  };
+
+  const handleFileUpload = (uploadedFiles: File[], category: string) => {
+    // Handle file upload logic here
+    console.log('Files uploaded:', uploadedFiles, 'Category:', category);
+  };
+
+  const handleRemoveFile = (fileId: string) => {
+    const updatedFiles = lead.attachedFiles?.filter(f => f.id !== fileId) || [];
+    const updatedLead = { ...lead, attachedFiles: updatedFiles };
+    onLeadUpdate(updatedLead);
   };
 
   return (
     <Card className="shadow-lg border-0">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <FileText className="w-5 h-5 text-crm-primary" />
+          <FileText className="w-5 h-5" />
           Conditional Fields
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Vesting Deed Section */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <Label htmlFor="vestingDeedDate" className="text-sm font-medium">
-              Vesting Deed Date
-            </Label>
-            <Badge variant="outline" className="text-xs">
-              Optional
-            </Badge>
-          </div>
-          
+        {/* Owner of Record */}
+        <div className="space-y-2">
+          <Label htmlFor="ownerOfRecord" className="flex items-center gap-2">
+            <User className="w-4 h-4" />
+            Owner of Record
+          </Label>
+          <Input
+            id="ownerOfRecord"
+            value={lead.ownerOfRecord || ''}
+            onChange={(e) => handleFieldChange('ownerOfRecord', e.target.value)}
+            placeholder="Enter owner of record"
+            disabled={!canEdit}
+          />
+        </div>
+
+        {/* Vesting Deed Date */}
+        <div className="space-y-2">
+          <Label htmlFor="vestingDeedDate" className="flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            Vesting Deed Date
+          </Label>
           <Input
             id="vestingDeedDate"
-            value={formData.vestingDeedDate || ''}
-            onChange={(e) => onInputChange('vestingDeedDate', e.target.value)}
-            placeholder="Enter vesting deed date"
+            type="date"
+            value={lead.vestingDeedDate || ''}
+            onChange={(e) => handleFieldChange('vestingDeedDate', e.target.value)}
             disabled={!canEdit}
-            className="w-full"
           />
+        </div>
 
-          {/* Grantor/Grantee Name */}
-          <div className="space-y-2">
-            <Label htmlFor="grantorGranteeName" className="text-sm font-medium">
-              Grantor/Grantee Name
-            </Label>
-            <Input
-              id="grantorGranteeName"
-              value={formData.grantorGranteeName || ''}
-              onChange={(e) => onInputChange('grantorGranteeName', e.target.value)}
-              placeholder="Enter grantor/grantee name"
-              disabled={!canEdit}
-              className="w-full"
-            />
-          </div>
+        {/* Grantor/Grantee Name */}
+        <div className="space-y-2">
+          <Label htmlFor="grantorGranteeName">Grantor/Grantee Name</Label>
+          <Input
+            id="grantorGranteeName"
+            value={lead.grantorGranteeName || ''}
+            onChange={(e) => handleFieldChange('grantorGranteeName', e.target.value)}
+            placeholder="Enter grantor/grantee name"
+            disabled={!canEdit}
+          />
+        </div>
 
-          {/* Owner of Record */}
-          <div className="space-y-2">
-            <Label htmlFor="ownerOfRecord" className="text-sm font-medium">
-              Owner of Record
-            </Label>
-            <Input
-              id="ownerOfRecord"
-              value={formData.ownerOfRecord || ''}
-              onChange={(e) => onInputChange('ownerOfRecord', e.target.value)}
-              placeholder="Enter owner of record"
-              disabled={!canEdit}
-              className="w-full"
-            />
-          </div>
-
-          {/* Vesting Deed File Upload */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium">Vesting Deed Documents</Label>
-            
-            {canEdit && (
-              <div className="flex items-center gap-3">
-                <input
-                  type="file"
-                  id="vestingDeedUpload"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  multiple
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => document.getElementById('vestingDeedUpload')?.click()}
-                  className="flex items-center gap-2"
-                >
-                  <Upload className="w-4 h-4" />
-                  Upload Vesting Deed
-                </Button>
-              </div>
-            )}
-
-            {/* Display uploaded vesting deed files */}
-            {vestingDeedFiles.length > 0 && (
-              <div className="space-y-2">
-                {vestingDeedFiles.map((file) => (
-                  <div key={file.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <FileText className="w-4 h-4 text-gray-500" />
-                      <span className="text-sm font-medium">{file.name}</span>
-                    </div>
-                    {canEdit && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onRemoveFile(file.id)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+        {/* Vesting Deed Documents */}
+        <div className="space-y-4">
+          <Label>Vesting Deed Documents</Label>
+          <FileUploadSection
+            title="Vesting Deed Documents"
+            category="vesting_deed"
+            files={files}
+            onFileUpload={(files) => handleFileUpload(files, 'vesting_deed')}
+            onRemoveFile={handleRemoveFile}
+            acceptedTypes=".pdf,.docx,.png,.jpg,.jpeg"
+            disabled={!canEdit}
+          />
         </div>
       </CardContent>
     </Card>
