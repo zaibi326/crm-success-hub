@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { TaxLead } from '@/types/taxLead';
+import { Lead } from '@/types/lead';
 import { ContactInfoSection } from './ContactInfoSection';
 import { LegalInfoSection } from './LegalInfoSection';
 import { NotesSection } from './NotesSection';
@@ -88,7 +89,26 @@ export function LeadDetailsForm({ lead, onSave, canEdit }: LeadDetailsFormProps)
     setIsSaving(false);
   };
 
-  // Create a ContactInfoSection that works with TaxLead
+  // Convert TaxLead to Lead format for ContactInfoSection
+  const convertToLead = (taxLead: TaxLead): Lead => ({
+    id: taxLead.id,
+    name: taxLead.ownerName,
+    email: taxLead.email,
+    phone: taxLead.phone,
+    company: '',
+    position: '',
+    address: taxLead.propertyAddress,
+    city: '',
+    state: '',
+    zip: '',
+    status: taxLead.status,
+    score: 0,
+    notes: taxLead.notes,
+    avatar: undefined,
+    tags: taxLead.tags || []
+  });
+
+  // Create wrapper components that handle the conversion
   const TaxLeadContactInfoSection = ({ 
     formData, 
     isOpen, 
@@ -101,19 +121,7 @@ export function LeadDetailsForm({ lead, onSave, canEdit }: LeadDetailsFormProps)
     onInputChange: (field: keyof TaxLead, value: any) => void;
   }) => (
     <ContactInfoSection
-      formData={{
-        ...formData,
-        name: formData.ownerName,
-        company: '',
-        position: '',
-        address: formData.propertyAddress,
-        city: '',
-        state: '',
-        zip: '',
-        avatar: undefined,
-        tags: formData.tags || [],
-        score: 0
-      }}
+      formData={convertToLead(formData)}
       isOpen={isOpen}
       onToggle={onToggle}
       onInputChange={(field, value) => {
@@ -127,6 +135,8 @@ export function LeadDetailsForm({ lead, onSave, canEdit }: LeadDetailsFormProps)
           onInputChange('phone', value);
         } else if (field === 'notes') {
           onInputChange('notes', value);
+        } else if (field === 'status') {
+          onInputChange('status', value);
         }
       }}
     />
@@ -145,19 +155,7 @@ export function LeadDetailsForm({ lead, onSave, canEdit }: LeadDetailsFormProps)
     onInputChange: (field: keyof TaxLead, value: any) => void;
   }) => (
     <NotesSection
-      formData={{
-        ...formData,
-        name: formData.ownerName,
-        company: '',
-        position: '',
-        address: formData.propertyAddress,
-        city: '',
-        state: '',
-        zip: '',
-        avatar: undefined,
-        tags: formData.tags || [],
-        score: 0
-      }}
+      formData={convertToLead(formData)}
       isOpen={isOpen}
       onToggle={onToggle}
       onInputChange={(field, value) => {
