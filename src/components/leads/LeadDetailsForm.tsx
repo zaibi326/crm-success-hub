@@ -14,7 +14,7 @@ interface LeadDetailsFormProps {
   canEdit: boolean;
 }
 
-interface UploadedFile {
+interface LocalUploadedFile {
   id: string;
   name: string;
   type?: string;
@@ -24,7 +24,7 @@ interface UploadedFile {
 
 export function LeadDetailsForm({ lead, onSave, canEdit }: LeadDetailsFormProps) {
   const [formData, setFormData] = useState(lead);
-  const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [files, setFiles] = useState<LocalUploadedFile[]>([]);
   const [isContactOpen, setIsContactOpen] = useState(true);
   const [isLegalOpen, setIsLegalOpen] = useState(false);
   const [isNotesOpen, setIsNotesOpen] = useState(true);
@@ -43,7 +43,7 @@ export function LeadDetailsForm({ lead, onSave, canEdit }: LeadDetailsFormProps)
     
     uploadedFiles.forEach(file => {
       const fileUrl = URL.createObjectURL(file);
-      const newFile: UploadedFile = {
+      const newFile: LocalUploadedFile = {
         id: Math.random().toString(36).substr(2, 9),
         name: file.name,
         type: file.type,

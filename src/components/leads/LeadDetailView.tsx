@@ -2,33 +2,16 @@
 import React from 'react';
 import { LeadHeader } from './LeadHeader';
 import { LeadInsights } from './LeadInsights';
-import { LeadDetailsForm } from './LeadDetailsForm';
+import { TaxLeadDetailsForm } from './TaxLeadDetailsForm';
 import { LeadStatusButtons } from './LeadStatusButtons';
 import { EnhancedLeadContactInfo } from './EnhancedLeadContactInfo';
-
-interface Lead {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  company: string;
-  position: string;
-  address: string;
-  city: string;
-  state: string;
-  zip: string;
-  status: 'HOT' | 'WARM' | 'COLD' | 'PASS';
-  score: number;
-  notes: string;
-  avatar?: string;
-  tags: string[];
-}
+import { TaxLead } from '@/types/taxLead';
 
 interface LeadDetailViewProps {
-  lead: Lead;
+  lead: TaxLead;
   onBack: () => void;
-  onStatusChange: (status: 'HOT' | 'WARM' | 'COLD' | 'PASS') => void;
-  onSave: (updatedLead: Lead) => void;
+  onStatusChange: (status: 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP') => void;
+  onSave: (updatedLead: TaxLead) => void;
   canEdit: boolean;
 }
 
@@ -47,14 +30,15 @@ export function LeadDetailView({ lead, onBack, onStatusChange, onSave, canEdit }
           <LeadStatusButtons 
             currentStatus={lead.status}
             onStatusChange={onStatusChange}
+            disabled={!canEdit}
           />
         </div>
       </div>
       
-      <LeadDetailsForm 
+      <TaxLeadDetailsForm 
         lead={lead} 
         onSave={onSave}
-        canEdit={canEdit}
+        userRole={canEdit ? "editor" : "viewer"}
       />
     </div>
   );
