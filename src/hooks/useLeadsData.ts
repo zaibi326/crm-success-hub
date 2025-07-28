@@ -41,6 +41,7 @@ export function useLeadsData() {
           taxId: lead.tax_id || '',
           ownerName: lead.owner_name,
           propertyAddress: lead.property_address,
+          sellerContactAddress: lead.seller_contact_address || lead.property_address, // New field with fallback
           taxLawsuitNumber: lead.tax_lawsuit_number || '',
           currentArrears: lead.current_arrears || 0,
           status: (lead.status || 'COLD') as 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP',
@@ -129,6 +130,7 @@ export function useLeadsData() {
           tax_id: newLead.taxId,
           owner_name: newLead.ownerName,
           property_address: newLead.propertyAddress,
+          seller_contact_address: newLead.sellerContactAddress || newLead.propertyAddress,
           tax_lawsuit_number: newLead.taxLawsuitNumber,
           current_arrears: newLead.currentArrears,
           status: newLead.status,
@@ -189,7 +191,8 @@ export function useLeadsData() {
         phone: updatedLead.phone,
         email: updatedLead.email,
         firstName: updatedLead.firstName,
-        lastName: updatedLead.lastName
+        lastName: updatedLead.lastName,
+        sellerContactAddress: updatedLead.sellerContactAddress
       });
 
       // Update the lead in the database
@@ -199,6 +202,7 @@ export function useLeadsData() {
           tax_id: updatedLead.taxId,
           owner_name: updatedLead.ownerName,
           property_address: updatedLead.propertyAddress,
+          seller_contact_address: updatedLead.sellerContactAddress,
           tax_lawsuit_number: updatedLead.taxLawsuitNumber,
           current_arrears: updatedLead.currentArrears,
           status: updatedLead.status,

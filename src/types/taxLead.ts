@@ -3,61 +3,24 @@ export interface TaxLead {
   id: number;
   taxId: string;
   ownerName: string;
-  firstName?: string;
-  lastName?: string;
-  propertyAddress: string;
-  currentArrears?: number;
+  propertyAddress: string; // This will be for Lead Details section
+  sellerContactAddress?: string; // New field for Seller Contact Details section
+  taxLawsuitNumber: string;
+  currentArrears: number;
   status: 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP';
-  temperature?: 'HOT' | 'WARM' | 'COLD' | 'PASS';
-  email?: string;
-  phone?: string;
-  taxLawsuitNumber?: string;
-  notes?: string;
+  notes: string;
+  phone: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  temperature: 'HOT' | 'WARM' | 'COLD';
+  occupancyStatus: 'OWNER_OCCUPIED' | 'TENANT_OCCUPIED' | 'VACANT';
+  disposition: 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED';
   createdAt?: string;
   updatedAt?: string;
-  createdVia?: string;
-  leadManager?: string;
-  tags?: string[];
-  occupancyStatus?: string;
-  
-  // Lead Information
   leadSource?: string;
-  campaignId?: string;
   agentName?: string;
-  disposition?: 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED';
-  
-  // Financial Information
+  campaignId?: string;
   askingPrice?: number;
   mortgagePrice?: number;
-  propertyValue?: number;
-  taxAmount?: number;
-  
-  // Location Information
-  county?: string;
-  state?: string;
-  
-  // Additional Information Fields
-  hasDeath?: boolean;
-  deathNotes?: string;
-  hasProbate?: boolean;
-  probateNotes?: string;
-  hasLawsuit?: boolean;
-  lawsuitNotes?: string;
-  hasAdditionalTaxingEntities?: boolean;
-  additionalTaxingNotes?: string;
-  
-  // Conditional Fields
-  vestingDeedDate?: string;
-  grantorGranteeName?: string;
-  ownerOfRecord?: string;
-  
-  // Attachments - Updated with size property
-  attachedFiles?: Array<{
-    id: string;
-    name: string;
-    type: string;
-    url: string;
-    preview?: string;
-    size?: number;
-  }>;
 }

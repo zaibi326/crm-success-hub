@@ -86,7 +86,6 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
                 label="First Name"
                 value={lead.firstName || ''}
                 onSave={(value) => handleFieldChange('firstName', value)}
-                placeholder="Enter first name"
                 required
                 canEdit={canEdit}
               />
@@ -95,7 +94,6 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
                 label="Last Name"
                 value={lead.lastName || ''}
                 onSave={(value) => handleFieldChange('lastName', value)}
-                placeholder="Enter last name"
                 required
                 canEdit={canEdit}
               />
@@ -105,7 +103,6 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
                 value={lead.phone || ''}
                 onSave={(value) => handleFieldChange('phone', value)}
                 type="tel"
-                placeholder="Enter phone number"
                 canEdit={canEdit}
               />
 
@@ -114,16 +111,14 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
                 value={lead.email || ''}
                 onSave={(value) => handleFieldChange('email', value)}
                 type="email"
-                placeholder="Enter email address"
                 canEdit={canEdit}
               />
 
               <div className="md:col-span-2">
                 <InlineEditField
-                  label="Property Address"
-                  value={lead.propertyAddress || ''}
-                  onSave={(value) => handleFieldChange('propertyAddress', value)}
-                  placeholder="Enter property address"
+                  label="Seller Contact Address"
+                  value={lead.sellerContactAddress || lead.propertyAddress || ''}
+                  onSave={(value) => handleFieldChange('sellerContactAddress', value)}
                   required
                   canEdit={canEdit}
                 />

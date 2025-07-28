@@ -1,188 +1,161 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Check, X, Edit3 } from 'lucide-react';
+import { Edit2, Check, X } from 'lucide-react';
 
 interface InlineEditFieldProps {
   label: string;
   value: string;
   onSave: (value: string) => Promise<void> | void;
-  type?: 'text' | 'email' | 'tel' | 'number' | 'select';
+  type?: 'text' | 'email' | 'tel' | 'number' | 'select' | 'textarea';
   options?: Array<{ value: string; label: string }>;
-  placeholder?: string;
   required?: boolean;
-  multiline?: boolean;
   canEdit?: boolean;
-  className?: string;
 }
 
-export function InlineEditField({
-  label,
-  value,
-  onSave,
+export function InlineEditField({ 
+  label, 
+  value, 
+  onSave, 
   type = 'text',
   options = [],
-  placeholder,
   required = false,
-  multiline = false,
-  canEdit = true,
-  className = ''
+  canEdit = true
 }: InlineEditFieldProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(value || '');
+  const [editValue, setEditValue] = useState(value);
   const [isSaving, setIsSaving] = useState(false);
-  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    setEditValue(value || '');
-  }, [value]);
-
-  useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus();
-      if (inputRef.current instanceof HTMLInputElement || inputRef.current instanceof HTMLTextAreaElement) {
-        inputRef.current.select();
-      }
-    }
-  }, [isEditing]);
 
   const handleSave = async () => {
-    if (editValue.trim() !== value && canEdit) {
-      setIsSaving(true);
-      try {
-        await onSave(editValue.trim());
-        setIsEditing(false);
-      } catch (error) {
-        console.error('Error saving field:', error);
-        // Reset to original value on error
-        setEditValue(value || '');
-      } finally {
-        setIsSaving(false);
-      }
-    } else {
+    if (required && !editValue.trim()) {
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await onSave(editValue);
       setIsEditing(false);
+    } catch (error) {
+      console.error('Error saving field:', error);
+      // Reset to original value on error
+      setEditValue(value);
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleCancel = () => {
-    setEditValue(value || '');
+    setEditValue(value);
     setIsEditing(false);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !multiline) {
-      e.preventDefault();
-      handleSave();
-    } else if (e.key === 'Escape') {
-      handleCancel();
+  // Update edit value when prop value changes
+  React.useEffect(() => {
+    if (!isEditing) {
+      setEditValue(value);
+    }
+  }, [value, isEditing]);
+
+  const renderEditField = () => {
+    switch (type) {
+      case 'select':
+        return (
+          <Select value={editValue} onValueChange={setEditValue}>
+            <SelectTrigger className="flex-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {options.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+      case 'textarea':
+        return (
+          <Textarea
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            className="flex-1"
+            rows={3}
+            required={required}
+          />
+        );
+      default:
+        return (
+          <Input
+            type={type}
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            className="flex-1"
+            required={required}
+          />
+        );
     }
   };
 
-  const handleDoubleClick = () => {
-    if (canEdit && !isEditing) {
-      setIsEditing(true);
-    }
-  };
-
-  const getDisplayValue = () => {
-    if (type === 'select' && options.length > 0) {
-      const option = options.find(opt => opt.value === value);
-      return option ? option.label : value;
-    }
-    return value;
-  };
+  if (isEditing && canEdit) {
+    return (
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-gray-700">
+          {label} {required && <span className="text-red-500">*</span>}
+        </label>
+        <div className="flex items-center gap-2">
+          {renderEditField()}
+          <Button
+            size="sm"
+            onClick={handleSave}
+            disabled={isSaving || (required && !editValue.trim())}
+            className="h-8 px-3 bg-green-600 hover:bg-green-700"
+          >
+            {isSaving ? (
+              <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Check className="w-3 h-3" />
+            )}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleCancel}
+            disabled={isSaving}
+            className="h-8 px-3"
+          >
+            <X className="w-3 h-3" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className={`space-y-2 ${className}`}>
-      <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-        {label}
-        {required && <span className="text-red-500">*</span>}
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-gray-700">
+        {label} {required && <span className="text-red-500">*</span>}
       </label>
-      
-      <div className="group relative">
-        {isEditing ? (
-          <div className="flex items-center gap-2">
-            {type === 'select' ? (
-              <Select value={editValue} onValueChange={setEditValue}>
-                <SelectTrigger className="flex-1 border-blue-300 focus:border-blue-500 focus:ring-blue-500">
-                  <SelectValue placeholder={placeholder} />
-                </SelectTrigger>
-                <SelectContent>
-                  {options.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : multiline ? (
-              <Textarea
-                ref={inputRef as React.RefObject<HTMLTextAreaElement>}
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={placeholder}
-                className="flex-1 min-h-[80px] resize-none border-blue-300 focus:border-blue-500 focus:ring-blue-500"
-                rows={3}
-              />
-            ) : (
-              <Input
-                ref={inputRef as React.RefObject<HTMLInputElement>}
-                type={type}
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={placeholder}
-                className="flex-1 border-blue-300 focus:border-blue-500 focus:ring-blue-500"
-              />
-            )}
-            
-            <div className="flex items-center gap-1 flex-shrink-0">
-              <Button
-                size="sm"
-                onClick={handleSave}
-                disabled={isSaving}
-                className="h-8 w-8 p-0 bg-green-600 hover:bg-green-700 text-white"
-                title="Save changes"
-              >
-                {isSaving ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Check className="w-4 h-4" />
-                )}
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleCancel}
-                disabled={isSaving}
-                className="h-8 w-8 p-0 border-gray-300 hover:bg-gray-50 text-gray-700"
-                title="Cancel changes"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div 
-            onDoubleClick={handleDoubleClick}
-            className={`
-              p-3 rounded-lg border bg-gray-50 min-h-[44px] flex items-center justify-between
-              ${canEdit ? 'cursor-pointer hover:bg-gray-100 hover:border-blue-300 transition-colors' : 'cursor-default'}
-              ${!value ? 'text-gray-400 italic' : 'text-gray-900'}
-            `}
-            title={canEdit ? "Double-click to edit" : "Read only"}
+      <div className="flex items-center gap-2 group">
+        <div className="flex-1 min-h-[40px] px-3 py-2 bg-gray-50 border border-gray-200 rounded-md">
+          <span className="text-gray-900">
+            {type === 'select' && options.length > 0 
+              ? options.find(opt => opt.value === value)?.label || value || 'Not set'
+              : value || 'Not set'
+            }
+          </span>
+        </div>
+        {canEdit && (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setIsEditing(true)}
+            className="h-8 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
           >
-            <span className="flex-1">
-              {getDisplayValue() || placeholder || `Enter ${label.toLowerCase()}`}
-            </span>
-            {canEdit && (
-              <Edit3 className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-            )}
-          </div>
+            <Edit2 className="w-3 h-3" />
+          </Button>
         )}
       </div>
     </div>
