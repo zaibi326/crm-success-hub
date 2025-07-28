@@ -26,7 +26,6 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole }: TaxLeadDetailsFor
   const [formData, setFormData] = useState<TaxLead>(lead);
   const [isEditing, setIsEditing] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-  const [files, setFiles] = useState<any[]>([]);
   const { toast } = useToast();
 
   const canEdit = userRole === 'admin' || userRole === 'editor';
@@ -81,7 +80,8 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole }: TaxLeadDetailsFor
   };
 
   const handleRemoveFile = (fileId: string) => {
-    setFiles(prev => prev.filter(f => f.id !== fileId));
+    const updatedFiles = formData.attachedFiles?.filter(f => f.id !== fileId) || [];
+    handleFieldChange('attachedFiles', updatedFiles);
   };
 
   // Add null check for lead data
@@ -188,8 +188,9 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole }: TaxLeadDetailsFor
 
           {/* Attachments */}
           <AttachmentsSection
-            lead={formData}
-            onLeadUpdate={handleLeadUpdate}
+            files={formData.attachedFiles?.map(f => ({ ...f, category: 'other' as const })) || []}
+            onRemoveFile={handleRemoveFile}
+            onFileUpload={handleFileUpload}
             canEdit={canEdit}
           />
         </div>
@@ -199,7 +200,7 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole }: TaxLeadDetailsFor
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <AdditionalInformationSection
           formData={formData}
-          files={files}
+          files={[]}
           onInputChange={handleFieldChange}
           onFileUpload={handleFileUpload}
           onRemoveFile={handleRemoveFile}
