@@ -2,84 +2,94 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-
-interface Lead {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  company: string;
-  position: string;
-  address: string;
-  city: string;
-  state: string;
-  zip: string;
-  status: 'HOT' | 'WARM' | 'COLD' | 'PASS';
-  score: number;
-  notes: string;
-  avatar?: string;
-  tags: string[];
-}
+import { TrendingUp, DollarSign, Calendar, User } from 'lucide-react';
+import { TaxLead } from '@/types/taxLead';
 
 interface LeadInsightsProps {
-  lead: Lead;
+  lead: TaxLead;
 }
 
 export function LeadInsights({ lead }: LeadInsightsProps) {
-  const getStatusColor = (status: Lead['status']) => {
-    switch (status) {
-      case 'HOT':
-        return 'bg-red-500 text-white border-red-500 hover:bg-red-600';
-      case 'WARM':
-        return 'bg-orange-500 text-white border-orange-500 hover:bg-orange-600';
-      case 'COLD':
-        return 'bg-blue-500 text-white border-blue-500 hover:bg-blue-600';
-      case 'PASS':
-        return 'bg-gray-500 text-white border-gray-500 hover:bg-gray-600';
+  const getTemperatureColor = (temp: string) => {
+    switch (temp) {
+      case 'HOT': return 'text-red-600 bg-red-50';
+      case 'WARM': return 'text-orange-600 bg-orange-50';
+      case 'COLD': return 'text-blue-600 bg-blue-50';
+      default: return 'text-gray-600 bg-gray-50';
+    }
+  };
+
+  const getOccupancyColor = (occupancy: string) => {
+    switch (occupancy) {
+      case 'OWNER_OCCUPIED': return 'text-green-600 bg-green-50';
+      case 'TENANT_OCCUPIED': return 'text-blue-600 bg-blue-50';
+      case 'VACANT': return 'text-gray-600 bg-gray-50';
+      default: return 'text-gray-600 bg-gray-50';
     }
   };
 
   return (
-    <Card className="border-0 shadow-lg">
+    <Card>
       <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          📊 Lead Insights
+        <CardTitle className="flex items-center gap-2">
+          <TrendingUp className="w-5 h-5" />
+          Lead Insights
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-            <span className="text-gray-600 font-medium">Engagement Score</span>
-            <div className="flex items-center gap-2">
-              <div className="w-20 bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-crm-primary h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${lead.score}%` }}
-                />
-              </div>
-              <span className="font-bold text-crm-primary">{lead.score}/100</span>
-            </div>
-          </div>
-          
-          <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-            <span className="text-gray-600 font-medium">Priority Level</span>
-            <Badge className={`${getStatusColor(lead.status)} text-sm font-semibold`}>
-              {lead.status}
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <div className="text-sm text-gray-600">Temperature</div>
+            <Badge className={getTemperatureColor(lead.temperature)}>
+              {lead.temperature}
             </Badge>
           </div>
-          
-          <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-            <span className="text-gray-600 font-medium">Company Type</span>
-            <span className="font-semibold text-gray-900">
-              {lead.score > 80 ? 'Enterprise' : lead.score > 60 ? 'Mid-Market' : 'SMB'}
-            </span>
-          </div>
-
-          <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-            <span className="text-gray-600 font-medium">Tags Count</span>
-            <span className="font-semibold text-gray-900">{lead.tags.length}</span>
+          <div className="space-y-2">
+            <div className="text-sm text-gray-600">Occupancy</div>
+            <Badge className={getOccupancyColor(lead.occupancyStatus)}>
+              {lead.occupancyStatus?.replace('_', ' ')}
+            </Badge>
           </div>
         </div>
+        
+        <div className="space-y-2">
+          <div className="text-sm text-gray-600 flex items-center gap-1">
+            <DollarSign className="w-4 h-4" />
+            Current Arrears
+          </div>
+          <div className="text-lg font-semibold">
+            ${lead.currentArrears?.toLocaleString() || '0'}
+          </div>
+        </div>
+
+        {lead.taxLawsuitNumber && (
+          <div className="space-y-2">
+            <div className="text-sm text-gray-600">Tax Lawsuit #</div>
+            <div className="font-mono text-sm">{lead.taxLawsuitNumber}</div>
+          </div>
+        )}
+
+        {lead.createdAt && (
+          <div className="space-y-2">
+            <div className="text-sm text-gray-600 flex items-center gap-1">
+              <Calendar className="w-4 h-4" />
+              Created
+            </div>
+            <div className="text-sm">
+              {new Date(lead.createdAt).toLocaleDateString()}
+            </div>
+          </div>
+        )}
+
+        {lead.agentName && (
+          <div className="space-y-2">
+            <div className="text-sm text-gray-600 flex items-center gap-1">
+              <User className="w-4 h-4" />
+              Agent
+            </div>
+            <div className="text-sm">{lead.agentName}</div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

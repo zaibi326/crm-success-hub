@@ -143,11 +143,26 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole }: TaxLeadDetailsFor
       </div>
 
       {/* Lead Status */}
-      <LeadStatusButtons
-        currentStatus={formData.status}
-        onStatusChange={handleStatusChange}
-        disabled={!canEdit}
-      />
+      <Card>
+        <CardHeader>
+          <CardTitle>Lead Status</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-5 gap-2">
+            {(['HOT', 'WARM', 'COLD', 'PASS', 'KEEP'] as const).map((status) => (
+              <Button
+                key={status}
+                variant={formData.status === status ? "default" : "outline"}
+                onClick={() => handleStatusChange(status)}
+                disabled={!canEdit}
+                className="w-full"
+              >
+                {status}
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

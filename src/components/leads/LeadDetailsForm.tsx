@@ -88,6 +88,86 @@ export function LeadDetailsForm({ lead, onSave, canEdit }: LeadDetailsFormProps)
     setIsSaving(false);
   };
 
+  // Create a ContactInfoSection that works with TaxLead
+  const TaxLeadContactInfoSection = ({ 
+    formData, 
+    isOpen, 
+    onToggle, 
+    onInputChange 
+  }: {
+    formData: TaxLead;
+    isOpen: boolean;
+    onToggle: (open: boolean) => void;
+    onInputChange: (field: keyof TaxLead, value: any) => void;
+  }) => (
+    <ContactInfoSection
+      formData={{
+        ...formData,
+        name: formData.ownerName,
+        company: '',
+        position: '',
+        address: formData.propertyAddress,
+        city: '',
+        state: '',
+        zip: '',
+        avatar: undefined,
+        tags: formData.tags || [],
+        score: 0
+      }}
+      isOpen={isOpen}
+      onToggle={onToggle}
+      onInputChange={(field, value) => {
+        if (field === 'name') {
+          onInputChange('ownerName', value);
+        } else if (field === 'address') {
+          onInputChange('propertyAddress', value);
+        } else if (field === 'email') {
+          onInputChange('email', value);
+        } else if (field === 'phone') {
+          onInputChange('phone', value);
+        } else if (field === 'notes') {
+          onInputChange('notes', value);
+        }
+      }}
+    />
+  );
+
+  // Create a NotesSection that works with TaxLead
+  const TaxLeadNotesSection = ({ 
+    formData, 
+    isOpen, 
+    onToggle, 
+    onInputChange 
+  }: {
+    formData: TaxLead;
+    isOpen: boolean;
+    onToggle: (open: boolean) => void;
+    onInputChange: (field: keyof TaxLead, value: any) => void;
+  }) => (
+    <NotesSection
+      formData={{
+        ...formData,
+        name: formData.ownerName,
+        company: '',
+        position: '',
+        address: formData.propertyAddress,
+        city: '',
+        state: '',
+        zip: '',
+        avatar: undefined,
+        tags: formData.tags || [],
+        score: 0
+      }}
+      isOpen={isOpen}
+      onToggle={onToggle}
+      onInputChange={(field, value) => {
+        if (field === 'notes') {
+          onInputChange('notes', value);
+        }
+      }}
+    />
+  );
+
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       {!canEdit && (
@@ -98,7 +178,7 @@ export function LeadDetailsForm({ lead, onSave, canEdit }: LeadDetailsFormProps)
         </div>
       )}
 
-      <ContactInfoSection
+      <TaxLeadContactInfoSection
         formData={formData}
         isOpen={isContactOpen}
         onToggle={setIsContactOpen}
@@ -108,12 +188,12 @@ export function LeadDetailsForm({ lead, onSave, canEdit }: LeadDetailsFormProps)
       <LegalInfoSection
         isOpen={isLegalOpen}
         onToggle={setIsLegalOpen}
-        files={files}
+        files={files.map(f => ({ ...f, type: f.type || 'unknown' }))}
         onFileUpload={handleFileUpload}
         onRemoveFile={removeFile}
       />
 
-      <NotesSection
+      <TaxLeadNotesSection
         formData={formData}
         isOpen={isNotesOpen}
         onToggle={setIsNotesOpen}
