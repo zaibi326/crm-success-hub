@@ -57,7 +57,6 @@ export function PropertyInfoSection({ leadData, onFieldUpdate }: PropertyInfoSec
             label="Property Address"
             value={leadData.propertyAddress}
             onSave={handleAddressUpdate}
-            placeholder="Enter complete property address"
           />
           
           {/* Zillow Integration Controls */}
