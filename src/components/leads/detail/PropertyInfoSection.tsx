@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,28 @@ const occupancyOptions = [
 export function PropertyInfoSection({ leadData, onFieldUpdate }: PropertyInfoSectionProps) {
   const [showMap, setShowMap] = useState(false);
   const [mapKey, setMapKey] = useState(0);
+
+  // Add null check for leadData
+  if (!leadData) {
+    return (
+      <Card className="shadow-lg border-0">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Home className="w-5 h-5 text-crm-primary" />
+            Property Information
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center p-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading property information...</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const handleAddressUpdate = (value: string) => {
     onFieldUpdate('propertyAddress', value);
@@ -55,7 +78,7 @@ export function PropertyInfoSection({ leadData, onFieldUpdate }: PropertyInfoSec
         <div className="space-y-4">
           <EditableField
             label="Property Address"
-            value={leadData.propertyAddress}
+            value={leadData.propertyAddress || ''}
             onSave={handleAddressUpdate}
           />
           
@@ -125,7 +148,7 @@ export function PropertyInfoSection({ leadData, onFieldUpdate }: PropertyInfoSec
         {/* Other Property Fields */}
         <EditableField
           label="Occupancy Status"
-          value={leadData.occupancyStatus}
+          value={leadData.occupancyStatus || ''}
           onSave={(value) => onFieldUpdate('occupancyStatus', value)}
           type="select"
           options={occupancyOptions}
@@ -134,7 +157,7 @@ export function PropertyInfoSection({ leadData, onFieldUpdate }: PropertyInfoSec
         {leadData.taxId && (
           <EditableField
             label="Tax ID"
-            value={leadData.taxId}
+            value={leadData.taxId || ''}
             onSave={(value) => onFieldUpdate('taxId', value)}
           />
         )}
@@ -146,7 +169,7 @@ export function PropertyInfoSection({ leadData, onFieldUpdate }: PropertyInfoSec
             <Button
               variant="link"
               className="p-0 h-auto text-crm-primary hover:text-crm-accent justify-start"
-              onClick={() => window.open(`https://www.homes.com/property/${encodeURIComponent(leadData.propertyAddress)}/`, '_blank')}
+              onClick={() => window.open(`https://www.homes.com/property/${encodeURIComponent(leadData.propertyAddress || '')}/`, '_blank')}
             >
               <ExternalLink className="w-3 h-3 mr-1" />
               Homes.com
@@ -154,7 +177,7 @@ export function PropertyInfoSection({ leadData, onFieldUpdate }: PropertyInfoSec
             <Button
               variant="link"
               className="p-0 h-auto text-crm-primary hover:text-crm-accent justify-start"
-              onClick={() => window.open(`https://www.redfin.com/stingray/do/location-search?location=${encodeURIComponent(leadData.propertyAddress)}`, '_blank')}
+              onClick={() => window.open(`https://www.redfin.com/stingray/do/location-search?location=${encodeURIComponent(leadData.propertyAddress || '')}`, '_blank')}
             >
               <ExternalLink className="w-3 h-3 mr-1" />
               Redfin
@@ -162,7 +185,7 @@ export function PropertyInfoSection({ leadData, onFieldUpdate }: PropertyInfoSec
             <Button
               variant="link"
               className="p-0 h-auto text-crm-primary hover:text-crm-accent justify-start"
-              onClick={() => window.open(`https://www.realtor.com/realestateandhomes-search/${encodeURIComponent(leadData.propertyAddress)}`, '_blank')}
+              onClick={() => window.open(`https://www.realtor.com/realestateandhomes-search/${encodeURIComponent(leadData.propertyAddress || '')}`, '_blank')}
             >
               <ExternalLink className="w-3 h-3 mr-1" />
               Realtor.com
@@ -170,7 +193,7 @@ export function PropertyInfoSection({ leadData, onFieldUpdate }: PropertyInfoSec
             <Button
               variant="link"
               className="p-0 h-auto text-crm-primary hover:text-crm-accent justify-start"
-              onClick={() => window.open(`https://www.google.com/maps/search/${encodeURIComponent(leadData.propertyAddress)}`, '_blank')}
+              onClick={() => window.open(`https://www.google.com/maps/search/${encodeURIComponent(leadData.propertyAddress || '')}`, '_blank')}
             >
               <ExternalLink className="w-3 h-3 mr-1" />
               Google Maps
