@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -6,55 +7,107 @@ import { LeadSearchFilters } from './LeadSearchFilters';
 import { LeadReviewCard } from './LeadReviewCard';
 import { ReviewActions } from './ReviewActions';
 import { TaxLeadDetailsForm } from './TaxLeadDetailsForm';
+import { TaxLead } from '@/types/taxLead';
 
-interface Lead {
-  id: number;
-  taxId: string;
-  ownerName: string;
-  propertyAddress: string;
-  taxLawsuitNumber?: string;
-  currentArrears?: number;
-  status: 'HOT' | 'WARM' | 'COLD' | 'PASS';
-  notes?: string;
-  phone?: string;
-  email?: string;
-}
-
-const mockLeads: Lead[] = [
+const mockLeads: TaxLead[] = [
   {
     id: 1,
     taxId: 'TX123456789',
     ownerName: 'John Smith',
+    firstName: 'John',
+    lastName: 'Smith',
     propertyAddress: '123 Main St, Dallas, TX 75201',
+    sellerContactAddress: '123 Main St, Dallas, TX 75201',
     taxLawsuitNumber: 'TL-2024-001',
     currentArrears: 15000,
     status: 'HOT',
+    temperature: 'HOT',
+    occupancyStatus: 'OWNER_OCCUPIED',
+    disposition: 'UNDECIDED',
     notes: 'High-value property with significant arrears',
     phone: '(555) 123-4567',
-    email: 'john.smith@email.com'
+    email: 'john.smith@email.com',
+    createdAt: '2024-01-15T10:30:00Z',
+    updatedAt: '2024-01-15T10:30:00Z',
+    leadSource: 'Website',
+    agentName: 'Jane Doe',
+    askingPrice: 250000,
+    mortgagePrice: 180000,
+    campaignId: 'campaign-1',
+    hasDeath: false,
+    hasProbate: false,
+    hasLawsuit: true,
+    hasAdditionalTaxingEntities: false,
+    ownerOfRecord: 'John Smith',
+    leadManager: 'Jane Doe',
+    createdVia: 'Website Form',
+    tags: ['Hot Lead']
   },
   {
     id: 2,
     taxId: 'TX987654321',
     ownerName: 'Sarah Johnson',
+    firstName: 'Sarah',
+    lastName: 'Johnson',
     propertyAddress: '456 Oak Ave, Houston, TX 77001',
+    sellerContactAddress: '456 Oak Ave, Houston, TX 77001',
     taxLawsuitNumber: 'TL-2024-002',
     currentArrears: 8500,
     status: 'WARM',
+    temperature: 'WARM',
+    occupancyStatus: 'TENANT_OCCUPIED',
+    disposition: 'UNDECIDED',
     notes: 'Property owner contacted previously',
     phone: '(555) 987-6543',
-    email: 'sarah.j@email.com'
+    email: 'sarah.j@email.com',
+    createdAt: '2024-01-10T14:20:00Z',
+    updatedAt: '2024-01-10T14:20:00Z',
+    leadSource: 'Cold Call',
+    agentName: 'Mike Smith',
+    askingPrice: 180000,
+    mortgagePrice: 120000,
+    campaignId: 'campaign-2',
+    hasDeath: false,
+    hasProbate: false,
+    hasLawsuit: false,
+    hasAdditionalTaxingEntities: false,
+    ownerOfRecord: 'Sarah Johnson',
+    leadManager: 'Mike Smith',
+    createdVia: 'Cold Call',
+    tags: ['Warm Lead']
   },
   {
     id: 3,
     taxId: 'TX456789123',
     ownerName: 'Mike Rodriguez',
+    firstName: 'Mike',
+    lastName: 'Rodriguez',
     propertyAddress: '789 Pine Rd, Austin, TX 73301',
+    sellerContactAddress: '789 Pine Rd, Austin, TX 73301',
     taxLawsuitNumber: 'TL-2024-003',
     currentArrears: 3200,
     status: 'COLD',
+    temperature: 'COLD',
+    occupancyStatus: 'VACANT',
+    disposition: 'UNDECIDED',
     notes: 'Small arrears, low priority',
-    phone: '(555) 456-7890'
+    phone: '(555) 456-7890',
+    email: 'mike.r@email.com',
+    createdAt: '2024-01-05T09:15:00Z',
+    updatedAt: '2024-01-05T09:15:00Z',
+    leadSource: 'Referral',
+    agentName: 'Lisa Wilson',
+    askingPrice: 150000,
+    mortgagePrice: 100000,
+    campaignId: 'campaign-3',
+    hasDeath: false,
+    hasProbate: false,
+    hasLawsuit: false,
+    hasAdditionalTaxingEntities: false,
+    ownerOfRecord: 'Mike Rodriguez',
+    leadManager: 'Lisa Wilson',
+    createdVia: 'Referral',
+    tags: ['Cold Lead']
   }
 ];
 
@@ -106,14 +159,14 @@ export function LeadReviewSystem() {
     }
   };
 
-  const handleLeadUpdate = (updatedLead: Lead) => {
+  const handleLeadUpdate = (updatedLead: TaxLead) => {
     const updatedLeads = leads.map(lead =>
       lead.id === updatedLead.id ? updatedLead : lead
     );
     setLeads(updatedLeads);
   };
 
-  const handleDetailFormSave = (updatedLead: Lead) => {
+  const handleDetailFormSave = (updatedLead: TaxLead) => {
     handleLeadUpdate(updatedLead);
     setShowDetailForm(false);
     
@@ -194,7 +247,7 @@ export function LeadReviewSystem() {
             <DialogTitle>Detailed Lead Information - {currentLead.ownerName}</DialogTitle>
           </DialogHeader>
           <TaxLeadDetailsForm
-            lead={currentLead as any}
+            lead={currentLead}
             onSave={handleDetailFormSave}
             userRole="editor"
           />

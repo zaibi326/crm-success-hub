@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { TaxLead } from '@/types/taxLead';
 import { supabase } from '@/integrations/supabase/client';
@@ -41,7 +42,7 @@ export function useLeadsData() {
           taxId: lead.tax_id || '',
           ownerName: lead.owner_name,
           propertyAddress: lead.property_address,
-          sellerContactAddress: lead.seller_contact_address || lead.property_address, // New field with fallback
+          sellerContactAddress: lead.property_address, // Use property_address as fallback since seller_contact_address doesn't exist yet
           taxLawsuitNumber: lead.tax_lawsuit_number || '',
           currentArrears: lead.current_arrears || 0,
           status: (lead.status || 'COLD') as 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP',
@@ -55,7 +56,20 @@ export function useLeadsData() {
           disposition: (lead.disposition as 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED') || 'UNDECIDED',
           createdAt: lead.created_at,
           updatedAt: lead.updated_at,
-          supabaseId: lead.id // Store the actual Supabase ID for operations
+          supabaseId: lead.id, // Store the actual Supabase ID for operations
+          leadSource: 'Manual Entry',
+          agentName: 'Unassigned',
+          campaignId: lead.campaign_id || '',
+          askingPrice: 0,
+          mortgagePrice: 0,
+          hasDeath: false,
+          hasProbate: false,
+          hasLawsuit: false,
+          hasAdditionalTaxingEntities: false,
+          ownerOfRecord: lead.owner_name || '',
+          leadManager: 'Unassigned',
+          createdVia: 'Manual Entry',
+          tags: []
         } as TaxLead & { supabaseId: string };
       }) || [];
 
@@ -130,7 +144,6 @@ export function useLeadsData() {
           tax_id: newLead.taxId,
           owner_name: newLead.ownerName,
           property_address: newLead.propertyAddress,
-          seller_contact_address: newLead.sellerContactAddress || newLead.propertyAddress,
           tax_lawsuit_number: newLead.taxLawsuitNumber,
           current_arrears: newLead.currentArrears,
           status: newLead.status,
@@ -202,7 +215,6 @@ export function useLeadsData() {
           tax_id: updatedLead.taxId,
           owner_name: updatedLead.ownerName,
           property_address: updatedLead.propertyAddress,
-          seller_contact_address: updatedLead.sellerContactAddress,
           tax_lawsuit_number: updatedLead.taxLawsuitNumber,
           current_arrears: updatedLead.currentArrears,
           status: updatedLead.status,
