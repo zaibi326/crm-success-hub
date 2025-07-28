@@ -43,6 +43,11 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole }: TaxLeadDetailsFor
     setHasChanges(true);
   };
 
+  const handleLeadUpdate = (updatedLead: TaxLead) => {
+    setFormData(updatedLead);
+    setHasChanges(true);
+  };
+
   const handleSave = () => {
     const updatedLead = {
       ...formData,
@@ -66,7 +71,7 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole }: TaxLeadDetailsFor
 
   const handleStatusChange = (status: 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP') => {
     handleFieldChange('status', status);
-    handleFieldChange('temperature', status === 'PASS' ? 'COLD' : status);
+    handleFieldChange('temperature', status === 'PASS' ? 'COLD' : (status === 'KEEP' ? 'WARM' : status));
   };
 
   const sections = [
@@ -139,31 +144,22 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole }: TaxLeadDetailsFor
           {/* Contact Information */}
           <ContactSection
             lead={formData}
-            onLeadUpdate={(updatedLead) => {
-              setFormData(updatedLead);
-              setHasChanges(true);
-            }}
-            canEdit={canEdit}
+            onLeadUpdate={handleLeadUpdate}
+            onCall={(phone) => console.log('Call:', phone)}
+            onSendText={(phone) => console.log('Text:', phone)}
+            onEmail={(email) => console.log('Email:', email)}
           />
 
           {/* Property Information */}
           <PropertyInfoSection
-            lead={formData}
-            onLeadUpdate={(updatedLead) => {
-              setFormData(updatedLead);
-              setHasChanges(true);
-            }}
-            canEdit={canEdit}
+            leadData={formData}
+            onFieldUpdate={handleFieldChange}
           />
 
           {/* Financial Information */}
           <FinancialInfoSection
-            lead={formData}
-            onLeadUpdate={(updatedLead) => {
-              setFormData(updatedLead);
-              setHasChanges(true);
-            }}
-            canEdit={canEdit}
+            leadData={formData}
+            onFieldUpdate={(field, value) => handleFieldChange(field, value)}
           />
         </div>
 
@@ -171,21 +167,17 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole }: TaxLeadDetailsFor
         <div className="space-y-6">
           {/* Notes */}
           <NotesSection
-            lead={formData}
-            onLeadUpdate={(updatedLead) => {
-              setFormData(updatedLead);
-              setHasChanges(true);
-            }}
+            notes={[]}
+            newNote=""
+            onNewNoteChange={() => {}}
+            onAddNote={() => {}}
             canEdit={canEdit}
           />
 
           {/* Attachments */}
           <AttachmentsSection
             lead={formData}
-            onLeadUpdate={(updatedLead) => {
-              setFormData(updatedLead);
-              setHasChanges(true);
-            }}
+            onLeadUpdate={handleLeadUpdate}
             canEdit={canEdit}
           />
         </div>
@@ -195,19 +187,13 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole }: TaxLeadDetailsFor
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <AdditionalInformationSection
           lead={formData}
-          onLeadUpdate={(updatedLead) => {
-            setFormData(updatedLead);
-            setHasChanges(true);
-          }}
+          onLeadUpdate={handleLeadUpdate}
           canEdit={canEdit}
         />
 
         <ConditionalFieldsSection
           lead={formData}
-          onLeadUpdate={(updatedLead) => {
-            setFormData(updatedLead);
-            setHasChanges(true);
-          }}
+          onLeadUpdate={handleLeadUpdate}
           canEdit={canEdit}
         />
       </div>

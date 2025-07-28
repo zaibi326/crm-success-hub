@@ -12,7 +12,7 @@ interface ContactSectionProps {
   onCall: (phoneNumber: string) => void;
   onSendText: (phoneNumber: string) => void;
   onEmail: (email: string) => void;
-  onLeadUpdate: (field: keyof TaxLead, value: string) => void;
+  onLeadUpdate: (updatedLead: TaxLead) => void;
 }
 
 export function ContactSection({ 
@@ -23,15 +23,15 @@ export function ContactSection({
   onLeadUpdate 
 }: ContactSectionProps) {
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onLeadUpdate('phone', e.target.value);
+    onLeadUpdate({ ...lead, phone: e.target.value });
   };
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onLeadUpdate('email', e.target.value);
+    onLeadUpdate({ ...lead, email: e.target.value });
   };
 
   const handleOwnerNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onLeadUpdate('ownerName', e.target.value);
+    onLeadUpdate({ ...lead, ownerName: e.target.value });
   };
 
   return (
