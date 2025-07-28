@@ -22,7 +22,7 @@ interface UploadedFile {
 }
 
 interface AdditionalInformationSectionProps {
-  formData: TaxLead | undefined;
+  formData: TaxLead;
   files: UploadedFile[];
   onInputChange: (field: keyof TaxLead, value: any) => void;
   onFileUpload: (files: File[], category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities') => void;
@@ -42,25 +42,6 @@ export function AdditionalInformationSection({
   const [probateOpen, setProbateOpen] = React.useState(false);
   const [lawsuitOpen, setLawsuitOpen] = React.useState(false);
   const [taxingOpen, setTaxingOpen] = React.useState(false);
-
-  // Early return if formData is undefined
-  if (!formData) {
-    return (
-      <Card className="shadow-lg border-0">
-        <CardHeader>
-          <CardTitle>Additional Information</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center justify-center p-8">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading additional information...</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card className="shadow-lg border-0">

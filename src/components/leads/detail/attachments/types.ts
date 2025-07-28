@@ -2,7 +2,7 @@
 export interface UploadedFile {
   id: string;
   name: string;
-  type?: string;
+  type: string;
   url: string;
   size?: number;
   category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities';

@@ -3,36 +3,52 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { TaxLead } from '@/types/taxLead';
-import { Lead } from '@/types/lead';
 import { ContactInfoSection } from './ContactInfoSection';
 import { LegalInfoSection } from './LegalInfoSection';
 import { NotesSection } from './NotesSection';
 
+interface Lead {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  position: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  status: 'HOT' | 'WARM' | 'COLD' | 'PASS';
+  score: number;
+  notes: string;
+  avatar?: string;
+  tags: string[];
+}
+
 interface LeadDetailsFormProps {
-  lead: TaxLead;
-  onSave: (updatedLead: TaxLead) => void;
+  lead: Lead;
+  onSave: (updatedLead: Lead) => void;
   canEdit: boolean;
 }
 
-interface LocalUploadedFile {
+interface UploadedFile {
   id: string;
   name: string;
-  type?: string;
+  type: string;
   url: string;
   preview?: string;
 }
 
 export function LeadDetailsForm({ lead, onSave, canEdit }: LeadDetailsFormProps) {
   const [formData, setFormData] = useState(lead);
-  const [files, setFiles] = useState<LocalUploadedFile[]>([]);
+  const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isContactOpen, setIsContactOpen] = useState(true);
   const [isLegalOpen, setIsLegalOpen] = useState(false);
   const [isNotesOpen, setIsNotesOpen] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
-  const handleInputChange = (field: keyof TaxLead, value: any) => {
+  const handleInputChange = (field: keyof Lead, value: any) => {
     if (!canEdit) return;
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -44,7 +60,7 @@ export function LeadDetailsForm({ lead, onSave, canEdit }: LeadDetailsFormProps)
     
     uploadedFiles.forEach(file => {
       const fileUrl = URL.createObjectURL(file);
-      const newFile: LocalUploadedFile = {
+      const newFile: UploadedFile = {
         id: Math.random().toString(36).substr(2, 9),
         name: file.name,
         type: file.type,
@@ -89,83 +105,6 @@ export function LeadDetailsForm({ lead, onSave, canEdit }: LeadDetailsFormProps)
     setIsSaving(false);
   };
 
-  // Convert TaxLead to Lead format for ContactInfoSection
-  const convertToLead = (taxLead: TaxLead): Lead => ({
-    id: taxLead.id,
-    name: taxLead.ownerName,
-    email: taxLead.email,
-    phone: taxLead.phone,
-    company: '',
-    position: '',
-    address: taxLead.propertyAddress,
-    city: '',
-    state: '',
-    zip: '',
-    status: taxLead.status,
-    score: 0,
-    notes: taxLead.notes,
-    avatar: undefined,
-    tags: taxLead.tags || []
-  });
-
-  // Create wrapper components that handle the conversion
-  const TaxLeadContactInfoSection = ({ 
-    formData, 
-    isOpen, 
-    onToggle, 
-    onInputChange 
-  }: {
-    formData: TaxLead;
-    isOpen: boolean;
-    onToggle: (open: boolean) => void;
-    onInputChange: (field: keyof TaxLead, value: any) => void;
-  }) => (
-    <ContactInfoSection
-      formData={convertToLead(formData)}
-      isOpen={isOpen}
-      onToggle={onToggle}
-      onInputChange={(field, value) => {
-        if (field === 'name') {
-          onInputChange('ownerName', value);
-        } else if (field === 'address') {
-          onInputChange('propertyAddress', value);
-        } else if (field === 'email') {
-          onInputChange('email', value);
-        } else if (field === 'phone') {
-          onInputChange('phone', value);
-        } else if (field === 'notes') {
-          onInputChange('notes', value);
-        } else if (field === 'status') {
-          onInputChange('status', value);
-        }
-      }}
-    />
-  );
-
-  // Create a NotesSection that works with TaxLead
-  const TaxLeadNotesSection = ({ 
-    formData, 
-    isOpen, 
-    onToggle, 
-    onInputChange 
-  }: {
-    formData: TaxLead;
-    isOpen: boolean;
-    onToggle: (open: boolean) => void;
-    onInputChange: (field: keyof TaxLead, value: any) => void;
-  }) => (
-    <NotesSection
-      formData={convertToLead(formData)}
-      isOpen={isOpen}
-      onToggle={onToggle}
-      onInputChange={(field, value) => {
-        if (field === 'notes') {
-          onInputChange('notes', value);
-        }
-      }}
-    />
-  );
-
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       {!canEdit && (
@@ -176,7 +115,7 @@ export function LeadDetailsForm({ lead, onSave, canEdit }: LeadDetailsFormProps)
         </div>
       )}
 
-      <TaxLeadContactInfoSection
+      <ContactInfoSection
         formData={formData}
         isOpen={isContactOpen}
         onToggle={setIsContactOpen}
@@ -186,12 +125,12 @@ export function LeadDetailsForm({ lead, onSave, canEdit }: LeadDetailsFormProps)
       <LegalInfoSection
         isOpen={isLegalOpen}
         onToggle={setIsLegalOpen}
-        files={files.map(f => ({ ...f, type: f.type || 'unknown' }))}
+        files={files}
         onFileUpload={handleFileUpload}
         onRemoveFile={removeFile}
       />
 
-      <TaxLeadNotesSection
+      <NotesSection
         formData={formData}
         isOpen={isNotesOpen}
         onToggle={setIsNotesOpen}

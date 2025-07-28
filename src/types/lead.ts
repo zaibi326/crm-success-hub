@@ -1,4 +1,5 @@
 
+// Lead type definitions
 export interface Lead {
   id: number;
   name: string;

@@ -105,6 +105,7 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
             label="Owner Name"
             value={lead.ownerName || ''}
             onSave={(value) => handleFieldChange('ownerName', value)}
+            placeholder="Enter owner name"
             required
             canEdit={canEdit}
           />
@@ -113,6 +114,7 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
             label="Tax ID"
             value={lead.taxId || ''}
             onSave={(value) => handleFieldChange('taxId', value)}
+            placeholder="Enter tax ID"
             canEdit={canEdit}
           />
 
@@ -121,6 +123,7 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
             value={lead.phone || ''}
             onSave={(value) => handleFieldChange('phone', value)}
             type="tel"
+            placeholder="Enter phone number"
             canEdit={canEdit}
           />
 
@@ -129,6 +132,7 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
             value={lead.email || ''}
             onSave={(value) => handleFieldChange('email', value)}
             type="email"
+            placeholder="Enter email address"
             canEdit={canEdit}
           />
         </div>
@@ -166,6 +170,7 @@ export function EnhancedSellerContactSection({ lead, onFieldUpdate, canEdit = tr
             label="Property Address"
             value={lead.propertyAddress || ''}
             onSave={(value) => handleFieldChange('propertyAddress', value)}
+            placeholder="Enter complete property address"
             required
             canEdit={canEdit}
           />

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { TaxLead } from '@/types/taxLead';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,7 +41,6 @@ export function useLeadsData() {
           taxId: lead.tax_id || '',
           ownerName: lead.owner_name,
           propertyAddress: lead.property_address,
-          sellerContactAddress: lead.property_address, // Use property_address as fallback since seller_contact_address doesn't exist yet
           taxLawsuitNumber: lead.tax_lawsuit_number || '',
           currentArrears: lead.current_arrears || 0,
           status: (lead.status || 'COLD') as 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP',
@@ -56,20 +54,7 @@ export function useLeadsData() {
           disposition: (lead.disposition as 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED') || 'UNDECIDED',
           createdAt: lead.created_at,
           updatedAt: lead.updated_at,
-          supabaseId: lead.id, // Store the actual Supabase ID for operations
-          leadSource: 'Manual Entry',
-          agentName: 'Unassigned',
-          campaignId: lead.campaign_id || '',
-          askingPrice: 0,
-          mortgagePrice: 0,
-          hasDeath: false,
-          hasProbate: false,
-          hasLawsuit: false,
-          hasAdditionalTaxingEntities: false,
-          ownerOfRecord: lead.owner_name || '',
-          leadManager: 'Unassigned',
-          createdVia: 'Manual Entry',
-          tags: []
+          supabaseId: lead.id // Store the actual Supabase ID for operations
         } as TaxLead & { supabaseId: string };
       }) || [];
 
@@ -204,8 +189,7 @@ export function useLeadsData() {
         phone: updatedLead.phone,
         email: updatedLead.email,
         firstName: updatedLead.firstName,
-        lastName: updatedLead.lastName,
-        sellerContactAddress: updatedLead.sellerContactAddress
+        lastName: updatedLead.lastName
       });
 
       // Update the lead in the database

@@ -64,16 +64,6 @@ export function MainContent({
     // For now, we'll just log it
   };
 
-  const handleLeadUpdate = (updatedLead: TaxLead) => {
-    // Update individual fields
-    Object.keys(updatedLead).forEach(key => {
-      const field = key as keyof TaxLead;
-      if (updatedLead[field] !== formData[field]) {
-        onInputChange(field, updatedLead[field]);
-      }
-    });
-  };
-
   return (
     <div className="space-y-6">
       {/* Step 1: Seller Contact Section - NO attachments here */}
@@ -118,9 +108,12 @@ export function MainContent({
 
           {/* Conditional Fields Section - Only vesting deed specific uploads */}
           <ConditionalFieldsSection
-            lead={formData}
-            onLeadUpdate={handleLeadUpdate}
+            formData={formData}
+            files={files}
             canEdit={canEdit}
+            onInputChange={onInputChange}
+            onFileUpload={onFileUpload}
+            onRemoveFile={onRemoveFile}
           />
 
           {/* Enhanced Ownership Section */}

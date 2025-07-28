@@ -46,31 +46,7 @@ interface DashboardDataProviderProps {
 }
 
 export function DashboardDataProvider({ children }: DashboardDataProviderProps) {
-  const { recentLeads, stats } = useDashboardData();
-  
-  // Create a complete dashboard data object with all required properties
-  const dashboardData: DashboardDataContextType = {
-    leads: recentLeads,
-    stats: {
-      hotDeals: stats.hotLeads,
-      warmDeals: stats.warmLeads,
-      coldDeals: stats.coldLeads,
-      passRate: stats.totalLeads > 0 ? (stats.passLeads / stats.totalLeads) * 100 : 0,
-      totalLeads: stats.totalLeads,
-      keepRate: stats.totalLeads > 0 ? (stats.keepLeads / stats.totalLeads) * 100 : 0,
-      passDeals: stats.passLeads,
-      keepDeals: stats.keepLeads,
-      thisWeekLeads: stats.totalLeads, // Using totalLeads as approximation
-      thisMonthLeads: stats.totalLeads,
-      avgResponseTime: "2.5 hours"
-    },
-    activities: [], // Empty array for now, can be populated later
-    loading: false,
-    refetch: async () => {
-      // Implement refetch logic if needed
-      return Promise.resolve();
-    }
-  };
+  const dashboardData = useDashboardData();
 
   return (
     <DashboardDataContext.Provider value={dashboardData}>

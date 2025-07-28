@@ -3,60 +3,61 @@ export interface TaxLead {
   id: number;
   taxId: string;
   ownerName: string;
-  propertyAddress: string; // This will be for Lead Details section
-  sellerContactAddress?: string; // New field for Seller Contact Details section
-  taxLawsuitNumber: string;
-  currentArrears: number;
+  firstName?: string;
+  lastName?: string;
+  propertyAddress: string;
+  currentArrears?: number;
   status: 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP';
-  notes: string;
-  phone: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  temperature: 'HOT' | 'WARM' | 'COLD';
-  occupancyStatus: 'OWNER_OCCUPIED' | 'TENANT_OCCUPIED' | 'VACANT';
-  disposition: 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED';
+  temperature?: 'HOT' | 'WARM' | 'COLD' | 'PASS';
+  email?: string;
+  phone?: string;
+  taxLawsuitNumber?: string;
+  notes?: string;
   createdAt?: string;
   updatedAt?: string;
+  createdVia?: string;
+  leadManager?: string;
+  tags?: string[];
+  occupancyStatus?: string;
+  
+  // Lead Information
   leadSource?: string;
-  agentName?: string;
   campaignId?: string;
+  agentName?: string;
+  disposition?: 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED';
+  
+  // Financial Information
   askingPrice?: number;
   mortgagePrice?: number;
+  propertyValue?: number;
+  taxAmount?: number;
   
-  // Additional properties that were missing
-  attachedFiles?: Array<{
-    id: string;
-    name: string;
-    url: string;
-    type?: string;
-    size?: number;
-    uploadedAt?: string;
-  }>;
+  // Location Information
+  county?: string;
+  state?: string;
   
-  // Death-related fields
+  // Additional Information Fields
   hasDeath?: boolean;
   deathNotes?: string;
-  
-  // Probate-related fields
   hasProbate?: boolean;
   probateNotes?: string;
-  
-  // Lawsuit-related fields
   hasLawsuit?: boolean;
   lawsuitNotes?: string;
-  
-  // Additional taxing entities
   hasAdditionalTaxingEntities?: boolean;
   additionalTaxingNotes?: string;
   
-  // Ownership details
-  ownerOfRecord?: string;
+  // Conditional Fields
   vestingDeedDate?: string;
   grantorGranteeName?: string;
+  ownerOfRecord?: string;
   
-  // Lead management
-  leadManager?: string;
-  createdVia?: string;
-  tags?: string[];
+  // Attachments - Updated with size property
+  attachedFiles?: Array<{
+    id: string;
+    name: string;
+    type: string;
+    url: string;
+    preview?: string;
+    size?: number;
+  }>;
 }
