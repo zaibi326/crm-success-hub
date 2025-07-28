@@ -23,4 +23,40 @@ export interface TaxLead {
   campaignId?: string;
   askingPrice?: number;
   mortgagePrice?: number;
+  
+  // Additional properties that were missing
+  attachedFiles?: Array<{
+    id: string;
+    name: string;
+    url: string;
+    type?: string;
+    size?: number;
+    uploadedAt?: string;
+  }>;
+  
+  // Death-related fields
+  hasDeath?: boolean;
+  deathNotes?: string;
+  
+  // Probate-related fields
+  hasProbate?: boolean;
+  probateNotes?: string;
+  
+  // Lawsuit-related fields
+  hasLawsuit?: boolean;
+  lawsuitNotes?: string;
+  
+  // Additional taxing entities
+  hasAdditionalTaxingEntities?: boolean;
+  additionalTaxingNotes?: string;
+  
+  // Ownership details
+  ownerOfRecord?: string;
+  vestingDeedDate?: string;
+  grantorGranteeName?: string;
+  
+  // Lead management
+  leadManager?: string;
+  createdVia?: string;
+  tags?: string[];
 }
