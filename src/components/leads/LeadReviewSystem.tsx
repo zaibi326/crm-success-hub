@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { TaxLead } from '@/types/taxLead';
-import { LeadDetailsForm } from './LeadDetailsForm';
+import { TaxLeadDetailsForm } from './TaxLeadDetailsForm';
 import { 
   CheckCircle, 
   XCircle, 
@@ -165,10 +165,10 @@ export function LeadReviewSystem({ leads, onLeadUpdate, userRole }: LeadReviewSy
       </Card>
 
       {/* Lead Details Form */}
-      <LeadDetailsForm
+      <TaxLeadDetailsForm
         lead={currentLead}
         onSave={onLeadUpdate}
-        canEdit={userRole === 'admin' || userRole === 'editor'}
+        userRole={userRole}
       />
 
       {/* Action Buttons */}

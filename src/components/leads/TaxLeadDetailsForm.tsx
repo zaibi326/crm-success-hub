@@ -188,7 +188,11 @@ export function TaxLeadDetailsForm({ lead, onSave, userRole }: TaxLeadDetailsFor
 
           {/* Attachments */}
           <AttachmentsSection
-            files={formData.attachedFiles?.map(f => ({ ...f, category: 'other' as const })) || []}
+            files={formData.attachedFiles?.map(f => ({ 
+              ...f, 
+              category: 'other' as const,
+              type: f.type || 'unknown'
+            })) || []}
             onRemoveFile={handleRemoveFile}
             onFileUpload={handleFileUpload}
             canEdit={canEdit}

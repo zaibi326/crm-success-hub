@@ -3,38 +3,21 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { TaxLead } from '@/types/taxLead';
 import { ContactInfoSection } from './ContactInfoSection';
 import { LegalInfoSection } from './LegalInfoSection';
 import { NotesSection } from './NotesSection';
 
-interface Lead {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  company: string;
-  position: string;
-  address: string;
-  city: string;
-  state: string;
-  zip: string;
-  status: 'HOT' | 'WARM' | 'COLD' | 'PASS';
-  score: number;
-  notes: string;
-  avatar?: string;
-  tags: string[];
-}
-
 interface LeadDetailsFormProps {
-  lead: Lead;
-  onSave: (updatedLead: Lead) => void;
+  lead: TaxLead;
+  onSave: (updatedLead: TaxLead) => void;
   canEdit: boolean;
 }
 
 interface UploadedFile {
   id: string;
   name: string;
-  type: string;
+  type?: string;
   url: string;
   preview?: string;
 }
@@ -48,7 +31,7 @@ export function LeadDetailsForm({ lead, onSave, canEdit }: LeadDetailsFormProps)
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
-  const handleInputChange = (field: keyof Lead, value: any) => {
+  const handleInputChange = (field: keyof TaxLead, value: any) => {
     if (!canEdit) return;
     setFormData(prev => ({ ...prev, [field]: value }));
   };

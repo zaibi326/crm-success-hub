@@ -40,7 +40,8 @@ export function ConditionalFieldsSection({ lead, onLeadUpdate, canEdit }: Condit
   // Map attachedFiles to include category for vesting_deed files
   const files = lead.attachedFiles?.filter(f => f.type === 'vesting_deed').map(f => ({
     ...f,
-    category: 'vesting_deed' as const
+    category: 'vesting_deed' as const,
+    type: f.type || 'unknown'
   })) || [];
 
   const handleFieldChange = (field: keyof TaxLead, value: any) => {
