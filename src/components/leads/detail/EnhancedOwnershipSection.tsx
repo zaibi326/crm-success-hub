@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -155,16 +156,16 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
     return 'bg-gray-500';
   };
 
-  const renderEditableField = (heir: Heir, field: keyof Heir, label: string, type: string = 'text', width: string = 'w-full') => {
+  const renderEditableField = (heir: Heir, field: keyof Heir, label: string, type: string = 'text') => {
     const isEditing = editingHeir === heir.id && editingField === field;
     const value = heir[field];
 
     if (isEditing) {
       return (
-        <div className={`flex items-center gap-2 ${width}`}>
+        <div className="flex items-center gap-2">
           {field === 'relationship' ? (
             <Select value={editValue} onValueChange={setEditValue}>
-              <SelectTrigger className="h-9">
+              <SelectTrigger className="h-8 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -180,7 +181,7 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
               type={type}
-              className="h-9"
+              className="h-8 text-xs"
               placeholder={`Enter ${label.toLowerCase()}`}
             />
           )}
@@ -188,33 +189,33 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
             size="sm"
             variant="ghost"
             onClick={() => saveEdit(heir.id, field)}
-            className="text-green-600 hover:text-green-800 hover:bg-green-50 p-1 h-8 w-8 flex-shrink-0"
+            className="text-green-600 hover:text-green-800 hover:bg-green-50 p-1 h-6 w-6 flex-shrink-0"
           >
-            <Check className="w-4 h-4" />
+            <Check className="w-3 h-3" />
           </Button>
           <Button
             size="sm"
             variant="ghost"
             onClick={cancelEdit}
-            className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 h-8 w-8 flex-shrink-0"
+            className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 h-6 w-6 flex-shrink-0"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3 h-3" />
           </Button>
         </div>
       );
     }
 
     return (
-      <div className={`flex items-center gap-2 ${width}`}>
-        <span className="text-sm text-gray-900 truncate flex-1">{value || '-'}</span>
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-gray-900 truncate flex-1">{value || '-'}</span>
         {canEdit && (
           <Button
             size="sm"
             variant="ghost"
             onClick={() => startEdit(heir.id, field, value.toString())}
-            className="text-gray-400 hover:text-gray-600 hover:bg-gray-50 p-1 h-6 w-6 flex-shrink-0"
+            className="text-gray-400 hover:text-gray-600 hover:bg-gray-50 p-1 h-5 w-5 flex-shrink-0"
           >
-            <Edit2 className="w-3 h-3" />
+            <Edit2 className="w-2.5 h-2.5" />
           </Button>
         )}
       </div>
@@ -410,27 +411,28 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
             </div>
           )}
 
-          {/* Heirs Table */}
+          {/* Heirs Horizontal Layout */}
           {heirs.length > 0 && (
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Heirs</h3>
               
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {heirs.map((heir) => (
                   <Card key={heir.id} className="shadow-sm border border-gray-200">
                     <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-4">
+                      {/* Header with Avatar and Remove Button */}
+                      <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                             {getInitials(heir.name)}
                           </div>
                           <div>
-                            <h4 className="font-semibold text-gray-900">{heir.name}</h4>
-                            <p className="text-sm text-gray-600">{heir.relationship}</p>
+                            <h4 className="font-semibold text-gray-900 text-sm">{heir.name}</h4>
+                            <p className="text-xs text-gray-600">{heir.relationship}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Badge className={`${getPercentageColor(heir.percentage)} text-white`}>
+                        <div className="flex items-center gap-1">
+                          <Badge className={`${getPercentageColor(heir.percentage)} text-white text-xs`}>
                             {heir.percentage}%
                           </Badge>
                           {canEdit && (
@@ -438,40 +440,52 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
                               variant="ghost"
                               size="sm"
                               onClick={() => removeHeir(heir.id)}
-                              className="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 h-8 w-8"
+                              className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 h-6 w-6"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3 h-3" />
                             </Button>
                           )}
                         </div>
                       </div>
                       
-                      {/* Heir Details Grid */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {/* Heir Details in Compact Form */}
+                      <div className="space-y-2 text-xs">
                         <div>
-                          <Label className="text-xs font-medium text-gray-500 mb-1 block">Name</Label>
-                          {renderEditableField(heir, 'name', 'Name', 'text', 'w-full')}
+                          <span className="text-gray-500 font-medium block mb-1">Name</span>
+                          {renderEditableField(heir, 'name', 'Name')}
                         </div>
                         <div>
-                          <Label className="text-xs font-medium text-gray-500 mb-1 block">Relationship</Label>
-                          {renderEditableField(heir, 'relationship', 'Relationship', 'text', 'w-full')}
+                          <span className="text-gray-500 font-medium block mb-1">Relationship</span>
+                          {renderEditableField(heir, 'relationship', 'Relationship')}
                         </div>
                         <div>
-                          <Label className="text-xs font-medium text-gray-500 mb-1 block">Ownership %</Label>
-                          {renderEditableField(heir, 'percentage', 'Ownership', 'number', 'w-full')}
+                          <span className="text-gray-500 font-medium block mb-1">Ownership %</span>
+                          {renderEditableField(heir, 'percentage', 'Percentage', 'number')}
                         </div>
-                        <div>
-                          <Label className="text-xs font-medium text-gray-500 mb-1 block">Email</Label>
-                          {renderEditableField(heir, 'email', 'Email', 'email', 'w-full')}
-                        </div>
-                        <div>
-                          <Label className="text-xs font-medium text-gray-500 mb-1 block">Phone</Label>
-                          {renderEditableField(heir, 'phoneNumber', 'Phone', 'tel', 'w-full')}
-                        </div>
-                        <div>
-                          <Label className="text-xs font-medium text-gray-500 mb-1 block">Address</Label>
-                          {renderEditableField(heir, 'propertyAddress', 'Address', 'text', 'w-full')}
-                        </div>
+                        {heir.email && (
+                          <div>
+                            <span className="text-gray-500 font-medium block mb-1 flex items-center gap-1">
+                              <Mail className="w-3 h-3" /> Email
+                            </span>
+                            {renderEditableField(heir, 'email', 'Email', 'email')}
+                          </div>
+                        )}
+                        {heir.phoneNumber && (
+                          <div>
+                            <span className="text-gray-500 font-medium block mb-1 flex items-center gap-1">
+                              <Phone className="w-3 h-3" /> Phone
+                            </span>
+                            {renderEditableField(heir, 'phoneNumber', 'Phone', 'tel')}
+                          </div>
+                        )}
+                        {heir.propertyAddress && (
+                          <div>
+                            <span className="text-gray-500 font-medium block mb-1 flex items-center gap-1">
+                              <MapPin className="w-3 h-3" /> Address
+                            </span>
+                            {renderEditableField(heir, 'propertyAddress', 'Address')}
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
