@@ -28,7 +28,7 @@ export function PropertyInfoSection({ leadData, onFieldUpdate }: PropertyInfoSec
         
         <EditableField
           label="Property Value"
-          value={leadData.propertyValue || ''}
+          value={leadData.propertyValue ? leadData.propertyValue.toString() : ''}
           onSave={(value) => onFieldUpdate('propertyValue', value)}
         />
         

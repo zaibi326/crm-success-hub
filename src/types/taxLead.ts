@@ -36,6 +36,12 @@ export interface TaxLead {
   county?: string;
   state?: string;
   
+  // Property Information
+  propertyType?: string;
+  yearBuilt?: string;
+  squareFootage?: string;
+  lotSize?: string;
+  
   // Additional Information Fields
   hasDeath?: boolean;
   deathNotes?: string;
