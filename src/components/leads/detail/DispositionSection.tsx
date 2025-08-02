@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 interface DispositionSectionProps {
   disposition: 'keep' | 'pass' | null;
   passReason: string;
-  onDisposition: (disp: 'keep' | 'pass') => void;
+  onDisposition: (disp: 'keep' | 'pass' | null) => void;
   onPassReasonChange: (reason: string) => void;
   canEdit: boolean;
 }
@@ -53,7 +53,7 @@ export function DispositionSection({
               </span>
               {canEdit && (
                 <Button
-                  onClick={() => onDisposition(null as any)}
+                  onClick={() => onDisposition(null)}
                   variant="outline"
                   size="sm"
                 >

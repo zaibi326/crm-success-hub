@@ -128,8 +128,21 @@ export function TaxLeadDetailsForm({
     setHasUnsavedChanges(true);
   };
 
-  const handleDisposition = async (disp: 'keep' | 'pass') => {
+  const handleDisposition = async (disp: 'keep' | 'pass' | null) => {
     setDisposition(disp);
+    
+    // If resetting disposition to null, don't auto-save
+    if (disp === null) {
+      // Reset to original state
+      const updatedFormData: TaxLead = {
+        ...formData,
+        disposition: lead.disposition || 'UNDECIDED',
+        status: lead.status
+      };
+      setFormData(updatedFormData);
+      setHasUnsavedChanges(true);
+      return;
+    }
     
     // Update the lead's disposition and status with proper typing
     const newDisposition: 'QUALIFIED' | 'DISQUALIFIED' = disp === 'keep' ? 'QUALIFIED' : 'DISQUALIFIED';
