@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Users, Plus, Trash2, Phone, Mail, MapPin, Check, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -55,16 +55,6 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingHeir, setEditingHeir] = useState<Heir | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newHeir, setNewHeir] = useState<Heir>({
-    id: '',
-    name: '',
-    relationship: 'Other',
-    percentage: 0,
-    propertyAddress: '',
-    phoneNumber: '',
-    email: ''
-  });
   const { toast } = useToast();
 
   const getHeirsTotalPercentage = () => {
@@ -195,135 +185,173 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
   const isValidTotal = Math.abs(totalPercentage - 100) < 0.01;
 
   return (
-    <div className="space-y-6">
-      {/* Primary Owner and Heirs Cards */}
-      <Card className="shadow-lg border-0">
-        <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-t-lg">
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-3 text-xl">
-              <Users className="w-6 h-6 text-purple-600" />
-              Heirs & Ownership Details
-            </div>
-            {canEdit && (
-              <Button 
-                onClick={openAddModal} 
-                size="sm" 
-                className="bg-purple-600 hover:bg-purple-700"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Heir
-              </Button>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          {/* Total Percentage Indicator */}
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700">Total Ownership:</span>
-              <Badge 
-                variant="outline" 
-                className={`text-sm font-bold ${
-                  isValidTotal 
-                    ? 'border-green-500 text-green-700 bg-green-50' 
-                    : 'border-red-500 text-red-700 bg-red-50'
-                }`}
-              >
-                {totalPercentage.toFixed(1)}%
-              </Badge>
-            </div>
-            <div className="mt-2 text-xs text-gray-500">
-              Primary Owner: {primaryOwnerPercentage.toFixed(1)}% | Heirs: {heirsTotalPercentage.toFixed(1)}%
-            </div>
-          </div>
-
-          {/* Primary Owner Section */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Primary Owner</h3>
-            <Card className="shadow-sm border border-gray-200">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
-                      {getInitials(lead.ownerName || '')}
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900">{lead.ownerName || 'Owner'}</h4>
-                      <p className="text-sm text-gray-600">Primary Owner</p>
-                    </div>
-                  </div>
-                  <Badge className={`${getPercentageColor(primaryOwnerPercentage)} text-white`}>
-                    {primaryOwnerPercentage.toFixed(1)}%
+    <Card className="shadow-sm border border-gray-200">
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="ownership" className="border-none">
+          <AccordionTrigger className="px-6 py-4 hover:no-underline">
+            <div className="flex items-center justify-between w-full mr-4">
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-purple-600" />
+                <span className="text-lg font-semibold">Heirs & Ownership</span>
+                {heirs.length > 0 && (
+                  <Badge variant="outline">
+                    {heirs.length} heir{heirs.length !== 1 ? 's' : ''}
                   </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Heirs Horizontal Layout - Simplified Cards */}
-          {heirs.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Heirs</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {heirs.map((heir) => (
-                  <Card 
-                    key={heir.id} 
-                    className="shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => canEdit && openEditModal(heir)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                            {getInitials(heir.name)}
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-gray-900 text-sm">{heir.name}</h4>
-                            <p className="text-xs text-gray-600">{heir.relationship}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Badge className={`${getPercentageColor(heir.percentage)} text-white text-xs`}>
-                            {heir.percentage}%
-                          </Badge>
-                          {canEdit && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                removeHeir(heir.id);
-                              }}
-                              className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 h-6 w-6"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                )}
+              </div>
+              {canEdit && (
+                <Button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openAddModal();
+                  }}
+                  size="sm" 
+                  className="bg-purple-600 hover:bg-purple-700 h-8"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Heir
+                </Button>
+              )}
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-6 pb-6">
+            {/* Total Percentage Indicator */}
+            <div className="mb-4 p-3 bg-gray-50 rounded-md border">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700">Total Ownership:</span>
+                <Badge 
+                  variant="outline" 
+                  className={`text-sm font-bold ${
+                    isValidTotal 
+                      ? 'border-green-500 text-green-700 bg-green-50' 
+                      : 'border-red-500 text-red-700 bg-red-50'
+                  }`}
+                >
+                  {totalPercentage.toFixed(1)}%
+                </Badge>
+              </div>
+              <div className="mt-1 text-xs text-gray-500">
+                Primary Owner: {primaryOwnerPercentage.toFixed(1)}% | Heirs: {heirsTotalPercentage.toFixed(1)}%
               </div>
             </div>
-          )}
 
-          {/* Save Button */}
-          {canEdit && heirs.length > 0 && (
-            <div className="flex justify-end">
-              <Button 
-                onClick={() => onSave(heirs)}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                Save Ownership
-              </Button>
+            {/* Primary Owner Section */}
+            <div className="mb-4">
+              <h4 className="font-medium text-gray-900 mb-2">Primary Owner</h4>
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-md">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                    {getInitials(lead.ownerName || '')}
+                  </div>
+                  <div>
+                    <h5 className="font-medium text-gray-900 text-sm">{lead.ownerName || 'Owner'}</h5>
+                    <p className="text-xs text-gray-600">Primary Owner</p>
+                  </div>
+                </div>
+                <Badge className={`${getPercentageColor(primaryOwnerPercentage)} text-white text-xs`}>
+                  {primaryOwnerPercentage.toFixed(1)}%
+                </Badge>
+              </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
 
-      {/* Edit/Add Heir Modal */}
+            {/* Heirs List */}
+            {heirs.length > 0 && (
+              <div className="mb-4">
+                <h4 className="font-medium text-gray-900 mb-2">Heirs</h4>
+                
+                <div className="grid grid-cols-1 gap-2">
+                  {heirs.map((heir) => (
+                    <div 
+                      key={heir.id} 
+                      className="flex items-center justify-between p-2 bg-gray-50 rounded-md cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => canEdit && openEditModal(heir)}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-xs">
+                          {getInitials(heir.name)}
+                        </div>
+                        <div>
+                          <h6 className="font-medium text-gray-900 text-sm">{heir.name}</h6>
+                          <p className="text-xs text-gray-600">{heir.relationship}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Badge className={`${getPercentageColor(heir.percentage)} text-white text-xs`}>
+                          {heir.percentage}%
+                        </Badge>
+                        {canEdit && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeHeir(heir.id);
+                            }}
+                            className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 h-6 w-6"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Save Button */}
+            {canEdit && heirs.length > 0 && (
+              <div className="flex justify-end">
+                <Button 
+                  onClick={() => onSave(heirs)}
+                  className="bg-blue-600 hover:bg-blue-700 h-8"
+                  size="sm"
+                >
+                  Save Ownership
+                </Button>
+              </div>
+            )}
+
+            {/* Ownership Distribution Chart */}
+            {chartData.length > 0 && (
+              <div className="mt-4 p-4 bg-gray-50 rounded-md">
+                <h4 className="font-medium text-gray-900 mb-3 text-center">Ownership Distribution</h4>
+                <div className="h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={chartData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={40}
+                        outerRadius={80}
+                        paddingAngle={2}
+                        dataKey="value"
+                        animationBegin={0}
+                        animationDuration={800}
+                      >
+                        {chartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<CustomTooltip />} />
+                      <Legend 
+                        formatter={(value, entry) => (
+                          <span style={{ color: entry.color, fontSize: '12px' }}>
+                            {value} ({entry.payload?.value?.toFixed(1)}%)
+                          </span>
+                        )}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
+      {/* Edit/Add Heir Modal - keep existing modal code the same */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
@@ -427,51 +455,6 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
           )}
         </DialogContent>
       </Dialog>
-
-      {/* Ownership Distribution Chart */}
-      {chartData.length > 0 && (
-        <Card className="shadow-lg border-0">
-          <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-t-lg">
-            <CardTitle className="flex items-center gap-3 text-xl">
-              <div className="w-6 h-6 bg-emerald-600 rounded flex items-center justify-center">
-                <Users className="w-4 h-4 text-white" />
-              </div>
-              Ownership Distribution
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={120}
-                    paddingAngle={2}
-                    dataKey="value"
-                    animationBegin={0}
-                    animationDuration={800}
-                  >
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend 
-                    formatter={(value, entry) => (
-                      <span style={{ color: entry.color }}>
-                        {value} ({entry.payload?.value?.toFixed(1)}%)
-                      </span>
-                    )}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+    </Card>
   );
 }

@@ -11,6 +11,12 @@ import { Sidebar } from './detail/Sidebar';
 import { ViewOnlyMessage } from './detail/ViewOnlyMessage';
 import { SellerContactSection } from './detail/SellerContactSection';
 import { EnhancedLeadDetailsSection } from './detail/EnhancedLeadDetailsSection';
+import { DispositionSection } from './detail/DispositionSection';
+import { EnhancedOwnershipSection } from './detail/EnhancedOwnershipSection';
+import { ConditionalFieldsSection } from './detail/ConditionalFieldsSection';
+import { NotesSection } from './detail/NotesSection';
+import { PropertyMapSection } from './detail/PropertyMapSection';
+import { NotesDisplaySection } from './detail/NotesDisplaySection';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UploadedFile {
@@ -312,23 +318,29 @@ export function TaxLeadDetailsForm({
     }
   };
 
+  const handleOwnershipSave = (heirs: any[]) => {
+    console.log('Heirs saved:', heirs);
+    // Here you would typically save the heirs data to your backend
+    // For now, we'll just log it
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+      <div className="container mx-auto px-4 py-4 max-w-7xl">
+        {/* Compact Header */}
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-gray-900">
               Lead Details
             </h1>
-            <p className="text-lg text-gray-600 mt-1">
+            <p className="text-sm text-gray-600 mt-0.5">
               {formData.ownerName} - {formData.propertyAddress}
             </p>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {!canEdit && (
-              <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-4 py-2 rounded-lg border border-amber-200">
+              <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-3 py-1.5 rounded-md border border-amber-200">
                 <Eye className="w-4 h-4" />
                 <span className="text-sm font-medium">View Only</span>
               </div>
@@ -338,10 +350,11 @@ export function TaxLeadDetailsForm({
               <Button
                 onClick={handleSave}
                 disabled={loading}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 h-8"
+                size="sm"
               >
-                <Save className="w-4 h-4 mr-2" />
-                {loading ? 'Saving...' : 'Save Changes'}
+                <Save className="w-4 h-4 mr-1" />
+                {loading ? 'Saving...' : 'Save'}
               </Button>
             )}
           </div>
@@ -351,74 +364,146 @@ export function TaxLeadDetailsForm({
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8 bg-white border border-gray-200 p-1 rounded-lg">
-            <TabsTrigger value="details" className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-md">
+          <TabsList className="grid w-full grid-cols-2 mb-4 bg-white border border-gray-200 p-1 rounded-md h-9">
+            <TabsTrigger value="details" className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded text-sm">
               <FileText className="w-4 h-4" />
               Details
             </TabsTrigger>
-            <TabsTrigger value="activity" className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-md">
+            <TabsTrigger value="activity" className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded text-sm">
               <Activity className="w-4 h-4" />
               Activity
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="details" className="space-y-6">
-            {/* Two Column Layout */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-              {/* Left Column - Main Content */}
-              <div className="xl:col-span-2 space-y-6">
+          <TabsContent value="details" className="space-y-4">
+            {/* Responsive 2-Column Layout */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+              {/* Left Column */}
+              <div className="space-y-4">
                 {/* Seller Contact Section */}
-                <SellerContactSection 
-                  lead={formData} 
-                  onFieldUpdate={handleInputChange} 
-                  canEdit={canEdit} 
-                />
-                
-                {/* Lead Details Section */}
-                <EnhancedLeadDetailsSection 
-                  lead={formData} 
-                  onFieldUpdate={handleInputChange} 
-                  canEdit={canEdit} 
-                />
-
-                {/* Main Content - Lead Disposition */}
-                <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
-                  <CardContent>
-                    <MainContent
-                      formData={formData}
-                      disposition={disposition}
-                      passReason={passReason}
-                      notes={notes}
-                      newNote={newNote}
-                      files={files}
-                      canEdit={canEdit}
-                      onInputChange={handleInputChange}
-                      onDisposition={handleDisposition}
-                      onPassReasonChange={handlePassReasonChange}
-                      onNewNoteChange={handleNewNoteChange}
-                      onAddNote={handleAddNote}
-                      onFileUpload={handleFileUpload}
-                      onRemoveFile={handleRemoveFile}
+                <Card className="shadow-sm border border-gray-200">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Seller Contact Details</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <SellerContactSection 
+                      lead={formData} 
+                      onFieldUpdate={handleInputChange} 
+                      canEdit={canEdit} 
                     />
                   </CardContent>
                 </Card>
+
+                {/* Lead Disposition Section */}
+                <DispositionSection
+                  disposition={disposition}
+                  passReason={passReason}
+                  canEdit={canEdit}
+                  onDisposition={handleDisposition}
+                  onPassReasonChange={handlePassReasonChange}
+                />
+
+                {/* Conditional rendering based on disposition */}
+                {disposition === 'keep' && (
+                  <>
+                    {/* Collapsible Conditional Fields Section */}
+                    <ConditionalFieldsSection
+                      formData={formData}
+                      files={files}
+                      canEdit={canEdit}
+                      onInputChange={handleInputChange}
+                      onFileUpload={handleFileUpload}
+                      onRemoveFile={handleRemoveFile}
+                    />
+
+                    {/* Collapsible Heirs & Ownership Section */}
+                    <EnhancedOwnershipSection
+                      lead={formData}
+                      canEdit={canEdit}
+                      onSave={handleOwnershipSave}
+                    />
+                  </>
+                )}
+
+                {/* Notes Section (for pass disposition or general notes) */}
+                {(disposition === 'pass' || disposition === null) && (
+                  <NotesSection
+                    notes={notes}
+                    newNote={newNote}
+                    canEdit={canEdit}
+                    onNewNoteChange={handleNewNoteChange}
+                    onAddNote={handleAddNote}
+                  />
+                )}
               </div>
 
-              {/* Right Column - Sidebar */}
-              <div className="xl:col-span-1 space-y-6">
-                <Sidebar
-                  currentStatus={formData.status as 'HOT' | 'WARM' | 'COLD' | 'PASS'}
-                  files={files}
-                  canEdit={canEdit}
-                  onStatusChange={status => handleInputChange('status', status)}
-                  onRemoveFile={handleRemoveFile}
-                  onFileUpload={handleFileUpload}
-                />
+              {/* Right Column */}
+              <div className="space-y-4">
+                {/* Lead Details Section */}
+                <Card className="shadow-sm border border-gray-200">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Lead Details</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <EnhancedLeadDetailsSection 
+                      lead={formData} 
+                      onFieldUpdate={handleInputChange} 
+                      canEdit={canEdit} 
+                    />
+                  </CardContent>
+                </Card>
+
+                {/* Property Map */}
+                <Card className="shadow-sm border border-gray-200">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Property Map</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <PropertyMapSection address={formData.propertyAddress} />
+                  </CardContent>
+                </Card>
+
+                {/* Notes Display */}
+                {formData.notes && (
+                  <Card className="shadow-sm border border-gray-200">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg">Notes</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <NotesDisplaySection notes={formData.notes} />
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Attachments Summary */}
+                {files.length > 0 && (
+                  <Card className="shadow-sm border border-gray-200">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg">Attachments ({files.length})</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="space-y-2">
+                        {files.slice(0, 3).map((file) => (
+                          <div key={file.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded text-sm">
+                            <FileText className="w-4 h-4 text-gray-500" />
+                            <span className="truncate">{file.name}</span>
+                          </div>
+                        ))}
+                        {files.length > 3 && (
+                          <div className="text-sm text-gray-500 text-center py-2">
+                            +{files.length - 3} more files
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             </div>
           </TabsContent>
 
-          <TabsContent value="activity" className="space-y-6">
+          <TabsContent value="activity" className="space-y-4">
+            
             <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-900">
