@@ -6,6 +6,7 @@ export interface TaxLead {
   firstName?: string;
   lastName?: string;
   propertyAddress: string;
+  sellerContactAddress?: string;
   currentArrears?: number;
   status: 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP';
   temperature?: 'HOT' | 'WARM' | 'COLD' | 'PASS';
