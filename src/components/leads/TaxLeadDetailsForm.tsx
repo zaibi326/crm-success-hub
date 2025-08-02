@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,6 +18,7 @@ import { NotesSection } from './detail/NotesSection';
 import { PropertyMapSection } from './detail/PropertyMapSection';
 import { NotesDisplaySection } from './detail/NotesDisplaySection';
 import { EnhancedAdditionalInfoSection } from './detail/EnhancedAdditionalInfoSection';
+import { AttachmentsSection } from './detail/AttachmentsSection';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UploadedFile {
@@ -379,9 +379,9 @@ export function TaxLeadDetailsForm({
 
           <TabsContent value="details" className="space-y-4">
             {/* Responsive 2-Column Layout */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-              {/* Left Column */}
-              <div className="space-y-4">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+              {/* Left Column - Main Content (2/3 width) */}
+              <div className="xl:col-span-2 space-y-4">
                 {/* Seller Contact Section */}
                 <SellerContactSection 
                   lead={formData} 
@@ -401,7 +401,7 @@ export function TaxLeadDetailsForm({
                 {/* Conditional rendering based on disposition */}
                 {disposition === 'keep' && (
                   <>
-                    {/* Additional Information Section - RESTORED */}
+                    {/* Additional Information Section */}
                     <EnhancedAdditionalInfoSection
                       formData={formData}
                       onInputChange={handleInputChange}
@@ -437,11 +437,21 @@ export function TaxLeadDetailsForm({
                     onAddNote={handleAddNote}
                   />
                 )}
+
+                {/* Attachments Section - Always visible for file management */}
+                <AttachmentsSection
+                  files={files.filter(file => file.category !== 'vesting_deed')}
+                  onRemoveFile={handleRemoveFile}
+                  onFileUpload={handleFileUpload}
+                  canEdit={canEdit}
+                  title="General Attachments"
+                  description="Upload documents, images, and other files related to this lead"
+                />
               </div>
 
-              {/* Right Column */}
+              {/* Right Column - Sidebar (1/3 width) */}
               <div className="space-y-4">
-                {/* Lead Details Section - RESTORED */}
+                {/* Lead Details Section */}
                 <EnhancedLeadDetailsSection 
                   lead={formData} 
                   onFieldUpdate={handleInputChange} 
@@ -456,29 +466,15 @@ export function TaxLeadDetailsForm({
                   <NotesDisplaySection notes={formData.notes} />
                 )}
 
-                {/* Attachments Summary */}
-                {files.length > 0 && (
-                  <Card className="shadow-sm border border-gray-200">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg">Attachments ({files.length})</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <div className="space-y-2">
-                        {files.slice(0, 3).map((file) => (
-                          <div key={file.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded text-sm">
-                            <FileText className="w-4 h-4 text-gray-500" />
-                            <span className="truncate">{file.name}</span>
-                          </div>
-                        ))}
-                        {files.length > 3 && (
-                          <div className="text-sm text-gray-500 text-center py-2">
-                            +{files.length - 3} more files
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                {/* Sidebar - Lead Summary */}
+                <Sidebar
+                  currentStatus={formData.status}
+                  files={files}
+                  canEdit={canEdit}
+                  onStatusChange={(status) => handleInputChange('status', status)}
+                  onRemoveFile={handleRemoveFile}
+                  onFileUpload={handleFileUpload}
+                />
               </div>
             </div>
           </TabsContent>
