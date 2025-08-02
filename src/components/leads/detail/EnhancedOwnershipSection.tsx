@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Plus, Edit2, Trash2, X } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
 import { useToast } from '@/hooks/use-toast';
-import { useComprehensiveLeadActivityTracker } from '@/hooks/useComprehensiveActivityLogger';
+import { useComprehensiveLeadActivityTracker } from '@/hooks/useComprehensiveLeadActivityTracker';
 
 interface Heir {
   id: string;
@@ -287,34 +287,31 @@ export function EnhancedOwnershipSection({ lead, onFieldUpdate, canEdit }: Enhan
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {/* Heirs Display */}
+        {/* Heirs Display - Simplified Cards */}
         {heirs.length > 0 ? (
           <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {heirs.map((heir) => (
-                <div key={heir.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition-colors">
+                <div 
+                  key={heir.id} 
+                  className="border border-gray-200 rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
+                  onClick={() => canEdit && handleEditHeir(heir)}
+                >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <h4 className="font-semibold text-sm text-gray-900 truncate">{heir.name}</h4>
                       {canEdit && (
-                        <div className="flex gap-1">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEditHeir(heir)}
-                            className="h-7 w-7 p-0"
-                          >
-                            <Edit2 className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDeleteHeir(heir.id)}
-                            className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteHeir(heir.id);
+                          }}
+                          className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
                       )}
                     </div>
                     <p className="text-sm text-gray-600">{heir.relationship}</p>
@@ -352,12 +349,12 @@ export function EnhancedOwnershipSection({ lead, onFieldUpdate, canEdit }: Enhan
           </div>
         )}
 
-        {/* Edit Heir Dialog */}
+        {/* Edit Heir Dialog - Full Form */}
         {editingHeir && (
           <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
             <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Edit Heir</DialogTitle>
+                <DialogTitle>Edit Heir Details</DialogTitle>
               </DialogHeader>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -400,7 +397,7 @@ export function EnhancedOwnershipSection({ lead, onFieldUpdate, canEdit }: Enhan
                   <Label htmlFor="edit-heir-phone">Phone</Label>
                   <Input
                     id="edit-heir-phone"
-                    value={editingHeir.phone}
+                    value={editingHeir.phone || ''}
                     onChange={(e) => setEditingHeir(prev => prev ? { ...prev, phone: e.target.value } : null)}
                     placeholder="Enter phone number"
                   />
@@ -410,7 +407,7 @@ export function EnhancedOwnershipSection({ lead, onFieldUpdate, canEdit }: Enhan
                   <Input
                     id="edit-heir-email"
                     type="email"
-                    value={editingHeir.email}
+                    value={editingHeir.email || ''}
                     onChange={(e) => setEditingHeir(prev => prev ? { ...prev, email: e.target.value } : null)}
                     placeholder="Enter email address"
                   />
@@ -419,7 +416,7 @@ export function EnhancedOwnershipSection({ lead, onFieldUpdate, canEdit }: Enhan
                   <Label htmlFor="edit-heir-address">Address</Label>
                   <Input
                     id="edit-heir-address"
-                    value={editingHeir.address}
+                    value={editingHeir.address || ''}
                     onChange={(e) => setEditingHeir(prev => prev ? { ...prev, address: e.target.value } : null)}
                     placeholder="Enter full address"
                   />
@@ -429,7 +426,7 @@ export function EnhancedOwnershipSection({ lead, onFieldUpdate, canEdit }: Enhan
                   <Input
                     id="edit-heir-dob"
                     type="date"
-                    value={editingHeir.dateOfBirth}
+                    value={editingHeir.dateOfBirth || ''}
                     onChange={(e) => setEditingHeir(prev => prev ? { ...prev, dateOfBirth: e.target.value } : null)}
                   />
                 </div>
@@ -437,7 +434,7 @@ export function EnhancedOwnershipSection({ lead, onFieldUpdate, canEdit }: Enhan
                   <Label htmlFor="edit-heir-ssn">SSN (Last 4 digits)</Label>
                   <Input
                     id="edit-heir-ssn"
-                    value={editingHeir.ssn}
+                    value={editingHeir.ssn || ''}
                     onChange={(e) => setEditingHeir(prev => prev ? { ...prev, ssn: e.target.value } : null)}
                     placeholder="****"
                     maxLength={4}

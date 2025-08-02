@@ -1,4 +1,3 @@
-
 export interface TaxLead {
   id: number;
   taxId: string;
@@ -13,7 +12,7 @@ export interface TaxLead {
   firstName?: string;
   lastName?: string;
   temperature: 'HOT' | 'WARM' | 'COLD';
-  occupancyStatus: 'OCCUPIED' | 'VACANT';
+  occupancyStatus: 'OCCUPIED' | 'VACANT' | 'OWNER_OCCUPIED' | 'TENANT_OCCUPIED' | 'UNKNOWN';
   disposition: 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED';
   passReason?: string;
   createdAt?: string;
@@ -28,6 +27,30 @@ export interface TaxLead {
   tags?: string[];
   leadManager?: string;
   createdVia?: string;
+  
+  // Additional Information fields
+  hasDeath?: boolean;
+  deathNotes?: string;
+  hasProbate?: boolean;
+  probateNotes?: string;
+  hasLawsuit?: boolean;
+  lawsuitNotes?: string;
+  hasAdditionalTaxingEntities?: boolean;
+  additionalTaxingNotes?: string;
+  
+  // Property ownership fields
+  vestingDeedDate?: string;
+  grantorGranteeName?: string;
+  ownerOfRecord?: string;
+  
+  // Financial fields
+  askingPrice?: number;
+  mortgagePrice?: number;
+  
+  // Lead information fields
+  leadSource?: string;
+  campaignId?: string;
+  agentName?: string;
 }
 
 export interface Heir {
