@@ -1,10 +1,14 @@
 
 import { useComprehensiveActivityLogger } from './useComprehensiveActivityLogger';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function useAuthActivityTracking() {
   const { logAuthActivity } = useComprehensiveActivityLogger();
+  const { user, isLoading } = useAuth();
 
   const trackUserRegistered = (email: string, role: string) => {
+    if (!user?.id || isLoading) return;
+    
     logAuthActivity(
       'registered',
       `New user registered with email ${email}`,
@@ -17,6 +21,8 @@ export function useAuthActivityTracking() {
   };
 
   const trackUserLogin = (email: string) => {
+    if (!user?.id || isLoading) return;
+    
     logAuthActivity(
       'login',
       `User logged in: ${email}`,
@@ -28,6 +34,8 @@ export function useAuthActivityTracking() {
   };
 
   const trackUserLogout = (email: string) => {
+    if (!user?.id || isLoading) return;
+    
     logAuthActivity(
       'logout',
       `User logged out: ${email}`,
@@ -38,6 +46,8 @@ export function useAuthActivityTracking() {
   };
 
   const trackPasswordReset = (email: string) => {
+    if (!user?.id || isLoading) return;
+    
     logAuthActivity(
       'password_reset',
       `Password reset requested for ${email}`,
@@ -48,6 +58,8 @@ export function useAuthActivityTracking() {
   };
 
   const trackEmailVerification = (email: string) => {
+    if (!user?.id || isLoading) return;
+    
     logAuthActivity(
       'email_verified',
       `Email verified for ${email}`,

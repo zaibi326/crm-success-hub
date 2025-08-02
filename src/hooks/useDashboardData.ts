@@ -1,7 +1,9 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { TaxLead } from '@/types/taxLead';
 import { useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface DashboardStats {
   totalLeads: number;
@@ -41,9 +43,16 @@ export interface DashboardDataContextType {
 }
 
 export function useDashboardData(): DashboardDataContextType {
+  const { user, isLoading: authLoading } = useAuth();
+
   const { data: campaignLeads = [], isLoading: leadsLoading, error: leadsError, refetch: refetchLeads } = useQuery({
     queryKey: ['campaign-leads'],
     queryFn: async () => {
+      // Don't fetch if user is not authenticated or still loading
+      if (!user?.id || authLoading) {
+        return [];
+      }
+
       const { data, error } = await supabase
         .from('campaign_leads')
         .select('*')
@@ -53,11 +62,17 @@ export function useDashboardData(): DashboardDataContextType {
       console.log('Loaded campaign leads from database:', data?.length || 0, 'leads');
       return data || [];
     },
+    enabled: !!user?.id && !authLoading,
   });
 
   const { data: activitiesData = [], isLoading: activitiesLoading, error: activitiesError, refetch: refetchActivities } = useQuery({
     queryKey: ['activities'],
     queryFn: async () => {
+      // Don't fetch if user is not authenticated or still loading
+      if (!user?.id || authLoading) {
+        return [];
+      }
+
       const { data, error } = await supabase
         .from('activities')
         .select('*')
@@ -68,10 +83,16 @@ export function useDashboardData(): DashboardDataContextType {
       console.log('Loaded activities from database:', data?.length || 0, 'activities');
       return data || [];
     },
+    enabled: !!user?.id && !authLoading,
   });
 
   // Set up real-time subscription for activities
   useEffect(() => {
+    // Don't set up subscription if user is not authenticated
+    if (!user?.id || authLoading) {
+      return;
+    }
+
     const channel = supabase
       .channel('activities-changes')
       .on(
@@ -91,7 +112,7 @@ export function useDashboardData(): DashboardDataContextType {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [refetchActivities]);
+  }, [refetchActivities, user?.id, authLoading]);
 
   // Transform campaign_leads to TaxLead format
   const leads: TaxLead[] = campaignLeads.map(lead => ({
@@ -154,9 +175,10 @@ export function useDashboardData(): DashboardDataContextType {
     leads,
     stats,
     activities,
-    loading: leadsLoading || activitiesLoading,
+    loading: authLoading || leadsLoading || activitiesLoading,
     error: leadsError?.message || activitiesError?.message || null,
     refetch: async () => {
+      if (!user?.id || authLoading) return;
       await refetchLeads();
       await refetchActivities();
     }
