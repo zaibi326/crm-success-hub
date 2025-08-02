@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +18,7 @@ import { ConditionalFieldsSection } from './detail/ConditionalFieldsSection';
 import { NotesSection } from './detail/NotesSection';
 import { PropertyMapSection } from './detail/PropertyMapSection';
 import { NotesDisplaySection } from './detail/NotesDisplaySection';
+import { EnhancedAdditionalInfoSection } from './detail/EnhancedAdditionalInfoSection';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UploadedFile {
@@ -381,18 +383,11 @@ export function TaxLeadDetailsForm({
               {/* Left Column */}
               <div className="space-y-4">
                 {/* Seller Contact Section */}
-                <Card className="shadow-sm border border-gray-200">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">Seller Contact Details</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <SellerContactSection 
-                      lead={formData} 
-                      onFieldUpdate={handleInputChange} 
-                      canEdit={canEdit} 
-                    />
-                  </CardContent>
-                </Card>
+                <SellerContactSection 
+                  lead={formData} 
+                  onFieldUpdate={handleInputChange} 
+                  canEdit={canEdit} 
+                />
 
                 {/* Lead Disposition Section */}
                 <DispositionSection
@@ -406,6 +401,13 @@ export function TaxLeadDetailsForm({
                 {/* Conditional rendering based on disposition */}
                 {disposition === 'keep' && (
                   <>
+                    {/* Additional Information Section - RESTORED */}
+                    <EnhancedAdditionalInfoSection
+                      formData={formData}
+                      onInputChange={handleInputChange}
+                      canEdit={canEdit}
+                    />
+
                     {/* Collapsible Conditional Fields Section */}
                     <ConditionalFieldsSection
                       formData={formData}
@@ -439,40 +441,19 @@ export function TaxLeadDetailsForm({
 
               {/* Right Column */}
               <div className="space-y-4">
-                {/* Lead Details Section */}
-                <Card className="shadow-sm border border-gray-200">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">Lead Details</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <EnhancedLeadDetailsSection 
-                      lead={formData} 
-                      onFieldUpdate={handleInputChange} 
-                      canEdit={canEdit} 
-                    />
-                  </CardContent>
-                </Card>
+                {/* Lead Details Section - RESTORED */}
+                <EnhancedLeadDetailsSection 
+                  lead={formData} 
+                  onFieldUpdate={handleInputChange} 
+                  canEdit={canEdit} 
+                />
 
                 {/* Property Map */}
-                <Card className="shadow-sm border border-gray-200">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">Property Map</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <PropertyMapSection address={formData.propertyAddress} />
-                  </CardContent>
-                </Card>
+                <PropertyMapSection address={formData.propertyAddress} />
 
                 {/* Notes Display */}
                 {formData.notes && (
-                  <Card className="shadow-sm border border-gray-200">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg">Notes</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <NotesDisplaySection notes={formData.notes} />
-                    </CardContent>
-                  </Card>
+                  <NotesDisplaySection notes={formData.notes} />
                 )}
 
                 {/* Attachments Summary */}
@@ -503,7 +484,6 @@ export function TaxLeadDetailsForm({
           </TabsContent>
 
           <TabsContent value="activity" className="space-y-4">
-            
             <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-900">
