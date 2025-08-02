@@ -16,5 +16,4 @@ export interface Lead {
   notes: string;
   avatar?: string;
   tags: string[];
-  disposition?: 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED';
 }

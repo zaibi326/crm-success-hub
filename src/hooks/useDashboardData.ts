@@ -108,10 +108,6 @@ export function useDashboardData(): DashboardDataContextType {
     createdAt: lead.created_at,
     updatedAt: lead.updated_at,
     disposition: (lead.disposition as 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED') || 'UNDECIDED',
-    temperature: (lead.status as 'HOT' | 'WARM' | 'COLD') || 'COLD',
-    occupancyStatus: 'UNKNOWN',
-    firstName: lead.owner_name?.split(' ')[0] || '',
-    lastName: lead.owner_name?.split(' ').slice(1).join(' ') || '',
   }));
 
   // Fixed stats calculation - KEEP and PASS are mutually exclusive
