@@ -211,7 +211,7 @@ export function TaxLeadDetailsForm({
 }: TaxLeadDetailsFormProps) {
   const { user } = useAuth();
   const [formData, setFormData] = useState<TaxLead>(lead);
-  const [disposition, setDisposition] = useState<'keep' | 'pass' | null'>(
+  const [disposition, setDisposition] = useState<'keep' | 'pass' | null>(
     lead.disposition === 'QUALIFIED' ? 'keep' : 
     lead.disposition === 'DISQUALIFIED' ? 'pass' : null
   );
