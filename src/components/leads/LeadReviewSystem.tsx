@@ -1,26 +1,15 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { TaxLead } from '@/types/taxLead';
 import { LeadSearchFilters } from './LeadSearchFilters';
 import { LeadReviewCard } from './LeadReviewCard';
 import { ReviewActions } from './ReviewActions';
 import { TaxLeadDetailsForm } from './TaxLeadDetailsForm';
 
-interface Lead {
-  id: number;
-  taxId: string;
-  ownerName: string;
-  propertyAddress: string;
-  taxLawsuitNumber?: string;
-  currentArrears?: number;
-  status: 'HOT' | 'WARM' | 'COLD' | 'PASS';
-  notes?: string;
-  phone?: string;
-  email?: string;
-}
-
-const mockLeads: Lead[] = [
+const mockLeads: TaxLead[] = [
   {
     id: 1,
     taxId: 'TX123456789',
@@ -29,9 +18,14 @@ const mockLeads: Lead[] = [
     taxLawsuitNumber: 'TL-2024-001',
     currentArrears: 15000,
     status: 'HOT',
+    temperature: 'HOT',
+    occupancyStatus: 'OWNER_OCCUPIED',
+    disposition: 'UNDECIDED',
     notes: 'High-value property with significant arrears',
     phone: '(555) 123-4567',
-    email: 'john.smith@email.com'
+    email: 'john.smith@email.com',
+    firstName: 'John',
+    lastName: 'Smith'
   },
   {
     id: 2,
@@ -41,9 +35,14 @@ const mockLeads: Lead[] = [
     taxLawsuitNumber: 'TL-2024-002',
     currentArrears: 8500,
     status: 'WARM',
+    temperature: 'WARM',
+    occupancyStatus: 'TENANT_OCCUPIED',
+    disposition: 'UNDECIDED',
     notes: 'Property owner contacted previously',
     phone: '(555) 987-6543',
-    email: 'sarah.j@email.com'
+    email: 'sarah.j@email.com',
+    firstName: 'Sarah',
+    lastName: 'Johnson'
   },
   {
     id: 3,
@@ -53,8 +52,13 @@ const mockLeads: Lead[] = [
     taxLawsuitNumber: 'TL-2024-003',
     currentArrears: 3200,
     status: 'COLD',
+    temperature: 'COLD',
+    occupancyStatus: 'VACANT',
+    disposition: 'UNDECIDED',
     notes: 'Small arrears, low priority',
-    phone: '(555) 456-7890'
+    phone: '(555) 456-7890',
+    firstName: 'Mike',
+    lastName: 'Rodriguez'
   }
 ];
 
@@ -106,14 +110,14 @@ export function LeadReviewSystem() {
     }
   };
 
-  const handleLeadUpdate = (updatedLead: Lead) => {
+  const handleLeadUpdate = (updatedLead: TaxLead) => {
     const updatedLeads = leads.map(lead =>
       lead.id === updatedLead.id ? updatedLead : lead
     );
     setLeads(updatedLeads);
   };
 
-  const handleDetailFormSave = (updatedLead: Lead) => {
+  const handleDetailFormSave = (updatedLead: TaxLead) => {
     handleLeadUpdate(updatedLead);
     setShowDetailForm(false);
     
@@ -194,7 +198,7 @@ export function LeadReviewSystem() {
             <DialogTitle>Detailed Lead Information - {currentLead.ownerName}</DialogTitle>
           </DialogHeader>
           <TaxLeadDetailsForm
-            lead={currentLead as any}
+            lead={currentLead}
             onSave={handleDetailFormSave}
             userRole="editor"
           />
