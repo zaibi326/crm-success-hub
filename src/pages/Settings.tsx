@@ -10,7 +10,8 @@ import SecuritySection from '@/components/settings/SecuritySection';
 import RoleBasedSettings from '@/components/settings/RoleBasedSettings';
 import LeadSourceSection from '@/components/settings/LeadSourceSection';
 import AdminUsersSection from '@/components/settings/AdminUsersSection';
-import { User, Shield, Settings as SettingsIcon, Database, Crown } from 'lucide-react';
+import LogoutSection from '@/components/settings/LogoutSection';
+import { User, Shield, Settings as SettingsIcon, Database, Crown, LogOut } from 'lucide-react';
 
 const Settings = () => {
   const { profile } = useAuth();
@@ -45,7 +46,7 @@ const Settings = () => {
             
             <main className="p-6">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-5 mb-6">
+                <TabsList className="grid w-full grid-cols-6 mb-6">
                   <TabsTrigger value="profile" className="flex items-center gap-2">
                     <User className="w-4 h-4" />
                     Profile
@@ -68,6 +69,10 @@ const Settings = () => {
                       Admin
                     </TabsTrigger>
                   )}
+                  <TabsTrigger value="logout" className="flex items-center gap-2 text-red-600">
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="profile" className="mt-6">
@@ -91,6 +96,10 @@ const Settings = () => {
                     <AdminUsersSection />
                   </TabsContent>
                 )}
+
+                <TabsContent value="logout" className="mt-6">
+                  <LogoutSection />
+                </TabsContent>
               </Tabs>
             </main>
           </SidebarInset>
