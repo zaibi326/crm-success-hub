@@ -47,7 +47,7 @@ const Navbar = () => {
           <div className="hidden md:block">
             <Link to="/login">
               <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg">
-                Start Free Trial
+                Sign In
               </Button>
             </Link>
           </div>
@@ -76,7 +76,7 @@ const Navbar = () => {
               <a href="#" className="text-gray-600 block px-3 py-2 text-base font-medium">Contact</a>
               <Link to="/login">
                 <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white w-full mt-4">
-                  Start Free Trial
+                  Sign In
                 </Button>
               </Link>
             </div>
