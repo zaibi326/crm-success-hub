@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -128,19 +129,62 @@ export function TaxLeadDetailsForm({
     setHasUnsavedChanges(true);
   };
 
-  const handleDisposition = (disp: 'keep' | 'pass') => {
+  const handleDisposition = async (disp: 'keep' | 'pass') => {
     setDisposition(disp);
     
     // Update the lead's disposition and status
     const newDisposition = disp === 'keep' ? 'QUALIFIED' : 'DISQUALIFIED';
     const newStatus = disp === 'keep' ? 'KEEP' : 'PASS';
     
-    setFormData(prev => ({
-      ...prev,
+    const updatedFormData = {
+      ...formData,
       disposition: newDisposition,
       status: newStatus
-    }));
-    setHasUnsavedChanges(true);
+    };
+    
+    setFormData(updatedFormData);
+    
+    // Automatically save the disposition change to the database
+    try {
+      setLoading(true);
+      console.log('Auto-saving disposition change:', { disposition: newDisposition, status: newStatus });
+      
+      onSave(updatedFormData);
+      
+      toast({
+        title: "Disposition Updated",
+        description: `Lead has been marked as ${disp === 'keep' ? 'Keep' : 'Pass'}`,
+      });
+      
+      // Add activity for disposition change
+      const newActivity: ActivityItem = {
+        id: activities.length + 1,
+        type: 'status_change',
+        title: 'Disposition Changed',
+        description: `Lead disposition changed to ${disp === 'keep' ? 'Keep' : 'Pass'}`,
+        timestamp: new Date(),
+        user: user?.email ? `${user.email}` : 'Current User',
+        userInitials: user?.email ? user.email.substring(0, 2).toUpperCase() : 'CU'
+      };
+      setActivities(prev => [newActivity, ...prev]);
+      
+    } catch (error) {
+      console.error('Error saving disposition:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save disposition change",
+        variant: "destructive",
+      });
+      
+      // Revert the changes on error
+      setDisposition(
+        lead.disposition === 'QUALIFIED' ? 'keep' : 
+        lead.disposition === 'DISQUALIFIED' ? 'pass' : null
+      );
+      setFormData(lead);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePassReasonChange = (reason: string) => {
