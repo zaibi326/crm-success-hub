@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -132,11 +131,11 @@ export function TaxLeadDetailsForm({
   const handleDisposition = async (disp: 'keep' | 'pass') => {
     setDisposition(disp);
     
-    // Update the lead's disposition and status
-    const newDisposition = disp === 'keep' ? 'QUALIFIED' : 'DISQUALIFIED';
-    const newStatus = disp === 'keep' ? 'KEEP' : 'PASS';
+    // Update the lead's disposition and status with proper typing
+    const newDisposition: 'QUALIFIED' | 'DISQUALIFIED' = disp === 'keep' ? 'QUALIFIED' : 'DISQUALIFIED';
+    const newStatus: 'KEEP' | 'PASS' = disp === 'keep' ? 'KEEP' : 'PASS';
     
-    const updatedFormData = {
+    const updatedFormData: TaxLead = {
       ...formData,
       disposition: newDisposition,
       status: newStatus
