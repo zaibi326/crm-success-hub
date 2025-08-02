@@ -1,4 +1,5 @@
 
+
 // Lead type definitions
 export interface Lead {
   id: number;
@@ -16,4 +17,5 @@ export interface Lead {
   notes: string;
   avatar?: string;
   tags: string[];
+  disposition?: 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED';
 }

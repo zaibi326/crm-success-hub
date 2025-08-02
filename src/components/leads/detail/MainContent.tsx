@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TaxLead } from '@/types/taxLead';
 import { DispositionSection } from './DispositionSection';
@@ -58,12 +57,6 @@ export function MainContent({
   onFileUpload,
   onRemoveFile
 }: MainContentProps) {
-  const handleOwnershipSave = (heirs: any[]) => {
-    console.log('Heirs saved:', heirs);
-    // Here you would typically save the heirs data to your backend
-    // For now, we'll just log it
-  };
-
   return (
     <div className="space-y-6">
       {/* Step 1: Seller Contact Section - NO attachments here */}
@@ -116,11 +109,11 @@ export function MainContent({
             onRemoveFile={onRemoveFile}
           />
 
-          {/* Enhanced Ownership Section */}
+          {/* Enhanced Ownership Section - Removed onSave prop */}
           <EnhancedOwnershipSection
             lead={formData}
+            onFieldUpdate={onInputChange}
             canEdit={canEdit}
-            onSave={handleOwnershipSave}
           />
         </>
       )}
