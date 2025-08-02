@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { FileText, ChevronDown, ChevronUp, MapPin, ExternalLink, Search, Home, DollarSign } from 'lucide-react';
 import { TaxLead } from '@/types/taxLead';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { InlineEditField } from './InlineEditField';
+import { Button } from '@/components/ui/button';
 
 interface EnhancedLeadDetailsSectionProps {
   lead: TaxLead;
@@ -82,6 +83,38 @@ export function EnhancedLeadDetailsSection({
   const getCurrentStatusColor = () => {
     const status = leadStatusOptions.find(option => option.value === lead.status);
     return status?.color || 'text-gray-600 bg-gray-50 border-gray-200';
+  };
+
+  const openZillowProperty = () => {
+    const address = lead.propertyAddress;
+    if (address) {
+      const encodedAddress = encodeURIComponent(address);
+      window.open(`https://www.zillow.com/homes/${encodedAddress}/`, '_blank');
+    }
+  };
+
+  const openZillowComps = () => {
+    const address = lead.propertyAddress;
+    if (address) {
+      const encodedAddress = encodeURIComponent(address);
+      window.open(`https://www.zillow.com/homes/comps/${encodedAddress}/`, '_blank');
+    }
+  };
+
+  const openZillowRentEstimate = () => {
+    const address = lead.propertyAddress;
+    if (address) {
+      const encodedAddress = encodeURIComponent(address);
+      window.open(`https://www.zillow.com/rental-manager/price-my-rental/${encodedAddress}/`, '_blank');
+    }
+  };
+
+  const searchNearbyProperties = () => {
+    const address = lead.propertyAddress;
+    if (address) {
+      const encodedAddress = encodeURIComponent(address);
+      window.open(`https://www.zillow.com/homes/for_sale/${encodedAddress}/`, '_blank');
+    }
   };
 
   return (
@@ -197,6 +230,99 @@ export function EnhancedLeadDetailsSection({
                   canEdit={canEdit}
                 />
               </div>
+            </div>
+
+            {/* Property Address with Zillow Integration */}
+            <div className="mt-8 space-y-4">
+              <InlineEditField
+                label="🏠 Property Address"
+                value={lead.propertyAddress || ''}
+                onSave={(value) => handleFieldUpdate('propertyAddress', value)}
+                placeholder="Enter complete property address"
+                required
+                canEdit={canEdit}
+              />
+              
+              {/* Zillow Integration Panel */}
+              {lead.propertyAddress && (
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-5 border border-blue-200">
+                  <div className="flex items-center gap-2 mb-4">
+                    <MapPin className="w-5 h-5 text-blue-600" />
+                    <span className="text-base font-semibold text-blue-900">Zillow Property Tools</span>
+                  </div>
+                  
+                  {/* Property Analysis Tools */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                    <Button
+                      onClick={openZillowProperty}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                    >
+                      <Home className="w-4 h-4" />
+                      <span className="text-xs">View Property</span>
+                    </Button>
+                    
+                    <Button
+                      onClick={openZillowComps}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2 hover:bg-green-50 hover:border-green-300 transition-colors"
+                    >
+                      <Search className="w-4 h-4" />
+                      <span className="text-xs">Comparables</span>
+                    </Button>
+                    
+                    <Button
+                      onClick={openZillowRentEstimate}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2 hover:bg-purple-50 hover:border-purple-300 transition-colors"
+                    >
+                      <DollarSign className="w-4 h-4" />
+                      <span className="text-xs">Rent Estimate</span>
+                    </Button>
+                    
+                    <Button
+                      onClick={searchNearbyProperties}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2 hover:bg-orange-50 hover:border-orange-300 transition-colors"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      <span className="text-xs">Nearby Sales</span>
+                    </Button>
+                  </div>
+                  
+                  {/* Property Preview */}
+                  <div className="bg-white rounded-lg p-4 border border-blue-200 shadow-sm">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-blue-600" />
+                        <span className="text-sm font-medium text-blue-900">Property Preview</span>
+                      </div>
+                      <Button
+                        onClick={openZillowProperty}
+                        variant="link"
+                        size="sm"
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        <ExternalLink className="w-3 h-3 mr-1" />
+                        Open in Zillow
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="text-sm text-gray-600">
+                        Address: <span className="font-medium text-gray-900">{lead.propertyAddress}</span>
+                      </div>
+                      <div className="text-xs text-blue-600 break-all">
+                        Zillow URL: https://www.zillow.com/homes/{encodeURIComponent(lead.propertyAddress)}/
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </CollapsibleContent>
