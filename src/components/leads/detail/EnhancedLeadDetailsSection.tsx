@@ -232,7 +232,7 @@ export function EnhancedLeadDetailsSection({
               </div>
             </div>
 
-            {/* Property Address with Zillow Integration */}
+            {/* Property Address with Zillow Integration - Use the same field as SellerContactSection */}
             <div className="mt-8 space-y-4">
               <InlineEditField
                 label="🏠 Property Address"
