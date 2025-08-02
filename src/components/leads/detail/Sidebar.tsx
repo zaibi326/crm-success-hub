@@ -1,11 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, Upload, X } from 'lucide-react';
-import { useDropzone } from 'react-dropzone';
+import { Badge } from '@/components/ui/badge';
+import { Upload, FileText, Trash2 } from 'lucide-react';
 
 interface UploadedFile {
   id: string;
@@ -17,140 +15,179 @@ interface UploadedFile {
 }
 
 interface SidebarProps {
-  currentStatus: 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP';
+  currentStatus: string;
   files: UploadedFile[];
   canEdit: boolean;
-  onStatusChange: (status: 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP') => void;
+  onStatusChange: (status: string) => void;
   onRemoveFile: (fileId: string) => void;
   onFileUpload: (files: File[], category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities') => void;
 }
 
-export function Sidebar({
-  currentStatus,
-  files,
-  canEdit,
-  onStatusChange,
-  onRemoveFile,
-  onFileUpload
+export function Sidebar({ 
+  currentStatus, 
+  files, 
+  canEdit, 
+  onStatusChange, 
+  onRemoveFile, 
+  onFileUpload 
 }: SidebarProps) {
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    accept: {
-      'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
-      'application/pdf': ['.pdf'],
-      'application/msword': ['.doc', '.docx'],
-      'text/plain': ['.txt']
-    },
-    onDrop: (acceptedFiles) => {
-      if (canEdit) {
-        onFileUpload(acceptedFiles, 'other');
-      }
-    },
-    disabled: !canEdit
-  });
+  const [isDragOver, setIsDragOver] = useState(false);
 
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case 'HOT':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'WARM':
-        return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'COLD':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'PASS':
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-      case 'KEEP':
-        return 'bg-green-100 text-green-800 border-green-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    if (!canEdit) return;
+    
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    if (droppedFiles.length > 0) {
+      onFileUpload(droppedFiles, 'other');
     }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!canEdit) return;
+    
+    const selectedFiles = Array.from(e.target.files || []);
+    if (selectedFiles.length > 0) {
+      onFileUpload(selectedFiles, 'other');
+    }
+  };
+
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return 'Unknown size';
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+  };
+
+  const getCategoryBadgeColor = (category: string) => {
+    const colors: Record<string, string> = {
+      probate: 'bg-purple-100 text-purple-800 border-purple-200',
+      vesting_deed: 'bg-blue-100 text-blue-800 border-blue-200',
+      death: 'bg-red-100 text-red-800 border-red-200',
+      lawsuit: 'bg-orange-100 text-orange-800 border-orange-200',
+      taxing_entities: 'bg-green-100 text-green-800 border-green-200',
+      other: 'bg-gray-100 text-gray-800 border-gray-200'
+    };
+    return colors[category] || colors.other;
   };
 
   return (
     <div className="space-y-4">
-      {/* Status Card */}
-      <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-semibold text-gray-900">Lead Status</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="space-y-3">
-            <Badge className={`${getStatusBadgeColor(currentStatus)} px-3 py-1 text-sm font-medium border`}>
-              {currentStatus}
-            </Badge>
-            
-            {canEdit && (
-              <Select value={currentStatus} onValueChange={onStatusChange}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Change status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="HOT">Hot Lead</SelectItem>
-                  <SelectItem value="WARM">Warm Lead</SelectItem>
-                  <SelectItem value="COLD">Cold Lead</SelectItem>
-                  <SelectItem value="PASS">Pass</SelectItem>
-                  <SelectItem value="KEEP">Keep</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Lead Documents Card */}
-      <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-semibold text-gray-900">
-            Lead Documents ({files.length})
+      {/* Lead Documents Section */}
+      <Card className="bg-white shadow-lg border-0 rounded-xl overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 border-b border-gray-100">
+          <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-900">
+            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+              <FileText className="w-4 h-4 text-white" />
+            </div>
+            Lead Documents
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-0">
+        <CardContent className="p-6">
           {/* Upload Area */}
           {canEdit && (
             <div
-              {...getRootProps()}
-              className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors mb-4 ${
-                isDragActive
+              className={`border-2 border-dashed rounded-xl p-6 text-center transition-all duration-200 ${
+                isDragOver
                   ? 'border-blue-400 bg-blue-50'
-                  : 'border-gray-300 hover:border-gray-400'
+                  : 'border-gray-200 hover:border-gray-300 bg-gray-50'
               }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
             >
-              <input {...getInputProps()} />
-              <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-600">
-                {isDragActive ? 'Drop files here...' : 'Drop files or click to upload'}
+              <Upload className="w-8 h-8 text-gray-400 mx-auto mb-3" />
+              <p className="text-sm font-medium text-gray-700 mb-2">
+                Drop files here or click to upload
               </p>
-              <p className="text-xs text-gray-500 mt-1">
-                PDF, DOC, JPG, PNG files
+              <p className="text-xs text-gray-500 mb-4">
+                PDF, DOC, JPG, PNG up to 10MB
               </p>
+              <input
+                type="file"
+                multiple
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                onChange={handleFileInputChange}
+                className="hidden"
+                id="file-upload"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => document.getElementById('file-upload')?.click()}
+                className="bg-white border-gray-200 hover:bg-gray-50"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Choose Files
+              </Button>
             </div>
           )}
 
           {/* Files List */}
-          {files.length > 0 ? (
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {files.map((file) => (
-                <div key={file.id} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <FileText className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                    <span className="truncate">{file.name}</span>
+          {files.length > 0 && (
+            <div className="mt-4 space-y-3">
+              <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                Uploaded Files ({files.length})
+              </h4>
+              <div className="space-y-2">
+                {files.map((file) => (
+                  <div
+                    key={file.id}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100"
+                  >
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <FileText className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {file.name}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge
+                            variant="outline"
+                            className={`text-xs ${getCategoryBadgeColor(file.category)}`}
+                          >
+                            {file.category.replace('_', ' ').toUpperCase()}
+                          </Badge>
+                          <span className="text-xs text-gray-500">
+                            {formatFileSize(file.size)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    {canEdit && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onRemoveFile(file.id)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 p-1 h-auto"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
-                  {canEdit && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onRemoveFile(file.id)}
-                      className="h-6 w-6 p-0 text-gray-400 hover:text-red-500"
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          ) : (
-            <p className="text-sm text-gray-500 text-center py-4">
-              No documents uploaded yet
-            </p>
+          )}
+
+          {!canEdit && files.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">No documents uploaded</p>
+            </div>
           )}
         </CardContent>
       </Card>
