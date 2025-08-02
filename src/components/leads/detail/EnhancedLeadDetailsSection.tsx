@@ -21,6 +21,12 @@ const leadStatusOptions = [{
 }, {
   value: 'COLD',
   label: 'Cold Lead'
+}, {
+  value: 'PASS',
+  label: 'Pass'
+}, {
+  value: 'KEEP',
+  label: 'Keep'
 }];
 
 const occupancyOptions = [{
@@ -117,9 +123,9 @@ export function EnhancedLeadDetailsSection({
               />
 
               <InlineEditField
-                label="Temperature"
-                value={lead.temperature || ''}
-                onSave={(value) => handleFieldUpdate('temperature', value)}
+                label="Lead Status"
+                value={lead.status || ''}
+                onSave={(value) => handleFieldUpdate('status', value)}
                 type="select"
                 options={leadStatusOptions}
                 canEdit={canEdit}

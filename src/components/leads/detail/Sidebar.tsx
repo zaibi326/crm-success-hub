@@ -96,40 +96,37 @@ export function Sidebar({
         </CardContent>
       </Card>
 
-      {/* Quick Upload Card */}
-      {canEdit && (
-        <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-semibold text-gray-900">Quick Upload</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
+      {/* Lead Documents Card */}
+      <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg font-semibold text-gray-900">
+            Lead Documents ({files.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          {/* Upload Area */}
+          {canEdit && (
             <div
               {...getRootProps()}
-              className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
+              className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors mb-4 ${
                 isDragActive
                   ? 'border-blue-400 bg-blue-50'
                   : 'border-gray-300 hover:border-gray-400'
               }`}
             >
               <input {...getInputProps()} />
-              <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+              <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
               <p className="text-sm text-gray-600">
                 {isDragActive ? 'Drop files here...' : 'Drop files or click to upload'}
               </p>
+              <p className="text-xs text-gray-500 mt-1">
+                PDF, DOC, JPG, PNG files
+              </p>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          )}
 
-      {/* Files Summary */}
-      {files.length > 0 && (
-        <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-semibold text-gray-900">
-              Attachments ({files.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
+          {/* Files List */}
+          {files.length > 0 ? (
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {files.map((file) => (
                 <div key={file.id} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
@@ -150,9 +147,13 @@ export function Sidebar({
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          ) : (
+            <p className="text-sm text-gray-500 text-center py-4">
+              No documents uploaded yet
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
