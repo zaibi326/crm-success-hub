@@ -1,8 +1,11 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText } from 'lucide-react';
-import { AttachmentsSection } from './AttachmentsSection';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { FileText, Upload, X } from 'lucide-react';
+import { useDropzone } from 'react-dropzone';
 
 interface UploadedFile {
   id: string;
@@ -14,64 +17,142 @@ interface UploadedFile {
 }
 
 interface SidebarProps {
-  currentStatus: 'HOT' | 'WARM' | 'COLD' | 'PASS';
+  currentStatus: 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP';
   files: UploadedFile[];
   canEdit: boolean;
-  onStatusChange: (status: 'HOT' | 'WARM' | 'COLD' | 'PASS') => void;
+  onStatusChange: (status: 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP') => void;
   onRemoveFile: (fileId: string) => void;
   onFileUpload: (files: File[], category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities') => void;
 }
 
 export function Sidebar({
+  currentStatus,
   files,
   canEdit,
+  onStatusChange,
   onRemoveFile,
   onFileUpload
 }: SidebarProps) {
-  // Filter files for general attachments (exclude vesting_deed which is handled separately in ConditionalFieldsSection)
-  const generalFiles = files.filter(file => file.category !== 'vesting_deed');
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    accept: {
+      'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
+      'application/pdf': ['.pdf'],
+      'application/msword': ['.doc', '.docx'],
+      'text/plain': ['.txt']
+    },
+    onDrop: (acceptedFiles) => {
+      if (canEdit) {
+        onFileUpload(acceptedFiles, 'other');
+      }
+    },
+    disabled: !canEdit
+  });
+
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case 'HOT':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'WARM':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'COLD':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'PASS':
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'KEEP':
+        return 'bg-green-100 text-green-800 border-green-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Lead Summary Card */}
-      <Card className="shadow-lg border-0">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-crm-primary" />
-            Lead Summary
-          </CardTitle>
+    <div className="space-y-4">
+      {/* Status Card */}
+      <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg font-semibold text-gray-900">Lead Status</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Created:</span>
-              <span className="font-medium">Today</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Last Updated:</span>
-              <span className="font-medium">2 hours ago</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Total Files:</span>
-              <span className="font-medium">{files.length}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Documents:</span>
-              <span className="font-medium">{generalFiles.length}</span>
-            </div>
+        <CardContent className="pt-0">
+          <div className="space-y-3">
+            <Badge className={`${getStatusBadgeColor(currentStatus)} px-3 py-1 text-sm font-medium border`}>
+              {currentStatus}
+            </Badge>
+            
+            {canEdit && (
+              <Select value={currentStatus} onValueChange={onStatusChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Change status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="HOT">Hot Lead</SelectItem>
+                  <SelectItem value="WARM">Warm Lead</SelectItem>
+                  <SelectItem value="COLD">Cold Lead</SelectItem>
+                  <SelectItem value="PASS">Pass</SelectItem>
+                  <SelectItem value="KEEP">Keep</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Lead Documents - Attachment Section (Only appears here) */}
-      <AttachmentsSection
-        files={generalFiles}
-        onRemoveFile={onRemoveFile}
-        onFileUpload={onFileUpload}
-        canEdit={canEdit}
-        title="Lead Documents"
-        description="Attach multiple PDF/image files (e.g., title deeds, legal docs, correspondence)"
-      />
+      {/* Quick Upload Card */}
+      {canEdit && (
+        <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-semibold text-gray-900">Quick Upload</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div
+              {...getRootProps()}
+              className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
+                isDragActive
+                  ? 'border-blue-400 bg-blue-50'
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              <input {...getInputProps()} />
+              <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-600">
+                {isDragActive ? 'Drop files here...' : 'Drop files or click to upload'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Files Summary */}
+      {files.length > 0 && (
+        <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-semibold text-gray-900">
+              Attachments ({files.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {files.map((file) => (
+                <div key={file.id} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <FileText className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                    <span className="truncate">{file.name}</span>
+                  </div>
+                  {canEdit && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onRemoveFile(file.id)}
+                      className="h-6 w-6 p-0 text-gray-400 hover:text-red-500"
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
