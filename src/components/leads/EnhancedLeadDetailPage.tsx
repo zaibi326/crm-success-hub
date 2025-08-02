@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -62,20 +61,6 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
         variant: "destructive",
       });
     }
-  };
-
-  const handleOwnershipSave = (heirs: any[]) => {
-    console.log('Heirs saved:', heirs);
-    
-    // Track heir data modifications
-    heirs.forEach(heir => {
-      trackHeirDataModified(leadData, 'added', heir);
-    });
-    
-    toast({
-      title: "Ownership Saved",
-      description: "Heirs and ownership details have been saved successfully",
-    });
   };
 
   const getStatusColor = (status: string) => {
@@ -230,7 +215,7 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
           <TabsContent value="ownership" className="space-y-6 mt-6">
             <EnhancedOwnershipSection 
               lead={leadData}
-              onSave={handleOwnershipSave}
+              onFieldUpdate={handleFieldUpdate}
               canEdit={true}
             />
           </TabsContent>
