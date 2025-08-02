@@ -18,7 +18,6 @@ import { NotesSection } from './detail/NotesSection';
 import { PropertyMapSection } from './detail/PropertyMapSection';
 import { NotesDisplaySection } from './detail/NotesDisplaySection';
 import { EnhancedAdditionalInfoSection } from './detail/EnhancedAdditionalInfoSection';
-import { AttachmentsSection } from './detail/AttachmentsSection';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UploadedFile {
@@ -378,9 +377,9 @@ export function TaxLeadDetailsForm({
           </TabsList>
 
           <TabsContent value="details" className="space-y-4">
-            {/* Responsive 2-Column Layout */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-              {/* Left Column - Main Content (2/3 width) */}
+            {/* Responsive 3-Column Layout */}
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
+              {/* Left Column - Main Content (2/4 width) */}
               <div className="xl:col-span-2 space-y-4">
                 {/* Seller Contact Section */}
                 <SellerContactSection 
@@ -437,19 +436,9 @@ export function TaxLeadDetailsForm({
                     onAddNote={handleAddNote}
                   />
                 )}
-
-                {/* Attachments Section - Always visible for file management */}
-                <AttachmentsSection
-                  files={files.filter(file => file.category !== 'vesting_deed')}
-                  onRemoveFile={handleRemoveFile}
-                  onFileUpload={handleFileUpload}
-                  canEdit={canEdit}
-                  title="General Attachments"
-                  description="Upload documents, images, and other files related to this lead"
-                />
               </div>
 
-              {/* Right Column - Sidebar (1/3 width) */}
+              {/* Middle Column - Lead Details (1/4 width) */}
               <div className="space-y-4">
                 {/* Lead Details Section */}
                 <EnhancedLeadDetailsSection 
@@ -457,7 +446,10 @@ export function TaxLeadDetailsForm({
                   onFieldUpdate={handleInputChange} 
                   canEdit={canEdit} 
                 />
+              </div>
 
+              {/* Right Column - Sidebar (1/4 width) */}
+              <div className="space-y-4">
                 {/* Property Map */}
                 <PropertyMapSection address={formData.propertyAddress} />
 
