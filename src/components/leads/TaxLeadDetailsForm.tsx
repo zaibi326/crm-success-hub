@@ -12,6 +12,7 @@ import { ViewOnlyMessage } from './detail/ViewOnlyMessage';
 import { SellerContactSection } from './detail/SellerContactSection';
 import { EnhancedLeadDetailsSection } from './detail/EnhancedLeadDetailsSection';
 import { useAuth } from '@/contexts/AuthContext';
+import { useComprehensiveLeadActivityTracker } from '@/hooks/useComprehensiveLeadActivityTracker';
 
 interface UploadedFile {
   id: string;
@@ -52,6 +53,7 @@ export function TaxLeadDetailsForm({
   userRole
 }: TaxLeadDetailsFormProps) {
   const { user } = useAuth();
+  const { trackStatusChanged, trackLeadUpdated } = useComprehensiveLeadActivityTracker();
   const [formData, setFormData] = useState<TaxLead>(lead);
   const [disposition, setDisposition] = useState<'keep' | 'pass' | null>(
     lead.disposition === 'QUALIFIED' ? 'keep' : 
@@ -118,6 +120,11 @@ export function TaxLeadDetailsForm({
       }));
       setFiles(convertedFiles);
     }
+
+    // Initialize heir data if available
+    if (lead.heirs && lead.heirs.length > 0) {
+      console.log('Loading existing heir data:', lead.heirs);
+    }
   }, [lead]);
 
   const handleInputChange = (field: keyof TaxLead, value: any) => {
@@ -129,6 +136,9 @@ export function TaxLeadDetailsForm({
   };
 
   const handleDisposition = (disp: 'keep' | 'pass') => {
+    const oldDisposition = disposition;
+    const oldStatus = formData.status;
+    
     setDisposition(disp);
     
     // Update the lead's disposition and status
@@ -141,6 +151,17 @@ export function TaxLeadDetailsForm({
       status: newStatus
     }));
     setHasUnsavedChanges(true);
+
+    // Track the disposition change activity
+    console.log('Tracking disposition change:', { oldStatus, newStatus, leadId: formData.id });
+    trackStatusChanged(formData, oldStatus, newStatus);
+    
+    // Also track as a lead update
+    trackLeadUpdated(
+      { ...formData, disposition: newDisposition, status: newStatus },
+      ['disposition', 'status'],
+      { disposition: oldDisposition, status: oldStatus }
+    );
   };
 
   const handlePassReasonChange = (reason: string) => {
@@ -236,6 +257,15 @@ export function TaxLeadDetailsForm({
         attachedFiles,
         updatedAt: new Date().toISOString()
       };
+
+      // Track the save activity
+      const changedFields = Object.keys(formData).filter(key => 
+        lead[key as keyof TaxLead] !== formData[key as keyof TaxLead]
+      );
+      
+      if (changedFields.length > 0) {
+        trackLeadUpdated(updatedLead, changedFields, lead);
+      }
 
       onSave(updatedLead);
       toast({

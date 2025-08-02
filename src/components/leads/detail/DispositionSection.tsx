@@ -19,6 +19,12 @@ export function DispositionSection({
   onPassReasonChange, 
   canEdit 
 }: DispositionSectionProps) {
+  
+  const handleDispositionChange = (disp: 'keep' | 'pass') => {
+    console.log('DispositionSection: Disposition changed to:', disp);
+    onDisposition(disp);
+  };
+
   return (
     <Card className="shadow-lg border-0">
       <CardHeader>
@@ -28,7 +34,7 @@ export function DispositionSection({
         {!disposition ? (
           <div className="flex gap-4">
             <Button
-              onClick={() => onDisposition('pass')}
+              onClick={() => handleDispositionChange('pass')}
               variant="outline"
               className="flex-1 h-12 text-red-600 border-red-200 hover:bg-red-50"
               disabled={!canEdit}
@@ -36,7 +42,7 @@ export function DispositionSection({
               Pass
             </Button>
             <Button
-              onClick={() => onDisposition('keep')}
+              onClick={() => handleDispositionChange('keep')}
               className="flex-1 h-12 bg-green-600 hover:bg-green-700"
               disabled={!canEdit}
             >
@@ -53,7 +59,7 @@ export function DispositionSection({
               </span>
               {canEdit && (
                 <Button
-                  onClick={() => onDisposition(null as any)}
+                  onClick={() => handleDispositionChange(null as any)}
                   variant="outline"
                   size="sm"
                 >
