@@ -1,5 +1,5 @@
 
-import { StrictMode } from "react";
+import React, { StrictMode } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -45,113 +45,115 @@ const queryClient = new QueryClient({
 
 const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <AuthProvider>
-            <Toaster />
-            <Sonner />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/features" element={<Features />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/security" element={<Security />} />
-              <Route path="/integrations" element={<Integrations />} />
-              <Route path="/mobile-apps" element={<MobileApps />} />
-              <Route path="/api-docs" element={<ApiDocumentation />} />
-              
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/current-deals" element={
-                <ProtectedRoute>
-                  <CurrentDeals />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/campaigns" element={
-                <ProtectedRoute>
-                  <Campaigns />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/communication-center" element={
-                <ProtectedRoute>
-                  <CommunicationCenter />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/calendar" element={
-                <ProtectedRoute>
-                  <Calendar />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/notifications" element={
-                <ProtectedRoute>
-                  <Notifications />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/settings" element={
-                <ProtectedRoute>
-                  <Settings />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/admin-users" element={
-                <ProtectedRoute>
-                  <AdminUsers />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/organization-management" element={
-                <ProtectedRoute>
-                  <OrganizationManagement />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/system-settings" element={
-                <ProtectedRoute>
-                  <SystemSettings />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/analytics" element={
-                <ProtectedRoute>
-                  <FullAnalytics />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/app-builder" element={
-                <ProtectedRoute>
-                  <AppBuilder />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/leads" element={
-                <ProtectedRoute>
-                  <Leads />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/tax-leads" element={
-                <ProtectedRoute>
-                  <TaxLeads />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <AuthProvider>
+              <Toaster />
+              <Sonner />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/features" element={<Features />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/security" element={<Security />} />
+                <Route path="/integrations" element={<Integrations />} />
+                <Route path="/mobile-apps" element={<MobileApps />} />
+                <Route path="/api-docs" element={<ApiDocumentation />} />
+                
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/current-deals" element={
+                  <ProtectedRoute>
+                    <CurrentDeals />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/campaigns" element={
+                  <ProtectedRoute>
+                    <Campaigns />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/communication-center" element={
+                  <ProtectedRoute>
+                    <CommunicationCenter />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/calendar" element={
+                  <ProtectedRoute>
+                    <Calendar />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/notifications" element={
+                  <ProtectedRoute>
+                    <Notifications />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/settings" element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/admin-users" element={
+                  <ProtectedRoute>
+                    <AdminUsers />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/organization-management" element={
+                  <ProtectedRoute>
+                    <OrganizationManagement />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/system-settings" element={
+                  <ProtectedRoute>
+                    <SystemSettings />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/analytics" element={
+                  <ProtectedRoute>
+                    <FullAnalytics />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/app-builder" element={
+                  <ProtectedRoute>
+                    <AppBuilder />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/leads" element={
+                  <ProtectedRoute>
+                    <Leads />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/tax-leads" element={
+                  <ProtectedRoute>
+                    <TaxLeads />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AuthProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </React.StrictMode>
   );
 };
 
