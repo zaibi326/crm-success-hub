@@ -133,6 +133,100 @@ export function useComprehensiveActivityLogger() {
     });
   };
 
+  // Enhanced lead-specific activity functions
+  const logLeadStatusChange = (leadId: string, leadName: string, oldStatus: string, newStatus: string, metadata?: any) => {
+    if (!user?.id || isLoading) return;
+    
+    logActivity.mutate({
+      module: 'leads',
+      actionType: 'status_change',
+      description: `Changed lead status from "${oldStatus}" to "${newStatus}" for ${leadName}`,
+      referenceId: leadId,
+      referenceType: 'lead',
+      targetId: leadId,
+      targetType: 'lead',
+      metadata: { oldStatus, newStatus, leadName, ...metadata }
+    });
+  };
+
+  const logLeadDispositionChange = (leadId: string, leadName: string, disposition: 'keep' | 'pass', reason?: string, metadata?: any) => {
+    if (!user?.id || isLoading) return;
+    
+    const actionType = disposition === 'keep' ? 'keep_lead' : 'pass_lead';
+    const description = `Marked lead as "${disposition.toUpperCase()}" for ${leadName}${reason ? ` - Reason: ${reason}` : ''}`;
+    
+    logActivity.mutate({
+      module: 'leads',
+      actionType,
+      description,
+      referenceId: leadId,
+      referenceType: 'lead',
+      targetId: leadId,
+      targetType: 'lead',
+      metadata: { disposition, reason, leadName, ...metadata }
+    });
+  };
+
+  const logDocumentUpload = (leadId: string, leadName: string, fileName: string, fileType: string, metadata?: any) => {
+    if (!user?.id || isLoading) return;
+    
+    logActivity.mutate({
+      module: 'leads',
+      actionType: 'document_upload',
+      description: `Uploaded document "${fileName}" for ${leadName}`,
+      referenceId: leadId,
+      referenceType: 'lead',
+      targetId: leadId,
+      targetType: 'lead',
+      metadata: { fileName, fileType, leadName, ...metadata }
+    });
+  };
+
+  const logHeirAddition = (leadId: string, leadName: string, heirName: string, relationship?: string, metadata?: any) => {
+    if (!user?.id || isLoading) return;
+    
+    logActivity.mutate({
+      module: 'leads',
+      actionType: 'heir_added',
+      description: `Added heir "${heirName}"${relationship ? ` (${relationship})` : ''} to ${leadName}`,
+      referenceId: leadId,
+      referenceType: 'lead',
+      targetId: leadId,
+      targetType: 'lead',
+      metadata: { heirName, relationship, leadName, ...metadata }
+    });
+  };
+
+  const logLeadFieldUpdate = (leadId: string, leadName: string, fieldName: string, oldValue: string, newValue: string, metadata?: any) => {
+    if (!user?.id || isLoading) return;
+    
+    logActivity.mutate({
+      module: 'leads',
+      actionType: 'field_updated',
+      description: `Updated ${fieldName} from "${oldValue}" to "${newValue}" for ${leadName}`,
+      referenceId: leadId,
+      referenceType: 'lead',
+      targetId: leadId,
+      targetType: 'lead',
+      metadata: { fieldName, oldValue, newValue, leadName, ...metadata }
+    });
+  };
+
+  const logLeadNote = (leadId: string, leadName: string, noteContent: string, metadata?: any) => {
+    if (!user?.id || isLoading) return;
+    
+    logActivity.mutate({
+      module: 'leads',
+      actionType: 'note_added',
+      description: `Added note for ${leadName}: "${noteContent.substring(0, 100)}${noteContent.length > 100 ? '...' : ''}"`,
+      referenceId: leadId,
+      referenceType: 'lead',
+      targetId: leadId,
+      targetType: 'lead',
+      metadata: { noteContent, leadName, ...metadata }
+    });
+  };
+
   const logCampaignActivity = (actionType: string, description: string, campaignId?: string, metadata?: any) => {
     if (!user?.id || isLoading) return;
     
@@ -230,6 +324,12 @@ export function useComprehensiveActivityLogger() {
       logActivity.mutate(params);
     },
     logLeadActivity,
+    logLeadStatusChange,
+    logLeadDispositionChange,
+    logDocumentUpload,
+    logHeirAddition,
+    logLeadFieldUpdate,
+    logLeadNote,
     logCampaignActivity,
     logCommunicationActivity,
     logCalendarActivity,

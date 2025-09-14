@@ -7,9 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { useRecentActivities } from "@/hooks/useRecentActivities";
 import { ActivityResetButton } from "./ActivityResetButton";
-import { Activity, Plus, Edit, Trash2, RefreshCw, Settings, Calendar, MessageSquare, Bell, Users, FileText, Phone, Mail, MessageCircle, Upload, TrendingUp, LogIn, LogOut, UserPlus, Shield, Database } from "lucide-react";
+import { Activity, Plus, Edit, Trash2, RefreshCw, Settings, Calendar, MessageSquare, Bell, Users, FileText, Phone, Mail, MessageCircle, Upload, TrendingUp, LogIn, LogOut, UserPlus, Shield, Database, Check, X, FileCheck, UserCheck, StickyNote, Eye, UserX } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getActivityTitle, formatActivityDescription, getActivityPriority, shouldShowInFeed } from "@/utils/activityHelpers";
 
 interface EnhancedActivityFeedProps {
   userRole: string;
@@ -28,7 +29,15 @@ export function EnhancedActivityFeed({ userRole }: EnhancedActivityFeedProps) {
         if (actionType === 'created') return <Plus className="w-4 h-4" />;
         if (actionType === 'status_change') return <TrendingUp className="w-4 h-4" />;
         if (actionType === 'updated') return <Edit className="w-4 h-4" />;
+        if (actionType === 'field_updated') return <Edit className="w-4 h-4" />;
         if (actionType === 'deleted') return <Trash2 className="w-4 h-4" />;
+        if (actionType === 'keep_lead') return <Check className="w-4 h-4" />;
+        if (actionType === 'pass_lead') return <X className="w-4 h-4" />;
+        if (actionType === 'document_upload') return <Upload className="w-4 h-4" />;
+        if (actionType === 'heir_added') return <UserCheck className="w-4 h-4" />;
+        if (actionType === 'note_added') return <StickyNote className="w-4 h-4" />;
+        if (actionType === 'viewed') return <Eye className="w-4 h-4" />;
+        if (actionType === 'comment') return <MessageCircle className="w-4 h-4" />;
         return <Users className="w-4 h-4" />;
       case 'campaigns':
         if (actionType === 'created') return <Plus className="w-4 h-4" />;
@@ -64,9 +73,21 @@ export function EnhancedActivityFeed({ userRole }: EnhancedActivityFeedProps) {
           case 'deleted':
             return <Trash2 className="w-4 h-4" />;
           case 'file_upload':
+          case 'document_upload':
             return <Upload className="w-4 h-4" />;
           case 'status_change':
             return <TrendingUp className="w-4 h-4" />;
+          case 'keep_lead':
+            return <Check className="w-4 h-4" />;
+          case 'pass_lead':
+            return <X className="w-4 h-4" />;
+          case 'heir_added':
+            return <UserCheck className="w-4 h-4" />;
+          case 'note_added':
+          case 'comment':
+            return <StickyNote className="w-4 h-4" />;
+          case 'viewed':
+            return <Eye className="w-4 h-4" />;
           default:
             return <Activity className="w-4 h-4" />;
         }
@@ -80,11 +101,25 @@ export function EnhancedActivityFeed({ userRole }: EnhancedActivityFeedProps) {
           return 'bg-green-100 text-green-800 border-green-200';
         case 'updated':
         case 'edited':
+        case 'field_updated':
           return 'bg-blue-100 text-blue-800 border-blue-200';
         case 'deleted':
           return 'bg-red-100 text-red-800 border-red-200';
         case 'status_change':
           return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+        case 'keep_lead':
+          return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+        case 'pass_lead':
+          return 'bg-rose-100 text-rose-800 border-rose-200';
+        case 'document_upload':
+          return 'bg-violet-100 text-violet-800 border-violet-200';
+        case 'heir_added':
+          return 'bg-teal-100 text-teal-800 border-teal-200';
+        case 'note_added':
+        case 'comment':
+          return 'bg-amber-100 text-amber-800 border-amber-200';
+        case 'viewed':
+          return 'bg-slate-100 text-slate-800 border-slate-200';
         case 'login':
         case 'logout':
           return 'bg-purple-100 text-purple-800 border-purple-200';
@@ -112,11 +147,25 @@ export function EnhancedActivityFeed({ userRole }: EnhancedActivityFeedProps) {
         return 'text-green-600 bg-green-100';
       case 'updated':
       case 'edited':
+      case 'field_updated':
         return 'text-blue-600 bg-blue-100';
       case 'deleted':
         return 'text-red-600 bg-red-100';
       case 'status_change':
         return 'text-indigo-600 bg-indigo-100';
+      case 'keep_lead':
+        return 'text-emerald-600 bg-emerald-100';
+      case 'pass_lead':
+        return 'text-rose-600 bg-rose-100';
+      case 'document_upload':
+        return 'text-violet-600 bg-violet-100';
+      case 'heir_added':
+        return 'text-teal-600 bg-teal-100';
+      case 'note_added':
+      case 'comment':
+        return 'text-amber-600 bg-amber-100';
+      case 'viewed':
+        return 'text-slate-600 bg-slate-100';
       case 'login':
       case 'logout':
         return 'text-purple-600 bg-purple-100';
@@ -199,11 +248,18 @@ export function EnhancedActivityFeed({ userRole }: EnhancedActivityFeedProps) {
     }
   };
 
-  const filteredActivities = activities.filter(activity => {
-    const moduleMatch = moduleFilter === 'all' || activity.module.toLowerCase() === moduleFilter;
-    const actionMatch = actionFilter === 'all' || activity.action_type === actionFilter;
-    return moduleMatch && actionMatch;
-  });
+  const filteredActivities = activities
+    .filter(activity => {
+      const moduleMatch = moduleFilter === 'all' || activity.module.toLowerCase() === moduleFilter;
+      const actionMatch = actionFilter === 'all' || activity.action_type === actionFilter;
+      return moduleMatch && actionMatch && shouldShowInFeed(activity);
+    })
+    .sort((a, b) => {
+      // Sort by priority first, then by timestamp
+      const priorityDiff = getActivityPriority(b.action_type, b.module) - getActivityPriority(a.action_type, a.module);
+      if (priorityDiff !== 0) return priorityDiff;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
 
   const uniqueModules = Array.from(new Set(activities.map(a => a.module)));
   const uniqueActions = Array.from(new Set(activities.map(a => a.action_type)));
@@ -340,9 +396,37 @@ export function EnhancedActivityFeed({ userRole }: EnhancedActivityFeedProps) {
                         {getActivityBadge(activity.action_type, activity.module)}
                       </div>
                     </div>
-                    <p className="text-sm text-gray-700 mb-2 break-words leading-relaxed">
-                      {activity.description}
-                    </p>
+                    <div className="mb-2">
+                      <p className="text-sm font-medium text-gray-900 mb-1">
+                        {getActivityTitle(activity.action_type, activity.module)}
+                      </p>
+                      <p className="text-sm text-gray-700 break-words leading-relaxed">
+                        {formatActivityDescription(activity)}
+                      </p>
+                      {activity.metadata && Object.keys(activity.metadata).length > 0 && (
+                        <div className="mt-2 text-xs text-gray-500">
+                          {typeof activity.metadata === 'object' && activity.metadata !== null && 'leadName' in activity.metadata && (
+                            <span className="inline-block bg-gray-100 rounded px-2 py-1 mr-2">
+                              Lead: {String(activity.metadata.leadName)}
+                            </span>
+                          )}
+                          {typeof activity.metadata === 'object' && activity.metadata !== null && 'fileName' in activity.metadata && (
+                            <span className="inline-block bg-blue-100 rounded px-2 py-1 mr-2">
+                              File: {String(activity.metadata.fileName)}
+                            </span>
+                          )}
+                          {typeof activity.metadata === 'object' && activity.metadata !== null && 'disposition' in activity.metadata && (
+                            <span className={`inline-block rounded px-2 py-1 mr-2 ${
+                              activity.metadata.disposition === 'keep' 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {String(activity.metadata.disposition).toUpperCase()}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
                     <div className="flex items-center justify-between">
                       <p className="text-xs text-gray-500 font-medium">
                         {formatTimestamp(activity.created_at)}
