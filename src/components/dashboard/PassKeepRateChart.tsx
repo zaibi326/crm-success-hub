@@ -1,27 +1,22 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { TrendingUp } from 'lucide-react';
+import { Target } from 'lucide-react';
 import { useDashboardDataContext } from '@/contexts/DashboardDataContext';
 
 const chartConfig = {
-  HOT: {
-    label: "Hot Leads",
-    color: "#DC2626"
+  PASS: {
+    label: "Passed Leads",
+    color: "#EF4444"
   },
-  WARM: {
-    label: "Warm Leads", 
-    color: "#F97316"
-  },
-  COLD: {
-    label: "Cold Leads",
-    color: "#2563EB"
+  KEEP: {
+    label: "Keep Leads",
+    color: "#10B981"
   }
 };
 
-export function LeadsPieChart() {
+export function PassKeepRateChart() {
   const { stats, loading } = useDashboardDataContext();
 
   const data = React.useMemo(() => {
@@ -29,28 +24,25 @@ export function LeadsPieChart() {
       return [];
     }
 
-    const temperatureTotal = stats.hotDeals + stats.warmDeals + stats.coldDeals;
-    if (temperatureTotal === 0) return [];
+    const passDeals = stats.passDeals || 0;
+    const keepDeals = stats.keepDeals || 0;
+    const total = passDeals + keepDeals;
+
+    if (total === 0) return [];
 
     return [
       { 
-        name: 'HOT', 
-        value: Math.round((stats.hotDeals / temperatureTotal) * 100), 
-        color: '#DC2626', 
-        count: stats.hotDeals 
+        name: 'PASS', 
+        value: Math.round((passDeals / total) * 100), 
+        color: '#EF4444', 
+        count: passDeals 
       },
       { 
-        name: 'WARM', 
-        value: Math.round((stats.warmDeals / temperatureTotal) * 100), 
-        color: '#F97316', 
-        count: stats.warmDeals 
+        name: 'KEEP', 
+        value: Math.round((keepDeals / total) * 100), 
+        color: '#10B981', 
+        count: keepDeals 
       },
-      { 
-        name: 'COLD', 
-        value: Math.round((stats.coldDeals / temperatureTotal) * 100), 
-        color: '#2563EB', 
-        count: stats.coldDeals 
-      }
     ].filter(item => item.count > 0);
   }, [stats, loading]);
 
@@ -58,15 +50,15 @@ export function LeadsPieChart() {
     <Card className="transition-all duration-300 hover:shadow-lg">
       <CardHeader className="pb-4">
         <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center shadow-sm">
-            <TrendingUp className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center shadow-sm">
+            <Target className="w-5 h-5 text-white" />
           </div>
           <div>
             <span className="text-gray-800">
-              Lead Temperature Distribution
+              Pass / Keep Rate
             </span>
             <p className="text-sm text-gray-500 font-normal">
-              {loading ? 'Loading...' : `${stats.hotDeals + stats.warmDeals + stats.coldDeals} temperature leads`}
+              {loading ? 'Loading...' : `${(stats.passDeals || 0) + (stats.keepDeals || 0)} processed leads`}
             </p>
           </div>
         </CardTitle>
@@ -74,13 +66,13 @@ export function LeadsPieChart() {
       <CardContent>
         {loading ? (
           <div className="h-[300px] flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
           </div>
         ) : data.length === 0 || data.every(item => item.count === 0) ? (
           <div className="h-[300px] flex items-center justify-center text-gray-500">
             <div className="text-center">
-              <p className="text-lg font-medium">No leads data available</p>
-              <p className="text-sm">Add some leads to see the distribution</p>
+              <p className="text-lg font-medium">No processed leads data</p>
+              <p className="text-sm">Process some leads to see pass/keep rates</p>
             </div>
           </div>
         ) : (

@@ -4,6 +4,7 @@ import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { DashboardStats } from './DashboardStats';
 import { EnhancedActivityFeed } from './EnhancedActivityFeed';
 import { LeadsPieChart } from './LeadsPieChart';
+import { PassKeepRateChart } from './PassKeepRateChart';
 import { useDashboardDataContext } from '@/contexts/DashboardDataContext';
 
 interface DashboardContentProps {
@@ -33,8 +34,9 @@ export function DashboardContent({ userRole, showLeadsInDashboard = false }: Das
         <DashboardStats userRole={userRole} />
         
         {/* Charts and Activity Feed */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <LeadsPieChart />
+          <PassKeepRateChart />
           <EnhancedActivityFeed userRole={userRole} />
         </div>
       </main>
