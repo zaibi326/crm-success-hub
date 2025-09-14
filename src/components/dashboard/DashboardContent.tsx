@@ -33,10 +33,14 @@ export function DashboardContent({ userRole, showLeadsInDashboard = false }: Das
         {/* Stats Cards */}
         <DashboardStats userRole={userRole} />
         
-        {/* Charts and Activity Feed */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Charts Row */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <LeadsPieChart />
           <PassKeepRateChart />
+        </div>
+
+        {/* Activity Feed Row */}
+        <div className="w-full">
           <EnhancedActivityFeed userRole={userRole} />
         </div>
       </main>
