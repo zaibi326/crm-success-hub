@@ -31,6 +31,7 @@ export function EnhancedActivityFeed({ userRole }: EnhancedActivityFeedProps) {
         if (actionType === 'updated') return <Edit className="w-4 h-4" />;
         if (actionType === 'field_updated') return <Edit className="w-4 h-4" />;
         if (actionType === 'deleted') return <Trash2 className="w-4 h-4" />;
+        if (actionType === 'bulk_deleted') return <Trash2 className="w-4 h-4" />;
         if (actionType === 'keep_lead') return <Check className="w-4 h-4" />;
         if (actionType === 'pass_lead') return <X className="w-4 h-4" />;
         if (actionType === 'document_upload') return <Upload className="w-4 h-4" />;
@@ -71,6 +72,7 @@ export function EnhancedActivityFeed({ userRole }: EnhancedActivityFeedProps) {
           case 'edited':
             return <Edit className="w-4 h-4" />;
           case 'deleted':
+          case 'bulk_deleted':
             return <Trash2 className="w-4 h-4" />;
           case 'file_upload':
           case 'document_upload':
@@ -104,6 +106,7 @@ export function EnhancedActivityFeed({ userRole }: EnhancedActivityFeedProps) {
         case 'field_updated':
           return 'bg-blue-100 text-blue-800 border-blue-200';
         case 'deleted':
+        case 'bulk_deleted':
           return 'bg-red-100 text-red-800 border-red-200';
         case 'status_change':
           return 'bg-indigo-100 text-indigo-800 border-indigo-200';
@@ -150,6 +153,7 @@ export function EnhancedActivityFeed({ userRole }: EnhancedActivityFeedProps) {
       case 'field_updated':
         return 'text-blue-600 bg-blue-100';
       case 'deleted':
+      case 'bulk_deleted':
         return 'text-red-600 bg-red-100';
       case 'status_change':
         return 'text-indigo-600 bg-indigo-100';

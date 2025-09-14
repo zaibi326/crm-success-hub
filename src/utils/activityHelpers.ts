@@ -8,6 +8,7 @@ export const getActivityTitle = (actionType: string, module: string): string => 
         case 'updated': return 'Lead Updated';
         case 'field_updated': return 'Field Updated';
         case 'deleted': return 'Lead Deleted';
+        case 'bulk_deleted': return 'Leads Deleted';
         case 'status_change': return 'Status Changed';
         case 'keep_lead': return 'Lead Kept';
         case 'pass_lead': return 'Lead Passed';
@@ -79,6 +80,8 @@ export const formatActivityDescription = (activity: any): string => {
           return `Added heir${metadata?.heirName ? ` "${metadata.heirName}"` : ''}${metadata?.relationship ? ` (${metadata.relationship})` : ''}${metadata?.leadName ? ` to ${metadata.leadName}` : ''}`;
         case 'field_updated':
           return `Updated ${metadata?.fieldName || 'field'}${metadata?.oldValue && metadata?.newValue ? ` from "${metadata.oldValue}" to "${metadata.newValue}"` : ''}${metadata?.leadName ? ` for ${metadata.leadName}` : ''}`;
+        case 'bulk_deleted':
+          return `Deleted ${metadata?.count || 'multiple'} lead(s) in bulk operation${metadata?.deletedLeads && metadata.deletedLeads[0]?.ownerName ? ` including ${metadata.deletedLeads[0].ownerName}` : ''}`;
         default:
           return activity.description || `Performed ${action_type} action`;
       }
@@ -97,6 +100,7 @@ export const getActivityPriority = (actionType: string, module: string): number 
           return 10; // Highest priority
         case 'created':
         case 'deleted':
+        case 'bulk_deleted':
           return 9;
         case 'status_change':
           return 8;
