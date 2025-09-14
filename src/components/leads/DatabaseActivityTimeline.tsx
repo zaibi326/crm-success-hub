@@ -25,7 +25,7 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { TaxLead } from '@/types/taxLead';
 import { useLeadActivities, DatabaseActivityItem } from '@/hooks/useLeadActivities';
-import { useEnhancedActivityLogger } from '@/hooks/useEnhancedActivityLogger';
+import { useComprehensiveActivityLogger } from '@/hooks/useComprehensiveActivityLogger';
 import { useToast } from '@/hooks/use-toast';
 
 interface DatabaseActivityTimelineProps {
@@ -61,7 +61,7 @@ export function DatabaseActivityTimeline({
   const [filterType, setFilterType] = useState<string>('all');
   
   const { data: activities = [], isLoading, error, refetch } = useLeadActivities(lead.id.toString());
-  const { logLeadActivity, isLogging } = useEnhancedActivityLogger();
+  const { logLeadNote, isLogging } = useComprehensiveActivityLogger();
   const { toast } = useToast();
 
   // Log component mount for debugging
@@ -73,30 +73,23 @@ export function DatabaseActivityTimeline({
   const handleSubmitComment = async () => {
     if (newComment.trim()) {
       try {
-        await logLeadActivity({
-          actionType: 'comment',
-          description: newComment,
-          referenceId: lead.id.toString(),
-          metadata: {
-            leadId: lead.id,
-            ownerName: lead.ownerName,
-            commentType: 'user_comment',
-            propertyAddress: lead.propertyAddress
-          }
-        });
-
+        logLeadNote(
+          lead.id.toString(),
+          lead.ownerName || 'Unknown',
+          newComment,
+          'general'
+        );
+        
         setNewComment('');
         setIsAddingComment(false);
         
         toast({
           title: "Comment Added",
-          description: "Your comment has been added to the activity timeline",
+          description: "Your comment has been logged successfully",
         });
-
-        // Refresh activities after a short delay to ensure the database is updated
-        setTimeout(() => {
-          refetch();
-        }, 500);
+        
+        // Refetch activities to show the new comment
+        refetch();
       } catch (error) {
         console.error('Error adding comment:', error);
         toast({

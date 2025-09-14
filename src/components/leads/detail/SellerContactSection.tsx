@@ -6,7 +6,7 @@ import { TaxLead } from '@/types/taxLead';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { InlineEditField } from './InlineEditField';
 import { useToast } from '@/hooks/use-toast';
-import { useEnhancedActivityLogger } from '@/hooks/useEnhancedActivityLogger';
+import { useComprehensiveActivityLogger } from '@/hooks/useComprehensiveActivityLogger';
 
 interface SellerContactSectionProps {
   lead: TaxLead;
@@ -17,7 +17,7 @@ interface SellerContactSectionProps {
 export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: SellerContactSectionProps) {
   const [isOpen, setIsOpen] = useState(true);
   const { toast } = useToast();
-  const { logLeadActivity } = useEnhancedActivityLogger();
+  const { logLeadFieldUpdate } = useComprehensiveActivityLogger();
 
   const handleFieldChange = async (field: keyof TaxLead, value: string) => {
     if (canEdit) {
@@ -28,18 +28,13 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
         await onFieldUpdate(field, value);
         
         // Log each field change
-        await logLeadActivity({
-          actionType: 'updated',
-          description: `Updated ${field} from "${oldValue}" to "${value}" for ${lead.ownerName || 'Unknown'}`,
-          referenceId: lead.id.toString(),
-          metadata: {
-            leadId: lead.id,
-            field: field,
-            oldValue: oldValue,
-            newValue: value,
-            ownerName: lead.ownerName
-          }
-        });
+        logLeadFieldUpdate(
+          lead.id.toString(),
+          lead.ownerName || 'Unknown',
+          String(field),
+          String(oldValue || ''),
+          String(value || '')
+        );
 
         toast({
           title: "Success",

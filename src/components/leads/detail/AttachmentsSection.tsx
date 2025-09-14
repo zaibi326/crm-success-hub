@@ -9,6 +9,7 @@ import { Paperclip, Upload, File, Image, FileText, Download, Trash2, Plus, Folde
 import { AttachmentsSectionProps } from './attachments/types';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useToast } from '@/hooks/use-toast';
+import { useComprehensiveActivityLogger } from '@/hooks/useComprehensiveActivityLogger';
 import { FilesList } from './attachments/FilesList';
 import { PdfLinkInput } from './attachments/PdfLinkInput';
 
@@ -18,21 +19,40 @@ export function AttachmentsSection({
   onFileUpload,
   canEdit,
   title = "Lead Documents",
-  description = "Attach multiple PDF/image files (e.g., title deeds, legal docs, correspondence)"
+  description = "Attach multiple PDF/image files (e.g., title deeds, legal docs, correspondence)",
+  leadId,
+  leadName
 }: AttachmentsSectionProps & {
   title?: string;
   description?: string;
+  leadId?: string;
+  leadName?: string;
 }) {
   const [isOpen, setIsOpen] = useState(true);
   const [pdfUrl, setPdfUrl] = useState('');
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { logDocumentUpload } = useComprehensiveActivityLogger();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(event.target.files || []);
     if (selectedFiles.length > 0 && onFileUpload) {
       onFileUpload(selectedFiles, 'other');
+      
+      // Log document upload activity for each file
+      selectedFiles.forEach(file => {
+        if (leadId && leadName) {
+          logDocumentUpload(
+            leadId,
+            leadName,
+            file.name,
+            file.type,
+            { fileSize: file.size }
+          );
+        }
+      });
+      
       toast({
         title: "Files Added",
         description: `${selectedFiles.length} file(s) added. Click "Save Changes" to persist.`
@@ -60,6 +80,20 @@ export function AttachmentsSection({
     const droppedFiles = Array.from(e.dataTransfer.files);
     if (droppedFiles.length > 0 && onFileUpload) {
       onFileUpload(droppedFiles, 'other');
+      
+      // Log document upload activity for each dropped file
+      droppedFiles.forEach(file => {
+        if (leadId && leadName) {
+          logDocumentUpload(
+            leadId,
+            leadName,
+            file.name,
+            file.type,
+            { fileSize: file.size, uploadMethod: 'drag_drop' }
+          );
+        }
+      });
+      
       toast({
         title: "Files Added",
         description: `${droppedFiles.length} file(s) added. Click "Save Changes" to persist.`
@@ -96,6 +130,18 @@ export function AttachmentsSection({
     
     if (onFileUpload) {
       onFileUpload([mockFile], 'other');
+      
+      // Log PDF link addition activity
+      if (leadId && leadName) {
+        logDocumentUpload(
+          leadId,
+          leadName,
+          fileName,
+          'application/pdf',
+          { uploadMethod: 'pdf_link', sourceUrl: pdfUrl }
+        );
+      }
+      
       setPdfUrl('');
       toast({
         title: "PDF Link Added",

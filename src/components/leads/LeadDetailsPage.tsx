@@ -10,7 +10,7 @@ import { NotesDisplaySection } from './detail/NotesDisplaySection';
 import { DatabaseActivityTimeline } from './DatabaseActivityTimeline';
 import { LeadDetailsHeader } from './detail/LeadDetailsHeader';
 import { useToast } from '@/hooks/use-toast';
-import { useEnhancedActivityLogger } from '@/hooks/useEnhancedActivityLogger';
+import { useComprehensiveActivityLogger } from '@/hooks/useComprehensiveActivityLogger';
 
 interface LeadDetailsPageProps {
   lead: TaxLead;
@@ -23,7 +23,7 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
   const [leadData, setLeadData] = useState<TaxLead>(lead);
   const [disposition, setDisposition] = useState<'keep' | 'pass' | null>(null);
   const { toast } = useToast();
-  const { logLeadActivity } = useEnhancedActivityLogger();
+  const { logCommunicationActivity, logLeadDispositionChange, logLeadActivity } = useComprehensiveActivityLogger();
 
   // Update local state when lead prop changes
   useEffect(() => {
@@ -34,48 +34,51 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
     window.open(`tel:${phoneNumber}`, '_self');
     
     // Log call activity
-    logLeadActivity({
-      actionType: 'call',
-      description: `Initiated call to ${phoneNumber} for ${leadData.ownerName || 'Unknown'}`,
-      referenceId: leadData.id.toString(),
-      metadata: {
+    logCommunicationActivity(
+      'call',
+      `Initiated call to ${phoneNumber} for ${leadData.ownerName || 'Unknown'}`,
+      leadData.id.toString(),
+      {
         leadId: leadData.id,
         phoneNumber: phoneNumber,
-        ownerName: leadData.ownerName
+        ownerName: leadData.ownerName,
+        target: phoneNumber
       }
-    });
+    );
   };
 
   const handleSendText = (phoneNumber: string) => {
     window.open(`sms:${phoneNumber}`, '_self');
     
     // Log SMS activity
-    logLeadActivity({
-      actionType: 'sms',
-      description: `Sent SMS to ${phoneNumber} for ${leadData.ownerName || 'Unknown'}`,
-      referenceId: leadData.id.toString(),
-      metadata: {
+    logCommunicationActivity(
+      'sms',
+      `Sent SMS to ${phoneNumber} for ${leadData.ownerName || 'Unknown'}`,
+      leadData.id.toString(),
+      {
         leadId: leadData.id,
         phoneNumber: phoneNumber,
-        ownerName: leadData.ownerName
+        ownerName: leadData.ownerName,
+        target: phoneNumber
       }
-    });
+    );
   };
 
   const handleEmail = (email: string) => {
     window.open(`mailto:${email}`, '_self');
     
     // Log email activity
-    logLeadActivity({
-      actionType: 'email',
-      description: `Sent email to ${email} for ${leadData.ownerName || 'Unknown'}`,
-      referenceId: leadData.id.toString(),
-      metadata: {
+    logCommunicationActivity(
+      'email',
+      `Sent email to ${email} for ${leadData.ownerName || 'Unknown'}`,
+      leadData.id.toString(),
+      {
         leadId: leadData.id,
         email: email,
-        ownerName: leadData.ownerName
+        ownerName: leadData.ownerName,
+        target: email
       }
-    });
+    );
   };
 
   const handleFieldUpdate = async (field: keyof TaxLead, value: string) => {
@@ -181,16 +184,16 @@ export function LeadDetailsPage({ lead, onBack, onLeadUpdate }: LeadDetailsPageP
           await onLeadUpdate(updatedLead);
           
           // Log template modification activity
-          await logLeadActivity({
-            actionType: 'updated',
-            description: `Modified lead template for ${updatedLead.ownerName || 'Unknown'}`,
-            referenceId: updatedLead.id.toString(),
-            metadata: {
+          logLeadActivity(
+            'updated', 
+            `Modified lead template for ${updatedLead.ownerName || 'Unknown'}`,
+            updatedLead.id.toString(),
+            {
               leadId: updatedLead.id,
               ownerName: updatedLead.ownerName,
               modificationType: 'template'
             }
-          });
+          );
         }}
       />
     </div>

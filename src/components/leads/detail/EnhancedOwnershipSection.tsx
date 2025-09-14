@@ -9,7 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Users, Plus, Trash2, Phone, Mail, MapPin, Check, X } from 'lucide-react';
+import { InlineEditField } from './InlineEditField';
 import { useToast } from '@/hooks/use-toast';
+import { useComprehensiveActivityLogger } from '@/hooks/useComprehensiveActivityLogger';
 import { TaxLead } from '@/types/taxLead';
 
 interface Heir {
@@ -56,6 +58,7 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
   const [editingHeir, setEditingHeir] = useState<Heir | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const { toast } = useToast();
+  const { logHeirAddition, logLeadFieldUpdate } = useComprehensiveActivityLogger();
 
   const getHeirsTotalPercentage = () => {
     return heirs.reduce((sum, heir) => sum + heir.percentage, 0);
@@ -115,6 +118,20 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
         id: Date.now().toString()
       };
       setHeirs(prev => [...prev, newHeirWithId]);
+      
+      // Log heir addition activity
+      logHeirAddition(
+        lead.id.toString(),
+        lead.ownerName || 'Unknown',
+        editingHeir.name || 'New Heir',
+        editingHeir.relationship,
+        {
+          phone: editingHeir.phoneNumber,
+          email: editingHeir.email,
+          percentage: editingHeir.percentage
+        }
+      );
+      
       toast({
         title: "Heir Added",
         description: "New heir has been added successfully",
@@ -123,6 +140,16 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
       setHeirs(prev => prev.map(heir => 
         heir.id === editingHeir.id ? editingHeir : heir
       ));
+      
+      // Log heir update activity
+      logLeadFieldUpdate(
+        lead.id.toString(),
+        lead.ownerName || 'Unknown',
+        'Heir Information',
+        'Previous details',
+        `Updated ${editingHeir.name || 'heir'} information`
+      );
+      
       toast({
         title: "Heir Updated",
         description: "Heir information has been updated successfully",

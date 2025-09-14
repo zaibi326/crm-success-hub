@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Plus, Trash2, Users, PieChart as PieChartIcon, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useComprehensiveActivityLogger } from '@/hooks/useComprehensiveActivityLogger';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
@@ -29,6 +30,8 @@ interface OwnershipBreakdownChartProps {
   onSave: (heirs: Heir[]) => void;
   initialHeirs?: Heir[];
   readOnly?: boolean;
+  leadId?: string;
+  leadName?: string;
 }
 
 const COLORS = [
@@ -45,7 +48,9 @@ const RELATIONSHIP_OPTIONS = [
 export function OwnershipBreakdownChart({ 
   onSave, 
   initialHeirs = [], 
-  readOnly = false 
+  readOnly = false,
+  leadId,
+  leadName
 }: OwnershipBreakdownChartProps) {
   const [heirs, setHeirs] = useState<Heir[]>(
     initialHeirs.length > 0 ? initialHeirs : [
@@ -74,6 +79,7 @@ export function OwnershipBreakdownChart({
   const [editingHeir, setEditingHeir] = useState<Heir | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { toast } = useToast();
+  const { logHeirAddition, logLeadFieldUpdate } = useComprehensiveActivityLogger();
 
   const addHeir = () => {
     const newHeir: Heir = {
@@ -87,6 +93,16 @@ export function OwnershipBreakdownChart({
       notes: ''
     };
     setHeirs(prev => [...prev, newHeir]);
+    
+    // Log heir addition activity
+    if (leadId && leadName) {
+      logHeirAddition(
+        leadId,
+        leadName,
+        'New Heir (pending details)',
+        'Other'
+      );
+    }
   };
 
   const removeHeir = (id: string) => {
