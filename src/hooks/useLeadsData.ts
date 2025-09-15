@@ -30,14 +30,19 @@ export function useLeadsData() {
         return;
       }
 
-      const leadsData = data?.map((lead, index) => {
+      const leadsData = data?.map((lead) => {
         // Split owner_name into firstName and lastName
         const nameParts = lead.owner_name?.split(' ') || ['', ''];
         const firstName = nameParts[0] || '';
         const lastName = nameParts.slice(1).join(' ') || '';
 
+        // Create a stable numeric ID from the Supabase UUID
+        const stableNumericId = lead.id ? 
+          Math.abs(lead.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % 2147483647 : 
+          Math.floor(Math.random() * 1000000);
+
         return {
-          id: index + 1, // Use index + 1 for numeric ID as expected by TaxLead interface
+          id: stableNumericId, // Use stable numeric ID derived from Supabase UUID
           taxId: lead.tax_id || '',
           ownerName: lead.owner_name,
           propertyAddress: lead.property_address,

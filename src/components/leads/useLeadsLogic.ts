@@ -163,13 +163,13 @@ export function useLeadsLogic() {
   };
 
   const handleAddLead = async (lead: TaxLead) => {
-    const newLead = { ...lead, id: Date.now() };
-    await addLead(newLead);
+    // Don't assign a temporary ID here - let the database handle it and reload
+    await addLead(lead);
     
-    // Track the activity
-    trackLeadCreated(newLead);
+    // Track the activity - use the lead data as is
+    trackLeadCreated(lead);
     
-    console.log('Adding lead:', newLead);
+    console.log('Adding lead:', lead);
   };
 
   const handleLeadUpdate = async (updatedLead: TaxLead) => {
