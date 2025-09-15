@@ -18,22 +18,30 @@ export function SaveViewDialog({ isOpen, onClose, filters }: SaveViewDialogProps
   const { saveFilter } = useSavedFilters();
 
   const handleSave = () => {
-    if (!viewName.trim()) {
+    const trimmedName = viewName.trim();
+    console.log('Attempting to save view:', { viewName, trimmedName, filtersLength: filters.length });
+    
+    if (!trimmedName) {
+      console.log('Name validation failed - empty name');
       toast.error('Please enter a view name');
       return;
     }
 
     if (filters.length === 0) {
+      console.log('Filters validation failed - no filters');
       toast.error('No filters to save');
       return;
     }
 
     try {
-      saveFilter(viewName.trim(), filters);
-      toast.success(`View "${viewName.trim()}" saved successfully!`);
+      console.log('Calling saveFilter with:', trimmedName, filters);
+      const savedFilter = saveFilter(trimmedName, filters);
+      console.log('Filter saved successfully:', savedFilter);
+      toast.success(`View "${trimmedName}" saved successfully!`);
       setViewName('');
       onClose();
     } catch (error) {
+      console.error('Save filter error:', error);
       toast.error('Failed to save view');
     }
   };
@@ -57,9 +65,13 @@ export function SaveViewDialog({ isOpen, onClose, filters }: SaveViewDialogProps
               id="viewName"
               placeholder="Enter a name for this view..."
               value={viewName}
-              onChange={(e) => setViewName(e.target.value)}
+              onChange={(e) => {
+                console.log('Input value changed:', e.target.value);
+                setViewName(e.target.value);
+              }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && viewName.trim()) {
+                  console.log('Enter key pressed, calling handleSave');
                   handleSave();
                 }
               }}
@@ -76,7 +88,10 @@ export function SaveViewDialog({ isOpen, onClose, filters }: SaveViewDialogProps
           <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={!viewName.trim()}>
+          <Button onClick={() => {
+            console.log('Save button clicked, viewName:', viewName);
+            handleSave();
+          }} disabled={!viewName.trim()}>
             Save View
           </Button>
         </DialogFooter>
