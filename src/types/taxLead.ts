@@ -17,6 +17,7 @@ export interface TaxLead {
   createdAt?: string;
   updatedAt?: string;
   createdVia?: string;
+  createdBy?: string;
   leadManager?: string;
   tags?: string[];
   occupancyStatus?: string;

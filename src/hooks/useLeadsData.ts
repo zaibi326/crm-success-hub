@@ -15,6 +15,9 @@ export function useLeadsData() {
 
   const loadLeadsFromDatabase = async () => {
     try {
+      // First get the current user for joining with profiles
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const { data, error } = await supabase
         .from('campaign_leads')
         .select('*')
@@ -28,6 +31,35 @@ export function useLeadsData() {
           variant: "destructive",
         });
         return;
+      }
+
+      // Get unique lead creators and their profiles for better mapping
+      const uniqueCreatorIds = [...new Set(data.map(lead => lead.campaign_id).filter(Boolean))];
+      let creatorProfiles: { [key: string]: string } = {};
+
+      if (uniqueCreatorIds.length > 0) {
+        const { data: campaigns } = await supabase
+          .from('campaigns')
+          .select(`
+            id,
+            created_by,
+            profiles!campaigns_created_by_fkey(
+              first_name,
+              last_name,
+              email
+            )
+          `)
+          .in('id', uniqueCreatorIds);
+
+        if (campaigns) {
+          campaigns.forEach(campaign => {
+            if (campaign.profiles) {
+              const profile = campaign.profiles as any;
+              const displayName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email;
+              creatorProfiles[campaign.id] = displayName;
+            }
+          });
+        }
       }
 
       const leadsData = data?.map((lead) => {
@@ -46,6 +78,7 @@ export function useLeadsData() {
           taxId: lead.tax_id || '',
           ownerName: lead.owner_name,
           propertyAddress: lead.property_address,
+          createdBy: creatorProfiles[lead.campaign_id] || 'Unknown User',
           taxLawsuitNumber: lead.tax_lawsuit_number || '',
           currentArrears: lead.current_arrears || 0,
           status: (lead.status || 'COLD') as 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP',
@@ -125,6 +158,17 @@ export function useLeadsData() {
       } else {
         campaignId = campaigns[0].id;
       }
+
+      // Get user profile for creator info
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, email')
+        .eq('id', user.id)
+        .single();
+
+      const createdByName = profile 
+        ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email
+        : user.email || 'Unknown User';
 
       // Insert the new lead
       const { data, error } = await supabase

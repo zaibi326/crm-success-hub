@@ -89,7 +89,7 @@ export function useLeadsLogic() {
             fieldValue = lead.status;
             break;
           case 'createdBy':
-            fieldValue = lead.ownerName; // Using ownerName as proxy for createdBy
+            fieldValue = lead.createdBy || 'Unknown User';
             break;
           case 'createdVia':
             fieldValue = lead.createdVia || 'Manual Entry';

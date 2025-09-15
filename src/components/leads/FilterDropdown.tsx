@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { FilterPanel } from './filters/FilterPanel';
 import { FilterCondition } from './filters/types';
+import { SaveViewDialog } from './SaveViewDialog';
 
 interface FilterDropdownProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ export function FilterDropdown({
   onClearAll
 }: FilterDropdownProps) {
   const [tempFilters, setTempFilters] = useState<FilterCondition[]>(filters);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
 
   const handleApply = () => {
     onFiltersChange(tempFilters);
@@ -31,8 +33,7 @@ export function FilterDropdown({
   };
 
   const handleSave = () => {
-    onSaveView();
-    // TODO: Implement save view functionality
+    setShowSaveDialog(true);
   };
 
   const handleClear = () => {
@@ -41,14 +42,22 @@ export function FilterDropdown({
   };
 
   return (
-    <FilterPanel
-      isOpen={isOpen}
-      onClose={onClose}
-      filters={tempFilters}
-      onFiltersChange={setTempFilters}
-      onApplyFilters={handleApply}
-      onSaveView={handleSave}
-      onClearAll={handleClear}
-    />
+    <>
+      <FilterPanel
+        isOpen={isOpen}
+        onClose={onClose}
+        filters={tempFilters}
+        onFiltersChange={setTempFilters}
+        onApplyFilters={handleApply}
+        onSaveView={handleSave}
+        onClearAll={handleClear}
+      />
+      
+      <SaveViewDialog
+        isOpen={showSaveDialog}
+        onClose={() => setShowSaveDialog(false)}
+        filters={tempFilters}
+      />
+    </>
   );
 }
