@@ -267,14 +267,15 @@ export function TaxLeadDetailsForm({
     // Initialize files from lead data if available
     if (lead.attachedFiles) {
       const convertedFiles: UploadedFile[] = lead.attachedFiles.map((file, index) => ({
-        id: `existing-${index}`,
+        id: file.id || `existing-${index}`,
         name: file.name,
         type: file.type || 'application/octet-stream',
         url: file.url,
         size: file.size,
-        category: 'other' as const
+        category: (file as any).category || 'other' as const
       }));
       setFiles(convertedFiles);
+      console.log('Initialized files from lead:', convertedFiles.map(f => ({ name: f.name, category: f.category })));
     }
   }, [lead]);
 
@@ -403,12 +404,17 @@ export function TaxLeadDetailsForm({
       size: file.size,
       category
     }));
-    setFiles(prev => [...prev, ...uploadedFiles]);
+    
+    setFiles(prev => {
+      const newFiles = [...prev, ...uploadedFiles];
+      console.log('Updated files with categories:', newFiles.map(f => ({ name: f.name, category: f.category })));
+      return newFiles;
+    });
     setHasUnsavedChanges(true);
     
     toast({
       title: "Files uploaded",
-      description: `${newFiles.length} file(s) added successfully`,
+      description: `${newFiles.length} file(s) added to ${category} section`,
     });
   };
 
@@ -434,13 +440,14 @@ export function TaxLeadDetailsForm({
         ? notes.map(note => `${note.userName} (${note.timestamp.toLocaleDateString()}): ${note.text}`).join('\n\n')
         : formData.notes || '';
 
-      // Convert files back to the expected format
+      // Convert files back to the expected format with categories preserved
       const attachedFiles = files.map(file => ({
         id: file.id,
         name: file.name,
         url: file.url,
         type: file.type,
         size: file.size,
+        category: file.category,
         uploadedAt: new Date().toISOString()
       }));
 
