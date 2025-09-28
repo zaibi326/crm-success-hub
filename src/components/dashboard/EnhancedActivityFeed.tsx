@@ -258,6 +258,24 @@ export function EnhancedActivityFeed({ userRole }: EnhancedActivityFeedProps) {
       const actionMatch = actionFilter === 'all' || activity.action_type === actionFilter;
       return moduleMatch && actionMatch && shouldShowInFeed(activity);
     })
+    .reduce((unique, activity) => {
+      // Remove duplicate "viewed" activities for the same lead within short time frame
+      if (activity.action_type === 'viewed') {
+        const existingViewIndex = unique.findIndex(existing => 
+          existing.action_type === 'viewed' && 
+          existing.target_id === activity.target_id &&
+          Math.abs(new Date(existing.created_at).getTime() - new Date(activity.created_at).getTime()) < 60000 // 1 minute
+        );
+        if (existingViewIndex !== -1) {
+          // Keep the more recent one
+          if (new Date(activity.created_at) > new Date(unique[existingViewIndex].created_at)) {
+            unique[existingViewIndex] = activity;
+          }
+          return unique;
+        }
+      }
+      return [...unique, activity];
+    }, [] as typeof activities)
     .sort((a, b) => {
       // Sort by timestamp first (most recent first), then by priority
       const timeA = new Date(a.created_at).getTime();

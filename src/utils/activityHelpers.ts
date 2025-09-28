@@ -135,13 +135,13 @@ export const shouldShowInFeed = (activity: any): boolean => {
   // Filter out low-priority activities or spam
   const { action_type, module, created_at } = activity;
   
-  // Don't show too many "viewed" activities
+  // Limit "viewed" activities - only show recent ones and avoid spam
   if (action_type === 'viewed') {
     const activityTime = new Date(created_at);
     const now = new Date();
     const diffMinutes = (now.getTime() - activityTime.getTime()) / (1000 * 60);
-    // Only show recent views (within 10 minutes)
-    return diffMinutes <= 10;
+    // Only show recent views (within 5 minutes) and limit frequency  
+    return diffMinutes <= 5;
   }
   
   return true;

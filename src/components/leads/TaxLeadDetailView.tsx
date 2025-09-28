@@ -16,7 +16,7 @@ export function TaxLeadDetailView({ selectedLead, onBack }: TaxLeadDetailViewPro
   const { logActivity } = useActivityLogger();
   const navigate = useNavigate();
 
-  // Log when user views a lead
+  // Log when user views a lead (only once per lead view, not on status changes)
   useEffect(() => {
     logActivity({
       module: 'leads',
@@ -27,10 +27,10 @@ export function TaxLeadDetailView({ selectedLead, onBack }: TaxLeadDetailViewPro
       metadata: {
         leadId: selectedLead.id,
         ownerName: selectedLead.ownerName,
-        status: selectedLead.status
+        propertyAddress: selectedLead.propertyAddress
       }
     });
-  }, [selectedLead.id, selectedLead.ownerName, selectedLead.status, logActivity]);
+  }, [selectedLead.id, selectedLead.ownerName, logActivity]); // Removed status from dependencies
 
   const handleSave = (updatedLead: TaxLead) => {
     console.log('Lead updated:', updatedLead);
