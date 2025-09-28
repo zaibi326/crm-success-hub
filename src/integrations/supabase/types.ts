@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -70,7 +70,7 @@ export type Database = {
       }
       campaign_leads: {
         Row: {
-          campaign_id: string
+          campaign_id: string | null
           created_at: string
           current_arrears: number | null
           disposition: string | null
@@ -86,7 +86,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          campaign_id: string
+          campaign_id?: string | null
           created_at?: string
           current_arrears?: number | null
           disposition?: string | null
@@ -102,7 +102,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          campaign_id?: string
+          campaign_id?: string | null
           created_at?: string
           current_arrears?: number | null
           disposition?: string | null
@@ -471,30 +471,30 @@ export type Database = {
       }
       log_comprehensive_activity: {
         Args: {
-          p_user_id: string
-          p_user_name: string
-          p_module: string
           p_action_type: string
           p_description: string
+          p_ip_address?: string
+          p_metadata?: Json
+          p_module: string
           p_reference_id?: string
           p_reference_type?: string
+          p_session_id?: string
           p_target_id?: string
           p_target_type?: string
-          p_metadata?: Json
-          p_ip_address?: string
           p_user_agent?: string
-          p_session_id?: string
+          p_user_id: string
+          p_user_name: string
         }
         Returns: string
       }
       log_lead_activity: {
         Args: {
-          p_user_id: string
-          p_user_name: string
           p_action_type: string
           p_description: string
-          p_reference_id: string
           p_metadata?: Json
+          p_reference_id: string
+          p_user_id: string
+          p_user_name: string
         }
         Returns: string
       }
