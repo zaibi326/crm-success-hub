@@ -82,7 +82,7 @@ export function FileUploadSection({
           >
             <Upload className="w-4 h-4 text-gray-400" />
             <span className="text-sm text-gray-600">
-              Click to upload documents
+              {files.length > 0 ? 'Upload more documents' : 'Click to upload documents'}
             </span>
           </label>
           <p className="text-xs text-gray-500 mt-2">

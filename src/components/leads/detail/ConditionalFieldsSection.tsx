@@ -110,33 +110,36 @@ export function ConditionalFieldsSection({
               <div className="space-y-3">
                 <Label className="text-sm font-medium">Vesting Deed Documents</Label>
                 
+                {/* Upload Area - Always show if can edit */}
                 {canEdit && (
-                  <div className="flex items-center gap-3">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-primary transition-colors">
                     <input
                       type="file"
                       id="vestingDeedUpload"
-                      accept=".pdf,.jpg,.jpeg,.png"
+                      accept=".pdf,.jpg,.jpeg,.png,.docx"
                       multiple
                       onChange={handleFileUpload}
                       className="hidden"
                     />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => document.getElementById('vestingDeedUpload')?.click()}
-                      className="flex items-center gap-2 h-8"
+                    <label 
+                      htmlFor="vestingDeedUpload"
+                      className="cursor-pointer flex flex-col items-center gap-2"
                     >
-                      <Upload className="w-4 h-4" />
-                      Upload Documents
-                    </Button>
+                      <Upload className="w-6 h-6 text-gray-400" />
+                      <span className="text-sm text-gray-600">
+                        {vestingDeedFiles.length > 0 ? 'Upload more documents' : 'Click to upload documents'}
+                      </span>
+                      <span className="text-xs text-gray-500">PDF, DOCX, JPG, PNG supported</span>
+                    </label>
                   </div>
                 )}
 
                 {/* Display uploaded vesting deed files */}
                 {vestingDeedFiles.length > 0 && (
                   <div className="space-y-2">
+                    <Label className="text-xs font-medium text-gray-600">Uploaded Files:</Label>
                     {vestingDeedFiles.map((file) => (
-                      <div key={file.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
+                      <div key={file.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
                         <div className="flex items-center gap-2">
                           <FileText className="w-4 h-4 text-gray-500" />
                           <span className="text-sm font-medium truncate">{file.name}</span>
