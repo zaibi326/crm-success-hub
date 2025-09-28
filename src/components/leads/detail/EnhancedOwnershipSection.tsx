@@ -26,7 +26,11 @@ interface Heir {
 
 interface EnhancedOwnershipSectionProps {
   lead: TaxLead;
+  heirs: Heir[];
   onSave: (heirs: Heir[]) => void;
+  onHeirAdd: (heir: Heir) => void;
+  onHeirUpdate: (heir: Heir) => void;
+  onHeirRemove: (heirId: string) => void;
   canEdit?: boolean;
 }
 
@@ -52,8 +56,15 @@ const COLORS = [
   '#06B6D4', '#F97316', '#84CC16', '#EC4899', '#6366F1'
 ];
 
-export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: EnhancedOwnershipSectionProps) {
-  const [heirs, setHeirs] = useState<Heir[]>([]);
+export function EnhancedOwnershipSection({ 
+  lead, 
+  heirs, 
+  onSave, 
+  onHeirAdd, 
+  onHeirUpdate, 
+  onHeirRemove, 
+  canEdit = true 
+}: EnhancedOwnershipSectionProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingHeir, setEditingHeir] = useState<Heir | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
@@ -117,7 +128,7 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
         ...editingHeir,
         id: Date.now().toString()
       };
-      setHeirs(prev => [...prev, newHeirWithId]);
+      onHeirAdd(newHeirWithId);
       
       // Log heir addition activity
       logHeirAddition(
@@ -137,9 +148,7 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
         description: "New heir has been added successfully",
       });
     } else {
-      setHeirs(prev => prev.map(heir => 
-        heir.id === editingHeir.id ? editingHeir : heir
-      ));
+      onHeirUpdate(editingHeir);
       
       // Log heir update activity
       logLeadFieldUpdate(
@@ -162,7 +171,7 @@ export function EnhancedOwnershipSection({ lead, onSave, canEdit = true }: Enhan
   };
 
   const removeHeir = (id: string) => {
-    setHeirs(prev => prev.filter(heir => heir.id !== id));
+    onHeirRemove(id);
     toast({
       title: "Heir Removed",
       description: "Heir has been removed successfully",

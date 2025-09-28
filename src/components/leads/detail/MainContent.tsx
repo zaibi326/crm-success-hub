@@ -19,6 +19,16 @@ interface UploadedFile {
   category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities';
 }
 
+interface Heir {
+  id: string;
+  name: string;
+  relationship: string;
+  percentage: number;
+  propertyAddress: string;
+  phoneNumber: string;
+  email: string;
+}
+
 interface NoteEntry {
   id: string;
   text: string;
@@ -33,6 +43,7 @@ interface MainContentProps {
   notes: NoteEntry[];
   newNote: string;
   files: UploadedFile[];
+  heirs: Heir[];
   canEdit: boolean;
   onInputChange: (field: keyof TaxLead, value: any) => void;
   onDisposition: (disp: 'keep' | 'pass') => void;
@@ -41,6 +52,10 @@ interface MainContentProps {
   onAddNote: () => void;
   onFileUpload: (files: File[], category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities') => void;
   onRemoveFile: (fileId: string) => void;
+  onOwnershipSave: (heirs: Heir[]) => void;
+  onHeirAdd: (heir: Heir) => void;
+  onHeirUpdate: (heir: Heir) => void;
+  onHeirRemove: (heirId: string) => void;
 }
 
 export function MainContent({
@@ -50,6 +65,7 @@ export function MainContent({
   notes,
   newNote,
   files,
+  heirs,
   canEdit,
   onInputChange,
   onDisposition,
@@ -57,7 +73,11 @@ export function MainContent({
   onNewNoteChange,
   onAddNote,
   onFileUpload,
-  onRemoveFile
+  onRemoveFile,
+  onOwnershipSave,
+  onHeirAdd,
+  onHeirUpdate,
+  onHeirRemove
 }: MainContentProps) {
   const handleOwnershipSave = (heirs: any[]) => {
     console.log('Heirs saved:', heirs);
@@ -123,8 +143,12 @@ export function MainContent({
           {/* Enhanced Ownership Section */}
           <EnhancedOwnershipSection
             lead={formData}
+            heirs={heirs}
             canEdit={canEdit}
-            onSave={handleOwnershipSave}
+            onSave={onOwnershipSave}
+            onHeirAdd={onHeirAdd}
+            onHeirUpdate={onHeirUpdate}
+            onHeirRemove={onHeirRemove}
           />
         </>
       )}

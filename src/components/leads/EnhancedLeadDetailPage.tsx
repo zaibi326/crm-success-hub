@@ -29,8 +29,19 @@ interface EnhancedLeadDetailPageProps {
   onLeadUpdate: (updatedLead: TaxLead) => void;
 }
 
+interface Heir {
+  id: string;
+  name: string;
+  relationship: string;
+  percentage: number;
+  propertyAddress: string;
+  phoneNumber: string;
+  email: string;
+}
+
 export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedLeadDetailPageProps) {
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
+  const [heirs, setHeirs] = useState<Heir[]>([]);
   const [leadData, setLeadData] = useState<TaxLead>({
     ...lead,
     firstName: lead.firstName || '',
@@ -64,11 +75,12 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
     }
   };
 
-  const handleOwnershipSave = (heirs: any[]) => {
-    console.log('Heirs saved:', heirs);
+  const handleOwnershipSave = (heirsData: Heir[]) => {
+    setHeirs(heirsData);
+    console.log('Heirs saved:', heirsData);
     
     // Track heir data modifications
-    heirs.forEach(heir => {
+    heirsData.forEach(heir => {
       trackHeirDataModified(leadData, 'added', heir);
     });
     
@@ -76,6 +88,24 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
       title: "Ownership Saved",
       description: "Heirs and ownership details have been saved successfully",
     });
+  };
+
+  const handleHeirAdd = (heir: Heir) => {
+    const newHeir = {
+      ...heir,
+      id: Date.now().toString()
+    };
+    setHeirs(prev => [...prev, newHeir]);
+  };
+
+  const handleHeirUpdate = (updatedHeir: Heir) => {
+    setHeirs(prev => prev.map(heir => 
+      heir.id === updatedHeir.id ? updatedHeir : heir
+    ));
+  };
+
+  const handleHeirRemove = (heirId: string) => {
+    setHeirs(prev => prev.filter(heir => heir.id !== heirId));
   };
 
   const getStatusColor = (status: string) => {
@@ -230,7 +260,11 @@ export function EnhancedLeadDetailPage({ lead, onBack, onLeadUpdate }: EnhancedL
           <TabsContent value="ownership" className="space-y-6 mt-6">
             <EnhancedOwnershipSection 
               lead={leadData}
+              heirs={heirs}
               onSave={handleOwnershipSave}
+              onHeirAdd={handleHeirAdd}
+              onHeirUpdate={handleHeirUpdate}
+              onHeirRemove={handleHeirRemove}
               canEdit={true}
             />
           </TabsContent>

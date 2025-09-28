@@ -27,6 +27,16 @@ interface UploadedFile {
   category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities';
 }
 
+interface Heir {
+  id: string;
+  name: string;
+  relationship: string;
+  percentage: number;
+  propertyAddress: string;
+  phoneNumber: string;
+  email: string;
+}
+
 interface NoteEntry {
   id: string;
   text: string;
@@ -219,6 +229,7 @@ export function TaxLeadDetailsForm({
   const [notes, setNotes] = useState<NoteEntry[]>([]);
   const [newNote, setNewNote] = useState('');
   const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [heirs, setHeirs] = useState<Heir[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
@@ -276,6 +287,12 @@ export function TaxLeadDetailsForm({
       }));
       setFiles(convertedFiles);
       console.log('Initialized files from lead:', convertedFiles.map(f => ({ name: f.name, category: f.category })));
+    }
+
+    // Initialize heirs from lead data if available
+    if ((lead as any).heirs && Array.isArray((lead as any).heirs)) {
+      setHeirs((lead as any).heirs);
+      console.log('Initialized heirs from lead:', (lead as any).heirs);
     }
   }, [lead]);
 
@@ -455,6 +472,7 @@ export function TaxLeadDetailsForm({
         ...formData,
         notes: combinedNotes,
         attachedFiles,
+        heirs: heirs.length > 0 ? heirs : undefined,
         updatedAt: new Date().toISOString()
       };
 
@@ -477,10 +495,31 @@ export function TaxLeadDetailsForm({
     }
   };
 
-  const handleOwnershipSave = (heirs: any[]) => {
-    console.log('Heirs saved:', heirs);
-    // Here you would typically save the heirs data to your backend
-    // For now, we'll just log it
+  const handleHeirAdd = (heir: Heir) => {
+    const newHeir = {
+      ...heir,
+      id: Date.now().toString()
+    };
+    setHeirs(prev => [...prev, newHeir]);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleHeirUpdate = (updatedHeir: Heir) => {
+    setHeirs(prev => prev.map(heir => 
+      heir.id === updatedHeir.id ? updatedHeir : heir
+    ));
+    setHasUnsavedChanges(true);
+  };
+
+  const handleHeirRemove = (heirId: string) => {
+    setHeirs(prev => prev.filter(heir => heir.id !== heirId));
+    setHasUnsavedChanges(true);
+  };
+
+  const handleOwnershipSave = (heirsData: Heir[]) => {
+    setHeirs(heirsData);
+    setHasUnsavedChanges(true);
+    console.log('Heirs saved:', heirsData);
   };
 
   return (
@@ -599,8 +638,12 @@ export function TaxLeadDetailsForm({
                     {/* Collapsible Heirs & Ownership Section */}
                     <EnhancedOwnershipSection
                       lead={formData}
+                      heirs={heirs}
                       canEdit={canEdit}
                       onSave={handleOwnershipSave}
+                      onHeirAdd={handleHeirAdd}
+                      onHeirUpdate={handleHeirUpdate}
+                      onHeirRemove={handleHeirRemove}
                     />
                   </>
                 )}
