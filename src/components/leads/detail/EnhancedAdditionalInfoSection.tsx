@@ -69,7 +69,6 @@ export function EnhancedAdditionalInfoSection({
   onFileUpload,
   onRemoveFile
 }: EnhancedAdditionalInfoSectionProps) {
-  const [hasChanges, setHasChanges] = useState(false);
 
   // Group files by category for display
   const getFilesForSection = (category: 'death' | 'probate' | 'lawsuit' | 'taxing_entities') => {
@@ -95,12 +94,10 @@ export function EnhancedAdditionalInfoSection({
 
   const handleToggle = (key: keyof TaxLead, value: boolean) => {
     onInputChange(key, value);
-    setHasChanges(true);
   };
 
   const handleNotesChange = (notesKey: keyof TaxLead, value: string) => {
     onInputChange(notesKey, value);
-    setHasChanges(true);
   };
 
   const handleFileUpload = (sectionKey: string, event: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,12 +114,10 @@ export function EnhancedAdditionalInfoSection({
     
     const category = categoryMap[sectionKey] || 'other';
     onFileUpload(fileArray, category);
-    setHasChanges(true);
   };
 
   const handleRemoveFile = (fileId: string) => {
     onRemoveFile(fileId);
-    setHasChanges(true);
   };
 
   const formatFileSize = (bytes: number) => {
@@ -133,26 +128,13 @@ export function EnhancedAdditionalInfoSection({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const handleSave = () => {
-    // Changes are automatically saved through onInputChange
-    setHasChanges(false);
-    console.log('Additional information saved automatically');
-  };
 
   return (
     <Card className="shadow-lg border-0 bg-white">
       <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-t-lg">
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-3 text-xl">
-            <FileText className="w-6 h-6 text-green-600" />
-            Additional Information
-          </div>
-          {hasChanges && (
-            <Button onClick={handleSave} size="sm" className="bg-green-600 hover:bg-green-700">
-              <Save className="w-4 h-4 mr-2" />
-              Save
-            </Button>
-          )}
+        <CardTitle className="flex items-center gap-3 text-xl">
+          <FileText className="w-6 h-6 text-green-600" />
+          Additional Information
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6 space-y-6">

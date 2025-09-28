@@ -268,10 +268,21 @@ export function TaxLeadDetailsForm({
 
   const canEdit = ['admin', 'editor'].includes(userRole);
 
+  // Auto-save when data changes
+  useEffect(() => {
+    if (hasUnsavedChanges && canEdit) {
+      const timer = setTimeout(() => {
+        console.log('Auto-saving changes...');
+        handleSave();
+      }, 1000); // Auto-save after 1 second of inactivity
+      
+      return () => clearTimeout(timer);
+    }
+  }, [hasUnsavedChanges, formData, files, heirs, notes, disposition, passReason]);
+
   // Auto-save when tab changes to prevent data loss
   useEffect(() => {
     if (hasUnsavedChanges && canEdit) {
-      console.log('Tab changed with unsaved changes, auto-saving...');
       handleSave();
     }
   }, [activeTab]);
@@ -566,18 +577,6 @@ export function TaxLeadDetailsForm({
                 <Eye className="w-4 h-4" />
                 <span className="text-sm font-medium">View Only</span>
               </div>
-            )}
-            
-            {canEdit && hasUnsavedChanges && (
-              <Button
-                onClick={handleSave}
-                disabled={loading}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 h-8"
-                size="sm"
-              >
-                <Save className="w-4 h-4 mr-1" />
-                {loading ? 'Saving...' : 'Save'}
-              </Button>
             )}
           </div>
         </div>
