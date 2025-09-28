@@ -268,6 +268,14 @@ export function TaxLeadDetailsForm({
 
   const canEdit = ['admin', 'editor'].includes(userRole);
 
+  // Auto-save when tab changes to prevent data loss
+  useEffect(() => {
+    if (hasUnsavedChanges && canEdit) {
+      console.log('Tab changed with unsaved changes, auto-saving...');
+      handleSave();
+    }
+  }, [activeTab]);
+
   useEffect(() => {
     setFormData(lead);
     setDisposition(
@@ -275,8 +283,8 @@ export function TaxLeadDetailsForm({
       lead.disposition === 'DISQUALIFIED' ? 'pass' : null
     );
     
-    // Initialize files from lead data if available
-    if (lead.attachedFiles) {
+    // Initialize files from lead data if available - only if files array is empty
+    if (lead.attachedFiles && files.length === 0) {
       const convertedFiles: UploadedFile[] = lead.attachedFiles.map((file, index) => ({
         id: file.id || `existing-${index}`,
         name: file.name,
@@ -289,8 +297,8 @@ export function TaxLeadDetailsForm({
       console.log('Initialized files from lead:', convertedFiles.map(f => ({ name: f.name, category: f.category })));
     }
 
-    // Initialize heirs from lead data if available
-    if ((lead as any).heirs && Array.isArray((lead as any).heirs)) {
+    // Initialize heirs from lead data if available - only if heirs array is empty
+    if ((lead as any).heirs && Array.isArray((lead as any).heirs) && heirs.length === 0) {
       setHeirs((lead as any).heirs);
       console.log('Initialized heirs from lead:', (lead as any).heirs);
     }
@@ -433,6 +441,14 @@ export function TaxLeadDetailsForm({
       title: "Files uploaded",
       description: `${newFiles.length} file(s) added to ${category} section`,
     });
+
+    // Auto-save files immediately to prevent data loss
+    setTimeout(() => {
+      if (canEdit) {
+        console.log('Auto-saving after file upload...');
+        handleSave();
+      }
+    }, 500);
   };
 
   const handleRemoveFile = (fileId: string) => {
@@ -502,6 +518,14 @@ export function TaxLeadDetailsForm({
     };
     setHeirs(prev => [...prev, newHeir]);
     setHasUnsavedChanges(true);
+    
+    // Auto-save heirs immediately to prevent data loss
+    setTimeout(() => {
+      if (canEdit) {
+        console.log('Auto-saving after heir addition...');
+        handleSave();
+      }
+    }, 500);
   };
 
   const handleHeirUpdate = (updatedHeir: Heir) => {

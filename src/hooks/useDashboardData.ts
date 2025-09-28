@@ -86,7 +86,7 @@ export function useDashboardData(): DashboardDataContextType {
     enabled: !!user?.id && !authLoading,
   });
 
-  // Set up real-time subscription for activities
+  // Set up real-time subscription for activities and leads
   useEffect(() => {
     // Don't set up subscription if user is not authenticated
     if (!user?.id || authLoading) {
@@ -94,7 +94,7 @@ export function useDashboardData(): DashboardDataContextType {
     }
 
     const channel = supabase
-      .channel('activities-changes')
+      .channel('dashboard-changes')
       .on(
         'postgres_changes',
         {
@@ -107,12 +107,24 @@ export function useDashboardData(): DashboardDataContextType {
           refetchActivities();
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'campaign_leads'
+        },
+        (payload) => {
+          console.log('Real-time leads update:', payload);
+          refetchLeads();
+        }
+      )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [refetchActivities, user?.id, authLoading]);
+  }, [refetchActivities, refetchLeads, user?.id, authLoading]);
 
   // Transform campaign_leads to TaxLead format
   const leads: TaxLead[] = campaignLeads.map(lead => ({
