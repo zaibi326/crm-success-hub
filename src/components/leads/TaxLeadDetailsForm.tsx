@@ -574,6 +574,9 @@ export function TaxLeadDetailsForm({
                       formData={formData}
                       onInputChange={handleInputChange}
                       canEdit={canEdit}
+                      files={files}
+                      onFileUpload={handleFileUpload}
+                      onRemoveFile={handleRemoveFile}
                     />
 
                     {/* Collapsible Conditional Fields Section */}

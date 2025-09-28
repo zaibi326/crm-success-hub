@@ -15,6 +15,7 @@ interface UploadedFile {
   name: string;
   type: string;
   url: string;
+  size?: number;
   category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities';
 }
 
@@ -104,6 +105,9 @@ export function MainContent({
             formData={formData}
             onInputChange={onInputChange}
             canEdit={canEdit}
+            files={files}
+            onFileUpload={onFileUpload}
+            onRemoveFile={onRemoveFile}
           />
 
           {/* Conditional Fields Section - Only vesting deed specific uploads */}

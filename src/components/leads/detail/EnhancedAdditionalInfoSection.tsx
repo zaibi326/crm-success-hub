@@ -12,15 +12,19 @@ import { TaxLead } from '@/types/taxLead';
 interface UploadedFile {
   id: string;
   name: string;
-  size: number;
+  size?: number;
   type: string;
   url?: string;
+  category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities';
 }
 
 interface EnhancedAdditionalInfoSectionProps {
   formData: TaxLead;
   onInputChange: (field: keyof TaxLead, value: any) => void;
   canEdit: boolean;
+  files: UploadedFile[];
+  onFileUpload: (files: File[], category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities') => void;
+  onRemoveFile: (fileId: string) => void;
 }
 
 interface InfoSection {
@@ -60,10 +64,17 @@ const infoSections: InfoSection[] = [
 export function EnhancedAdditionalInfoSection({ 
   formData, 
   onInputChange, 
-  canEdit 
+  canEdit,
+  files,
+  onFileUpload,
+  onRemoveFile
 }: EnhancedAdditionalInfoSectionProps) {
-  const [files, setFiles] = useState<Record<string, UploadedFile[]>>({});
   const [hasChanges, setHasChanges] = useState(false);
+
+  // Group files by category for display
+  const getFilesForSection = (category: 'death' | 'probate' | 'lawsuit' | 'taxing_entities') => {
+    return files.filter(file => file.category === category);
+  };
 
   // Early return if formData is not available
   if (!formData) {
@@ -96,25 +107,21 @@ export function EnhancedAdditionalInfoSection({
     const uploadedFiles = event.target.files;
     if (!uploadedFiles) return;
 
-    const newFiles = Array.from(uploadedFiles).map(file => ({
-      id: Date.now() + Math.random().toString(),
-      name: file.name,
-      size: file.size,
-      type: file.type
-    }));
-
-    setFiles(prev => ({
-      ...prev,
-      [sectionKey]: [...(prev[sectionKey] || []), ...newFiles]
-    }));
+    const fileArray = Array.from(uploadedFiles);
+    const categoryMap: Record<string, 'death' | 'probate' | 'lawsuit' | 'taxing_entities'> = {
+      'hasDeath': 'death',
+      'hasProbate': 'probate', 
+      'hasLawsuit': 'lawsuit',
+      'hasAdditionalTaxingEntities': 'taxing_entities'
+    };
+    
+    const category = categoryMap[sectionKey] || 'other';
+    onFileUpload(fileArray, category);
     setHasChanges(true);
   };
 
-  const removeFile = (sectionKey: string, fileId: string) => {
-    setFiles(prev => ({
-      ...prev,
-      [sectionKey]: prev[sectionKey]?.filter(f => f.id !== fileId) || []
-    }));
+  const handleRemoveFile = (fileId: string) => {
+    onRemoveFile(fileId);
     setHasChanges(true);
   };
 
@@ -127,9 +134,9 @@ export function EnhancedAdditionalInfoSection({
   };
 
   const handleSave = () => {
-    // Save changes logic here
+    // Changes are automatically saved through onInputChange
     setHasChanges(false);
-    console.log('Saving additional information...');
+    console.log('Additional information saved automatically');
   };
 
   return (
@@ -152,7 +159,13 @@ export function EnhancedAdditionalInfoSection({
         {infoSections.map((section) => {
           const isEnabled = Boolean(formData[section.key]);
           const notesValue = (formData[section.notesKey] as string) || '';
-          const sectionFiles = files[section.key] || [];
+          const categoryMap: Record<string, 'death' | 'probate' | 'lawsuit' | 'taxing_entities'> = {
+            'hasDeath': 'death',
+            'hasProbate': 'probate', 
+            'hasLawsuit': 'lawsuit',
+            'hasAdditionalTaxingEntities': 'taxing_entities'
+          };
+          const sectionFiles = getFilesForSection(categoryMap[section.key] || 'death');
 
           return (
             <div key={section.key} className="border border-gray-200 rounded-lg p-4 space-y-4">
@@ -235,7 +248,7 @@ export function EnhancedAdditionalInfoSection({
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => removeFile(section.key, file.id)}
+                                onClick={() => handleRemoveFile(file.id)}
                                 className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 h-auto"
                               >
                                 <X className="w-4 h-4" />
