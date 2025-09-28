@@ -259,10 +259,14 @@ export function EnhancedActivityFeed({ userRole }: EnhancedActivityFeedProps) {
       return moduleMatch && actionMatch && shouldShowInFeed(activity);
     })
     .sort((a, b) => {
-      // Sort by priority first, then by timestamp
-      const priorityDiff = getActivityPriority(b.action_type, b.module) - getActivityPriority(a.action_type, a.module);
-      if (priorityDiff !== 0) return priorityDiff;
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      // Sort by timestamp first (most recent first), then by priority
+      const timeA = new Date(a.created_at).getTime();
+      const timeB = new Date(b.created_at).getTime();
+      const timeDiff = timeB - timeA;
+      if (timeDiff !== 0) return timeDiff;
+      
+      // If timestamps are equal, then sort by priority
+      return getActivityPriority(b.action_type, b.module) - getActivityPriority(a.action_type, a.module);
     });
 
   const uniqueModules = Array.from(new Set(activities.map(a => a.module)));

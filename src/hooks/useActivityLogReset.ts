@@ -19,7 +19,7 @@ export function useActivityLogReset() {
         throw error;
       }
 
-      console.log('Activity logs reset successfully');
+      console.log('Activity logs reset successfully:', data);
       return data;
     },
     onSuccess: () => {

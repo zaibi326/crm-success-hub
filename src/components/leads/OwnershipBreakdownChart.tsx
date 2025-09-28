@@ -52,30 +52,14 @@ export function OwnershipBreakdownChart({
   leadId,
   leadName
 }: OwnershipBreakdownChartProps) {
-  const [heirs, setHeirs] = useState<Heir[]>(
-    initialHeirs.length > 0 ? initialHeirs : [
-      { 
-        id: '1', 
-        name: 'John Smith', 
-        relationship: 'Father',
-        email: '',
-        propertyAddress: '',
-        phoneNumber: '',
-        percentage: 50,
-        notes: ''
-      },
-      { 
-        id: '2', 
-        name: 'Jane Smith', 
-        relationship: 'Mother',
-        email: '',
-        propertyAddress: '',
-        phoneNumber: '',
-        percentage: 50,
-        notes: ''
-      }
-    ]
-  );
+  const [heirs, setHeirs] = useState<Heir[]>(() => {
+    // Always start with initialHeirs if provided, otherwise empty array for new entries
+    if (initialHeirs && initialHeirs.length > 0) {
+      return initialHeirs;
+    }
+    // For new ownership breakdown, start with empty state
+    return [];
+  });
   const [editingHeir, setEditingHeir] = useState<Heir | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { toast } = useToast();
@@ -92,7 +76,13 @@ export function OwnershipBreakdownChart({
       percentage: 0,
       notes: ''
     };
-    setHeirs(prev => [...prev, newHeir]);
+    const updatedHeirs = [...heirs, newHeir];
+    setHeirs(updatedHeirs);
+    
+    // Auto-save to prevent data loss
+    if (onSave) {
+      onSave(updatedHeirs);
+    }
     
     // Log heir addition activity
     if (leadId && leadName) {
@@ -114,15 +104,27 @@ export function OwnershipBreakdownChart({
       });
       return;
     }
-    setHeirs(prev => prev.filter(heir => heir.id !== id));
+    const updatedHeirs = heirs.filter(heir => heir.id !== id);
+    setHeirs(updatedHeirs);
+    
+    // Auto-save changes to prevent data loss
+    if (onSave) {
+      onSave(updatedHeirs);
+    }
   };
 
   const updateHeir = (id: string, field: keyof Heir, value: string | number) => {
-    setHeirs(prev => prev.map(heir => 
+    const updatedHeirs = heirs.map(heir => 
       heir.id === id 
         ? { ...heir, [field]: value }
         : heir
-    ));
+    );
+    setHeirs(updatedHeirs);
+    
+    // Auto-save changes to parent component to prevent data loss
+    if (onSave) {
+      onSave(updatedHeirs);
+    }
   };
 
   const openEditModal = (heir: Heir) => {
