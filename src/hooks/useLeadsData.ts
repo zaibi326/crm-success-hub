@@ -79,8 +79,38 @@ export function useLeadsData() {
           updatedAt: lead.updated_at,
           
           // Attached files and heirs from JSONB columns
-          attachedFiles: (lead.attached_files as Array<{ id: string; name: string; type: string; url: string; preview?: string; size?: number; }>) || [],
-          heirs: (lead.heirs as Array<any>) || [],
+          attachedFiles: (() => {
+            try {
+              const files = lead.attached_files;
+              if (Array.isArray(files)) {
+                return files;
+              }
+              if (typeof files === 'string') {
+                const parsed = JSON.parse(files);
+                return Array.isArray(parsed) ? parsed : [];
+              }
+              return [];
+            } catch (error) {
+              console.warn('Error parsing attached_files:', error);
+              return [];
+            }
+          })(),
+          heirs: (() => {
+            try {
+              const heirs = lead.heirs;
+              if (Array.isArray(heirs)) {
+                return heirs;
+              }
+              if (typeof heirs === 'string') {
+                const parsed = JSON.parse(heirs);
+                return Array.isArray(parsed) ? parsed : [];
+              }
+              return [];
+            } catch (error) {
+              console.warn('Error parsing heirs:', error);
+              return [];
+            }
+          })(),
           
           // Additional Information Fields
           hasDeath: lead.has_death || false,
