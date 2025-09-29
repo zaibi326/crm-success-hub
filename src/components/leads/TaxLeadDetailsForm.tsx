@@ -301,6 +301,23 @@ export function TaxLeadDetailsForm({
     }
   }, [hasUnsavedChanges, formData, files, heirs, notes, disposition, passReason]);
 
+  // Auto-save when files are uploaded (with updated state)
+  useEffect(() => {
+    if (files.length > 0 && canEdit && hasUnsavedChanges) {
+      const timer = setTimeout(() => {
+        console.log('Auto-saving after file upload - current files count:', files.length);
+        toast({
+          title: "Auto-saving files...",
+          description: "Saving uploaded files automatically",
+          duration: 1500,
+        });
+        handleSave();
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [files.length, canEdit, hasUnsavedChanges]);
+
   // Auto-save when tab changes to prevent data loss
   useEffect(() => {
     if (hasUnsavedChanges && canEdit) {
@@ -506,14 +523,6 @@ export function TaxLeadDetailsForm({
       title: "Files uploaded",
       description: `${newFiles.length} file(s) added to ${category} section`,
     });
-
-    // Auto-save files immediately to prevent data loss
-    setTimeout(() => {
-      if (canEdit) {
-        console.log('Auto-saving after file upload - current files state:', files.length);
-        handleSave();
-      }
-    }, 500);
   };
 
   const handleRemoveFile = (fileId: string) => {
@@ -594,14 +603,6 @@ export function TaxLeadDetailsForm({
     };
     setHeirs(prev => [...prev, newHeir]);
     setHasUnsavedChanges(true);
-    
-    // Auto-save heirs immediately to prevent data loss
-    setTimeout(() => {
-      if (canEdit) {
-        console.log('Auto-saving after heir addition...');
-        handleSave();
-      }
-    }, 500);
   };
 
   const handleHeirUpdate = (updatedHeir: Heir) => {
