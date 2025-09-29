@@ -228,8 +228,24 @@ export function TaxLeadDetailsForm({
   const [passReason, setPassReason] = useState('');
   const [notes, setNotes] = useState<NoteEntry[]>([]);
   const [newNote, setNewNote] = useState('');
-  const [files, setFiles] = useState<UploadedFile[]>([]);
-  const [heirs, setHeirs] = useState<Heir[]>([]);
+  const [files, setFiles] = useState<UploadedFile[]>(() => {
+    // Initialize files from lead data immediately
+    if (lead.attachedFiles) {
+      return lead.attachedFiles.map((file, index) => ({
+        id: file.id || `existing-${index}`,
+        name: file.name,
+        type: file.type || 'application/octet-stream',
+        url: file.url,
+        size: file.size,
+        category: (file as any).category || 'other' as const
+      }));
+    }
+    return [];
+  });
+  const [heirs, setHeirs] = useState<Heir[]>(() => {
+    // Initialize heirs from lead data immediately
+    return (lead as any).heirs && Array.isArray((lead as any).heirs) ? (lead as any).heirs : [];
+  });
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
@@ -299,7 +315,7 @@ export function TaxLeadDetailsForm({
   }, [activeTab]);
 
   useEffect(() => {
-    // Only reset formData if it's significantly different from lead prop
+    // Update formData when lead prop changes
     if (lead.id !== formData.id || lead.updatedAt !== formData.updatedAt) {
       console.log('Lead prop changed, updating form data');
       setFormData(lead);
@@ -308,9 +324,14 @@ export function TaxLeadDetailsForm({
         lead.disposition === 'DISQUALIFIED' ? 'pass' : null
       );
     }
+  }, [lead.id, lead.updatedAt]);
+
+  // Separate useEffect to always sync files and heirs with lead data
+  useEffect(() => {
+    console.log('Syncing files and heirs with lead data...');
     
-    // Initialize files from lead data if available - only when lead changes, not on every render
-    if (lead.attachedFiles && lead.id !== formData.id) {
+    // Always update files from lead data to ensure persistence across navigation
+    if (lead.attachedFiles) {
       const convertedFiles: UploadedFile[] = lead.attachedFiles.map((file, index) => ({
         id: file.id || `existing-${index}`,
         name: file.name,
@@ -320,15 +341,19 @@ export function TaxLeadDetailsForm({
         category: (file as any).category || 'other' as const
       }));
       setFiles(convertedFiles);
-      console.log('Initialized files from lead:', convertedFiles.map(f => ({ name: f.name, category: f.category })));
+      console.log('Synced files from lead:', convertedFiles.map(f => ({ name: f.name, category: f.category })));
+    } else {
+      setFiles([]);
     }
 
-    // Initialize heirs from lead data if available - only when lead changes, not on every render
-    if ((lead as any).heirs && Array.isArray((lead as any).heirs) && lead.id !== formData.id) {
+    // Always update heirs from lead data to ensure persistence across navigation
+    if ((lead as any).heirs && Array.isArray((lead as any).heirs)) {
       setHeirs((lead as any).heirs);
-      console.log('Initialized heirs from lead:', (lead as any).heirs);
+      console.log('Synced heirs from lead:', (lead as any).heirs);
+    } else {
+      setHeirs([]);
     }
-  }, [lead.id, lead.updatedAt]); // Only depend on ID and updatedAt to prevent unnecessary resets
+  }, [lead]);
 
   const handleInputChange = (field: keyof TaxLead, value: any) => {
     setFormData(prev => ({
