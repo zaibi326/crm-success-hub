@@ -70,52 +70,91 @@ export type Database = {
       }
       campaign_leads: {
         Row: {
+          additional_taxing_notes: string | null
+          attached_files: Json | null
           campaign_id: string | null
           created_at: string
           current_arrears: number | null
+          death_notes: string | null
           disposition: string | null
           email: string | null
+          grantor_grantee_name: string | null
+          has_additional_taxing_entities: boolean | null
+          has_death: boolean | null
+          has_lawsuit: boolean | null
+          has_probate: boolean | null
+          heirs: Json | null
           id: string
+          lawsuit_notes: string | null
           notes: string | null
           owner_name: string
+          owner_of_record: string | null
           phone: string | null
+          probate_notes: string | null
           property_address: string
           status: string | null
           tax_id: string | null
           tax_lawsuit_number: string | null
           updated_at: string
+          vesting_deed_date: string | null
         }
         Insert: {
+          additional_taxing_notes?: string | null
+          attached_files?: Json | null
           campaign_id?: string | null
           created_at?: string
           current_arrears?: number | null
+          death_notes?: string | null
           disposition?: string | null
           email?: string | null
+          grantor_grantee_name?: string | null
+          has_additional_taxing_entities?: boolean | null
+          has_death?: boolean | null
+          has_lawsuit?: boolean | null
+          has_probate?: boolean | null
+          heirs?: Json | null
           id?: string
+          lawsuit_notes?: string | null
           notes?: string | null
           owner_name: string
+          owner_of_record?: string | null
           phone?: string | null
+          probate_notes?: string | null
           property_address: string
           status?: string | null
           tax_id?: string | null
           tax_lawsuit_number?: string | null
           updated_at?: string
+          vesting_deed_date?: string | null
         }
         Update: {
+          additional_taxing_notes?: string | null
+          attached_files?: Json | null
           campaign_id?: string | null
           created_at?: string
           current_arrears?: number | null
+          death_notes?: string | null
           disposition?: string | null
           email?: string | null
+          grantor_grantee_name?: string | null
+          has_additional_taxing_entities?: boolean | null
+          has_death?: boolean | null
+          has_lawsuit?: boolean | null
+          has_probate?: boolean | null
+          heirs?: Json | null
           id?: string
+          lawsuit_notes?: string | null
           notes?: string | null
           owner_name?: string
+          owner_of_record?: string | null
           phone?: string | null
+          probate_notes?: string | null
           property_address?: string
           status?: string | null
           tax_id?: string | null
           tax_lawsuit_number?: string | null
           updated_at?: string
+          vesting_deed_date?: string | null
         }
         Relationships: [
           {

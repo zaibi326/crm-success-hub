@@ -273,6 +273,11 @@ export function TaxLeadDetailsForm({
     if (hasUnsavedChanges && canEdit) {
       const timer = setTimeout(() => {
         console.log('Auto-saving changes...');
+        toast({
+          title: "Auto-saving...",
+          description: "Saving your changes automatically",
+          duration: 1500,
+        });
         handleSave();
       }, 1000); // Auto-save after 1 second of inactivity
       
@@ -283,19 +288,29 @@ export function TaxLeadDetailsForm({
   // Auto-save when tab changes to prevent data loss
   useEffect(() => {
     if (hasUnsavedChanges && canEdit) {
+      console.log('Tab changed, auto-saving to prevent data loss...');
+      toast({
+        title: "Auto-saving...",
+        description: "Saving changes before tab switch",
+        duration: 1500,
+      });
       handleSave();
     }
   }, [activeTab]);
 
   useEffect(() => {
-    setFormData(lead);
-    setDisposition(
-      lead.disposition === 'QUALIFIED' ? 'keep' : 
-      lead.disposition === 'DISQUALIFIED' ? 'pass' : null
-    );
+    // Only reset formData if it's significantly different from lead prop
+    if (lead.id !== formData.id || lead.updatedAt !== formData.updatedAt) {
+      console.log('Lead prop changed, updating form data');
+      setFormData(lead);
+      setDisposition(
+        lead.disposition === 'QUALIFIED' ? 'keep' : 
+        lead.disposition === 'DISQUALIFIED' ? 'pass' : null
+      );
+    }
     
-    // Initialize files from lead data if available - only if files array is empty
-    if (lead.attachedFiles && files.length === 0) {
+    // Initialize files from lead data if available - only when lead changes, not on every render
+    if (lead.attachedFiles && lead.id !== formData.id) {
       const convertedFiles: UploadedFile[] = lead.attachedFiles.map((file, index) => ({
         id: file.id || `existing-${index}`,
         name: file.name,
@@ -308,12 +323,12 @@ export function TaxLeadDetailsForm({
       console.log('Initialized files from lead:', convertedFiles.map(f => ({ name: f.name, category: f.category })));
     }
 
-    // Initialize heirs from lead data if available - only if heirs array is empty
-    if ((lead as any).heirs && Array.isArray((lead as any).heirs) && heirs.length === 0) {
+    // Initialize heirs from lead data if available - only when lead changes, not on every render
+    if ((lead as any).heirs && Array.isArray((lead as any).heirs) && lead.id !== formData.id) {
       setHeirs((lead as any).heirs);
       console.log('Initialized heirs from lead:', (lead as any).heirs);
     }
-  }, [lead]);
+  }, [lead.id, lead.updatedAt]); // Only depend on ID and updatedAt to prevent unnecessary resets
 
   const handleInputChange = (field: keyof TaxLead, value: any) => {
     setFormData(prev => ({
@@ -495,13 +510,15 @@ export function TaxLeadDetailsForm({
         uploadedAt: new Date().toISOString()
       }));
 
-      const updatedLead = {
+      const updatedLead: TaxLead = {
         ...formData,
         notes: combinedNotes,
-        attachedFiles,
-        heirs: heirs.length > 0 ? heirs : undefined,
+        attachedFiles: attachedFiles as any, // Cast to match TaxLead interface
         updatedAt: new Date().toISOString()
       };
+
+      // Add heirs data separately to avoid TypeScript issues
+      (updatedLead as any).heirs = heirs;
 
       onSave(updatedLead);
       toast({

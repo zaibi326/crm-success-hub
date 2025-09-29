@@ -77,6 +77,26 @@ export function useLeadsData() {
           disposition: (lead.disposition as 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED') || 'UNDECIDED',
           createdAt: lead.created_at,
           updatedAt: lead.updated_at,
+          
+          // Attached files and heirs from JSONB columns
+          attachedFiles: (lead.attached_files as Array<{ id: string; name: string; type: string; url: string; preview?: string; size?: number; }>) || [],
+          heirs: (lead.heirs as Array<any>) || [],
+          
+          // Additional Information Fields
+          hasDeath: lead.has_death || false,
+          deathNotes: lead.death_notes || '',
+          hasProbate: lead.has_probate || false,
+          probateNotes: lead.probate_notes || '',
+          hasLawsuit: lead.has_lawsuit || false,
+          lawsuitNotes: lead.lawsuit_notes || '',
+          hasAdditionalTaxingEntities: lead.has_additional_taxing_entities || false,
+          additionalTaxingNotes: lead.additional_taxing_notes || '',
+          
+          // Conditional Fields
+          vestingDeedDate: lead.vesting_deed_date || '',
+          grantorGranteeName: lead.grantor_grantee_name || '',
+          ownerOfRecord: lead.owner_of_record || '',
+          
           supabaseId: lead.id // Store the actual Supabase ID for operations
         } as TaxLead & { supabaseId: string };
       }) || [];
@@ -169,7 +189,26 @@ export function useLeadsData() {
           notes: newLead.notes,
           phone: newLead.phone,
           email: newLead.email,
-          disposition: newLead.disposition || 'UNDECIDED'
+          disposition: newLead.disposition || 'UNDECIDED',
+          
+          // New JSONB fields
+          attached_files: JSON.stringify((newLead as any).attachedFiles || []),
+          heirs: JSON.stringify((newLead as any).heirs || []),
+          
+          // Additional information fields
+          has_death: newLead.hasDeath || false,
+          death_notes: newLead.deathNotes || '',
+          has_probate: newLead.hasProbate || false,
+          probate_notes: newLead.probateNotes || '',
+          has_lawsuit: newLead.hasLawsuit || false,
+          lawsuit_notes: newLead.lawsuitNotes || '',
+          has_additional_taxing_entities: newLead.hasAdditionalTaxingEntities || false,
+          additional_taxing_notes: newLead.additionalTaxingNotes || '',
+          
+          // Conditional fields
+          vesting_deed_date: newLead.vestingDeedDate || '',
+          grantor_grantee_name: newLead.grantorGranteeName || '',
+          owner_of_record: newLead.ownerOfRecord || ''
         })
         .select()
         .single();
@@ -240,6 +279,26 @@ export function useLeadsData() {
           phone: updatedLead.phone,
           email: updatedLead.email,
           disposition: updatedLead.disposition || 'UNDECIDED',
+          
+          // New JSONB fields
+          attached_files: JSON.stringify((updatedLead as any).attachedFiles || []),
+          heirs: JSON.stringify((updatedLead as any).heirs || []),
+          
+          // Additional information fields
+          has_death: updatedLead.hasDeath,
+          death_notes: updatedLead.deathNotes,
+          has_probate: updatedLead.hasProbate,
+          probate_notes: updatedLead.probateNotes,
+          has_lawsuit: updatedLead.hasLawsuit,
+          lawsuit_notes: updatedLead.lawsuitNotes,
+          has_additional_taxing_entities: updatedLead.hasAdditionalTaxingEntities,
+          additional_taxing_notes: updatedLead.additionalTaxingNotes,
+          
+          // Conditional fields
+          vesting_deed_date: updatedLead.vestingDeedDate,
+          grantor_grantee_name: updatedLead.grantorGranteeName,
+          owner_of_record: updatedLead.ownerOfRecord,
+          
           updated_at: new Date().toISOString()
         })
         .eq('id', leadWithSupabaseId.supabaseId);
