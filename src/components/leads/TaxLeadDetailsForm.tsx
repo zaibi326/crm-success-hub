@@ -472,6 +472,13 @@ export function TaxLeadDetailsForm({
   };
 
   const handleFileUpload = (newFiles: File[], category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities') => {
+    console.log('TaxLeadDetailsForm - handleFileUpload called:', {
+      category,
+      fileCount: newFiles.length,
+      fileNames: newFiles.map(f => f.name),
+      currentFilesCount: files.length
+    });
+
     const uploadedFiles: UploadedFile[] = newFiles.map(file => ({
       id: `${Date.now()}-${Math.random()}`,
       name: file.name,
@@ -481,9 +488,16 @@ export function TaxLeadDetailsForm({
       category
     }));
     
+    console.log('Created uploadedFiles:', uploadedFiles);
+    
     setFiles(prev => {
       const newFiles = [...prev, ...uploadedFiles];
-      console.log('Updated files with categories:', newFiles.map(f => ({ name: f.name, category: f.category })));
+      console.log('Setting new files state:', {
+        previousCount: prev.length,
+        addedCount: uploadedFiles.length,
+        newCount: newFiles.length,
+        newFiles: newFiles.map(f => ({ name: f.name, category: f.category }))
+      });
       return newFiles;
     });
     setHasUnsavedChanges(true);
@@ -496,7 +510,7 @@ export function TaxLeadDetailsForm({
     // Auto-save files immediately to prevent data loss
     setTimeout(() => {
       if (canEdit) {
-        console.log('Auto-saving after file upload...');
+        console.log('Auto-saving after file upload - current files state:', files.length);
         handleSave();
       }
     }, 500);

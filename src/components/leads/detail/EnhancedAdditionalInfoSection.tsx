@@ -113,7 +113,15 @@ export function EnhancedAdditionalInfoSection({
     };
     
     const category = categoryMap[sectionKey] || 'other';
-    onFileUpload(fileArray, category);
+    
+    console.log('EnhancedAdditionalInfoSection - File upload:', {
+      sectionKey,
+      category,
+      fileCount: fileArray.length,
+      fileNames: fileArray.map(f => f.name)
+    });
+    
+    onFileUpload(fileArray, category as 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities');
   };
 
   const handleRemoveFile = (fileId: string) => {
