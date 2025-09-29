@@ -230,7 +230,7 @@ export function TaxLeadDetailsForm({
   const [newNote, setNewNote] = useState('');
   const [files, setFiles] = useState<UploadedFile[]>(() => {
     // Initialize files from lead data immediately
-    if (lead.attachedFiles) {
+    if (lead.attachedFiles && Array.isArray(lead.attachedFiles)) {
       return lead.attachedFiles.map((file, index) => ({
         id: file.id || `existing-${index}`,
         name: file.name,
@@ -331,7 +331,7 @@ export function TaxLeadDetailsForm({
     console.log('Syncing files and heirs with lead data...');
     
     // Always update files from lead data to ensure persistence across navigation
-    if (lead.attachedFiles) {
+    if (lead.attachedFiles && Array.isArray(lead.attachedFiles)) {
       const convertedFiles: UploadedFile[] = lead.attachedFiles.map((file, index) => ({
         id: file.id || `existing-${index}`,
         name: file.name,
