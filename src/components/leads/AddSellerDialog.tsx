@@ -42,7 +42,7 @@ export function AddSellerDialog({ onAddSeller }: AddSellerDialogProps) {
         id: Date.now(),
         firstName: formData.firstName,
         lastName: formData.lastName,
-        ownerName: `${formData.firstName} ${formData.lastName}`.trim(),
+        ownerName: formData.firstName ? `${formData.firstName} ${formData.lastName}`.trim() : formData.lastName,
         propertyAddress: formData.propertyAddress,
         phone: formData.phone,
         email: formData.email,

@@ -21,13 +21,21 @@ export function PersonalInfoSection({ leadData, onFieldUpdate }: PersonalInfoSec
       </CardHeader>
       <CardContent className="space-y-4">
         <EditableField
-          label="Full Name"
-          value={`${leadData.firstName || ''} ${leadData.lastName || ''}`.trim()}
-          onSave={(value) => {
-            const [firstName, ...lastNameParts] = value.split(' ');
-            onFieldUpdate('firstName', firstName || '');
-            onFieldUpdate('lastName', lastNameParts.join(' ') || '');
-          }}
+          label="Owner Name"
+          value={leadData.ownerName || ''}
+          onSave={(value) => onFieldUpdate('ownerName', value)}
+        />
+        
+        <EditableField
+          label="First Name"
+          value={leadData.firstName || ''}
+          onSave={(value) => onFieldUpdate('firstName', value)}
+        />
+        
+        <EditableField
+          label="Last Name"
+          value={leadData.lastName || ''}
+          onSave={(value) => onFieldUpdate('lastName', value)}
         />
         
         {leadData.phone && (
