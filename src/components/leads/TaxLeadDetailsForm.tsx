@@ -512,12 +512,13 @@ export function TaxLeadDetailsForm({
     });
   };
 
-  const handleSave = async () => {
+   const handleSave = async () => {
     if (!canEdit) return;
     
     setLoading(true);
     try {
       console.log('Saving lead with data:', formData);
+      console.log('Current files state:', files);
       
       // Combine notes into the main notes field
       const combinedNotes = notes.length > 0 
@@ -535,6 +536,8 @@ export function TaxLeadDetailsForm({
         uploadedAt: new Date().toISOString()
       }));
 
+      console.log('Processed attachedFiles for save:', attachedFiles);
+
       const updatedLead: TaxLead = {
         ...formData,
         notes: combinedNotes,
@@ -544,6 +547,12 @@ export function TaxLeadDetailsForm({
 
       // Add heirs data separately to avoid TypeScript issues
       (updatedLead as any).heirs = heirs;
+
+      console.log('Final updatedLead with attachedFiles:', { 
+        id: updatedLead.id, 
+        attachedFiles: (updatedLead as any).attachedFiles,
+        filesCount: files.length 
+      });
 
       onSave(updatedLead);
       toast({

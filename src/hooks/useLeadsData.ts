@@ -292,7 +292,21 @@ export function useLeadsData() {
         phone: updatedLead.phone,
         email: updatedLead.email,
         firstName: updatedLead.firstName,
-        lastName: updatedLead.lastName
+        lastName: updatedLead.lastName,
+        attachedFiles: (updatedLead as any).attachedFiles,
+        attachedFilesType: typeof (updatedLead as any).attachedFiles,
+        attachedFilesLength: (updatedLead as any).attachedFiles?.length
+      });
+
+      // New JSONB fields
+      const attachedFilesToSave = (updatedLead as any).attachedFiles || [];
+      const heirsToSave = (updatedLead as any).heirs || [];
+      
+      console.log('Preparing to save to DB:', {
+        attachedFiles: attachedFilesToSave,
+        attachedFilesStringified: JSON.stringify(attachedFilesToSave),
+        heirs: heirsToSave,
+        heirsStringified: JSON.stringify(heirsToSave)
       });
 
       // Update the lead in the database
@@ -311,8 +325,8 @@ export function useLeadsData() {
           disposition: updatedLead.disposition || 'UNDECIDED',
           
           // New JSONB fields
-          attached_files: JSON.stringify((updatedLead as any).attachedFiles || []),
-          heirs: JSON.stringify((updatedLead as any).heirs || []),
+          attached_files: JSON.stringify(attachedFilesToSave),
+          heirs: JSON.stringify(heirsToSave),
           
           // Additional information fields
           has_death: updatedLead.hasDeath,
@@ -465,6 +479,6 @@ export function useLeadsData() {
     handleDeleteLead,
     handleBulkDeleteLeads,
     isLoaded,
-    refetch: loadLeadsFromDatabase
+    loadLeadsFromDatabase
   };
 }
