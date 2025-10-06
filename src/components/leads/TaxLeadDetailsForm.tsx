@@ -16,6 +16,7 @@ import { ConditionalFieldsSection } from './detail/ConditionalFieldsSection';
 import { NotesSection } from './detail/NotesSection';
 import { NotesDisplaySection } from './detail/NotesDisplaySection';
 import { EnhancedAdditionalInfoSection } from './detail/EnhancedAdditionalInfoSection';
+import { DatabaseActivityTimeline } from './DatabaseActivityTimeline';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UploadedFile {
@@ -42,17 +43,6 @@ interface NoteEntry {
   text: string;
   timestamp: Date;
   userName: string;
-}
-
-interface ActivityItem {
-  id: number;
-  type: 'created' | 'note' | 'status_change' | 'field_update' | 'file_upload' | 'comment';
-  title: string;
-  description: string;
-  timestamp: Date;
-  user: string;
-  userInitials: string;
-  mentions?: string[];
 }
 
 interface TaxLeadDetailsFormProps {
@@ -251,37 +241,6 @@ export function TaxLeadDetailsForm({
   const [activeTab, setActiveTab] = useState('details');
   const { toast } = useToast();
 
-  // Mock activity data
-  const [activities, setActivities] = useState<ActivityItem[]>([
-    {
-      id: 1,
-      type: 'created',
-      title: 'Lead Created',
-      description: `Lead for ${formData.ownerName} was created`,
-      timestamp: new Date(formData.createdAt || Date.now() - 2 * 24 * 60 * 60 * 1000),
-      user: 'System',
-      userInitials: 'SY'
-    },
-    {
-      id: 2,
-      type: 'field_update',
-      title: 'Status Updated',
-      description: `Status set to ${formData.status}`,
-      timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-      user: 'John Doe',
-      userInitials: 'JD'
-    },
-    {
-      id: 3,
-      type: 'note',
-      title: 'Note Added',
-      description: formData.notes || 'Initial assessment completed',
-      timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000),
-      user: 'Jane Smith',
-      userInitials: 'JS'
-    }
-  ]);
-
   const canEdit = ['admin', 'editor'].includes(userRole);
 
   // Auto-save when data changes
@@ -420,18 +379,6 @@ export function TaxLeadDetailsForm({
         description: `Lead has been marked as ${disp === 'keep' ? 'Keep' : 'Pass'}`,
       });
       
-      // Add activity for disposition change
-      const newActivity: ActivityItem = {
-        id: activities.length + 1,
-        type: 'status_change',
-        title: 'Disposition Changed',
-        description: `Lead disposition changed to ${disp === 'keep' ? 'Keep' : 'Pass'}`,
-        timestamp: new Date(),
-        user: user?.email ? `${user.email}` : 'Current User',
-        userInitials: user?.email ? user.email.substring(0, 2).toUpperCase() : 'CU'
-      };
-      setActivities(prev => [newActivity, ...prev]);
-      
     } catch (error) {
       console.error('Error saving disposition:', error);
       toast({
@@ -472,20 +419,6 @@ export function TaxLeadDetailsForm({
       setNewNote('');
       setHasUnsavedChanges(true);
     }
-  };
-
-  const handleAddComment = (comment: string) => {
-    const newActivity: ActivityItem = {
-      id: activities.length + 1,
-      type: 'comment',
-      title: 'Comment Added',
-      description: comment,
-      timestamp: new Date(),
-      user: 'Current User',
-      userInitials: 'CU',
-      mentions: comment.match(/@\w+/g) || []
-    };
-    setActivities(prev => [newActivity, ...prev]);
   };
 
   const handleFileUpload = (newFiles: File[], category: 'probate' | 'vesting_deed' | 'other' | 'death' | 'lawsuit' | 'taxing_entities') => {
@@ -759,91 +692,7 @@ export function TaxLeadDetailsForm({
           </TabsContent>
 
           <TabsContent value="activity" className="space-y-4">
-            <Card className="bg-white shadow-sm border border-gray-200 rounded-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-900">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Activity className="w-4 h-4 text-blue-600" />
-                  </div>
-                  Lead Activity Timeline
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {activities.map(activity => (
-                    <div key={activity.id} className="flex gap-4 pb-4 border-b border-gray-200 last:border-b-0">
-                      <div className="w-8 h-8 rounded-full bg-crm-primary/10 flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs font-medium text-crm-primary">
-                          {activity.userInitials}
-                        </span>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <h4 className="font-medium text-gray-900">{activity.title}</h4>
-                          <span className="text-xs text-gray-500">
-                            {activity.timestamp.toLocaleDateString()} at {activity.timestamp.toLocaleTimeString()}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-1">{activity.description}</p>
-                        <p className="text-xs text-gray-500">by {activity.user}</p>
-                        {activity.mentions && activity.mentions.length > 0 && (
-                          <div className="mt-2">
-                            {activity.mentions.map((mention, index) => (
-                              <span key={index} className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-1">
-                                {mention}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Add Comment Section */}
-                {canEdit && (
-                  <div className="mt-6 pt-4 border-t border-gray-200">
-                    <div className="flex gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs font-medium text-gray-600">CU</span>
-                      </div>
-                      <div className="flex-1">
-                        <textarea
-                          placeholder="Add a comment..."
-                          className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-crm-primary focus:border-transparent"
-                          rows={3}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                              e.preventDefault();
-                              const comment = e.currentTarget.value.trim();
-                              if (comment) {
-                                handleAddComment(comment);
-                                e.currentTarget.value = '';
-                              }
-                            }
-                          }}
-                        />
-                        <div className="flex justify-end mt-2">
-                          <Button
-                            size="sm"
-                            onClick={(e) => {
-                              const textarea = e.currentTarget.parentElement?.parentElement?.querySelector('textarea');
-                              const comment = textarea?.value.trim();
-                              if (comment) {
-                                handleAddComment(comment);
-                                textarea.value = '';
-                              }
-                            }}
-                          >
-                            Add Comment
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <DatabaseActivityTimeline lead={formData} readOnly={!canEdit} />
           </TabsContent>
         </Tabs>
       </div>
