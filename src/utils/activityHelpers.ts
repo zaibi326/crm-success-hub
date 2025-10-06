@@ -13,6 +13,8 @@ export const getActivityTitle = (actionType: string, module: string): string => 
         case 'keep_lead': return 'Lead Kept';
         case 'pass_lead': return 'Lead Passed';
         case 'document_upload': return 'Document Uploaded';
+        case 'attachment_uploaded': return 'File Uploaded';
+        case 'attachment_deleted': return 'File Deleted';
         case 'heir_added': return 'Heir Added';
         case 'note_added': return 'Note Added';
         case 'comment': return 'Comment Added';
@@ -76,6 +78,10 @@ export const formatActivityDescription = (activity: any): string => {
           return `Marked lead as PASS${metadata?.leadName ? ` for ${metadata.leadName}` : ''}${metadata?.reason ? ` - ${metadata.reason}` : ''}`;
         case 'document_upload':
           return `Uploaded document${metadata?.fileName ? ` "${metadata.fileName}"` : ''}${metadata?.leadName ? ` for ${metadata.leadName}` : ''}`;
+        case 'attachment_uploaded':
+          return `Uploaded ${metadata?.categoryLabel || 'file'}${metadata?.fileName ? ` "${metadata.fileName}"` : ''}`;
+        case 'attachment_deleted':
+          return `Deleted file${metadata?.fileName ? ` "${metadata.fileName}"` : ''}`;
         case 'heir_added':
           return `Added heir${metadata?.heirName ? ` "${metadata.heirName}"` : ''}${metadata?.relationship ? ` (${metadata.relationship})` : ''}${metadata?.leadName ? ` to ${metadata.leadName}` : ''}`;
         case 'field_updated':
@@ -104,6 +110,8 @@ export const getActivityPriority = (actionType: string, module: string): number 
           return 9;
         case 'status_change':
           return 8;
+        case 'attachment_uploaded':
+        case 'attachment_deleted':
         case 'document_upload':
         case 'heir_added':
           return 7;

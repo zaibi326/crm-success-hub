@@ -98,18 +98,31 @@ export function useComprehensiveLeadActivityTracker() {
     );
   }, [logLeadActivity]);
 
-  const trackAttachmentUploaded = useCallback((lead: TaxLead, fileName: string, fileType: string) => {
+  const trackAttachmentUploaded = useCallback((lead: TaxLead, fileName: string, fileType: string, category?: string) => {
     if (!lead) return;
+    
+    const categoryLabels: Record<string, string> = {
+      'death': '☠️ Death Certificate',
+      'probate': '⚖️ Probate',
+      'vesting_deed': '📜 Vesting Deed',
+      'lawsuit': '⚖️ Lawsuit',
+      'taxing_entities': '🏛️ Tax Entity',
+      'other': '📎 Other'
+    };
+    
+    const categoryLabel = category ? categoryLabels[category] || category : 'Document';
     
     logLeadActivity(
       'attachment_uploaded',
-      `Uploaded attachment "${fileName}" to lead for ${lead.ownerName}`,
+      `Uploaded ${categoryLabel} document "${fileName}" to lead for ${lead.ownerName}`,
       lead.id.toString(),
       {
         ownerName: lead.ownerName,
         propertyAddress: lead.propertyAddress,
         fileName,
         fileType,
+        category,
+        categoryLabel,
         uploadedAt: new Date().toISOString()
       }
     );

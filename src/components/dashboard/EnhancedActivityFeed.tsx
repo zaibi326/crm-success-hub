@@ -35,6 +35,8 @@ export function EnhancedActivityFeed({ userRole }: EnhancedActivityFeedProps) {
         if (actionType === 'keep_lead') return <Check className="w-4 h-4" />;
         if (actionType === 'pass_lead') return <X className="w-4 h-4" />;
         if (actionType === 'document_upload') return <Upload className="w-4 h-4" />;
+        if (actionType === 'attachment_uploaded') return <Upload className="w-4 h-4" />;
+        if (actionType === 'attachment_deleted') return <Trash2 className="w-4 h-4" />;
         if (actionType === 'heir_added') return <UserCheck className="w-4 h-4" />;
         if (actionType === 'note_added') return <StickyNote className="w-4 h-4" />;
         if (actionType === 'viewed') return <Eye className="w-4 h-4" />;
@@ -107,6 +109,7 @@ export function EnhancedActivityFeed({ userRole }: EnhancedActivityFeedProps) {
           return 'bg-blue-100 text-blue-800 border-blue-200';
         case 'deleted':
         case 'bulk_deleted':
+        case 'attachment_deleted':
           return 'bg-red-100 text-red-800 border-red-200';
         case 'status_change':
           return 'bg-indigo-100 text-indigo-800 border-indigo-200';
@@ -115,6 +118,7 @@ export function EnhancedActivityFeed({ userRole }: EnhancedActivityFeedProps) {
         case 'pass_lead':
           return 'bg-rose-100 text-rose-800 border-rose-200';
         case 'document_upload':
+        case 'attachment_uploaded':
           return 'bg-violet-100 text-violet-800 border-violet-200';
         case 'heir_added':
           return 'bg-teal-100 text-teal-800 border-teal-200';
@@ -154,6 +158,7 @@ export function EnhancedActivityFeed({ userRole }: EnhancedActivityFeedProps) {
         return 'text-blue-600 bg-blue-100';
       case 'deleted':
       case 'bulk_deleted':
+      case 'attachment_deleted':
         return 'text-red-600 bg-red-100';
       case 'status_change':
         return 'text-indigo-600 bg-indigo-100';
@@ -162,6 +167,7 @@ export function EnhancedActivityFeed({ userRole }: EnhancedActivityFeedProps) {
       case 'pass_lead':
         return 'text-rose-600 bg-rose-100';
       case 'document_upload':
+      case 'attachment_uploaded':
         return 'text-violet-600 bg-violet-100';
       case 'heir_added':
         return 'text-teal-600 bg-teal-100';
@@ -274,6 +280,23 @@ export function EnhancedActivityFeed({ userRole }: EnhancedActivityFeedProps) {
           return unique;
         }
       }
+      
+      // Remove repetitive "updated" activities that are just auto-saves (within 5 seconds of each other)
+      if (activity.action_type === 'updated') {
+        const recentUpdateIndex = unique.findIndex(existing => 
+          existing.action_type === 'updated' && 
+          existing.target_id === activity.target_id &&
+          Math.abs(new Date(existing.created_at).getTime() - new Date(activity.created_at).getTime()) < 5000 // 5 seconds
+        );
+        if (recentUpdateIndex !== -1) {
+          // Keep the more recent one
+          if (new Date(activity.created_at) > new Date(unique[recentUpdateIndex].created_at)) {
+            unique[recentUpdateIndex] = activity;
+          }
+          return unique;
+        }
+      }
+      
       return [...unique, activity];
     }, [] as typeof activities)
     .sort((a, b) => {

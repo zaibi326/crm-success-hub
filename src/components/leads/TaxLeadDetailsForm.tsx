@@ -18,6 +18,7 @@ import { NotesDisplaySection } from './detail/NotesDisplaySection';
 import { EnhancedAdditionalInfoSection } from './detail/EnhancedAdditionalInfoSection';
 import { DatabaseActivityTimeline } from './DatabaseActivityTimeline';
 import { useAuth } from '@/contexts/AuthContext';
+import { useComprehensiveLeadActivityTracker } from '@/hooks/useComprehensiveLeadActivityTracker';
 
 interface UploadedFile {
   id: string;
@@ -210,6 +211,7 @@ export function TaxLeadDetailsForm({
   userRole
 }: TaxLeadDetailsFormProps) {
   const { user } = useAuth();
+  const { trackAttachmentUploaded, trackAttachmentDeleted } = useComprehensiveLeadActivityTracker();
   const [formData, setFormData] = useState<TaxLead>(lead);
   const [disposition, setDisposition] = useState<'keep' | 'pass' | null>(
     lead.disposition === 'QUALIFIED' ? 'keep' : 
@@ -439,6 +441,11 @@ export function TaxLeadDetailsForm({
     
     console.log('Created uploadedFiles:', uploadedFiles);
     
+    // Track each file upload activity with category
+    uploadedFiles.forEach(file => {
+      trackAttachmentUploaded(lead, file.name, file.type, category);
+    });
+    
     setFiles(prev => {
       const newFiles = [...prev, ...uploadedFiles];
       console.log('Setting new files state:', {
@@ -458,8 +465,14 @@ export function TaxLeadDetailsForm({
   };
 
   const handleRemoveFile = (fileId: string) => {
+    const fileToRemove = files.find(f => f.id === fileId);
     setFiles(prev => prev.filter(file => file.id !== fileId));
     setHasUnsavedChanges(true);
+    
+    // Track file deletion
+    if (fileToRemove) {
+      trackAttachmentDeleted(lead, fileToRemove.name);
+    }
     
     toast({
       title: "File removed",
