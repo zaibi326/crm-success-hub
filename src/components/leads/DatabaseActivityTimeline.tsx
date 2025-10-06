@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { 
   MessageSquare, 
   Plus, 
@@ -27,6 +28,8 @@ import { TaxLead } from '@/types/taxLead';
 import { useLeadActivities, DatabaseActivityItem } from '@/hooks/useLeadActivities';
 import { useComprehensiveActivityLogger } from '@/hooks/useComprehensiveActivityLogger';
 import { useToast } from '@/hooks/use-toast';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface DatabaseActivityTimelineProps {
   lead: TaxLead;
@@ -59,10 +62,40 @@ export function DatabaseActivityTimeline({
   const [newComment, setNewComment] = useState('');
   const [isAddingComment, setIsAddingComment] = useState(false);
   const [filterType, setFilterType] = useState<string>('all');
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   
   const { data: activities = [], isLoading, error, refetch } = useLeadActivities(lead.id.toString());
   const { logLeadNote, isLogging } = useComprehensiveActivityLogger();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Reset mutation for this specific lead
+  const resetMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from('activities')
+        .delete()
+        .eq('reference_id', lead.id.toString())
+        .eq('reference_type', 'lead');
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lead-activities', lead.id.toString()] });
+      toast({
+        title: "Activities Reset",
+        description: "All activities for this lead have been cleared.",
+      });
+      setIsResetDialogOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Reset Failed",
+        description: error.message || "Could not reset activities. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
 
   // Log component mount for debugging
   React.useEffect(() => {
@@ -161,9 +194,21 @@ export function DatabaseActivityTimeline({
     }
   };
 
-  const filteredActivities = filterType === 'all' 
-    ? activities 
-    : activities.filter(activity => activity.action_type === filterType);
+  // Filter activities and limit "viewed" to only the most recent one
+  const filteredActivities = React.useMemo(() => {
+    let filtered = filterType === 'all' 
+      ? activities 
+      : activities.filter(activity => activity.action_type === filterType);
+    
+    // Keep only the most recent "viewed" activity
+    const viewedActivities = filtered.filter(a => a.action_type === 'viewed');
+    if (viewedActivities.length > 1) {
+      const mostRecentViewed = viewedActivities[0]; // Already sorted by created_at desc
+      filtered = filtered.filter(a => a.action_type !== 'viewed' || a.id === mostRecentViewed.id);
+    }
+    
+    return filtered;
+  }, [activities, filterType]);
 
   const activityTypes = [
     { value: 'all', label: 'All Activities' },
@@ -285,15 +330,54 @@ export function DatabaseActivityTimeline({
               Activity Timeline ({filteredActivities.length})
             </CardTitle>
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => refetch()}
-                disabled={isLoading}
-              >
-                <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
+              <AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={resetMutation.isPending || activities.length === 0}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                  >
+                    {resetMutation.isPending ? (
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-4 h-4 mr-2" />
+                    )}
+                    Reset
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="flex items-center gap-2">
+                      <Trash2 className="w-5 h-5 text-red-600" />
+                      Reset Lead Activities
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete all activity logs for this lead? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => resetMutation.mutate()}
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                      disabled={resetMutation.isPending}
+                    >
+                      {resetMutation.isPending ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          Resetting...
+                        </>
+                      ) : (
+                        <>
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Reset Activities
+                        </>
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
               <Filter className="w-4 h-4 text-gray-500" />
               <Select value={filterType} onValueChange={setFilterType}>
                 <SelectTrigger className="w-40">
