@@ -242,6 +242,8 @@ export function TaxLeadDetailsForm({
   const { toast } = useToast();
 
   const canEdit = ['admin', 'editor'].includes(userRole);
+  
+  // Force fresh build - removed activities state
 
   // Auto-save when data changes
   useEffect(() => {
