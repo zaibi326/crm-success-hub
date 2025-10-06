@@ -239,15 +239,16 @@ export function TaxLeadDetailsForm({
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
+  const [isChangingDisposition, setIsChangingDisposition] = useState(false);
   const { toast } = useToast();
 
   const canEdit = ['admin', 'editor'].includes(userRole);
   
   // Force fresh build - removed activities state
 
-  // Auto-save when data changes
+  // Auto-save when data changes (but not while changing disposition)
   useEffect(() => {
-    if (hasUnsavedChanges && canEdit) {
+    if (hasUnsavedChanges && canEdit && !isChangingDisposition) {
       const timer = setTimeout(() => {
         console.log('Auto-saving changes...');
         toast({
@@ -260,7 +261,7 @@ export function TaxLeadDetailsForm({
       
       return () => clearTimeout(timer);
     }
-  }, [hasUnsavedChanges, formData, files, heirs, notes, disposition, passReason]);
+  }, [hasUnsavedChanges, formData, files, heirs, notes, disposition, passReason, isChangingDisposition]);
 
   // Auto-save when files are uploaded (with updated state)
   useEffect(() => {
@@ -344,18 +345,14 @@ export function TaxLeadDetailsForm({
   const handleDisposition = async (disp: 'keep' | 'pass' | null) => {
     setDisposition(disp);
     
-    // If resetting disposition to null, don't auto-save
+    // If resetting disposition to null, set flag to prevent auto-save
     if (disp === null) {
-      // Reset to original state
-      const updatedFormData: TaxLead = {
-        ...formData,
-        disposition: lead.disposition || 'UNDECIDED',
-        status: lead.status
-      };
-      setFormData(updatedFormData);
-      setHasUnsavedChanges(true);
+      setIsChangingDisposition(true);
       return;
     }
+    
+    // User made a decision, clear the flag and save
+    setIsChangingDisposition(false);
     
     // Update the lead's disposition and status with proper typing
     const newDisposition: 'QUALIFIED' | 'DISQUALIFIED' = disp === 'keep' ? 'QUALIFIED' : 'DISQUALIFIED';
