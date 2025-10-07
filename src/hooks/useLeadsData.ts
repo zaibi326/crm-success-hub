@@ -279,6 +279,7 @@ export function useLeadsData() {
           // Store actual user IDs for filtering
           created_by: user.id,
           lead_manager: newLead.leadManager || user.id,
+          organization_id: profile.organization_id,
           
           // New JSONB fields
           attached_files: JSON.stringify((newLead as any).attachedFiles || []),
