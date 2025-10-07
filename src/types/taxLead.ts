@@ -17,8 +17,8 @@ export interface TaxLead {
   createdAt?: string;
   updatedAt?: string;
   createdVia?: string;
-  createdBy?: string;
-  leadManager?: string;
+  createdBy?: string; // UUID of the user who created the lead
+  leadManager?: string; // UUID of the lead manager
   tags?: string[];
   occupancyStatus?: string;
   

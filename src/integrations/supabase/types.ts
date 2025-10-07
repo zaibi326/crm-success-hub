@@ -77,6 +77,7 @@ export type Database = {
           attached_files: Json | null
           campaign_id: string | null
           created_at: string
+          created_by: string | null
           current_arrears: number | null
           death_notes: string | null
           disposition: string | null
@@ -89,6 +90,7 @@ export type Database = {
           heirs: Json | null
           id: string
           lawsuit_notes: string | null
+          lead_manager: string | null
           notes: string | null
           organization_id: string | null
           owner_name: string
@@ -107,6 +109,7 @@ export type Database = {
           attached_files?: Json | null
           campaign_id?: string | null
           created_at?: string
+          created_by?: string | null
           current_arrears?: number | null
           death_notes?: string | null
           disposition?: string | null
@@ -119,6 +122,7 @@ export type Database = {
           heirs?: Json | null
           id?: string
           lawsuit_notes?: string | null
+          lead_manager?: string | null
           notes?: string | null
           organization_id?: string | null
           owner_name: string
@@ -137,6 +141,7 @@ export type Database = {
           attached_files?: Json | null
           campaign_id?: string | null
           created_at?: string
+          created_by?: string | null
           current_arrears?: number | null
           death_notes?: string | null
           disposition?: string | null
@@ -149,6 +154,7 @@ export type Database = {
           heirs?: Json | null
           id?: string
           lawsuit_notes?: string | null
+          lead_manager?: string | null
           notes?: string | null
           organization_id?: string | null
           owner_name?: string

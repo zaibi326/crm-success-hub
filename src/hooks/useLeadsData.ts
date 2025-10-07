@@ -17,9 +17,6 @@ export function useLeadsData() {
 
   const loadLeadsFromDatabase = async () => {
     try {
-      // First get the current user for joining with profiles
-      const { data: { user } } = await supabase.auth.getUser();
-      
       const { data, error } = await supabase
         .from('campaign_leads')
         .select('*')
@@ -35,19 +32,23 @@ export function useLeadsData() {
         return;
       }
 
-      // Get current user profile for creator info
-      let currentUserName = 'Unknown User';
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('first_name, last_name, email')
-          .eq('id', user.id)
-          .single();
+      // Fetch all user profiles at once for mapping IDs to names
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, email');
 
-        if (profile) {
-          currentUserName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email;
-        }
+      if (profilesError) {
+        console.error('Error loading user profiles:', profilesError);
       }
+
+      // Create a map of user IDs to display names
+      const userMap = new Map<string, string>();
+      profiles?.forEach(profile => {
+        const displayName = profile.first_name && profile.last_name
+          ? `${profile.first_name} ${profile.last_name}`.trim()
+          : profile.email;
+        userMap.set(profile.id, displayName);
+      });
 
       const leadsData = data?.map((lead) => {
         // Split owner_name into firstName and lastName
@@ -60,12 +61,17 @@ export function useLeadsData() {
           Math.abs(lead.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % 2147483647 : 
           Math.floor(Math.random() * 1000000);
 
+        // Get actual user names from their IDs
+        const createdByName = lead.created_by ? userMap.get(lead.created_by) || 'Unknown User' : 'Unknown User';
+        const leadManagerName = lead.lead_manager ? userMap.get(lead.lead_manager) || undefined : undefined;
+
         return {
           id: stableNumericId, // Use stable numeric ID derived from Supabase UUID
           taxId: lead.tax_id || '',
           ownerName: lead.owner_name,
           propertyAddress: lead.property_address,
-          createdBy: currentUserName,
+          createdBy: lead.created_by, // Store UUID for filtering
+          leadManager: lead.lead_manager, // Store UUID for filtering
           taxLawsuitNumber: lead.tax_lawsuit_number || '',
           currentArrears: lead.current_arrears || 0,
           status: (lead.status || 'COLD') as 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP',
@@ -238,6 +244,10 @@ export function useLeadsData() {
           email: newLead.email,
           disposition: newLead.disposition || 'UNDECIDED',
           
+          // Store actual user IDs for filtering
+          created_by: user.id,
+          lead_manager: newLead.leadManager || user.id,
+          
           // New JSONB fields
           attached_files: JSON.stringify((newLead as any).attachedFiles || []),
           heirs: JSON.stringify((newLead as any).heirs || []),
@@ -355,6 +365,9 @@ export function useLeadsData() {
           phone: updatedLead.phone,
           email: updatedLead.email,
           disposition: updatedLead.disposition || 'UNDECIDED',
+          
+          // Update lead manager if changed
+          lead_manager: updatedLead.leadManager || null,
           
           // New JSONB fields
           attached_files: JSON.stringify(attachedFilesToSave),
