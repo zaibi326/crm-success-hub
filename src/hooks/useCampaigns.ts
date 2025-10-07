@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useCampaignActivityTracking } from './useCampaignActivityTracking';
+import { validateCampaignData } from '@/utils/validation';
+import { z } from 'zod';
 
 export interface Campaign {
   id: string;
@@ -50,6 +52,21 @@ export function useCampaigns() {
 
   const createCampaign = async (campaignData: Omit<Campaign, 'id' | 'created_by' | 'created_at' | 'updated_at' | 'progress' | 'signed_deals' | 'equity_purchased' | 'expenditure'>) => {
     try {
+      // Validate input data before processing
+      try {
+        validateCampaignData(campaignData);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          toast({
+            title: "Validation Error",
+            description: error.errors[0].message,
+            variant: "destructive"
+          });
+          throw error;
+        }
+        throw error;
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
@@ -84,6 +101,29 @@ export function useCampaigns() {
 
   const updateCampaign = async (id: string, updates: Partial<Campaign>) => {
     try {
+      // Validate input data if critical fields are being updated
+      const criticalFields = ['name', 'budget', 'start_date', 'end_date', 'target_deals'];
+      const hasCriticalUpdate = Object.keys(updates).some(key => criticalFields.includes(key));
+      
+      if (hasCriticalUpdate) {
+        const originalCampaign = campaigns.find(c => c.id === id);
+        const dataToValidate = { ...originalCampaign, ...updates };
+        
+        try {
+          validateCampaignData(dataToValidate);
+        } catch (error) {
+          if (error instanceof z.ZodError) {
+            toast({
+              title: "Validation Error",
+              description: error.errors[0].message,
+              variant: "destructive"
+            });
+            throw error;
+          }
+          throw error;
+        }
+      }
+
       const originalCampaign = campaigns.find(c => c.id === id);
       const changedFields = Object.keys(updates);
       

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { TaxLead } from '@/types/taxLead';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { validateLeadData } from '@/utils/validation';
+import { z } from 'zod';
 
 export function useLeadsData() {
   const [mockLeads, setMockLeads] = useState<TaxLead[]>([]);
@@ -147,6 +149,21 @@ export function useLeadsData() {
 
   const handleAddLead = async (newLead: TaxLead) => {
     try {
+      // Validate input data before processing
+      try {
+        validateLeadData(newLead);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          toast({
+            title: "Validation Error",
+            description: error.errors[0].message,
+            variant: "destructive",
+          });
+          return;
+        }
+        throw error;
+      }
+
       // First get or create a campaign for this user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -272,6 +289,21 @@ export function useLeadsData() {
 
   const handleLeadUpdate = async (updatedLead: TaxLead) => {
     try {
+      // Validate input data before processing
+      try {
+        validateLeadData(updatedLead);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          toast({
+            title: "Validation Error",
+            description: error.errors[0].message,
+            variant: "destructive",
+          });
+          return;
+        }
+        throw error;
+      }
+
       const leadWithSupabaseId = updatedLead as TaxLead & { supabaseId: string };
       
       if (!leadWithSupabaseId.supabaseId) {
