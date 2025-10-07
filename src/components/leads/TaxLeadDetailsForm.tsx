@@ -336,12 +336,20 @@ export function TaxLeadDetailsForm({
     }
   }, [lead]);
 
-  const handleInputChange = (field: keyof TaxLead, value: any) => {
+  const handleInputChange = async (field: keyof TaxLead, value: any) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
     setHasUnsavedChanges(true);
+    
+    // For critical fields like sellerContactAddress, save immediately
+    if (field === 'sellerContactAddress' || field === 'phone' || field === 'email' || field === 'firstName' || field === 'lastName') {
+      // Trigger immediate save for seller contact fields
+      setTimeout(() => {
+        handleSave();
+      }, 100); // Small delay to ensure state is updated
+    }
   };
 
   const handleDisposition = async (disp: 'keep' | 'pass' | null) => {

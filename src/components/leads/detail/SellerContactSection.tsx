@@ -21,33 +21,19 @@ export function SellerContactSection({ lead, onFieldUpdate, canEdit = true }: Se
 
   const handleFieldChange = async (field: keyof TaxLead, value: string) => {
     if (canEdit) {
-      try {
-        const oldValue = lead[field];
-        
-        // Save immediately to backend
-        await onFieldUpdate(field, value);
-        
-        // Log each field change
-        logLeadFieldUpdate(
-          lead.id.toString(),
-          lead.ownerName || 'Unknown',
-          String(field),
-          String(oldValue || ''),
-          String(value || '')
-        );
-
-        toast({
-          title: "Success",
-          description: `✅ ${field} updated successfully`,
-        });
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: `Failed to update ${field}`,
-          variant: "destructive",
-        });
-        throw error; // Re-throw to handle in InlineEditField
-      }
+      const oldValue = lead[field];
+      
+      // Update immediately - onFieldUpdate will handle the save
+      onFieldUpdate(field, value);
+      
+      // Log each field change
+      logLeadFieldUpdate(
+        lead.id.toString(),
+        lead.ownerName || 'Unknown',
+        String(field),
+        String(oldValue || ''),
+        String(value || '')
+      );
     }
   };
 
