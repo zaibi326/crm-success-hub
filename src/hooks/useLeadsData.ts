@@ -181,6 +181,22 @@ export function useLeadsData() {
         return;
       }
 
+      // Get user profile for organization_id
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('organization_id, first_name, last_name, email')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.organization_id) {
+        toast({
+          title: "Error",
+          description: "User profile not found or organization not set",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Check if user has any campaigns, create one if not
       let { data: campaigns } = await supabase
         .from('campaigns')
@@ -191,14 +207,15 @@ export function useLeadsData() {
       let campaignId: string;
 
       if (!campaigns || campaigns.length === 0) {
-        // Create a default campaign
+        // Create a default campaign with organization_id
         const { data: newCampaign, error: campaignError } = await supabase
           .from('campaigns')
           .insert({
             name: 'Default Campaign',
             description: 'Auto-created campaign for leads',
             start_date: new Date().toISOString().split('T')[0],
-            created_by: user.id
+            created_by: user.id,
+            organization_id: profile.organization_id
           })
           .select('id')
           .single();
@@ -216,13 +233,6 @@ export function useLeadsData() {
       } else {
         campaignId = campaigns[0].id;
       }
-
-      // Get user profile for creator info
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('first_name, last_name, email')
-        .eq('id', user.id)
-        .single();
 
       const createdByName = profile 
         ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email

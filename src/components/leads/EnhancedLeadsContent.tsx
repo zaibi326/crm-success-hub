@@ -13,11 +13,13 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { FilterCondition } from './filters/types';
 import { FilterState, createEmptyFilterState } from './filters/FilterState';
+import { useToast } from '@/hooks/use-toast';
 
 export function EnhancedLeadsContent() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const selectedLeadId = searchParams.get('leadId');
+  const { toast } = useToast();
   
   const {
     currentView,
@@ -63,8 +65,12 @@ export function EnhancedLeadsContent() {
   }, [selectedLeadId, mockLeads, selectedLead, setSelectedLead]);
 
   const handleSellerAdded = (seller: any) => {
-    setSelectedLead(seller);
-    setSearchParams({ leadId: seller.id.toString() });
+    // Just reload the leads list, don't navigate to details
+    // The lead will appear in the list after it's added
+    toast({
+      title: "Success",
+      description: "Seller lead added successfully",
+    });
   };
 
   const handleLeadSelect = (lead: any) => {
