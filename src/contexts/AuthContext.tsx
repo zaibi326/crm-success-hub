@@ -197,6 +197,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       const redirectUrl = `${window.location.origin}/`;
       
+      // Security: Do not pass role from client - always assign 'Employee' role server-side
       const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
@@ -205,7 +206,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           data: {
             first_name: firstName,
             last_name: lastName,
-            role: role,
+            // Role is not included - server will assign 'Employee' by default
           }
         }
       });

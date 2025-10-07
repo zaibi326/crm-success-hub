@@ -67,6 +67,7 @@ const ModernLoginForm = ({
                 value={formData.firstName}
                 onChange={(e) => onInputChange('firstName', e.target.value)}
                 className="pl-12 h-14 bg-white/40 backdrop-blur-sm border-white/30 rounded-2xl shadow-lg hover:shadow-xl focus:shadow-xl focus:bg-white/60 transition-all duration-300 text-gray-800 placeholder-gray-500"
+                required
                 disabled={isLoading}
               />
             </div>
@@ -80,6 +81,7 @@ const ModernLoginForm = ({
                 value={formData.lastName}
                 onChange={(e) => onInputChange('lastName', e.target.value)}
                 className="pl-12 h-14 bg-white/40 backdrop-blur-sm border-white/30 rounded-2xl shadow-lg hover:shadow-xl focus:shadow-xl focus:bg-white/60 transition-all duration-300 text-gray-800 placeholder-gray-500"
+                required
                 disabled={isLoading}
               />
             </div>
@@ -133,29 +135,6 @@ const ModernLoginForm = ({
             >
               {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
-          </div>
-        </div>
-      )}
-
-      {/* Role selection (only for sign up) */}
-      {isSignUp && (
-        <div className="space-y-2">
-          <div className="relative">
-            <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 z-10" />
-            <Select
-              value={formData.role}
-              onValueChange={(value) => onInputChange('role', value)}
-              disabled={isLoading}
-            >
-              <SelectTrigger className="pl-12 h-14 bg-white/40 backdrop-blur-sm border-white/30 rounded-2xl shadow-lg hover:shadow-xl focus:shadow-xl focus:bg-white/60 transition-all duration-300 text-gray-800">
-                <SelectValue placeholder="Select your role" />
-              </SelectTrigger>
-              <SelectContent className="bg-white/95 backdrop-blur-xl border-white/40 shadow-2xl rounded-xl">
-                <SelectItem value="Employee">Employee</SelectItem>
-                <SelectItem value="Manager">Manager</SelectItem>
-                <SelectItem value="Admin">Admin</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </div>
       )}
