@@ -260,19 +260,38 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(true);
       if (!user?.id) throw new Error('User not authenticated');
 
-      const { data: updatedProfile, error: updateError } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', user.id)
-        .select()
-        .single();
+      // Separate role updates from profile updates
+      const { role, ...profileUpdates } = updates;
 
-      if (updateError) {
-        console.error("Error updating profile:", updateError);
-        return { success: false, error: updateError.message };
+      // Update profile fields (excluding role)
+      if (Object.keys(profileUpdates).length > 0) {
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update(profileUpdates)
+          .eq('id', user.id);
+
+        if (updateError) {
+          console.error("Error updating profile:", updateError);
+          return { success: false, error: updateError.message };
+        }
       }
 
-      setProfile(updatedProfile as Profile);
+      // Update role separately if provided
+      if (role !== undefined) {
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .update({ role: role as any })
+          .eq('user_id', user.id);
+
+        if (roleError) {
+          console.error("Error updating role:", roleError);
+          return { success: false, error: roleError.message };
+        }
+      }
+
+      // Fetch updated profile
+      await fetchProfile(user.id, user.email || '');
+      
       toast({
         title: "Profile Updated",
         description: "Your profile has been successfully updated.",

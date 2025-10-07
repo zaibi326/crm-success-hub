@@ -108,9 +108,9 @@ const AdminUsersSection = () => {
   const handleUpdateUserRole = async (userId: string, newRole: string) => {
     try {
       const { error } = await supabase
-        .from('profiles')
-        .update({ role: newRole })
-        .eq('id', userId);
+        .from('user_roles')
+        .update({ role: newRole as any })
+        .eq('user_id', userId);
 
       if (error) throw error;
 

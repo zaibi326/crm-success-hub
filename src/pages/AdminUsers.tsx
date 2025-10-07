@@ -32,14 +32,32 @@ const AdminUsers = () => {
   }, []);
 
   const fetchUsers = async () => {
+    setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setUsers(data || []);
+      if (profilesError) throw profilesError;
+
+      // Fetch roles for each user
+      const usersWithRoles = await Promise.all(
+        (profilesData || []).map(async (profile) => {
+          const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', profile.id)
+            .single();
+          
+          return {
+            ...profile,
+            role: roleData?.role || 'Employee'
+          } as Profile;
+        })
+      );
+
+      setUsers(usersWithRoles);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
@@ -55,14 +73,14 @@ const AdminUsers = () => {
   const updateUserRole = async (userId: string, newRole: string) => {
     try {
       const { error } = await supabase
-        .from('profiles')
-        .update({ role: newRole })
-        .eq('id', userId);
+        .from('user_roles')
+        .update({ role: newRole as any })
+        .eq('user_id', userId);
 
       if (error) throw error;
 
       setUsers(users.map(user => 
-        user.id === userId ? { ...user, role: newRole } : user
+        user.id === userId ? { ...user, role: newRole as any } : user
       ));
 
       toast({
