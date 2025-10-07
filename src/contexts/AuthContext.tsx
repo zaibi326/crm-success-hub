@@ -104,6 +104,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       console.log('Fetching profile for userId:', userId, 'email:', userEmail);
       
+      // Fetch profile data
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -113,45 +114,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (profileError) {
         console.error("Error fetching profile:", profileError);
         
-        // If profile doesn't exist, create a default one
+        // If profile doesn't exist, it will be created by the trigger
         if (profileError.code === 'PGRST116') {
-          console.log('Profile not found, creating default profile...');
-          try {
-            const { data: newProfile, error: createError } = await supabase
-              .from('profiles')
-              .insert({
-                id: userId,
-                email: userEmail,
-                first_name: '',
-                last_name: '',
-                role: 'Employee'
-              })
-              .select()
-              .single();
-
-            if (createError) {
-              console.error("Error creating profile:", createError);
-              toast({
-                title: "Profile Creation Error",
-                description: "Failed to create user profile. Please try again.",
-                variant: "destructive",
-              });
-              setIsLoading(false);
-              return;
-            }
-
-            setProfile(newProfile as Profile);
-            console.log('Default profile created successfully:', newProfile);
-            setIsLoading(false);
-            return;
-          } catch (createError) {
-            console.error("Error in profile creation:", createError);
-            setIsLoading(false);
-            return;
-          }
+          console.log('Profile not found, will be created by trigger');
+          setIsLoading(false);
+          return;
         }
         
-        // For other errors, show toast and stop loading
         toast({
           title: "Profile Error",
           description: "Failed to load user profile. Please try again.",
@@ -161,8 +130,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return;
       }
 
-      setProfile(profileData as Profile);
-      console.log('Profile fetched successfully:', profileData);
+      // Fetch user role from user_roles table (secure role storage)
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
+
+      if (roleError) {
+        console.error("Error fetching user role:", roleError);
+        // Default to Employee if no role found
+        setProfile({
+          ...profileData,
+          role: 'Employee'
+        } as Profile);
+      } else {
+        setProfile({
+          ...profileData,
+          role: roleData.role
+        } as Profile);
+      }
+
+      console.log('Profile and role fetched successfully');
       setIsLoading(false);
     } catch (error) {
       console.error("Error in fetchProfile:", error);

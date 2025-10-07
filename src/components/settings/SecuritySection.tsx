@@ -32,7 +32,17 @@ const SecuritySection = () => {
     });
   };
 
-  const handlePasswordChange = () => {
+  const handlePasswordChange = async () => {
+    // Input validation
+    if (passwordData.newPassword.length < 8) {
+      toast({
+        title: "Password Too Short",
+        description: "Password must be at least 8 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast({
         title: "Password Mismatch",
@@ -41,17 +51,9 @@ const SecuritySection = () => {
       });
       return;
     }
-    
-    if (passwordData.newPassword.length < 6) {
-      toast({
-        title: "Password Too Short",
-        description: "Password must be at least 6 characters long.",
-        variant: "destructive",
-      });
-      return;
-    }
 
-    // Simulate password change
+    // TODO: Implement actual password change via Supabase
+    // For now, just show success message
     toast({
       title: "Password Updated",
       description: "Your password has been successfully changed.",

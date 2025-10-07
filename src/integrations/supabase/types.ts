@@ -23,6 +23,7 @@ export type Database = {
           ip_address: string | null
           metadata: Json | null
           module: string
+          organization_id: string | null
           reference_id: string | null
           reference_type: string | null
           session_id: string | null
@@ -40,6 +41,7 @@ export type Database = {
           ip_address?: string | null
           metadata?: Json | null
           module: string
+          organization_id?: string | null
           reference_id?: string | null
           reference_type?: string | null
           session_id?: string | null
@@ -57,6 +59,7 @@ export type Database = {
           ip_address?: string | null
           metadata?: Json | null
           module?: string
+          organization_id?: string | null
           reference_id?: string | null
           reference_type?: string | null
           session_id?: string | null
@@ -87,6 +90,7 @@ export type Database = {
           id: string
           lawsuit_notes: string | null
           notes: string | null
+          organization_id: string | null
           owner_name: string
           owner_of_record: string | null
           phone: string | null
@@ -116,6 +120,7 @@ export type Database = {
           id?: string
           lawsuit_notes?: string | null
           notes?: string | null
+          organization_id?: string | null
           owner_name: string
           owner_of_record?: string | null
           phone?: string | null
@@ -145,6 +150,7 @@ export type Database = {
           id?: string
           lawsuit_notes?: string | null
           notes?: string | null
+          organization_id?: string | null
           owner_name?: string
           owner_of_record?: string | null
           phone?: string | null
@@ -177,6 +183,7 @@ export type Database = {
           expenditure: number | null
           id: string
           name: string
+          organization_id: string | null
           progress: number | null
           signed_deals: number | null
           start_date: string
@@ -194,6 +201,7 @@ export type Database = {
           expenditure?: number | null
           id?: string
           name: string
+          organization_id?: string | null
           progress?: number | null
           signed_deals?: number | null
           start_date: string
@@ -211,6 +219,7 @@ export type Database = {
           expenditure?: number | null
           id?: string
           name?: string
+          organization_id?: string | null
           progress?: number | null
           signed_deals?: number | null
           start_date?: string
@@ -378,6 +387,7 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
+          organization_id: string | null
           role: string
           updated_at: string | null
         }
@@ -387,6 +397,7 @@ export type Database = {
           first_name?: string | null
           id: string
           last_name?: string | null
+          organization_id?: string | null
           role?: string
           updated_at?: string | null
         }
@@ -396,8 +407,33 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          organization_id?: string | null
           role?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -508,6 +544,13 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       log_comprehensive_activity: {
         Args: {
           p_action_type: string
@@ -543,7 +586,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "Admin" | "Manager" | "Lead Manager" | "Employee" | "Guest"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -670,6 +713,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["Admin", "Manager", "Lead Manager", "Employee", "Guest"],
+    },
   },
 } as const
