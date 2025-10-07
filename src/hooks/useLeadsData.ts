@@ -182,19 +182,41 @@ export function useLeadsData() {
       }
 
       // Get user profile for organization_id
-      const { data: profile } = await supabase
+      let { data: profile } = await supabase
         .from('profiles')
         .select('organization_id, first_name, last_name, email')
         .eq('id', user.id)
         .single();
 
-      if (!profile?.organization_id) {
+      if (!profile) {
         toast({
           title: "Error",
-          description: "User profile not found or organization not set",
+          description: "User profile not found",
           variant: "destructive",
         });
         return;
+      }
+
+      // If user doesn't have an organization_id, create one and update their profile
+      if (!profile.organization_id) {
+        const newOrgId = crypto.randomUUID();
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ organization_id: newOrgId })
+          .eq('id', user.id);
+
+        if (updateError) {
+          console.error('Error updating profile with organization_id:', updateError);
+          toast({
+            title: "Error",
+            description: "Failed to set up organization",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Update profile object with new organization_id
+        profile.organization_id = newOrgId;
       }
 
       // Check if user has any campaigns, create one if not
