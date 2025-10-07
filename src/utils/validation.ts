@@ -23,7 +23,7 @@ export const leadSchema = z.object({
   ]).optional(),
   
   phone: z.union([
-    z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format'),
+    z.string().regex(/^\+?\d{10,15}$/, 'Invalid phone number format'),
     z.literal('')
   ]).optional(),
   
