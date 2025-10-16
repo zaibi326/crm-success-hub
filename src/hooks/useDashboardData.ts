@@ -127,21 +127,35 @@ export function useDashboardData(): DashboardDataContextType {
   }, [refetchActivities, refetchLeads, user?.id, authLoading]);
 
   // Transform campaign_leads to TaxLead format
-  const leads: TaxLead[] = campaignLeads.map(lead => ({
-    id: parseInt(lead.id) || 0,
-    taxId: lead.tax_id || '',
-    ownerName: lead.owner_name,
-    propertyAddress: lead.property_address,
-    currentArrears: lead.current_arrears || undefined,
-    status: (lead.status as 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP') || 'COLD',
-    email: lead.email || undefined,
-    phone: lead.phone || undefined,
-    taxLawsuitNumber: lead.tax_lawsuit_number || undefined,
-    notes: lead.notes || undefined,
-    createdAt: lead.created_at,
-    updatedAt: lead.updated_at,
-    disposition: (lead.disposition as 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED') || 'UNDECIDED',
-  }));
+  const leads: TaxLead[] = campaignLeads.map(lead => {
+    // Normalize status to uppercase to ensure consistency
+    const normalizedStatus = lead.status?.toString().toUpperCase() || 'COLD';
+    const validStatus = ['HOT', 'WARM', 'COLD', 'PASS', 'KEEP'].includes(normalizedStatus) 
+      ? normalizedStatus 
+      : 'COLD';
+    
+    return {
+      id: parseInt(lead.id) || 0,
+      taxId: lead.tax_id || '',
+      ownerName: lead.owner_name,
+      propertyAddress: lead.property_address,
+      currentArrears: lead.current_arrears || undefined,
+      status: validStatus as 'HOT' | 'WARM' | 'COLD' | 'PASS' | 'KEEP',
+      email: lead.email || undefined,
+      phone: lead.phone || undefined,
+      taxLawsuitNumber: lead.tax_lawsuit_number || undefined,
+      notes: lead.notes || undefined,
+      createdAt: lead.created_at,
+      updatedAt: lead.updated_at,
+      disposition: (lead.disposition as 'UNDECIDED' | 'QUALIFIED' | 'DISQUALIFIED') || 'UNDECIDED',
+    };
+  });
+
+  console.log('📊 Dashboard Data - Total Leads:', leads.length, 'Leads:', leads.map(l => ({ 
+    owner: l.ownerName, 
+    status: l.status,
+    id: l.id 
+  })));
 
   // Fixed stats calculation - KEEP and PASS are mutually exclusive
   const stats: DashboardStats = {
@@ -167,6 +181,15 @@ export function useDashboardData(): DashboardDataContextType {
     }).length,
     avgResponseTime: '2.5 hrs'
   };
+
+  console.log('📊 Dashboard Stats:', {
+    total: stats.totalLeads,
+    hot: stats.hotDeals,
+    warm: stats.warmDeals,
+    cold: stats.coldDeals,
+    pass: stats.passDeals,
+    keep: stats.keepDeals
+  });
 
   // Transform activities data
   const activities: ActivityItem[] = activitiesData.map(activity => ({
